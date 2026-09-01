@@ -31,8 +31,36 @@ func _add_entrance(prop_scene: PackedScene, entrance_tile: Vector2i, target_scen
 	portal.target_spawn = target_spawn
 	add_child(portal)
 
+# Same underlying issue as the house-door fix: the 100x100 grid is fully
+# painted, but nothing at all stops the player from walking straight off
+# any of its 4 edges into completely undefined tile space beyond - and the
+# outer biomes (unlike the central valley) have no scattered trees/rocks to
+# even incidentally block the way. Four long thin colliders just outside
+# the map, one per edge, close that off.
+func _add_world_boundary() -> void:
+	var w: float = World.OVERWORLD_WIDTH * 32.0
+	var h: float = World.OVERWORLD_HEIGHT * 32.0
+	var thickness := 32.0
+	var margin := 64.0 # extends past the corners so the 4 walls overlap cleanly
+	var edges := [
+		{"pos": Vector2(w / 2.0, -thickness / 2.0), "size": Vector2(w + margin * 2.0, thickness)}, # north
+		{"pos": Vector2(w / 2.0, h + thickness / 2.0), "size": Vector2(w + margin * 2.0, thickness)}, # south
+		{"pos": Vector2(-thickness / 2.0, h / 2.0), "size": Vector2(thickness, h + margin * 2.0)}, # west
+		{"pos": Vector2(w + thickness / 2.0, h / 2.0), "size": Vector2(thickness, h + margin * 2.0)}, # east
+	]
+	for edge in edges:
+		var body := StaticBody2D.new()
+		body.position = edge.pos
+		var shape := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = edge.size
+		shape.shape = rect
+		body.add_child(shape)
+		add_child(body)
+
 func _ready() -> void:
 	World.build_overworld_map(tilemap)
+	_add_world_boundary()
 	if GameState.village_gates_open:
 		World.open_gates(tilemap)
 

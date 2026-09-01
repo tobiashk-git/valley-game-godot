@@ -60,6 +60,19 @@ func _ready() -> void:
 	out_portal.target_spawn = Vector2(World.DUNGEON_ENTRANCE.x * 32 + 16, (World.DUNGEON_ENTRANCE.y + 1) * 32 + 16)
 	add_child(out_portal)
 
+	# Same door-tile issue as house.gd/village_house.gd's fix: the door sits
+	# on the very last painted row (HEIGHT-1) with nothing at all beyond it,
+	# so without a blocker the player could walk straight through and off
+	# into undefined space past the map's edge.
+	var door_blocker := StaticBody2D.new()
+	door_blocker.position = _tile_center(Vector2i(gen.door_x, gen.door_y + 1))
+	var blocker_shape := CollisionShape2D.new()
+	var blocker_rect := RectangleShape2D.new()
+	blocker_rect.size = Vector2(32, 32)
+	blocker_shape.shape = blocker_rect
+	door_blocker.add_child(blocker_shape)
+	add_child(door_blocker)
+
 	# Reaching this scene at all in real play means walking through the
 	# entrance portal on the Overworld first, so this is already "discovered".
 	GameState.discovered_pois["dungeon"] = true
