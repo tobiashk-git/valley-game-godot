@@ -1,16 +1,9 @@
 extends SceneTree
 # Builds StoragePanel.tscn (two-column chest/backpack transfer UI, opened
-# by chest.gd). Run via:
+# by chest.gd). Panel background + title styling come from the shared
+# res://resources/ui_theme.tres (project default theme) - see
+# tools/setup_theme.gd. Run via:
 # godot --headless --script res://tools/setup_storage_panel.gd
-
-func _panel_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.07, 0.06, 0.85)
-	style.border_color = Color(0.7, 0.55, 0.2, 1.0)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(8)
-	style.set_content_margin_all(12)
-	return style
 
 func _build_column(parent: HBoxContainer, layer: Node, col_name: String, title_text: String) -> void:
 	var col := VBoxContainer.new()
@@ -22,7 +15,7 @@ func _build_column(parent: HBoxContainer, layer: Node, col_name: String, title_t
 	var title := Label.new()
 	title.name = col_name.replace("Column", "Title")
 	title.text = title_text
-	title.add_theme_color_override("font_color", Color(0.9, 0.75, 0.35))
+	title.theme_type_variation = &"PanelTitle"
 	title.add_theme_font_size_override("font_size", 16)
 	col.add_child(title)
 	title.owner = layer
@@ -43,7 +36,6 @@ func _build_storage_panel() -> void:
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.position = Vector2(-200, -140)
 	panel.size = Vector2(400, 280)
-	panel.add_theme_stylebox_override("panel", _panel_style())
 	layer.add_child(panel)
 	panel.owner = layer
 

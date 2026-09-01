@@ -1,15 +1,9 @@
 extends SceneTree
 # Builds HUD.tscn (always-visible top-left counters) and InventoryPanel.tscn
-# (toggled with I). Run via: godot --headless --script res://tools/setup_hud_inventory.gd
-
-func _panel_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.07, 0.06, 0.85)
-	style.border_color = Color(0.7, 0.55, 0.2, 1.0)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(8)
-	style.set_content_margin_all(12)
-	return style
+# (toggled with I). Panel background + title styling come from the shared
+# res://resources/ui_theme.tres (project default theme) - see
+# tools/setup_theme.gd. Run via:
+# godot --headless --script res://tools/setup_hud_inventory.gd
 
 func _build_hud() -> void:
 	var layer := CanvasLayer.new()
@@ -21,7 +15,6 @@ func _build_hud() -> void:
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	panel.position = Vector2(12, 12)
 	panel.size = Vector2(260, 40)
-	panel.add_theme_stylebox_override("panel", _panel_style())
 	layer.add_child(panel)
 	panel.owner = layer
 
@@ -59,7 +52,6 @@ func _build_inventory_panel() -> void:
 	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	panel.position = Vector2(-260, 12)
 	panel.size = Vector2(240, 220)
-	panel.add_theme_stylebox_override("panel", _panel_style())
 	layer.add_child(panel)
 	panel.owner = layer
 
@@ -77,8 +69,7 @@ func _build_inventory_panel() -> void:
 	var title := Label.new()
 	title.name = "Title"
 	title.text = "Inventory"
-	title.add_theme_color_override("font_color", Color(0.9, 0.75, 0.35))
-	title.add_theme_font_size_override("font_size", 18)
+	title.theme_type_variation = &"PanelTitle"
 	vbox.add_child(title)
 	title.owner = layer
 

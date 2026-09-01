@@ -2,26 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/inventory_panel.gd" id="1_1gbta"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_snuej"]
-content_margin_left = 12.0
-content_margin_top = 12.0
-content_margin_right = 12.0
-content_margin_bottom = 12.0
-bg_color = Color(0.08, 0.07, 0.06, 0.85)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.7, 0.55, 0.2, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[node name="InventoryPanel" type="CanvasLayer" unique_id=1548753601]
+[node name="InventoryPanel" type="CanvasLayer" unique_id=1506765583]
 script = ExtResource("1_1gbta")
 
-[node name="Panel" type="Panel" parent="." unique_id=327969377]
+[node name="Panel" type="Panel" parent="." unique_id=1994534768]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -29,21 +13,19 @@ offset_left = -260.0
 offset_top = 12.0
 offset_right = -20.0
 offset_bottom = 232.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_snuej")
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=327504205]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=787087177]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1241154781]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=605834227]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=937438277]
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=1227568902]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_colors/font_color = Color(0.9, 0.75, 0.35, 1)
+theme_type_variation = &"PanelTitle"
 text = "Inventory"
 
-[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=2115499950]
+[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1450672517]
 layout_mode = 2

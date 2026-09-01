@@ -30,6 +30,10 @@ StoragePanel="*res://scenes/StoragePanel.tscn"
 Crafting="*res://scripts/crafting.gd"
 CraftingPanel="*res://scenes/CraftingPanel.tscn"
 
+[gui]
+
+theme/custom="res://resources/ui_theme.tres"
+
 [display]
 
 window/size/viewport_width=800

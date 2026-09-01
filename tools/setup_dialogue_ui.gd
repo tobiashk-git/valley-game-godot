@@ -1,5 +1,7 @@
 extends SceneTree
-# Builds DialogueUI.tscn — a simple bottom-anchored dialogue box.
+# Builds DialogueUI.tscn — a simple bottom-anchored dialogue box. Panel
+# background + label styling come from the shared res://resources/
+# ui_theme.tres (project default theme) - see tools/setup_theme.gd.
 # Run via: godot --headless --script res://tools/setup_dialogue_ui.gd
 
 func _initialize() -> void:
@@ -14,13 +16,6 @@ func _initialize() -> void:
 	panel.offset_bottom = -20
 	panel.offset_left = 40
 	panel.offset_right = -40
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.07, 0.06, 0.92)
-	style.border_color = Color(0.7, 0.55, 0.2, 1.0)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(8)
-	style.set_content_margin_all(16)
-	panel.add_theme_stylebox_override("panel", style)
 	layer.add_child(panel)
 	panel.owner = layer
 
@@ -39,7 +34,7 @@ func _initialize() -> void:
 
 	var name_label := Label.new()
 	name_label.name = "NameLabel"
-	name_label.add_theme_color_override("font_color", Color(0.9, 0.75, 0.35))
+	name_label.theme_type_variation = &"PanelTitle"
 	name_label.add_theme_font_size_override("font_size", 20)
 	vbox.add_child(name_label)
 	name_label.owner = layer
@@ -54,7 +49,7 @@ func _initialize() -> void:
 	var hint_label := Label.new()
 	hint_label.name = "HintLabel"
 	hint_label.text = "Press E to close"
-	hint_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	hint_label.theme_type_variation = &"DimLabel"
 	hint_label.add_theme_font_size_override("font_size", 12)
 	vbox.add_child(hint_label)
 	hint_label.owner = layer

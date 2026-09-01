@@ -16,7 +16,7 @@ func _refresh() -> void:
 	if Inventory.backpack.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "(empty)"
-		empty_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		empty_label.theme_type_variation = &"DimLabel"
 		list.add_child(empty_label)
 		return
 	for item_id in Inventory.backpack.keys():

@@ -2,26 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/crafting_panel.gd" id="1_l44rf"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kldrn"]
-content_margin_left = 12.0
-content_margin_top = 12.0
-content_margin_right = 12.0
-content_margin_bottom = 12.0
-bg_color = Color(0.08, 0.07, 0.06, 0.85)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.7, 0.55, 0.2, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[node name="CraftingPanel" type="CanvasLayer" unique_id=638946944]
+[node name="CraftingPanel" type="CanvasLayer" unique_id=1470008497]
 script = ExtResource("1_l44rf")
 
-[node name="Panel" type="Panel" parent="." unique_id=1250382806]
+[node name="Panel" type="Panel" parent="." unique_id=1721567741]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -31,23 +15,21 @@ offset_left = -170.0
 offset_top = -110.0
 offset_right = 170.0
 offset_bottom = 110.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_kldrn")
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1968066566]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1285333045]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=194284021]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1079884170]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=1014879078]
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=1312040143]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_colors/font_color = Color(0.9, 0.75, 0.35, 1)
+theme_type_variation = &"PanelTitle"
 text = "Crafting"
 
-[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1424747760]
+[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=591832462]
 layout_mode = 2
 theme_override_constants/separation = 6
