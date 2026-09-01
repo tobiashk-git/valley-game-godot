@@ -79,10 +79,13 @@ func _initialize() -> void:
 	var journal_list: VBoxContainer = quest_panel.get_node("Panel/Margin/VBox/List")
 	# meet_villagers (the fence/gates tutorial quest) is pre-accepted from
 	# boot too, so it shares the Journal now - find the gather_wood row by
-	# name rather than assuming an index. Rows are HBoxContainers now (a
-	# status Label plus a Track button), so dig into child 0 for the text.
+	# name rather than assuming an index. The list also has "Active"/
+	# "Completed" section header Labels mixed in (no children), so skip
+	# anything that isn't a row before digging into child 0 for the text.
 	var wood_quest_label: Label = null
 	for row in journal_list.get_children():
+		if not row is HBoxContainer:
+			continue
 		var label: Label = row.get_child(0)
 		if label.text.begins_with("A Village in Need"):
 			wood_quest_label = label
@@ -141,16 +144,24 @@ func _initialize() -> void:
 	await process_frame
 	print("Dialogue closes normally via E: ", not dialogue_ui.is_open())
 
-	# --- Journal shows Completed. ---
+	# --- Journal moves it to the Completed section: bare name (no status
+	# suffix - the section header already says "Completed"), and no Track
+	# button since a completed quest can't be tracked. ---
 	Input.action_press("toggle_quests")
 	await process_frame
 	Input.action_release("toggle_quests")
 	await process_frame
+	var wood_quest_row: HBoxContainer = null
 	for row in journal_list.get_children():
+		if not row is HBoxContainer:
+			continue
 		var label: Label = row.get_child(0)
 		if label.text.begins_with("A Village in Need"):
+			wood_quest_row = row
 			wood_quest_label = label
-	print("Journal shows Completed: ", wood_quest_label.text.ends_with("Completed"))
+	print("Journal shows it under Completed (bare name, no suffix): ", wood_quest_label.text == "A Village in Need")
+	print("Completed row has no Track button: ", wood_quest_row.get_child_count() == 1)
+	print("Completing untracked it: ", not quests.tracked_quests.has("gather_wood"))
 	root.get_texture().get_image().save_png("res://verify_quest_journal_done.png")
 
 	quit()

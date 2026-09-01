@@ -46,6 +46,12 @@ func _build_header(quest_id: String, def: Dictionary, is_expanded: bool) -> HBox
 	name_label.theme_type_variation = &"PanelTitle"
 	name_label.add_theme_font_size_override("font_size", 15)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Collapsed (no box) reads better hugging the toggle button on the right
+	# rather than sticking out from the left edge with a gap of empty space
+	# before it - the boxed layout keeps the default left alignment, which
+	# already reads fine against its background.
+	if not is_expanded:
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	header.add_child(name_label)
 
 	var toggle_btn := Button.new()

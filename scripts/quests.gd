@@ -37,12 +37,15 @@ var quest_state: Dictionary = {"meet_villagers": "accepted"}
 var npcs_met: Dictionary = {}
 
 # Quest ids currently pinned to the always-visible QuestTracker overlay,
-# toggled from the Journal (QuestPanel). Capped at MAX_TRACKED - tracking a
-# 3rd quest is simply refused (the Journal disables that row's Track button
-# at the cap) rather than evicting an existing one, so the player always
-# chooses what gets dropped.
+# toggled from the Journal (QuestPanel) or automatically on accept (see
+# _accept_quest()/_mark_completed() below). Capped at MAX_TRACKED - tracking
+# a 3rd quest (manually or on auto-accept) is simply refused (the Journal
+# disables that row's Track button at the cap) rather than evicting an
+# existing one, so the player always chooses what gets dropped. A completed
+# quest can't be tracked at all - it's untracked the moment it completes,
+# same as leaving the Journal's Active section.
 const MAX_TRACKED := 2
-var tracked_quests: Array[String] = []
+var tracked_quests: Array[String] = ["meet_villagers"] # pre-accepted from boot, see quest_state below
 
 func is_tracked(quest_id: String) -> bool:
 	return tracked_quests.has(quest_id)
@@ -107,7 +110,16 @@ func talk_to_giver(quest_id: String) -> void:
 
 func _accept_quest(quest_id: String) -> void:
 	quest_state[quest_id] = "accepted"
+	# Auto-track so it's immediately visible on the overlay without a trip
+	# to the Journal - silently skipped if the tracker is already full,
+	# same as a manual Track click at the cap.
+	if tracked_quests.size() < MAX_TRACKED:
+		tracked_quests.append(quest_id)
 	changed.emit()
+
+func _mark_completed(quest_id: String) -> void:
+	quest_state[quest_id] = "completed"
+	tracked_quests.erase(quest_id)
 
 func _complete_quest(quest_id: String) -> void:
 	var def: Dictionary = QUEST_DEFS[quest_id]
@@ -118,7 +130,7 @@ func _complete_quest(quest_id: String) -> void:
 		Inventory.add_item("gold", reward.gold)
 	if reward.has("item_id"):
 		Inventory.add_item(reward.item_id, reward.get("item_amount", 1))
-	quest_state[quest_id] = "completed"
+	_mark_completed(quest_id)
 	changed.emit()
 
 # Called by npc.gd the first time (and only the first time) the player
@@ -133,7 +145,7 @@ func mark_npc_met(npc_id: String) -> bool:
 		return false
 	if not objective_met("meet_villagers"):
 		return false
-	quest_state["meet_villagers"] = "completed"
+	_mark_completed("meet_villagers")
 	GameState.village_gates_open = true
 	changed.emit()
 	return true
