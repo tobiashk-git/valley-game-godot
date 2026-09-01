@@ -14,7 +14,7 @@ func _build_hud() -> void:
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	panel.position = Vector2(12, 12)
-	panel.size = Vector2(260, 40)
+	panel.size = Vector2(340, 40)
 	layer.add_child(panel)
 	panel.owner = layer
 
@@ -36,6 +36,13 @@ func _build_hud() -> void:
 		label.add_theme_font_size_override("font_size", 14)
 		hbox.add_child(label)
 		label.owner = layer
+
+	var world_label := Label.new()
+	world_label.name = "WorldLabel"
+	world_label.theme_type_variation = &"DimLabel"
+	world_label.add_theme_font_size_override("font_size", 14)
+	hbox.add_child(world_label)
+	world_label.owner = layer
 
 	var packed := PackedScene.new()
 	packed.pack(layer)

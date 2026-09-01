@@ -40,6 +40,7 @@ Shop="*res://scripts/shop.gd"
 ShopPanel="*res://scenes/ShopPanel.tscn"
 WorldMap="*res://scripts/world_map.gd"
 WorldMapPanel="*res://scenes/WorldMapPanel.tscn"
+Altar="*res://scripts/altar.gd"
 
 [gui]
 

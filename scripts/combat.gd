@@ -88,7 +88,7 @@ func _build_enemy_entry(def: Dictionary) -> Dictionary:
 		"gold_min": def.gold_min,
 		"gold_max": def.gold_max,
 		"status_attack": def.get("status_attack", {}),
-		"drop_item_id": def.get("drop_item_id", ""),
+		"drop_item_ids": def.get("drop_item_ids", []),
 	}
 
 # Accepts either a single enemy id (String) or a group (Array of Strings).
@@ -382,8 +382,8 @@ func _defeat_enemy(index: int) -> void:
 	var gold: int = enemy.gold_min + randi() % (enemy.gold_max - enemy.gold_min + 1)
 	Inventory.add_item("gold", gold)
 	var msg := "%s defeated! Found %d gold." % [enemy.name, gold]
-	var drop_item_id: String = enemy.get("drop_item_id", "")
-	if drop_item_id != "":
+	var drop_item_ids: Array = enemy.get("drop_item_ids", [])
+	for drop_item_id in drop_item_ids:
 		Inventory.add_item(drop_item_id, 1)
 		msg += " Obtained %s!" % Items.get_item_name(drop_item_id)
 	_log(msg)

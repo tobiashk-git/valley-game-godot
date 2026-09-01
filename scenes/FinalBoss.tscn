@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/maze_interior.gd" id="1_bla8t"]
+[ext_resource type="TileSet" path="res://resources/dungeon_terrain_tileset.tres" id="2_1dk5d"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="3_wnahb"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="4_k0ioc"]
+[ext_resource type="TileSet" path="res://resources/fog_tileset.tres" id="5_st1qa"]
+
+[node name="FinalBoss" type="Node2D" unique_id=1671836562]
+script = ExtResource("1_bla8t")
+boss_id = "final_boss"
+entrance_tile = Vector2i(50, 85)
+poi_id = "final_boss"
+
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=819100030]
+tile_set = ExtResource("2_1dk5d")
+
+[node name="YSort" type="Node2D" parent="." unique_id=607194774]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("3_wnahb")]
+script = ExtResource("4_k0ioc")
+
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1965666627]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="FogLayer" type="TileMapLayer" parent="." unique_id=1744664911]
+tile_set = ExtResource("5_st1qa")

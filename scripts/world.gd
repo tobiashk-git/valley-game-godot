@@ -30,6 +30,9 @@ var VILLAGE_GATES := {
 const DUNGEON_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - 30)
 const CASTLE_ENTRANCE := Vector2i(WORLD_CENTER_X + 35, WORLD_CENTER_Y)
 const HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y - 3)
+# Hidden until the altar reveals it (2 Magic Crystals) - an outer biome
+# zone, well away from the village and the other two entrances.
+const FINAL_BOSS_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y + 35)
 
 # Elder (NE), Trader (SW), and the still-empty 3rd house (SE) — same corners
 # as VILLAGE_HOUSE_POSITIONS in game.js.
@@ -63,17 +66,23 @@ func biome_at(tx: int, ty: int) -> Dictionary:
 		return {"zone": Zone.SNOW, "source": SRC_SNOW} if dy < 0 else {"zone": Zone.DESERT, "source": SRC_SAND}
 	return {"zone": Zone.FOREST, "source": SRC_FOREST} if dx < 0 else {"zone": Zone.HILLS, "source": SRC_HILLS}
 
-# Paints the overworld's terrain layer onto the given TileMapLayer — port of
-# buildOverworld()'s biome fill + the World-1-only village fence/gate/path
-# stamping from buildWorld() in world.js. All tiles use atlas coord (0,0)
-# except grass, which uses (0,5) to match the JS game's groundSpriteFor()
-# crop (sy:160 / 32 = row 5).
-func build_overworld_map(tilemap: TileMapLayer) -> void:
+# Just the biome fill, no village/altar - shared by World 1's full
+# build_overworld_map() below and World 2 (overworld2.gd), which skips the
+# village/fence/altar entirely (that onboarding tutorial is World-1-only).
+# All tiles use atlas coord (0,0) except grass, which uses (0,5) to match
+# the JS game's groundSpriteFor() crop (sy:160 / 32 = row 5).
+func build_biome_layer(tilemap: TileMapLayer) -> void:
 	for y in range(OVERWORLD_HEIGHT):
 		for x in range(OVERWORLD_WIDTH):
 			var biome := biome_at(x, y)
 			var atlas_coords := Vector2i(0, 5) if biome.source == SRC_GRASS else Vector2i(0, 0)
 			tilemap.set_cell(Vector2i(x, y), biome.source, atlas_coords)
+
+# Paints the overworld's terrain layer onto the given TileMapLayer — port of
+# buildOverworld()'s biome fill + the World-1-only village fence/gate/path
+# stamping from buildWorld() in world.js.
+func build_overworld_map(tilemap: TileMapLayer) -> void:
+	build_biome_layer(tilemap)
 
 	# Village square: grass (village ground reuses the same grass tile the
 	# JS game does), stamped over whatever biome fill is underneath.
@@ -112,6 +121,31 @@ func build_overworld_map(tilemap: TileMapLayer) -> void:
 
 	# The altar itself, dead center.
 	tilemap.set_cell(ALTAR_POS, SRC_ALTAR, Vector2i(0, 0))
+
+# Shared by overworld.gd and overworld2.gd: 4 long invisible colliders, one
+# along each edge of the OVERWORLD_WIDTH x OVERWORLD_HEIGHT grid, since a
+# fully-painted map otherwise has nothing at all stopping the player from
+# walking straight off any edge into undefined tile space beyond it.
+func add_world_boundary(node: Node2D) -> void:
+	var w: float = OVERWORLD_WIDTH * 32.0
+	var h: float = OVERWORLD_HEIGHT * 32.0
+	var thickness := 32.0
+	var margin := 64.0 # extends past the corners so the 4 walls overlap cleanly
+	var edges := [
+		{"pos": Vector2(w / 2.0, -thickness / 2.0), "size": Vector2(w + margin * 2.0, thickness)}, # north
+		{"pos": Vector2(w / 2.0, h + thickness / 2.0), "size": Vector2(w + margin * 2.0, thickness)}, # south
+		{"pos": Vector2(-thickness / 2.0, h / 2.0), "size": Vector2(thickness, h + margin * 2.0)}, # west
+		{"pos": Vector2(w + thickness / 2.0, h / 2.0), "size": Vector2(thickness, h + margin * 2.0)}, # east
+	]
+	for edge in edges:
+		var body := StaticBody2D.new()
+		body.position = edge.pos
+		var shape := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = edge.size
+		shape.shape = rect
+		body.add_child(shape)
+		node.add_child(body)
 
 # Called by overworld.gd after build_overworld_map() when
 # GameState.village_gates_open is true - repaints each gate as walkable

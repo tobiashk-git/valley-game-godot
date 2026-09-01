@@ -12,7 +12,7 @@ var next_spawn_position: Vector2 = NO_OVERRIDE
 
 # Boss checkpoints: once true, that boss stays defeated for the session (no
 # save/load system exists yet, so this only persists until the game quits).
-var boss_defeated: Dictionary = {"dungeon_boss": false, "castle_boss": false}
+var boss_defeated: Dictionary = {"dungeon_boss": false, "castle_boss": false, "final_boss": false}
 
 # Set once by Quests.mark_npc_met() when the meet_villagers tutorial quest
 # completes. overworld.gd checks this every time it (re)builds the map, since
@@ -26,6 +26,11 @@ var village_gates_open := false
 # walking through the relevant entrance portal, so reaching this point
 # already means "discovered".
 var discovered_pois: Dictionary = {"house": true, "village": true, "dungeon": false, "castle": false}
+
+# The altar/world-advance loop: 2 Magic Crystals (from the two Guardians)
+# reveal a hidden final boss; its own crystal drop, returned to the altar,
+# opens the portal to World 2. See altar.gd.
+var world_progress: Dictionary = {"final_boss_revealed": false, "world2_unlocked": false}
 
 func set_next_spawn(pos: Vector2) -> void:
 	next_spawn_position = pos

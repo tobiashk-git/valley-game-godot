@@ -36,23 +36,36 @@ func pick_random_id() -> String:
 	var keys := ENEMIES.keys()
 	return keys[randi() % keys.size()]
 
-# One boss per location. Both reuse an existing enemy sprite with a tint
+# One boss per location, each reusing an existing enemy sprite with a tint
 # (both battle_panel.gd and tools/setup_boss.gd apply the same per-boss tint
 # - kept as plain literals in both rather than adding a shared-constant
-# indirection for two colors) rather than sourcing new boss-specific art.
+# indirection for three colors) rather than sourcing new boss-specific art.
+# drop_item_ids is a list (not a single id) since the two Guardians each
+# also drop a Magic Crystal alongside their usual gear - see altar.gd.
 const BOSSES := {
 	"dungeon_boss": {
 		"name": "Bone Lord", "sprite": "res://assets/enemies/skeleton.png",
 		"tint": Color(0.55, 0.35, 0.75, 1.0),
 		"max_hp": 60, "attack": 8, "defense": 3, "gold_min": 40, "gold_max": 60,
 		"status_attack": {"status": "paralysis", "chance": 0.2},
-		"drop_item_id": "bone_greatsword",
+		"drop_item_ids": ["bone_greatsword", "magic_crystal"],
 	},
 	"castle_boss": {
 		"name": "Royal Wraith", "sprite": "res://assets/enemies/ghost.png",
 		"tint": Color(0.85, 0.7, 0.25, 1.0),
 		"max_hp": 80, "attack": 9, "defense": 4, "gold_min": 60, "gold_max": 90,
 		"status_attack": {"status": "silence", "chance": 0.25},
-		"drop_item_id": "royal_plate",
+		"drop_item_ids": ["royal_plate", "magic_crystal"],
+	},
+	# The two Guardians' crystals reveal this one's hiding place (see
+	# altar.gd); roughly double their stats, per the plan's own first-pass
+	# tuning note. Reuses the Giant Spider sprite, tinted dark red/black -
+	# distinct from both Guardians' purple/gold.
+	"final_boss": {
+		"name": "The Ancient Warden", "sprite": "res://assets/enemies/spider.png",
+		"tint": Color(0.5, 0.1, 0.1, 1.0),
+		"max_hp": 150, "attack": 17, "defense": 7, "gold_min": 150, "gold_max": 200,
+		"status_attack": {"status": "paralysis", "chance": 0.3},
+		"drop_item_ids": ["magic_crystal"],
 	},
 }

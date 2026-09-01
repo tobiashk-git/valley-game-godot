@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/inventory_panel.gd" id="1_1gbta"]
 
-[node name="InventoryPanel" type="CanvasLayer" unique_id=1574546025]
+[node name="InventoryPanel" type="CanvasLayer" unique_id=1955780425]
 script = ExtResource("1_1gbta")
 
-[node name="Panel" type="Panel" parent="." unique_id=1941722472]
+[node name="Panel" type="Panel" parent="." unique_id=960421989]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -14,18 +14,18 @@ offset_top = 12.0
 offset_right = -20.0
 offset_bottom = 232.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1960524817]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1993879665]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1849531496]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=2114623104]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=102304286]
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=537017389]
 layout_mode = 2
 theme_type_variation = &"PanelTitle"
 text = "Inventory"
 
-[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1605562563]
+[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1227079149]
 layout_mode = 2

@@ -6,10 +6,13 @@ const HOUSE_ENTRANCE_SCENE := preload("res://scenes/props/HouseEntrance.tscn")
 const DUNGEON_ENTRANCE_SCENE := preload("res://scenes/props/DungeonEntrance.tscn")
 const CASTLE_ENTRANCE_SCENE := preload("res://scenes/props/CastleEntrance.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
+const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
 
 @onready var tilemap: TileMapLayer = $TileMapLayer
 @onready var ysort: Node2D = $YSort
 @onready var player: CharacterBody2D = $YSort/Player
+
+var _final_boss_entrance_spawned := false
 
 func _tile_center(pos: Vector2i) -> Vector2:
 	return Vector2(pos.x * 32 + 16, pos.y * 32 + 16)
@@ -31,36 +34,19 @@ func _add_entrance(prop_scene: PackedScene, entrance_tile: Vector2i, target_scen
 	portal.target_spawn = target_spawn
 	add_child(portal)
 
-# Same underlying issue as the house-door fix: the 100x100 grid is fully
-# painted, but nothing at all stops the player from walking straight off
-# any of its 4 edges into completely undefined tile space beyond - and the
-# outer biomes (unlike the central valley) have no scattered trees/rocks to
-# even incidentally block the way. Four long thin colliders just outside
-# the map, one per edge, close that off.
-func _add_world_boundary() -> void:
-	var w: float = World.OVERWORLD_WIDTH * 32.0
-	var h: float = World.OVERWORLD_HEIGHT * 32.0
-	var thickness := 32.0
-	var margin := 64.0 # extends past the corners so the 4 walls overlap cleanly
-	var edges := [
-		{"pos": Vector2(w / 2.0, -thickness / 2.0), "size": Vector2(w + margin * 2.0, thickness)}, # north
-		{"pos": Vector2(w / 2.0, h + thickness / 2.0), "size": Vector2(w + margin * 2.0, thickness)}, # south
-		{"pos": Vector2(-thickness / 2.0, h / 2.0), "size": Vector2(thickness, h + margin * 2.0)}, # west
-		{"pos": Vector2(w + thickness / 2.0, h / 2.0), "size": Vector2(thickness, h + margin * 2.0)}, # east
-	]
-	for edge in edges:
-		var body := StaticBody2D.new()
-		body.position = edge.pos
-		var shape := CollisionShape2D.new()
-		var rect := RectangleShape2D.new()
-		rect.size = edge.size
-		shape.shape = rect
-		body.add_child(shape)
-		add_child(body)
+# Called once by Altar.gd the moment 2 Magic Crystals reveal it, and again
+# from _ready() on every later visit once GameState.world_progress already
+# has it revealed — reuses DungeonEntrance's arch prop (no unique art for
+# "a hidden path" exists), leading to FinalBoss.tscn.
+func reveal_final_boss_entrance() -> void:
+	if _final_boss_entrance_spawned:
+		return
+	_final_boss_entrance_spawned = true
+	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.FINAL_BOSS_ENTRANCE, "res://scenes/FinalBoss.tscn", Vector2.ZERO)
 
 func _ready() -> void:
 	World.build_overworld_map(tilemap)
-	_add_world_boundary()
+	World.add_world_boundary(self)
 	if GameState.village_gates_open:
 		World.open_gates(tilemap)
 
@@ -74,11 +60,30 @@ func _ready() -> void:
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.ELDER_HOUSE_ENTRANCE, "res://scenes/ElderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.TRADER_HOUSE_ENTRANCE, "res://scenes/TraderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.EMPTY_HOUSE_ENTRANCE, "res://scenes/EmptyHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
-	# Dungeon.tscn/Castle.tscn both regenerate their maze fresh every visit
-	# and always spawn the player at their own entrance, so the
+	# Dungeon.tscn/Castle.tscn/FinalBoss.tscn all regenerate their maze fresh
+	# every visit and always spawn the player at their own entrance, so the
 	# target_spawn passed here is unused.
 	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.DUNGEON_ENTRANCE, "res://scenes/Dungeon.tscn", Vector2.ZERO)
 	_add_entrance(CASTLE_ENTRANCE_SCENE, World.CASTLE_ENTRANCE, "res://scenes/Castle.tscn", Vector2.ZERO)
+	if GameState.world_progress.final_boss_revealed:
+		reveal_final_boss_entrance()
+
+	# The altar tile (painted solid by build_overworld_map()) just needs an
+	# interact trigger on top of it - it isn't a separate prop/scene like
+	# the entrances above.
+	var altar_trigger := Area2D.new()
+	altar_trigger.position = _tile_center(World.ALTAR_POS)
+	altar_trigger.set_script(ALTAR_TRIGGER_SCRIPT)
+	var altar_shape := CollisionShape2D.new()
+	var altar_rect := RectangleShape2D.new()
+	# The altar tile is solid, so the player can only ever stand one full
+	# adjacent tile away (32px) - matching _add_entrance()'s 56x56 sizing
+	# for the same reason, not the smaller 48x48 used by NPCs/chests/
+	# gatherables (which the player can approach more closely).
+	altar_rect.size = Vector2(56, 56)
+	altar_shape.shape = altar_rect
+	altar_trigger.add_child(altar_shape)
+	add_child(altar_trigger)
 
 	if not GameState.consume_next_spawn(player):
 		# Spawn just inside the village's south gate. The 4 gates start solid
