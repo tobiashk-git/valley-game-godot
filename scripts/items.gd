@@ -1,6 +1,6 @@
 extends Node
-# Autoload — item registry, port of items.js through its Phase 5 (equipment
-# stats). Materials/consumables/gear all share one flat dict; gear carries a
+# Autoload — item registry, port of items.js through its Phase 6 (boss
+# drops). Materials/consumables/gear all share one flat dict; gear carries a
 # "slot" field (weapon/armor/accessory) so it can be equipped generically.
 
 const ITEMS := {
@@ -13,6 +13,8 @@ const ITEMS := {
 	"healing_potion": {"name": "Healing Potion", "effect": {"kind": "heal", "amount": 15}},
 	"mana_potion": {"name": "Mana Potion", "effect": {"kind": "restore_mp", "amount": 8}},
 	"antidote": {"name": "Antidote", "effect": {"kind": "cure", "status": "poison"}},
+	# Boss-exclusive - no recipe in crafting.gd, only obtainable as a drop.
+	"bone_greatsword": {"name": "Bone Greatsword", "slot": "weapon", "attack": 6},
 }
 
 func is_usable(item_id: String) -> bool:

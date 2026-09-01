@@ -10,6 +10,10 @@ const NO_OVERRIDE := Vector2(-999999, -999999)
 
 var next_spawn_position: Vector2 = NO_OVERRIDE
 
+# Boss checkpoints: once true, that boss stays defeated for the session (no
+# save/load system exists yet, so this only persists until the game quits).
+var boss_defeated: Dictionary = {"dungeon_boss": false}
+
 func set_next_spawn(pos: Vector2) -> void:
 	next_spawn_position = pos
 

@@ -1,7 +1,8 @@
 extends Node
-# Autoload — enemy definitions, port of enemies.js through its Phase 3
-# (status-attack enemies). Combat is single-enemy only; groups are a later
-# increment.
+# Autoload — enemy definitions, port of enemies.js through its Phase 6
+# (bosses). BOSSES is a deliberately separate dict from ENEMIES (mirrors the
+# JS reference) so pick_random_id()/Combat's group-picker — which only ever
+# read ENEMIES — can never accidentally roll a boss into a random encounter.
 
 const ENEMIES := {
 	"dungeon_rat": {
@@ -34,3 +35,19 @@ const ENEMIES := {
 func pick_random_id() -> String:
 	var keys := ENEMIES.keys()
 	return keys[randi() % keys.size()]
+
+# One boss per location; this port only has the Dungeon interior built out,
+# so there's just the one entry for now (Castle would get its own if/when
+# that interior gets built). Reuses the Skeleton sprite with a purple tint
+# (both battle_panel.gd and tools/setup_boss.gd apply this same tint - kept
+# as a plain literal in both rather than adding a shared-constant indirection
+# for one color) rather than sourcing new boss-specific art.
+const BOSSES := {
+	"dungeon_boss": {
+		"name": "Bone Lord", "sprite": "res://assets/enemies/skeleton.png",
+		"tint": Color(0.55, 0.35, 0.75, 1.0),
+		"max_hp": 60, "attack": 8, "defense": 3, "gold_min": 40, "gold_max": 60,
+		"status_attack": {"status": "paralysis", "chance": 0.2},
+		"drop_item_id": "bone_greatsword",
+	},
+}

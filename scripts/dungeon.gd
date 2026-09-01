@@ -3,7 +3,8 @@ extends Node2D
 # (see dungeon_gen.gd) plus the JS game's revealTilesAround()/isRevealed()
 # fog system, using a second TileMapLayer filled with an opaque tile that
 # gets erase_cell()'d as the player explores, instead of gating a hand-rolled
-# render loop like the JS canvas version does.
+# render loop like the JS canvas version does. The boss stands in
+# gen.boss_room (the deliberately-far 5th room DungeonGen already computes).
 
 const WIDTH := 40
 const HEIGHT := 28
@@ -12,6 +13,8 @@ const FOG_REVEAL_RADIUS := 2
 const SRC_WALL := 0
 const SRC_FLOOR := 1
 const SRC_FOG := 0 # fog layer has its own single-source TileSet, id 0
+
+const BOSS_SCENE := preload("res://scenes/props/Boss.tscn")
 
 @onready var terrain: TileMapLayer = $TerrainLayer
 @onready var fog: TileMapLayer = $FogLayer
@@ -41,6 +44,10 @@ func _ready() -> void:
 
 	var spawn_tile: Vector2i = gen.spawn_tile
 	player.position = _tile_center(spawn_tile)
+
+	var boss: StaticBody2D = BOSS_SCENE.instantiate()
+	boss.position = _tile_center(gen.boss_room.center())
+	ysort.add_child(boss)
 
 	var cam: Camera2D = player.get_node("Camera2D")
 	cam.limit_left = 0

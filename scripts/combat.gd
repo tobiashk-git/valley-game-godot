@@ -1,10 +1,12 @@
 extends Node
-# Autoload — Combat Phase 1-5: core battle loop, full command set, status
-# effects, enemy groups, and equipment-driven defense/status-resistance. Up
-# to 3 enemies per fight (weighted 60/30/10 solo/duo/trio), click-a-portrait
-# targeting once 2+ are alive (a lone survivor always auto-targets). Port of
-# combat.js up through its "Phase 5". Random encounters trigger only while
-# walking the dungeon interior (see dungeon.gd's tile-change hook).
+# Autoload — Combat Phase 1-6: core battle loop, full command set, status
+# effects, enemy groups, equipment-driven defense/status-resistance, and
+# boss battles. Up to 3 enemies per fight (weighted 60/30/10 solo/duo/trio),
+# click-a-portrait targeting once 2+ are alive (a lone survivor always
+# auto-targets). Port of combat.js up through its "Phase 6". Random
+# encounters trigger only while walking the dungeon interior (see
+# dungeon.gd's tile-change hook); a boss fight is instead started
+# deliberately by boss.gd when the player walks up and presses E.
 #
 # Status effects are contained to combat: player_status always resets to {}
 # when a fight starts or ends. Enemies can only inflict status on the player
@@ -24,6 +26,7 @@ var battle_log: Array[String] = []
 var active_submenu := "" # "" | "magic" | "item"
 var player_status: Dictionary = {} # status_id -> {"turns_left": N}
 var selecting_target := "" # "" | "attack" | "spell:<spell_id>"
+var current_boss_id := "" # set for the duration of a boss fight, "" otherwise
 
 var _steps_since_encounter := ENCOUNTER_COOLDOWN_STEPS
 
@@ -73,6 +76,21 @@ func check_random_encounter() -> void:
 		_steps_since_encounter = 0
 		start_combat(_pick_encounter_group())
 
+func _build_enemy_entry(def: Dictionary) -> Dictionary:
+	return {
+		"name": def.name,
+		"sprite": def.sprite,
+		"tint": def.get("tint", Color(1, 1, 1, 1)),
+		"hp": def.max_hp,
+		"max_hp": def.max_hp,
+		"attack": def.attack,
+		"defense": def.defense,
+		"gold_min": def.gold_min,
+		"gold_max": def.gold_max,
+		"status_attack": def.get("status_attack", {}),
+		"drop_item_id": def.get("drop_item_id", ""),
+	}
+
 # Accepts either a single enemy id (String) or a group (Array of Strings).
 func start_combat(enemy_ids) -> void:
 	var ids: Array = enemy_ids if enemy_ids is Array else [enemy_ids]
@@ -81,23 +99,31 @@ func start_combat(enemy_ids) -> void:
 	for id in ids:
 		var def: Dictionary = Enemies.ENEMIES[id]
 		names.append(def.name)
-		current_enemies.append({
-			"name": def.name,
-			"sprite": def.sprite,
-			"hp": def.max_hp,
-			"max_hp": def.max_hp,
-			"attack": def.attack,
-			"defense": def.defense,
-			"gold_min": def.gold_min,
-			"gold_max": def.gold_max,
-			"status_attack": def.get("status_attack", {}),
-		})
+		current_enemies.append(_build_enemy_entry(def))
 	in_combat = true
 	player_defending = false
 	active_submenu = ""
 	selecting_target = ""
 	player_status = {}
+	current_boss_id = ""
 	battle_log = ["%s %s!" % [_join_names(names), "appears" if names.size() == 1 else "appear"]]
+	changed.emit()
+
+# Fixed boss fight: the player already deliberately walked up and pressed E
+# (boss.gd), so unlike a random encounter there's no need to build any
+# suspense - the battle screen just opens, same as any other encounter here.
+func start_boss_fight(boss_id: String) -> void:
+	if in_combat or not Enemies.BOSSES.has(boss_id):
+		return
+	var def: Dictionary = Enemies.BOSSES[boss_id]
+	current_enemies = [_build_enemy_entry(def)]
+	in_combat = true
+	player_defending = false
+	active_submenu = ""
+	selecting_target = ""
+	player_status = {}
+	current_boss_id = boss_id
+	battle_log = ["%s blocks your path!" % def.name]
 	changed.emit()
 
 func _weapon_attack_bonus() -> int:
@@ -339,6 +365,7 @@ func player_run() -> void:
 	active_submenu = ""
 	selecting_target = ""
 	player_status = {}
+	current_boss_id = "" # fleeing a boss leaves it undefeated, re-challengeable
 	changed.emit()
 	ended.emit(false)
 
@@ -346,20 +373,29 @@ func player_run() -> void:
 # Enemy turn / resolution
 # ---------------------------------------------------------------------------
 
-# One enemy dropping to 0 HP: grants its gold immediately, logs it, and
-# clears its slot. If that empties the whole group, ends combat in victory;
-# otherwise the fight continues with the survivors' turn.
+# One enemy dropping to 0 HP: grants its gold (and drop item, if any)
+# immediately, logs it, and clears its slot. If that empties the whole
+# group, ends combat in victory (marking a boss's checkpoint permanently
+# defeated); otherwise the fight continues with the survivors' turn.
 func _defeat_enemy(index: int) -> void:
 	var enemy: Dictionary = current_enemies[index]
 	var gold: int = enemy.gold_min + randi() % (enemy.gold_max - enemy.gold_min + 1)
 	Inventory.add_item("gold", gold)
-	_log("%s defeated! Found %d gold." % [enemy.name, gold])
+	var msg := "%s defeated! Found %d gold." % [enemy.name, gold]
+	var drop_item_id: String = enemy.get("drop_item_id", "")
+	if drop_item_id != "":
+		Inventory.add_item(drop_item_id, 1)
+		msg += " Obtained %s!" % Items.get_item_name(drop_item_id)
+	_log(msg)
 	current_enemies[index] = null
 	if alive_enemies().is_empty():
 		in_combat = false
 		active_submenu = ""
 		selecting_target = ""
 		player_status = {}
+		if current_boss_id != "":
+			GameState.boss_defeated[current_boss_id] = true
+			current_boss_id = ""
 		changed.emit()
 		ended.emit(true)
 	else:
@@ -406,6 +442,7 @@ func _defeat() -> void:
 	active_submenu = ""
 	selecting_target = ""
 	player_status = {}
+	current_boss_id = "" # losing to a boss leaves it undefeated, re-challengeable
 	changed.emit()
 	ended.emit(false)
 	get_tree().change_scene_to_file("res://scenes/House.tscn")

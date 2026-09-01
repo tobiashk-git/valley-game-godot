@@ -61,6 +61,7 @@ func _refresh() -> void:
 		slot.modulate = TARGETABLE_TINT if targeting else NORMAL_TINT
 		var sprite: TextureRect = slot.get_node("Sprite")
 		sprite.texture = load(enemy.sprite)
+		sprite.modulate = enemy.get("tint", Color(1, 1, 1, 1))
 		var name_label: Label = slot.get_node("NameLabel")
 		name_label.text = enemy.name
 		var hp_bar: ProgressBar = slot.get_node("HPBar")
