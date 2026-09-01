@@ -25,6 +25,12 @@ func _build_world_map_panel() -> void:
 	var margin := MarginContainer.new()
 	margin.name = "Margin"
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# A plain Panel (unlike PanelContainer) doesn't auto-inset children by
+	# its StyleBox's content_margin, so the FULL_RECT MarginContainer sat
+	# flush against the panel's border with no breathing room - text looked
+	# clipped on the left edge. Explicit margins fix it directly.
+	for side in ["left", "top", "right", "bottom"]:
+		margin.add_theme_constant_override("margin_%s" % side, 20)
 	panel.add_child(margin)
 	margin.owner = layer
 

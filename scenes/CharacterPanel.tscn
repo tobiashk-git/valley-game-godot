@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/character_panel.gd" id="1_11nhv"]
 
-[node name="CharacterPanel" type="CanvasLayer" unique_id=384043921]
+[node name="CharacterPanel" type="CanvasLayer" unique_id=1809326949]
 script = ExtResource("1_11nhv")
 
-[node name="Panel" type="Panel" parent="." unique_id=1469897379]
+[node name="Panel" type="Panel" parent="." unique_id=581117500]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -16,27 +16,31 @@ offset_top = -240.0
 offset_right = 360.0
 offset_bottom = 260.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=713981811]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=795822062]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=938258584]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1638071989]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=1341961598]
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=20319537]
 layout_mode = 2
 theme_type_variation = &"PanelTitle"
 text = "Character"
 
-[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=2126694967]
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=1606198588]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_type_variation = &"HPBar"
 show_percentage = false
 
-[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/HPBar" unique_id=1190106263]
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/HPBar" unique_id=1868542606]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -44,13 +48,13 @@ theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="MPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=1803326342]
+[node name="MPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=2053798279]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_type_variation = &"MPBar"
 show_percentage = false
 
-[node name="MPLabel" type="Label" parent="Panel/Margin/VBox/MPBar" unique_id=968972742]
+[node name="MPLabel" type="Label" parent="Panel/Margin/VBox/MPBar" unique_id=1367658490]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -58,35 +62,35 @@ theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="StatsRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1457606157]
+[node name="StatsRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1632033264]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="StrengthLabel" type="Label" parent="Panel/Margin/VBox/StatsRow" unique_id=624826954]
+[node name="StrengthLabel" type="Label" parent="Panel/Margin/VBox/StatsRow" unique_id=1883065871]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 
-[node name="AgilityLabel" type="Label" parent="Panel/Margin/VBox/StatsRow" unique_id=519132067]
+[node name="AgilityLabel" type="Label" parent="Panel/Margin/VBox/StatsRow" unique_id=736646835]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 
-[node name="Sep" type="HSeparator" parent="Panel/Margin/VBox" unique_id=208181883]
+[node name="Sep" type="HSeparator" parent="Panel/Margin/VBox" unique_id=1359613017]
 layout_mode = 2
 
-[node name="EquipTitle" type="Label" parent="Panel/Margin/VBox" unique_id=1899786751]
+[node name="EquipTitle" type="Label" parent="Panel/Margin/VBox" unique_id=896073063]
 layout_mode = 2
 theme_type_variation = &"PanelTitle"
 theme_override_font_sizes/font_size = 14
 text = "Equipment"
 
-[node name="WeaponLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1783373541]
+[node name="WeaponLabel" type="Label" parent="Panel/Margin/VBox" unique_id=834588506]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 
-[node name="ArmorLabel" type="Label" parent="Panel/Margin/VBox" unique_id=751789755]
+[node name="ArmorLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1237762567]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 
-[node name="AccessoryLabel" type="Label" parent="Panel/Margin/VBox" unique_id=361327780]
+[node name="AccessoryLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1185940790]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
