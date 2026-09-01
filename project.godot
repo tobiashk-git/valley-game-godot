@@ -11,8 +11,12 @@ config_version=5
 [application]
 
 config/name="Valley of Adventure"
-run/main_scene="res://scenes/Main.tscn"
+run/main_scene="res://scenes/Overworld.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+World="*res://scripts/world.gd"
 
 [display]
 

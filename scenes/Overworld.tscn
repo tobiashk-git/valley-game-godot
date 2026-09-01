@@ -1,0 +1,90 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/overworld.gd" id="1_ff6um"]
+[ext_resource type="Texture2D" path="res://assets/grass.png" id="2_vvo0y"]
+[ext_resource type="Texture2D" path="res://assets/snow.png" id="3_8xaq6"]
+[ext_resource type="Texture2D" path="res://assets/sand.png" id="4_dysil"]
+[ext_resource type="Texture2D" path="res://assets/forest_ground.png" id="5_8wcqk"]
+[ext_resource type="Texture2D" path="res://assets/hills_ground.png" id="6_667vx"]
+[ext_resource type="Texture2D" path="res://assets/path.png" id="7_ojbe6"]
+[ext_resource type="Texture2D" path="res://assets/fence.png" id="8_yb8sh"]
+[ext_resource type="Texture2D" path="res://assets/gate.png" id="9_r1q4c"]
+[ext_resource type="Texture2D" path="res://assets/altar.png" id="10_8gr22"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="11_2ltwc"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="12_pv64x"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bj42m"]
+texture = ExtResource("2_vvo0y")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:1/0 = 0
+0:2/0 = 0
+0:3/0 = 0
+0:4/0 = 0
+0:5/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s5cm4"]
+texture = ExtResource("3_8xaq6")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_udwd7"]
+texture = ExtResource("4_dysil")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_t3ven"]
+texture = ExtResource("5_8wcqk")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_12s4i"]
+texture = ExtResource("6_667vx")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_od55l"]
+texture = ExtResource("7_ojbe6")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ovrfq"]
+texture = ExtResource("8_yb8sh")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0747q"]
+texture = ExtResource("9_r1q4c")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_imkcf"]
+texture = ExtResource("10_8gr22")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_1y5gq"]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("TileSetAtlasSource_bj42m")
+sources/1 = SubResource("TileSetAtlasSource_s5cm4")
+sources/2 = SubResource("TileSetAtlasSource_udwd7")
+sources/3 = SubResource("TileSetAtlasSource_t3ven")
+sources/4 = SubResource("TileSetAtlasSource_12s4i")
+sources/5 = SubResource("TileSetAtlasSource_od55l")
+sources/6 = SubResource("TileSetAtlasSource_ovrfq")
+sources/7 = SubResource("TileSetAtlasSource_0747q")
+sources/8 = SubResource("TileSetAtlasSource_imkcf")
+
+[node name="Overworld" type="Node2D" unique_id=1052639759]
+script = ExtResource("1_ff6um")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1567822407]
+tile_set = SubResource("TileSet_1y5gq")
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=1494915939 instance=ExtResource("11_2ltwc")]
+script = ExtResource("12_pv64x")
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1774758119]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0

@@ -1,0 +1,73 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/grass.png" id="1_nqc7g"]
+[ext_resource type="Texture2D" path="res://assets/snow.png" id="2_gremd"]
+[ext_resource type="Texture2D" path="res://assets/sand.png" id="3_rgscr"]
+[ext_resource type="Texture2D" path="res://assets/forest_ground.png" id="4_ilxu8"]
+[ext_resource type="Texture2D" path="res://assets/hills_ground.png" id="5_um858"]
+[ext_resource type="Texture2D" path="res://assets/path.png" id="6_vbj64"]
+[ext_resource type="Texture2D" path="res://assets/fence.png" id="7_ixua0"]
+[ext_resource type="Texture2D" path="res://assets/gate.png" id="8_srne8"]
+[ext_resource type="Texture2D" path="res://assets/altar.png" id="9_rv5ot"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bj42m"]
+texture = ExtResource("1_nqc7g")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:1/0 = 0
+0:2/0 = 0
+0:3/0 = 0
+0:4/0 = 0
+0:5/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s5cm4"]
+texture = ExtResource("2_gremd")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_udwd7"]
+texture = ExtResource("3_rgscr")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_t3ven"]
+texture = ExtResource("4_ilxu8")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_12s4i"]
+texture = ExtResource("5_um858")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_od55l"]
+texture = ExtResource("6_vbj64")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ovrfq"]
+texture = ExtResource("7_ixua0")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0747q"]
+texture = ExtResource("8_srne8")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_imkcf"]
+texture = ExtResource("9_rv5ot")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("TileSetAtlasSource_bj42m")
+sources/1 = SubResource("TileSetAtlasSource_s5cm4")
+sources/2 = SubResource("TileSetAtlasSource_udwd7")
+sources/3 = SubResource("TileSetAtlasSource_t3ven")
+sources/4 = SubResource("TileSetAtlasSource_12s4i")
+sources/5 = SubResource("TileSetAtlasSource_od55l")
+sources/6 = SubResource("TileSetAtlasSource_ovrfq")
+sources/7 = SubResource("TileSetAtlasSource_0747q")
+sources/8 = SubResource("TileSetAtlasSource_imkcf")
