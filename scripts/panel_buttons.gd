@@ -7,6 +7,10 @@ extends CanvasLayer
 # its style.css), but a clickable toolbar is worth having on desktop too,
 # and this project has no touch-input layer yet to gate it behind anyway.
 
+const PANEL_AUTOLOADS: Array[String] = [
+	"InventoryPanel", "CharacterPanel", "CraftingPanel", "QuestPanel", "WorldMapPanel",
+]
+
 @onready var inventory_btn: Button = $HBox/InventoryBtn
 @onready var character_btn: Button = $HBox/CharacterBtn
 @onready var crafting_btn: Button = $HBox/CraftingBtn
@@ -20,7 +24,15 @@ func _ready() -> void:
 	quest_btn.pressed.connect(_on_pressed.bind("QuestPanel"))
 	map_btn.pressed.connect(_on_pressed.bind("WorldMapPanel"))
 
+# Only one of these panels is meant to be on screen at a time - switching
+# between them via the toolbar closes whatever else is open first, rather
+# than stacking (clicking the already-open one just closes it).
 func _on_pressed(panel_autoload_name: String) -> void:
 	if Combat.in_combat:
 		return
-	get_node("/root/%s" % panel_autoload_name).toggle_open()
+	var target: Node = get_node("/root/%s" % panel_autoload_name)
+	var was_open: bool = target.is_open()
+	for autoload_name in PANEL_AUTOLOADS:
+		get_node("/root/%s" % autoload_name).close()
+	if not was_open:
+		target.open()

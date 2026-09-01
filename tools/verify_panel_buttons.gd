@@ -50,6 +50,18 @@ func _initialize() -> void:
 	panel_buttons.map_btn.pressed.emit()
 	await process_frame
 
+	# --- Switching panels closes the previous one instead of stacking. ---
+	panel_buttons.crafting_btn.pressed.emit()
+	await process_frame
+	panel_buttons.inventory_btn.pressed.emit()
+	await process_frame
+	print("Switching to Inventory closes Crafting: ", inventory_panel.get_node("Panel").visible and not crafting_panel.get_node("Panel").visible)
+
+	# --- Clicking the already-open panel's button just closes it. ---
+	panel_buttons.inventory_btn.pressed.emit()
+	await process_frame
+	print("Re-clicking the open panel's button closes it: ", not inventory_panel.get_node("Panel").visible)
+
 	# --- Keyboard shortcuts still work too (regression check on the refactor). ---
 	Input.action_press("toggle_inventory")
 	await process_frame
