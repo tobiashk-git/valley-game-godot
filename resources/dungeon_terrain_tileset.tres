@@ -1,0 +1,21 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/dungeon_wall.png" id="1_6agki"]
+[ext_resource type="Texture2D" path="res://assets/dungeon_floor.png" id="2_krki1"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v37wp"]
+texture = ExtResource("1_6agki")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sdlhw"]
+texture = ExtResource("2_krki1")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_v37wp")
+sources/1 = SubResource("TileSetAtlasSource_sdlhw")

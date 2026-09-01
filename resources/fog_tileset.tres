@@ -1,0 +1,12 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/fog_black.png" id="1_k6jmd"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_trxbk"]
+texture = ExtResource("1_k6jmd")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("TileSetAtlasSource_trxbk")

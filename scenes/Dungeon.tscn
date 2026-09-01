@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/dungeon.gd" id="1_gajge"]
+[ext_resource type="Texture2D" path="res://assets/dungeon_wall.png" id="2_18g1q"]
+[ext_resource type="Texture2D" path="res://assets/dungeon_floor.png" id="3_ykok4"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="4_kco37"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="5_dj1ww"]
+[ext_resource type="Texture2D" path="res://assets/fog_black.png" id="6_aq2ax"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v37wp"]
+texture = ExtResource("2_18g1q")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sdlhw"]
+texture = ExtResource("3_ykok4")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_lwrqk"]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_v37wp")
+sources/1 = SubResource("TileSetAtlasSource_sdlhw")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_trxbk"]
+texture = ExtResource("6_aq2ax")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_5bk5s"]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("TileSetAtlasSource_trxbk")
+
+[node name="Dungeon" type="Node2D" unique_id=430934058]
+script = ExtResource("1_gajge")
+
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=697915292]
+tile_set = SubResource("TileSet_lwrqk")
+
+[node name="YSort" type="Node2D" parent="." unique_id=1639668563]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("4_kco37")]
+script = ExtResource("5_dj1ww")
+
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=898920871]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="FogLayer" type="TileMapLayer" parent="." unique_id=1355760540]
+tile_set = SubResource("TileSet_5bk5s")

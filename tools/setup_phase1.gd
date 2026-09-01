@@ -3,7 +3,9 @@ extends SceneTree
 # are painted at runtime by overworld.gd/world.gd, not baked in here).
 # Run via: godot --headless --script res://tools/setup_phase1.gd
 
-func _add_source(tile_set: TileSet, path: String, id: int) -> void:
+const FULL_TILE_COLLISION: PackedVector2Array = [Vector2(-16, -16), Vector2(16, -16), Vector2(16, 16), Vector2(-16, 16)]
+
+func _add_source(tile_set: TileSet, path: String, id: int, solid: bool = false) -> void:
 	var tex: Texture2D = load(path)
 	var source := TileSetAtlasSource.new()
 	source.texture = tex
@@ -15,22 +17,31 @@ func _add_source(tile_set: TileSet, path: String, id: int) -> void:
 			source.create_tile(Vector2i(0, row))
 	else:
 		source.create_tile(Vector2i(0, 0))
+	# The source must be attached to the TileSet (which already has its
+	# physics layer added) *before* writing collision data into its TileData —
+	# a standalone, not-yet-attached source has no physics-layer context for
+	# add_collision_polygon() to write into, so it silently no-ops.
 	tile_set.add_source(source, id)
+	if solid:
+		var tile_data: TileData = source.get_tile_data(Vector2i(0, 0), 0)
+		tile_data.add_collision_polygon(0)
+		tile_data.set_collision_polygon_points(0, 0, FULL_TILE_COLLISION)
 
 func _initialize() -> void:
 	print("=== Phase 1 setup starting ===")
 
 	var tile_set := TileSet.new()
 	tile_set.tile_size = Vector2i(32, 32)
+	tile_set.add_physics_layer()
 	_add_source(tile_set, "res://assets/grass.png", 0)
 	_add_source(tile_set, "res://assets/snow.png", 1)
 	_add_source(tile_set, "res://assets/sand.png", 2)
 	_add_source(tile_set, "res://assets/forest_ground.png", 3)
 	_add_source(tile_set, "res://assets/hills_ground.png", 4)
 	_add_source(tile_set, "res://assets/path.png", 5)
-	_add_source(tile_set, "res://assets/fence.png", 6)
-	_add_source(tile_set, "res://assets/gate.png", 7)
-	_add_source(tile_set, "res://assets/altar.png", 8)
+	_add_source(tile_set, "res://assets/fence.png", 6, true)
+	_add_source(tile_set, "res://assets/gate.png", 7, true)
+	_add_source(tile_set, "res://assets/altar.png", 8, true)
 	var ts_err := ResourceSaver.save(tile_set, "res://resources/overworld_tileset.tres")
 	print("overworld_tileset.tres saved: ", ts_err)
 

@@ -1,0 +1,66 @@
+extends Node2D
+# Fog-of-war dungeon interior. Port of buildDungeonMaze()'s layout generation
+# (see dungeon_gen.gd) plus the JS game's revealTilesAround()/isRevealed()
+# fog system, using a second TileMapLayer filled with an opaque tile that
+# gets erase_cell()'d as the player explores, instead of gating a hand-rolled
+# render loop like the JS canvas version does.
+
+const WIDTH := 40
+const HEIGHT := 28
+const FOG_REVEAL_RADIUS := 2
+
+const SRC_WALL := 0
+const SRC_FLOOR := 1
+const SRC_FOG := 0 # fog layer has its own single-source TileSet, id 0
+
+@onready var terrain: TileMapLayer = $TerrainLayer
+@onready var fog: TileMapLayer = $FogLayer
+@onready var ysort: Node2D = $YSort
+@onready var player: CharacterBody2D = $YSort/Player
+
+var _last_revealed_tile: Vector2i = Vector2i(-9999, -9999)
+
+func _tile_center(pos: Vector2i) -> Vector2:
+	return Vector2(pos.x * 32 + 16, pos.y * 32 + 16)
+
+func _ready() -> void:
+	var gen: Dictionary = DungeonGen.generate(WIDTH, HEIGHT)
+	var map: Array = gen.map
+
+	for y in range(HEIGHT):
+		for x in range(WIDTH):
+			var cell: int = map[y][x]
+			if cell == DungeonGen.WALL:
+				terrain.set_cell(Vector2i(x, y), SRC_WALL, Vector2i(0, 0))
+			else:
+				terrain.set_cell(Vector2i(x, y), SRC_FLOOR, Vector2i(0, 0))
+
+	for y in range(HEIGHT):
+		for x in range(WIDTH):
+			fog.set_cell(Vector2i(x, y), SRC_FOG, Vector2i(0, 0))
+
+	var spawn_tile: Vector2i = gen.spawn_tile
+	player.position = _tile_center(spawn_tile)
+
+	var cam: Camera2D = player.get_node("Camera2D")
+	cam.limit_left = 0
+	cam.limit_top = 0
+	cam.limit_right = WIDTH * 32
+	cam.limit_bottom = HEIGHT * 32
+	cam.reset_smoothing()
+
+	_reveal_around(spawn_tile)
+	_last_revealed_tile = spawn_tile
+
+func _process(_delta: float) -> void:
+	var current_tile := Vector2i(int(player.position.x / 32), int(player.position.y / 32))
+	if current_tile != _last_revealed_tile:
+		_last_revealed_tile = current_tile
+		_reveal_around(current_tile)
+
+func _reveal_around(center: Vector2i) -> void:
+	for dy in range(-FOG_REVEAL_RADIUS, FOG_REVEAL_RADIUS + 1):
+		for dx in range(-FOG_REVEAL_RADIUS, FOG_REVEAL_RADIUS + 1):
+			if dx * dx + dy * dy > FOG_REVEAL_RADIUS * FOG_REVEAL_RADIUS:
+				continue
+			fog.erase_cell(center + Vector2i(dx, dy))

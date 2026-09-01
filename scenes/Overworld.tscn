@@ -52,19 +52,23 @@ texture_region_size = Vector2i(32, 32)
 texture = ExtResource("8_yb8sh")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0747q"]
 texture = ExtResource("9_r1q4c")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_imkcf"]
 texture = ExtResource("10_8gr22")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 
 [sub_resource type="TileSet" id="TileSet_1y5gq"]
 tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_bj42m")
 sources/1 = SubResource("TileSetAtlasSource_s5cm4")
 sources/2 = SubResource("TileSetAtlasSource_udwd7")
@@ -75,19 +79,19 @@ sources/6 = SubResource("TileSetAtlasSource_ovrfq")
 sources/7 = SubResource("TileSetAtlasSource_0747q")
 sources/8 = SubResource("TileSetAtlasSource_imkcf")
 
-[node name="Overworld" type="Node2D" unique_id=779871056]
+[node name="Overworld" type="Node2D" unique_id=310149965]
 script = ExtResource("1_ff6um")
 
-[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1386343180]
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1826832084]
 tile_set = SubResource("TileSet_1y5gq")
 
-[node name="YSort" type="Node2D" parent="." unique_id=449532988]
+[node name="YSort" type="Node2D" parent="." unique_id=348083968]
 y_sort_enabled = true
 
 [node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("11_2ltwc")]
 script = ExtResource("12_pv64x")
 
-[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1563136406]
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=592954177]
 zoom = Vector2(1.5, 1.5)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
