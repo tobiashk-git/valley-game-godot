@@ -39,10 +39,10 @@ func _initialize() -> void:
 	combat.start_combat("giant_spider")
 	character.stats.hp = 20
 	combat.player_status["sleep"] = {"turns_left": 3}
-	var enemy_hp_before_sleep: int = combat.current_enemy.hp
+	var enemy_hp_before_sleep: int = combat.current_enemies[0].hp
 	combat.player_attack() # should be fully skipped
 	await process_frame
-	print("Enemy HP unchanged while asleep (attack skipped): ", combat.current_enemy.hp == enemy_hp_before_sleep)
+	print("Enemy HP unchanged while asleep (attack skipped): ", combat.current_enemies[0].hp == enemy_hp_before_sleep)
 	print("Sleep cleared after taking a hit (wake-on-hit): ", not combat.player_status.has("sleep"))
 
 	# --- Paralysis: forced-fail roll skips the turn (checked via many trials since chance is 50/50). ---
@@ -51,10 +51,10 @@ func _initialize() -> void:
 	var paralysis_skipped_at_least_once := false
 	for i in range(20):
 		combat.player_status["paralysis"] = {"turns_left": 2}
-		var enemy_hp_before: int = combat.current_enemy.hp
+		var enemy_hp_before: int = combat.current_enemies[0].hp
 		combat.player_attack()
 		await process_frame
-		if combat.current_enemy.hp == enemy_hp_before and combat.in_combat:
+		if combat.current_enemies[0].hp == enemy_hp_before and combat.in_combat:
 			paralysis_skipped_at_least_once = true
 			break
 		if not combat.in_combat:

@@ -1,14 +1,17 @@
 extends CanvasLayer
 # Autoload — full-screen battle UI. Visibility mirrors Combat.in_combat.
-# Commands/Submenu toggle based on Combat.active_submenu, same pattern as
-# renderSubmenu() in combat.js: Magic/Item open a dynamically-built row list
-# (spells or usable items) with a Back button, replacing the command row.
+# Commands/Submenu toggle based on Combat.active_submenu (Magic/Item open a
+# dynamically-built row list with a Back button, replacing the command row).
+# Shows up to 3 enemy slots; when Combat.selecting_target is set, alive
+# slots get a warm highlight and become clickable, calling
+# Combat.select_target(index) via each slot's own gui_input.
+
+const MAX_ENEMY_SLOTS := 3
+const TARGETABLE_TINT := Color(1.3, 1.1, 0.6)
+const NORMAL_TINT := Color(1, 1, 1)
 
 @onready var panel: Panel = $Panel
-@onready var enemy_sprite: TextureRect = $Panel/Margin/VBox/EnemyRow/EnemySprite
-@onready var enemy_name_label: Label = $Panel/Margin/VBox/EnemyRow/EnemyInfo/EnemyName
-@onready var enemy_hp_bar: ProgressBar = $Panel/Margin/VBox/EnemyRow/EnemyInfo/EnemyHPBar
-@onready var enemy_hp_label: Label = $Panel/Margin/VBox/EnemyRow/EnemyInfo/EnemyHPBar/EnemyHPLabel
+@onready var enemy_slots: Array = []
 @onready var player_hp_bar: ProgressBar = $Panel/Margin/VBox/PlayerRow/PlayerHPBar
 @onready var player_hp_label: Label = $Panel/Margin/VBox/PlayerRow/PlayerHPBar/PlayerHPLabel
 @onready var player_mp_bar: ProgressBar = $Panel/Margin/VBox/PlayerRow/PlayerMPBar
@@ -25,6 +28,12 @@ extends CanvasLayer
 
 func _ready() -> void:
 	panel.visible = false
+	var enemies_row: HBoxContainer = $Panel/Margin/VBox/EnemiesRow
+	for i in range(MAX_ENEMY_SLOTS):
+		var slot: Control = enemies_row.get_node("EnemySlot%d" % i)
+		slot.gui_input.connect(_on_slot_gui_input.bind(i))
+		enemy_slots.append(slot)
+
 	Combat.changed.connect(_refresh)
 	Character.changed.connect(_refresh)
 	attack_btn.pressed.connect(Combat.player_attack)
@@ -33,17 +42,32 @@ func _ready() -> void:
 	defend_btn.pressed.connect(Combat.player_defend)
 	run_btn.pressed.connect(Combat.player_run)
 
+func _on_slot_gui_input(event: InputEvent, index: int) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		Combat.select_target(index)
+
 func _refresh() -> void:
 	panel.visible = Combat.in_combat
 	if not Combat.in_combat:
 		return
 
-	var enemy: Dictionary = Combat.current_enemy
-	enemy_sprite.texture = load(enemy.sprite)
-	enemy_name_label.text = enemy.name
-	enemy_hp_bar.max_value = enemy.max_hp
-	enemy_hp_bar.value = enemy.hp
-	enemy_hp_label.text = "%d / %d" % [enemy.hp, enemy.max_hp]
+	var targeting: bool = Combat.selecting_target != ""
+	for i in range(MAX_ENEMY_SLOTS):
+		var slot: Control = enemy_slots[i]
+		var enemy = Combat.current_enemies[i] if i < Combat.current_enemies.size() else null
+		slot.visible = enemy != null
+		if enemy == null:
+			continue
+		slot.modulate = TARGETABLE_TINT if targeting else NORMAL_TINT
+		var sprite: TextureRect = slot.get_node("Sprite")
+		sprite.texture = load(enemy.sprite)
+		var name_label: Label = slot.get_node("NameLabel")
+		name_label.text = enemy.name
+		var hp_bar: ProgressBar = slot.get_node("HPBar")
+		hp_bar.max_value = enemy.max_hp
+		hp_bar.value = enemy.hp
+		var hp_label: Label = hp_bar.get_node("HPLabel")
+		hp_label.text = "%d / %d" % [enemy.hp, enemy.max_hp]
 
 	var stats: Dictionary = Character.stats
 	player_hp_bar.max_value = stats.max_hp
@@ -87,8 +111,11 @@ func _add_submenu_row(text: String, disabled: bool, on_pick: Callable) -> void:
 	submenu.add_child(btn)
 
 func _refresh_submenu() -> void:
-	var open: bool = Combat.active_submenu != ""
-	commands.visible = not open
+	# Commands (and the ability to open a submenu) are unavailable while a
+	# target is being chosen - only clicking an enemy slot does anything then.
+	var targeting: bool = Combat.selecting_target != ""
+	var open: bool = Combat.active_submenu != "" and not targeting
+	commands.visible = not open and not targeting
 	submenu.visible = open
 	if not open:
 		return

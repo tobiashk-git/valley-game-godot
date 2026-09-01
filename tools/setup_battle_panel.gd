@@ -1,9 +1,11 @@
 extends SceneTree
-# Builds BattlePanel.tscn — full-screen battle UI (Combat Phase 1+2: Attack/
-# Magic/Item/Defend/Run). Panel background/title/bar styling come from the
-# shared res://resources/ui_theme.tres (project default theme) - see
-# tools/setup_theme.gd. Run via:
+# Builds BattlePanel.tscn — full-screen battle UI (Combat Phase 1-4: Attack/
+# Magic/Item/Defend/Run, up to 3 targetable enemy slots). Panel background/
+# title/bar styling come from the shared res://resources/ui_theme.tres
+# (project default theme) - see tools/setup_theme.gd. Run via:
 # godot --headless --script res://tools/setup_battle_panel.gd
+
+const MAX_ENEMY_SLOTS := 3
 
 func _bar_with_label(name_prefix: String, variation: StringName) -> ProgressBar:
 	var bar := ProgressBar.new()
@@ -11,14 +13,47 @@ func _bar_with_label(name_prefix: String, variation: StringName) -> ProgressBar:
 	bar.custom_minimum_size = Vector2(0, 22)
 	bar.show_percentage = false
 	bar.theme_type_variation = variation
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var label := Label.new()
 	label.name = name_prefix + "Label"
 	label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 13)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bar.add_child(label)
 	return bar
+
+# A clickable per-enemy slot: sprite + name + HP bar. Children are set to
+# MOUSE_FILTER_IGNORE so clicks pass through to the slot's own gui_input
+# (connected in battle_panel.gd), which calls Combat.select_target(index).
+func _build_enemy_slot(index: int) -> VBoxContainer:
+	var slot := VBoxContainer.new()
+	slot.name = "EnemySlot%d" % index
+	slot.mouse_filter = Control.MOUSE_FILTER_STOP
+	slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slot.add_theme_constant_override("separation", 4)
+
+	var sprite := TextureRect.new()
+	sprite.name = "Sprite"
+	sprite.custom_minimum_size = Vector2(48, 48)
+	sprite.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.add_child(sprite)
+
+	var name_label := Label.new()
+	name_label.name = "NameLabel"
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.add_child(name_label)
+
+	var hp_bar := _bar_with_label("HP", &"HPBar")
+	hp_bar.custom_minimum_size = Vector2(0, 16)
+	slot.add_child(hp_bar)
+
+	return slot
 
 func _own(node: Node, layer: Node) -> void:
 	for child in node.get_children():
@@ -33,8 +68,8 @@ func _build_battle_panel() -> void:
 	var panel := Panel.new()
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.position = Vector2(-220, -190)
-	panel.size = Vector2(440, 380)
+	panel.position = Vector2(-240, -200)
+	panel.size = Vector2(480, 400)
 	layer.add_child(panel)
 	panel.owner = layer
 
@@ -48,31 +83,15 @@ func _build_battle_panel() -> void:
 	vbox.add_theme_constant_override("separation", 10)
 	margin.add_child(vbox)
 
-	# Enemy row: sprite + name/HP.
-	var enemy_row := HBoxContainer.new()
-	enemy_row.name = "EnemyRow"
-	enemy_row.add_theme_constant_override("separation", 12)
-	vbox.add_child(enemy_row)
+	# Up to 3 enemy slots, side by side - shown/hidden and made targetable
+	# by battle_panel.gd based on Combat.current_enemies/selecting_target.
+	var enemies_row := HBoxContainer.new()
+	enemies_row.name = "EnemiesRow"
+	enemies_row.add_theme_constant_override("separation", 10)
+	vbox.add_child(enemies_row)
 
-	var enemy_sprite := TextureRect.new()
-	enemy_sprite.name = "EnemySprite"
-	enemy_sprite.custom_minimum_size = Vector2(64, 64)
-	enemy_sprite.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	enemy_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	enemy_row.add_child(enemy_sprite)
-
-	var enemy_info := VBoxContainer.new()
-	enemy_info.name = "EnemyInfo"
-	enemy_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	enemy_row.add_child(enemy_info)
-
-	var enemy_name := Label.new()
-	enemy_name.name = "EnemyName"
-	enemy_name.theme_type_variation = &"PanelTitle"
-	enemy_info.add_child(enemy_name)
-
-	var enemy_hp_bar := _bar_with_label("EnemyHP", &"HPBar")
-	enemy_info.add_child(enemy_hp_bar)
+	for i in range(MAX_ENEMY_SLOTS):
+		enemies_row.add_child(_build_enemy_slot(i))
 
 	# Player row: HP + MP bars stacked.
 	var player_row := VBoxContainer.new()

@@ -19,7 +19,7 @@ func _initialize() -> void:
 	await process_frame
 	print("In combat: ", combat.in_combat)
 	print("Battle panel visible: ", battle_panel.get_node("Panel").visible)
-	print("Enemy: ", combat.current_enemy.name, " hp=", combat.current_enemy.hp, "/", combat.current_enemy.max_hp)
+	print("Enemy: ", combat.current_enemies[0].name, " hp=", combat.current_enemies[0].hp, "/", combat.current_enemies[0].max_hp)
 	root.get_texture().get_image().save_png("res://verify_combat_open.png")
 
 	# --- Movement should be frozen while in combat. ---
@@ -38,12 +38,12 @@ func _initialize() -> void:
 	print("HP after defend-retaliation: ", character.stats.hp, " (was ", hp_before_defend, ")")
 
 	# --- Cast Spell: MP should drop by 3, enemy HP should drop. ---
-	var enemy_hp_before_spell: int = combat.current_enemy.hp
+	var enemy_hp_before_spell: int = combat.current_enemies[0].hp
 	var mp_before_spell: int = character.stats.mp
 	combat.cast_spell("fireball")
 	await process_frame
 	print("MP after spell: ", character.stats.mp, " (was ", mp_before_spell, ")")
-	print("Enemy HP after spell: ", combat.current_enemy.hp, " (was ", enemy_hp_before_spell, ")")
+	print("Enemy HP after spell: ", combat.current_enemies[0].hp, " (was ", enemy_hp_before_spell, ")")
 	root.get_texture().get_image().save_png("res://verify_combat_midfight.png")
 
 	# --- Attack until victory. ---
