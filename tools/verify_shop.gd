@@ -52,7 +52,7 @@ func _initialize() -> void:
 	var list: VBoxContainer = shop_panel.get_node("Panel/Margin/VBox/List")
 	var potion_row: HBoxContainer = null
 	for row in list.get_children():
-		if row is HBoxContainer and (row.get_child(0) as Label).text.contains("Healing Potion"):
+		if row is HBoxContainer and (row.get_child(0) as RichTextLabel).text.contains("Healing Potion"):
 			potion_row = row
 	print("Healing Potion buy row found: ", potion_row != null)
 	var buy_btn: Button = potion_row.get_child(1)
@@ -63,7 +63,7 @@ func _initialize() -> void:
 	await process_frame
 	potion_row = null
 	for row in list.get_children():
-		if row is HBoxContainer and (row.get_child(0) as Label).text.contains("Healing Potion"):
+		if row is HBoxContainer and (row.get_child(0) as RichTextLabel).text.contains("Healing Potion"):
 			potion_row = row
 	buy_btn = potion_row.get_child(1)
 	print("Buy button enabled with gold: ", not buy_btn.disabled)
@@ -85,7 +85,7 @@ func _initialize() -> void:
 	var sell_texts: Array = []
 	for row in list.get_children():
 		if row is HBoxContainer:
-			sell_texts.append((row.get_child(0) as Label).text)
+			sell_texts.append((row.get_child(0) as RichTextLabel).text)
 	print("Sell list: ", sell_texts)
 	var has_wood := false
 	var has_potion := false
@@ -109,7 +109,7 @@ func _initialize() -> void:
 	# --- Sell the wood. ---
 	var wood_row: HBoxContainer = null
 	for row in list.get_children():
-		if row is HBoxContainer and (row.get_child(0) as Label).text.contains("Wood") and not (row.get_child(0) as Label).text.contains("Wooden Pickaxe"):
+		if row is HBoxContainer and (row.get_child(0) as RichTextLabel).text.contains("Wood") and not (row.get_child(0) as RichTextLabel).text.contains("Wooden Pickaxe"):
 			wood_row = row
 	var sell_btn: Button = wood_row.get_child(1)
 	var gold_before_sell: int = inventory.get_count("gold")

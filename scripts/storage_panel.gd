@@ -44,6 +44,7 @@ func _build_column(list: VBoxContainer, items: Dictionary, on_pick: Callable) ->
 	for item_id in items.keys():
 		var btn := Button.new()
 		btn.text = "%s x%d" % [Items.get_item_name(item_id), items[item_id]]
+		btn.icon = Items.get_item_icon(item_id)
 		btn.pressed.connect(on_pick.bind(item_id))
 		list.add_child(btn)
 

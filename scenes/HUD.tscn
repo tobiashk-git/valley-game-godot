@@ -5,58 +5,58 @@
 [ext_resource type="Texture2D" path="res://assets/icons/stone.png" id="3_nysna"]
 [ext_resource type="Texture2D" path="res://assets/icons/gold.png" id="4_f6qnu"]
 
-[node name="HUD" type="CanvasLayer" unique_id=1661434733]
+[node name="HUD" type="CanvasLayer" unique_id=1103561212]
 script = ExtResource("1_qpvh6")
 
-[node name="Panel" type="Panel" parent="." unique_id=750643940]
+[node name="Panel" type="Panel" parent="." unique_id=1406196427]
 offset_left = 12.0
 offset_top = 12.0
-offset_right = 352.0
-offset_bottom = 52.0
+offset_right = 452.0
+offset_bottom = 68.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1726558503]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1434302450]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="HBox" type="HBoxContainer" parent="Panel/Margin" unique_id=134281896]
+[node name="HBox" type="HBoxContainer" parent="Panel/Margin" unique_id=587663115]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="WoodIcon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=615551553]
-custom_minimum_size = Vector2(18, 18)
+[node name="WoodIcon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=70753778]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("2_7hsmw")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="WoodLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1896443599]
+[node name="WoodLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1389528777]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 
-[node name="StoneIcon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=538674454]
-custom_minimum_size = Vector2(18, 18)
+[node name="StoneIcon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=392922700]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("3_nysna")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StoneLabel" type="Label" parent="Panel/Margin/HBox" unique_id=108984906]
+[node name="StoneLabel" type="Label" parent="Panel/Margin/HBox" unique_id=896171307]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 
-[node name="GoldIcon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=744345671]
-custom_minimum_size = Vector2(18, 18)
+[node name="GoldIcon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=973468900]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("4_f6qnu")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="GoldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1464173635]
+[node name="GoldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=748853065]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 
-[node name="WorldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1136513278]
+[node name="WorldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=406194476]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20

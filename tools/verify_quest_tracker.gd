@@ -10,7 +10,7 @@ func _find_row(list: VBoxContainer, name_prefix: String) -> HBoxContainer:
 	for row in list.get_children():
 		if not row is HBoxContainer: # skip "Active"/"Completed" section headers
 			continue
-		var label: Label = row.get_child(0)
+		var label: RichTextLabel = row.get_child(0)
 		if label.text.begins_with(name_prefix):
 			return row
 	return null
@@ -103,7 +103,7 @@ func _initialize() -> void:
 	inventory.add_item("wood", 5)
 	await process_frame
 	var wood_entry: Panel = tracker.vbox.get_child(0)
-	var status_label: Label = wood_entry.find_children("*", "Label", true, false)[1]
+	var status_label: RichTextLabel = wood_entry.find_children("*", "RichTextLabel", true, false)[0]
 	print("Tracked quest status updates live: ", status_label.text.contains("5/5") or status_label.text.contains("Ready"))
 
 	# --- Completing a quest auto-untracks it and removes it from the
@@ -112,6 +112,17 @@ func _initialize() -> void:
 	await process_frame
 	print("Completing auto-untracks it: ", not quests.tracked_quests.has("gather_wood"))
 	print("Tracker shows 1 entry after auto-untrack: ", tracker.vbox.get_child_count() == 1)
+
+	# --- Hidden while DialogueUI is open - its top-anchored box spans most
+	# of the screen width, reaching into the tracker's own right-side
+	# territory (real overlap seen in a screenshot before this guard existed). ---
+	var dialogue_ui: Node = root.get_node("DialogueUI")
+	dialogue_ui.show_dialogue("Test NPC", "Hello!")
+	await process_frame
+	print("Tracker hidden while DialogueUI is open: ", not tracker.visible)
+	dialogue_ui.hide_dialogue()
+	await process_frame
+	print("Tracker visible again once DialogueUI closes: ", tracker.visible)
 
 	# --- Hidden while another panel (Inventory) is open. ---
 	Input.action_press("toggle_inventory")

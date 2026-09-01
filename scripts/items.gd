@@ -3,11 +3,13 @@ extends Node
 # Materials/consumables/gear all share one flat dict; gear carries a "slot"
 # field (weapon/armor/accessory) so it can be equipped generically, and
 # anything with a "value" field is sellable to the Trader (Shop.SHOP_STOCK
-# curates what's also buyable - see shop.gd). Every entry has an "icon"
-# (a single emoji, matching the JS reference's own icon convention - Godot's
-# default font renders color emoji fine, confirmed via a render test) that
-# get_item_name() prepends, since every one of its ~13 call sites across the
-# UI is a display context that wants one.
+# curates what's also buyable - see shop.gd). Every entry has an "icon" (a
+# single emoji) which is NOT used for display directly anymore - Godot's Web
+# export can't render it (no access to the browser's/OS's color-emoji font
+# the way a desktop build gets via native font fallback). Display now goes
+# through get_item_icon()/get_item_name_bbcode() (real generated textures,
+# res://assets/icons/ - see tools/setup_item_icons.gd), which work
+# identically on every platform; get_item_name() is now plain text only.
 
 const ITEMS := {
 	"wood": {"name": "Wood", "icon": "🪵", "value": 1},
@@ -55,15 +57,7 @@ func get_item_name_bbcode(item_id: String) -> String:
 
 func get_item_name(item_id: String) -> String:
 	if ITEMS.has(item_id):
-		var def: Dictionary = ITEMS[item_id]
-		# Web export renders text through Godot's own rasterizer, with no
-		# access to the browser's/OS's color-emoji font the way a desktop
-		# build gets via native font fallback - the icon prefix rendered as
-		# a blank gap on a real phone (name still showed fine, since it's
-		# plain text). Desktop keeps the icon; it's confirmed working there.
-		if OS.has_feature("web"):
-			return def.name
-		return "%s %s" % [def.icon, def.name]
+		return ITEMS[item_id].name
 	return item_id
 
 # One-line gear stat suffix for UI rows, e.g. "Attack +2", "Defense +3",

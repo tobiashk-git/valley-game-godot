@@ -43,10 +43,15 @@ func _add_row(label_text: String, btn_text: String, btn_disabled: bool, on_pick:
 	row.add_theme_constant_override("separation", 12)
 	list.add_child(row)
 
-	var label := Label.new()
+	# RichTextLabel (not Label) - label_text embeds an inline item icon via
+	# BBCode (Items.get_item_name_bbcode(), see _refresh()).
+	var label := RichTextLabel.new()
+	label.bbcode_enabled = true
+	label.fit_content = true
+	label.scroll_active = false
 	label.text = label_text
-	label.custom_minimum_size = Vector2(240, 0)
-	label.add_theme_font_size_override("font_size", 14)
+	label.custom_minimum_size = Vector2(300, 0) # was 240 - icons need more room
+	label.add_theme_font_size_override("normal_font_size", 14)
 	row.add_child(label)
 
 	var btn := Button.new()
@@ -68,7 +73,7 @@ func _refresh() -> void:
 	if _tab == "buy":
 		for item_id in Shop.SHOP_STOCK:
 			var price: int = Shop.buy_price(item_id)
-			var label_text := "%s - %d gold" % [Items.get_item_name(item_id), price]
+			var label_text := "%s - %d gold" % [Items.get_item_name_bbcode(item_id), price]
 			_add_row(label_text, "Buy", Inventory.get_count("gold") < price, Shop.buy_item.bind(item_id))
 	else:
 		var any := false
@@ -77,7 +82,7 @@ func _refresh() -> void:
 				continue
 			any = true
 			var price: int = Shop.sell_price(item_id)
-			var label_text := "%s x%d - %d gold" % [Items.get_item_name(item_id), Inventory.backpack[item_id], price]
+			var label_text := "%s x%d - %d gold" % [Items.get_item_name_bbcode(item_id), Inventory.backpack[item_id], price]
 			_add_row(label_text, "Sell", false, Shop.sell_item.bind(item_id))
 		if not any:
 			var empty_label := Label.new()

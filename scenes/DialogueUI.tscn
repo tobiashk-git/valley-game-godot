@@ -2,46 +2,46 @@
 
 [ext_resource type="Script" path="res://scripts/dialogue_ui.gd" id="1_0qyo7"]
 
-[node name="DialogueUI" type="CanvasLayer" unique_id=1698241659]
+[node name="DialogueUI" type="CanvasLayer" unique_id=201730557]
 script = ExtResource("1_0qyo7")
 
-[node name="Panel" type="Panel" parent="." unique_id=337812536]
-anchors_preset = 12
-anchor_top = 1.0
+[node name="Panel" type="Panel" parent="." unique_id=16967842]
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 1.0
 offset_left = 40.0
-offset_top = -140.0
+offset_top = 60.0
 offset_right = -40.0
-offset_bottom = -20.0
+offset_bottom = 280.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1391041901]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1271642398]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1634077720]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=2115859781]
 layout_mode = 2
 
-[node name="NameLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1138516726]
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1426957595]
 layout_mode = 2
 theme_type_variation = &"PanelTitle"
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 
-[node name="TextLabel" type="Label" parent="Panel/Margin/VBox" unique_id=170209139]
+[node name="TextLabel" type="RichTextLabel" parent="Panel/Margin/VBox" unique_id=167587965]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-autowrap_mode = 2
+theme_override_font_sizes/normal_font_size = 20
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
 
-[node name="HintLabel" type="Label" parent="Panel/Margin/VBox" unique_id=806338092]
+[node name="HintLabel" type="Label" parent="Panel/Margin/VBox" unique_id=298216390]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 15
 text = "Press E to close"
 
-[node name="ActionsRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=2032307233]
+[node name="ActionsRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=252094207]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 8

@@ -68,13 +68,16 @@ func objective_met(quest_id: String) -> bool:
 		return true
 	return false
 
-# e.g. "3/5 Wood" or "1/2 Villagers" - used by the offer-in-progress line
-# (gather quests) and the Journal (every quest).
+# e.g. "3/5 [icon] Wood" or "1/2 Villagers" - used by the offer-in-progress
+# line (gather quests) and the Journal (every quest). BBCode (the gather
+# case embeds an inline item icon) - every consumer (DialogueUI's
+# text_label, quest_panel.gd's Journal rows, quest_tracker.gd's status
+# label) is a bbcode_enabled RichTextLabel.
 func objective_progress_text(quest_id: String) -> String:
 	var objective: Dictionary = QUEST_DEFS[quest_id].objective
 	if objective.type == "gather":
 		var have: int = min(Inventory.get_count(objective.item_id), objective.amount)
-		return "%d/%d %s" % [have, objective.amount, Items.get_item_name(objective.item_id)]
+		return "%d/%d %s" % [have, objective.amount, Items.get_item_name_bbcode(objective.item_id)]
 	if objective.type == "talk_to_npcs":
 		var have := 0
 		for npc_id in objective.npc_ids:

@@ -9,9 +9,9 @@ extends CanvasLayer
 @onready var mp_label: Label = $Panel/Margin/VBox/MPBar/MPLabel
 @onready var strength_label: Label = $Panel/Margin/VBox/StatsRow/StrengthLabel
 @onready var agility_label: Label = $Panel/Margin/VBox/StatsRow/AgilityLabel
-@onready var weapon_label: Label = $Panel/Margin/VBox/WeaponLabel
-@onready var armor_label: Label = $Panel/Margin/VBox/ArmorLabel
-@onready var accessory_label: Label = $Panel/Margin/VBox/AccessoryLabel
+@onready var weapon_label: RichTextLabel = $Panel/Margin/VBox/WeaponLabel
+@onready var armor_label: RichTextLabel = $Panel/Margin/VBox/ArmorLabel
+@onready var accessory_label: RichTextLabel = $Panel/Margin/VBox/AccessoryLabel
 
 func _ready() -> void:
 	panel.visible = false
@@ -38,8 +38,8 @@ func _slot_text(slot: String) -> String:
 		return "(empty)"
 	var stats := Items.describe_stats(item_id)
 	if stats == "":
-		return Items.get_item_name(item_id)
-	return "%s (%s)" % [Items.get_item_name(item_id), stats]
+		return Items.get_item_name_bbcode(item_id)
+	return "%s (%s)" % [Items.get_item_name_bbcode(item_id), stats]
 
 func is_open() -> bool:
 	return panel.visible

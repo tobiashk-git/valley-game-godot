@@ -104,9 +104,10 @@ func _clear_submenu() -> void:
 	for child in submenu.get_children():
 		child.queue_free()
 
-func _add_submenu_row(text: String, disabled: bool, on_pick: Callable) -> void:
+func _add_submenu_row(text: String, disabled: bool, on_pick: Callable, icon: Texture2D = null) -> void:
 	var btn := Button.new()
 	btn.text = text
+	btn.icon = icon
 	btn.disabled = disabled
 	btn.pressed.connect(on_pick)
 	submenu.add_child(btn)
@@ -125,17 +126,15 @@ func _refresh_submenu() -> void:
 	if Combat.active_submenu == "magic":
 		for spell_id in Spells.SPELLS.keys():
 			var spell: Dictionary = Spells.SPELLS[spell_id]
-			# Same web-export emoji-rendering gap as Items.get_item_name() -
-			# see its comment in items.gd for why.
-			var label: String = "%s (%d MP)" % [spell.name, spell.mp_cost] if OS.has_feature("web") else "%s %s (%d MP)" % [spell.icon, spell.name, spell.mp_cost]
-			_add_submenu_row(label, Character.stats.mp < spell.mp_cost, Combat.cast_spell.bind(spell_id))
+			var label := "%s (%d MP)" % [spell.name, spell.mp_cost]
+			_add_submenu_row(label, Character.stats.mp < spell.mp_cost, Combat.cast_spell.bind(spell_id), Spells.get_spell_icon(spell_id))
 	elif Combat.active_submenu == "item":
 		var usable := false
 		for item_id in Inventory.backpack.keys():
 			if Items.is_usable(item_id) and Inventory.backpack[item_id] > 0:
 				usable = true
 				var label := "%s x%d" % [Items.get_item_name(item_id), Inventory.backpack[item_id]]
-				_add_submenu_row(label, false, Combat.use_item.bind(item_id))
+				_add_submenu_row(label, false, Combat.use_item.bind(item_id), Items.get_item_icon(item_id))
 		if not usable:
 			var empty_label := Label.new()
 			empty_label.text = "No usable items."

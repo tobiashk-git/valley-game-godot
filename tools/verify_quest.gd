@@ -82,11 +82,11 @@ func _initialize() -> void:
 	# name rather than assuming an index. The list also has "Active"/
 	# "Completed" section header Labels mixed in (no children), so skip
 	# anything that isn't a row before digging into child 0 for the text.
-	var wood_quest_label: Label = null
+	var wood_quest_label: RichTextLabel = null
 	for row in journal_list.get_children():
 		if not row is HBoxContainer:
 			continue
-		var label: Label = row.get_child(0)
+		var label: RichTextLabel = row.get_child(0)
 		if label.text.begins_with("A Village in Need"):
 			wood_quest_label = label
 	print("Journal row: ", wood_quest_label.text)
@@ -155,7 +155,7 @@ func _initialize() -> void:
 	for row in journal_list.get_children():
 		if not row is HBoxContainer:
 			continue
-		var label: Label = row.get_child(0)
+		var label: RichTextLabel = row.get_child(0)
 		if label.text.begins_with("A Village in Need"):
 			wood_quest_row = row
 			wood_quest_label = label

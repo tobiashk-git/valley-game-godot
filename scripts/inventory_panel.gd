@@ -54,9 +54,14 @@ func _refresh() -> void:
 		if Items.is_equippable(item_id):
 			list.add_child(_build_gear_row(item_id))
 		else:
-			var row := Label.new()
-			row.text = "%s x%d" % [Items.get_item_name(item_id), Inventory.backpack[item_id]]
-			row.add_theme_font_size_override("font_size", 16)
+			# RichTextLabel (not Label) - embeds an inline item icon via
+			# BBCode (Items.get_item_name_bbcode()).
+			var row := RichTextLabel.new()
+			row.bbcode_enabled = true
+			row.fit_content = true
+			row.scroll_active = false
+			row.text = "%s x%d" % [Items.get_item_name_bbcode(item_id), Inventory.backpack[item_id]]
+			row.add_theme_font_size_override("normal_font_size", 16)
 			list.add_child(row)
 
 # Empty slot: plain (non-interactive) label. Filled slot: a button, click
@@ -77,6 +82,7 @@ func _build_equipment_row(slot: String) -> Control:
 	var label := "%s: %s (%s)" % [slot_name, Items.get_item_name(item_id), stats] if stats != "" else "%s: %s" % [slot_name, Items.get_item_name(item_id)]
 	var btn := Button.new()
 	btn.text = label
+	btn.icon = Items.get_item_icon(item_id)
 	btn.clip_text = true
 	btn.tooltip_text = label
 	btn.pressed.connect(Character.unequip.bind(slot))
@@ -92,6 +98,7 @@ func _build_gear_row(item_id: String) -> Button:
 	]
 	var btn := Button.new()
 	btn.text = label
+	btn.icon = Items.get_item_icon(item_id)
 	btn.clip_text = true # long gear descriptions must never overflow the panel
 	btn.tooltip_text = label # full text still reachable on hover if clipped
 	if equipped:

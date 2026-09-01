@@ -14,7 +14,14 @@ func _build_hud() -> void:
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	panel.position = Vector2(12, 12)
-	panel.size = Vector2(340, 40)
+	# Bigger than before (was 340x40 with 18px icons/14px font) - read as too
+	# small specifically on a high-DPI phone screen: window/stretch/aspect=
+	# "keep_width" keeps the game's *logical* width fixed at 800 units
+	# regardless of the device's pixel density, so on a high-DPR phone each
+	# unit maps to fewer physical on-screen pixels than the same 800 units
+	# would on a standard-DPI desktop - everything at a fixed size in game
+	# units ends up physically smaller the higher the screen's DPI.
+	panel.size = Vector2(440, 56)
 	layer.add_child(panel)
 	panel.owner = layer
 
@@ -37,7 +44,7 @@ func _build_hud() -> void:
 		var icon := TextureRect.new()
 		icon.name = label_name.replace("Label", "Icon")
 		icon.texture = load("res://assets/icons/%s.png" % item_id)
-		icon.custom_minimum_size = Vector2(18, 18)
+		icon.custom_minimum_size = Vector2(28, 28) # was 18x18
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		hbox.add_child(icon)
@@ -45,14 +52,14 @@ func _build_hud() -> void:
 
 		var label := Label.new()
 		label.name = label_name
-		label.add_theme_font_size_override("font_size", 14)
+		label.add_theme_font_size_override("font_size", 20) # was 14
 		hbox.add_child(label)
 		label.owner = layer
 
 	var world_label := Label.new()
 	world_label.name = "WorldLabel"
 	world_label.theme_type_variation = &"DimLabel"
-	world_label.add_theme_font_size_override("font_size", 14)
+	world_label.add_theme_font_size_override("font_size", 20) # was 14
 	hbox.add_child(world_label)
 	world_label.owner = layer
 

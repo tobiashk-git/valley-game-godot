@@ -116,9 +116,14 @@ func _build_character_panel() -> void:
 	equip_title.owner = layer
 
 	for entry in [["WeaponLabel", "Weapon"], ["ArmorLabel", "Armor"], ["AccessoryLabel", "Accessory"]]:
-		var label := Label.new()
+		# RichTextLabel (not Label) - equipped item text embeds an inline
+		# icon via BBCode (Items.get_item_name_bbcode()).
+		var label := RichTextLabel.new()
 		label.name = entry[0]
-		label.add_theme_font_size_override("font_size", 13)
+		label.bbcode_enabled = true
+		label.fit_content = true
+		label.scroll_active = false
+		label.add_theme_font_size_override("normal_font_size", 13)
 		vbox.add_child(label)
 		label.owner = layer
 

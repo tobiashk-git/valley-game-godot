@@ -8,7 +8,7 @@ extends CanvasLayer
 
 @onready var panel: Panel = $Panel
 @onready var name_label: Label = $Panel/Margin/VBox/NameLabel
-@onready var text_label: Label = $Panel/Margin/VBox/TextLabel
+@onready var text_label: RichTextLabel = $Panel/Margin/VBox/TextLabel
 @onready var hint_label: Label = $Panel/Margin/VBox/HintLabel
 @onready var actions_row: HBoxContainer = $Panel/Margin/VBox/ActionsRow
 

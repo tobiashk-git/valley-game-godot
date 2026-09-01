@@ -62,9 +62,14 @@ func _add_quest_row(quest_id: String, is_active: bool) -> void:
 	row.add_theme_constant_override("separation", 12)
 	list.add_child(row)
 
-	var label := Label.new()
+	# RichTextLabel (not Label) - an active quest's status can embed an
+	# inline item icon via BBCode (see Quests.objective_progress_text()).
+	var label := RichTextLabel.new()
+	label.bbcode_enabled = true
+	label.fit_content = true
+	label.scroll_active = false
 	label.text = "%s - %s" % [def.name, _status_text(quest_id)] if is_active else def.name
-	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_font_size_override("normal_font_size", 15)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(label)
 

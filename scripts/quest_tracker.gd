@@ -2,9 +2,10 @@ extends CanvasLayer
 # Autoload — persistent overlay down the right side of the screen showing
 # live status for up to Quests.MAX_TRACKED quests pinned via the Journal's
 # Track button, so progress is visible during normal play without opening
-# the panel. Hidden whenever any of the 5 toggleable panels or the battle
-# screen are open (they'd otherwise overlap it), and whenever nothing is
-# tracked.
+# the panel. Hidden whenever any of the 5 toggleable panels, DialogueUI (its
+# top-anchored box spans most of the screen width, reaching into this
+# overlay's own right-side territory), or the battle screen are open (they'd
+# otherwise overlap it), and whenever nothing is tracked.
 #
 # Each entry has its own expand/collapse toggle (▾/▸ on the right of the
 # name) - expanded shows the full boxed panel with progress text, collapsed
@@ -101,15 +102,21 @@ func _refresh() -> void:
 
 		entry_vbox.add_child(_build_header(quest_id, def, true))
 
-		var status_label := Label.new()
+		# RichTextLabel (not Label) - status text can embed an inline item
+		# icon via BBCode (see Quests.objective_progress_text()).
+		var status_label := RichTextLabel.new()
+		status_label.bbcode_enabled = true
+		status_label.fit_content = true
+		status_label.scroll_active = false
 		status_label.text = _status_text(quest_id)
-		status_label.add_theme_font_size_override("font_size", 13)
+		status_label.add_theme_font_size_override("normal_font_size", 13)
 		entry_vbox.add_child(status_label)
 
 func _process(_delta: float) -> void:
-	var any_panel_open := false
-	for autoload_name in PANEL_AUTOLOADS:
-		if get_node("/root/%s" % autoload_name).is_open():
-			any_panel_open = true
-			break
+	var any_panel_open: bool = get_node("/root/DialogueUI").is_open()
+	if not any_panel_open:
+		for autoload_name in PANEL_AUTOLOADS:
+			if get_node("/root/%s" % autoload_name).is_open():
+				any_panel_open = true
+				break
 	visible = not any_panel_open and not Combat.in_combat and not Quests.tracked_quests.is_empty()

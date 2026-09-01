@@ -11,9 +11,15 @@ func _initialize() -> void:
 
 	var panel := Panel.new()
 	panel.name = "Panel"
-	panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	panel.offset_top = -140
-	panel.offset_bottom = -20
+	# Top-anchored (was bottom-anchored) - a bottom sheet sat low enough to
+	# crowd the touch joystick/interact button on a phone's much-taller
+	# expanded viewport (window/stretch/aspect="keep_width"), and read as
+	# "too low on the screen" even on desktop. 60px top margin clears the
+	# always-visible PanelButtons toolbar row (y 12-52), matching every
+	# other top-anchored overlay (QuestTracker, the 5 big panels).
+	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	panel.offset_top = 60
+	panel.offset_bottom = 280
 	panel.offset_left = 40
 	panel.offset_right = -40
 	layer.add_child(panel)
@@ -35,14 +41,19 @@ func _initialize() -> void:
 	var name_label := Label.new()
 	name_label.name = "NameLabel"
 	name_label.theme_type_variation = &"PanelTitle"
-	name_label.add_theme_font_size_override("font_size", 20)
+	name_label.add_theme_font_size_override("font_size", 24) # was 20 - readability pass
 	vbox.add_child(name_label)
 	name_label.owner = layer
 
-	var text_label := Label.new()
+	# RichTextLabel (not Label) so quest-progress text ("3/5 [icon] Wood")
+	# can embed an inline item icon via BBCode - see Quests.
+	# objective_progress_text().
+	var text_label := RichTextLabel.new()
 	text_label.name = "TextLabel"
-	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	text_label.add_theme_font_size_override("font_size", 16)
+	text_label.bbcode_enabled = true
+	text_label.fit_content = true
+	text_label.scroll_active = false
+	text_label.add_theme_font_size_override("normal_font_size", 20) # was 16
 	vbox.add_child(text_label)
 	text_label.owner = layer
 
@@ -50,7 +61,7 @@ func _initialize() -> void:
 	hint_label.name = "HintLabel"
 	hint_label.text = "Press E to close"
 	hint_label.theme_type_variation = &"DimLabel"
-	hint_label.add_theme_font_size_override("font_size", 12)
+	hint_label.add_theme_font_size_override("font_size", 15) # was 12
 	vbox.add_child(hint_label)
 	hint_label.owner = layer
 
