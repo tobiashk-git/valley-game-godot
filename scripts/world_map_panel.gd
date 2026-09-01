@@ -46,8 +46,11 @@ func _on_travel(poi_id: String) -> void:
 	panel.visible = false
 	WorldMap.travel_to(poi_id)
 
+func toggle_open() -> void:
+	panel.visible = not panel.visible
+	if panel.visible:
+		_refresh()
+
 func _process(_delta: float) -> void:
 	if not Combat.in_combat and Input.is_action_just_pressed("toggle_map"):
-		panel.visible = not panel.visible
-		if panel.visible:
-			_refresh()
+		toggle_open()

@@ -41,16 +41,17 @@ ShopPanel="*res://scenes/ShopPanel.tscn"
 WorldMap="*res://scripts/world_map.gd"
 WorldMapPanel="*res://scenes/WorldMapPanel.tscn"
 Altar="*res://scripts/altar.gd"
-
-[gui]
-
-theme/custom="res://resources/ui_theme.tres"
+PanelButtons="*res://scenes/PanelButtons.tscn"
 
 [display]
 
 window/size/viewport_width=800
 window/size/viewport_height=600
 window/stretch/mode="viewport"
+
+[gui]
+
+theme/custom="res://resources/ui_theme.tres"
 
 [input]
 

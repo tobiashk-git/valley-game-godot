@@ -35,8 +35,11 @@ func _refresh() -> void:
 		row.add_theme_font_size_override("font_size", 15)
 		list.add_child(row)
 
+func toggle_open() -> void:
+	panel.visible = not panel.visible
+	if panel.visible:
+		_refresh()
+
 func _process(_delta: float) -> void:
 	if not Combat.in_combat and Input.is_action_just_pressed("toggle_quests"):
-		panel.visible = not panel.visible
-		if panel.visible:
-			_refresh()
+		toggle_open()

@@ -49,8 +49,11 @@ func _build_gear_row(item_id: String) -> Button:
 		btn.pressed.connect(Character.equip.bind(slot, item_id))
 	return btn
 
+func toggle_open() -> void:
+	panel.visible = not panel.visible
+	if panel.visible:
+		_refresh()
+
 func _process(_delta: float) -> void:
 	if not Combat.in_combat and Input.is_action_just_pressed("toggle_inventory"):
-		panel.visible = not panel.visible
-		if panel.visible:
-			_refresh()
+		toggle_open()
