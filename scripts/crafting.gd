@@ -1,13 +1,23 @@
 extends Node
-# Autoload — recipe registry + crafting logic, port of crafting.js. One
-# recipe for now (wooden_pickaxe) to prove the pipeline; the full roster
-# (potions, armor, accessories) is a later increment once those items exist.
+# Autoload — recipe registry + crafting logic, port of crafting.js. Recipes
+# stick to existing materials (wood/stone) since no herb-gathering exists
+# yet; armor/accessory recipes are a later increment once those items exist.
 
 const RECIPES := {
 	"wooden_pickaxe": {
 		"result": "wooden_pickaxe",
 		"amount": 1,
 		"cost": {"wood": 3, "stone": 2},
+	},
+	"healing_potion": {
+		"result": "healing_potion",
+		"amount": 1,
+		"cost": {"wood": 2, "stone": 1},
+	},
+	"mana_potion": {
+		"result": "mana_potion",
+		"amount": 1,
+		"cost": {"wood": 1, "stone": 2},
 	},
 }
 

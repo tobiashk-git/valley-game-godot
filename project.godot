@@ -30,6 +30,7 @@ StoragePanel="*res://scenes/StoragePanel.tscn"
 Crafting="*res://scripts/crafting.gd"
 CraftingPanel="*res://scenes/CraftingPanel.tscn"
 Enemies="*res://scripts/enemies.gd"
+Spells="*res://scripts/spells.gd"
 Combat="*res://scripts/combat.gd"
 BattlePanel="*res://scenes/BattlePanel.tscn"
 

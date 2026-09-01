@@ -40,7 +40,7 @@ func _initialize() -> void:
 	# --- Cast Spell: MP should drop by 3, enemy HP should drop. ---
 	var enemy_hp_before_spell: int = combat.current_enemy.hp
 	var mp_before_spell: int = character.stats.mp
-	combat.player_cast_spell()
+	combat.cast_spell("fireball")
 	await process_frame
 	print("MP after spell: ", character.stats.mp, " (was ", mp_before_spell, ")")
 	print("Enemy HP after spell: ", combat.current_enemy.hp, " (was ", enemy_hp_before_spell, ")")

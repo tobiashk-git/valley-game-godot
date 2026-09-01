@@ -1,6 +1,8 @@
 extends CanvasLayer
-# Autoload — full-screen battle UI. Visibility just mirrors Combat.in_combat;
-# every button is a thin wrapper calling straight into Combat's own guards.
+# Autoload — full-screen battle UI. Visibility mirrors Combat.in_combat.
+# Commands/Submenu toggle based on Combat.active_submenu, same pattern as
+# renderSubmenu() in combat.js: Magic/Item open a dynamically-built row list
+# (spells or usable items) with a Back button, replacing the command row.
 
 @onready var panel: Panel = $Panel
 @onready var enemy_sprite: TextureRect = $Panel/Margin/VBox/EnemyRow/EnemySprite
@@ -12,17 +14,21 @@ extends CanvasLayer
 @onready var player_mp_bar: ProgressBar = $Panel/Margin/VBox/PlayerRow/PlayerMPBar
 @onready var player_mp_label: Label = $Panel/Margin/VBox/PlayerRow/PlayerMPBar/PlayerMPLabel
 @onready var log_label: Label = $Panel/Margin/VBox/LogPanel/LogLabel
+@onready var commands: HBoxContainer = $Panel/Margin/VBox/Commands
 @onready var attack_btn: Button = $Panel/Margin/VBox/Commands/AttackBtn
-@onready var spell_btn: Button = $Panel/Margin/VBox/Commands/SpellBtn
+@onready var magic_btn: Button = $Panel/Margin/VBox/Commands/MagicBtn
+@onready var item_btn: Button = $Panel/Margin/VBox/Commands/ItemBtn
 @onready var defend_btn: Button = $Panel/Margin/VBox/Commands/DefendBtn
 @onready var run_btn: Button = $Panel/Margin/VBox/Commands/RunBtn
+@onready var submenu: VBoxContainer = $Panel/Margin/VBox/Submenu
 
 func _ready() -> void:
 	panel.visible = false
 	Combat.changed.connect(_refresh)
 	Character.changed.connect(_refresh)
 	attack_btn.pressed.connect(Combat.player_attack)
-	spell_btn.pressed.connect(Combat.player_cast_spell)
+	magic_btn.pressed.connect(Combat.open_magic_menu)
+	item_btn.pressed.connect(Combat.open_item_menu)
 	defend_btn.pressed.connect(Combat.player_defend)
 	run_btn.pressed.connect(Combat.player_run)
 
@@ -46,11 +52,53 @@ func _refresh() -> void:
 	player_mp_bar.value = stats.mp
 	player_mp_label.text = "MP: %d / %d" % [stats.mp, stats.max_mp]
 
-	spell_btn.disabled = stats.mp < Combat.SPELL_MP_COST
-
 	var text := ""
 	for i in range(Combat.battle_log.size()):
 		if i > 0:
 			text += "\n"
 		text += Combat.battle_log[i]
 	log_label.text = text
+
+	_refresh_submenu()
+
+func _clear_submenu() -> void:
+	for child in submenu.get_children():
+		child.queue_free()
+
+func _add_submenu_row(text: String, disabled: bool, on_pick: Callable) -> void:
+	var btn := Button.new()
+	btn.text = text
+	btn.disabled = disabled
+	btn.pressed.connect(on_pick)
+	submenu.add_child(btn)
+
+func _refresh_submenu() -> void:
+	var open: bool = Combat.active_submenu != ""
+	commands.visible = not open
+	submenu.visible = open
+	if not open:
+		return
+
+	_clear_submenu()
+	if Combat.active_submenu == "magic":
+		for spell_id in Spells.SPELLS.keys():
+			var spell: Dictionary = Spells.SPELLS[spell_id]
+			var label := "%s (%d MP)" % [spell.name, spell.mp_cost]
+			_add_submenu_row(label, Character.stats.mp < spell.mp_cost, Combat.cast_spell.bind(spell_id))
+	elif Combat.active_submenu == "item":
+		var usable := false
+		for item_id in Inventory.backpack.keys():
+			if Items.is_usable(item_id) and Inventory.backpack[item_id] > 0:
+				usable = true
+				var label := "%s x%d" % [Items.get_item_name(item_id), Inventory.backpack[item_id]]
+				_add_submenu_row(label, false, Combat.use_item.bind(item_id))
+		if not usable:
+			var empty_label := Label.new()
+			empty_label.text = "No usable items."
+			empty_label.theme_type_variation = &"DimLabel"
+			submenu.add_child(empty_label)
+
+	var back_btn := Button.new()
+	back_btn.text = "Back"
+	back_btn.pressed.connect(Combat.close_submenu)
+	submenu.add_child(back_btn)

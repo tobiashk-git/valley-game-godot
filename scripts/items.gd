@@ -8,7 +8,12 @@ const ITEMS := {
 	"stone": {"name": "Stone"},
 	"gold": {"name": "Gold"},
 	"wooden_pickaxe": {"name": "Wooden Pickaxe", "attack": 2},
+	"healing_potion": {"name": "Healing Potion", "effect": {"kind": "heal", "amount": 15}},
+	"mana_potion": {"name": "Mana Potion", "effect": {"kind": "restore_mp", "amount": 8}},
 }
+
+func is_usable(item_id: String) -> bool:
+	return ITEMS.has(item_id) and ITEMS[item_id].has("effect")
 
 func get_item_name(item_id: String) -> String:
 	if ITEMS.has(item_id):

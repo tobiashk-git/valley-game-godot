@@ -1,8 +1,9 @@
 extends SceneTree
-# Builds BattlePanel.tscn — full-screen battle UI (Combat Phase 1). Panel
-# background/title/bar styling come from the shared res://resources/
-# ui_theme.tres (project default theme) - see tools/setup_theme.gd.
-# Run via: godot --headless --script res://tools/setup_battle_panel.gd
+# Builds BattlePanel.tscn — full-screen battle UI (Combat Phase 1+2: Attack/
+# Magic/Item/Defend/Run). Panel background/title/bar styling come from the
+# shared res://resources/ui_theme.tres (project default theme) - see
+# tools/setup_theme.gd. Run via:
+# godot --headless --script res://tools/setup_battle_panel.gd
 
 func _bar_with_label(name_prefix: String, variation: StringName) -> ProgressBar:
 	var bar := ProgressBar.new()
@@ -105,12 +106,20 @@ func _build_battle_panel() -> void:
 	commands.add_theme_constant_override("separation", 8)
 	vbox.add_child(commands)
 
-	for entry in [["AttackBtn", "Attack"], ["SpellBtn", "Cast Spell"], ["DefendBtn", "Defend"], ["RunBtn", "Run"]]:
+	for entry in [["AttackBtn", "Attack"], ["MagicBtn", "Magic"], ["ItemBtn", "Item"], ["DefendBtn", "Defend"], ["RunBtn", "Run"]]:
 		var btn := Button.new()
 		btn.name = entry[0]
 		btn.text = entry[1]
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		commands.add_child(btn)
+
+	# Submenu (Magic/Item row list + Back), built dynamically by
+	# battle_panel.gd - hidden and empty at build time.
+	var submenu := VBoxContainer.new()
+	submenu.name = "Submenu"
+	submenu.add_theme_constant_override("separation", 4)
+	submenu.visible = false
+	vbox.add_child(submenu)
 
 	_own(panel, layer)
 
