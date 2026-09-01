@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/panel_buttons.gd" id="1_m36ys"]
 
-[node name="PanelButtons" type="CanvasLayer" unique_id=1523138994]
+[node name="PanelButtons" type="CanvasLayer" unique_id=964813604]
 script = ExtResource("1_m36ys")
 
-[node name="HBox" type="HBoxContainer" parent="." unique_id=1681446443]
+[node name="HBox" type="HBoxContainer" parent="." unique_id=282641392]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -15,32 +15,32 @@ offset_right = -252.0
 offset_bottom = 12.0
 theme_override_constants/separation = 8
 
-[node name="InventoryBtn" type="Button" parent="HBox" unique_id=2047487139]
+[node name="InventoryBtn" type="Button" parent="HBox" unique_id=1091512419]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "🎒"
+text = "I"
 
-[node name="CharacterBtn" type="Button" parent="HBox" unique_id=1920730262]
+[node name="CharacterBtn" type="Button" parent="HBox" unique_id=621093164]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "👤"
+text = "C"
 
-[node name="CraftingBtn" type="Button" parent="HBox" unique_id=689574083]
+[node name="CraftingBtn" type="Button" parent="HBox" unique_id=324322772]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "🔨"
+text = "R"
 
-[node name="QuestBtn" type="Button" parent="HBox" unique_id=1518475524]
+[node name="QuestBtn" type="Button" parent="HBox" unique_id=975774036]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "📜"
+text = "Q"
 
-[node name="MapBtn" type="Button" parent="HBox" unique_id=1078385276]
+[node name="MapBtn" type="Button" parent="HBox" unique_id=1787626274]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "🗺️"
+text = "M"

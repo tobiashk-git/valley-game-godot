@@ -12,6 +12,13 @@ const JOYSTICK_RADIUS := 50.0
 const JOYSTICK_DEADZONE := 10.0
 const JOYSTICK_ANGLE_THRESHOLD := 0.35 # dot-product-ish threshold per axis, allows diagonals
 
+# window/stretch/aspect="keep_width" keeps the horizontal FOV matching
+# desktop exactly, but a portrait phone still shows a lot more world
+# vertically than a 600-tall desktop view - felt "zoomed out" on a real
+# device. A modest zoom-in tightens the view back up on touch devices only;
+# desktop is untouched since Camera2D.zoom is never set there.
+const MOBILE_ZOOM := Vector2(1.4, 1.4)
+
 @onready var joystick_base: Control = $JoystickBase
 @onready var joystick_knob: Control = $JoystickBase/Knob
 @onready var interact_button: TouchScreenButton = $InteractButton
@@ -22,14 +29,26 @@ const INTERACT_MARGIN := Vector2(120, 130)
 
 var _joystick_touch_index := -1
 var _active_directions: Array[String] = []
+var _zoomed_camera: Camera2D = null
 
 func _ready() -> void:
 	var touch_available := DisplayServer.is_touchscreen_available()
 	visible = touch_available
 	set_process_input(touch_available)
+	set_process(touch_available)
 	if touch_available:
 		_position_interact_button()
 		get_viewport().size_changed.connect(_position_interact_button)
+
+# Every scene builds its own Camera2D in its own _ready() (Overworld, House,
+# Dungeon, etc.) - rather than touching every one of those scripts, just
+# watch for whichever camera is currently active and zoom it in once, the
+# first time this sees a new one (i.e. once per scene change).
+func _process(_delta: float) -> void:
+	var cam := get_viewport().get_camera_2d()
+	if cam != null and cam != _zoomed_camera:
+		_zoomed_camera = cam
+		cam.zoom = MOBILE_ZOOM
 
 # TouchScreenButton is a Node2D, not a Control - it has no anchor preset to
 # lean on like the joystick's BOTTOM_LEFT-anchored base, so its bottom-right

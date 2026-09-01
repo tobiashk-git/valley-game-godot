@@ -17,7 +17,14 @@ func _build_panel_buttons() -> void:
 	layer.add_child(hbox)
 	hbox.owner = layer
 
-	for entry in [["InventoryBtn", "🎒"], ["CharacterBtn", "👤"], ["CraftingBtn", "🔨"], ["QuestBtn", "📜"], ["MapBtn", "🗺️"]]:
+	# Plain letters (matching each panel's own keyboard shortcut), not emoji -
+	# Godot's Web export renders text through its own internal rasterizer,
+	# which has no access to the browser's/OS's color-emoji fonts the way
+	# desktop builds do via native font fallback. Emoji-only button labels
+	# rendered blank on a real phone even though they showed fine in every
+	# desktop screenshot this session - plain ASCII is guaranteed to render
+	# on every platform.
+	for entry in [["InventoryBtn", "I"], ["CharacterBtn", "C"], ["CraftingBtn", "R"], ["QuestBtn", "Q"], ["MapBtn", "M"]]:
 		var btn := Button.new()
 		btn.name = entry[0]
 		btn.text = entry[1]

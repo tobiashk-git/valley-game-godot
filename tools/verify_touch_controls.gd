@@ -21,6 +21,12 @@ func _initialize() -> void:
 	# a specific path directly.
 	touch_controls.visible = true
 	touch_controls.set_process_input(true)
+	touch_controls.set_process(true)
+
+	# --- Camera zoom-in on touch devices (the "felt zoomed out" fix). ---
+	var cam: Camera2D = overworld.get_node("YSort/Player/Camera2D")
+	await process_frame
+	print("Camera zoomed in once touch controls are active: ", cam.zoom == touch_controls.MOBILE_ZOOM)
 
 	# --- Drag the joystick straight down - should press move_down only. ---
 	var touch_down := InputEventScreenTouch.new()
