@@ -38,6 +38,23 @@ func _ready() -> void:
 	terrain.set_cell(Vector2i(10, 4), 2, Vector2i(0, 0))
 	terrain.set_cell(DOOR_TILE, 1, Vector2i(0, 0)) # door is walkable floor
 
+	# The door is a hole carved into the border wall, with nothing at all
+	# beyond it (no wall, no floor) - without a blocker here the player can
+	# just keep walking straight through into that undefined void, drifting
+	# out of the OutPortal's trigger range with no way back except
+	# backtracking north onto the door tile and pressing E. This invisible
+	# blocker stops them right at the threshold instead, one tile past the
+	# door — they can still stand on the door tile itself (where the portal
+	# is) and press E normally.
+	var door_blocker := StaticBody2D.new()
+	door_blocker.position = _tile_center(DOOR_TILE + Vector2i(0, 1))
+	var blocker_shape := CollisionShape2D.new()
+	var blocker_rect := RectangleShape2D.new()
+	blocker_rect.size = Vector2(32, 32)
+	blocker_shape.shape = blocker_rect
+	door_blocker.add_child(blocker_shape)
+	add_child(door_blocker)
+
 	_spawn_prop(BED_SCENE, Vector2i(2, 4))
 	_spawn_prop(STOVE_SCENE, Vector2i(8, 1))
 	_spawn_prop(TABLE_SCENE, Vector2i(8, 5))
