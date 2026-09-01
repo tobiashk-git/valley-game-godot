@@ -19,11 +19,11 @@ func _spawn_prop(scene: PackedScene, tile_pos: Vector2i) -> void:
 	instance.position = _tile_center(tile_pos)
 	ysort.add_child(instance)
 
-# The house entrance tile itself is solid (the HouseEntrance prop blocks it),
-# so the player is always standing on an *adjacent* tile when "at" the
-# house — size this bigger than one tile so it still triggers.
-func _add_house_entrance(entrance_tile: Vector2i, target_scene: String, target_spawn: Vector2) -> void:
-	_spawn_prop(HOUSE_ENTRANCE_SCENE, entrance_tile)
+# The entrance tile itself is solid (the prop blocks it), so the player is
+# always standing on an *adjacent* tile when "at" the entrance — size this
+# bigger than one tile so it still triggers.
+func _add_entrance(prop_scene: PackedScene, entrance_tile: Vector2i, target_scene: String, target_spawn: Vector2) -> void:
+	_spawn_prop(prop_scene, entrance_tile)
 	var portal: Area2D = PORTAL_SCENE.instantiate()
 	portal.position = _tile_center(entrance_tile)
 	portal.get_node("CollisionShape2D").shape.size = Vector2(56, 56)
@@ -40,21 +40,26 @@ func _ready() -> void:
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE
 		_spawn_prop(scene, entry.pos)
 
-	_spawn_prop(DUNGEON_ENTRANCE_SCENE, World.DUNGEON_ENTRANCE)
+	# Castle has no interior scene yet, so it stays a purely visual landmark
+	# for now (see the roadmap) - no portal, no fast-travel entry.
 	_spawn_prop(CASTLE_ENTRANCE_SCENE, World.CASTLE_ENTRANCE)
 
 	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
 	# target spawn is always the tile just inside the door (one row up).
-	_add_house_entrance(World.HOUSE_ENTRANCE, "res://scenes/House.tscn", Vector2(5 * 32 + 16, 7 * 32 + 16))
-	_add_house_entrance(World.ELDER_HOUSE_ENTRANCE, "res://scenes/ElderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
-	_add_house_entrance(World.TRADER_HOUSE_ENTRANCE, "res://scenes/TraderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
-	_add_house_entrance(World.EMPTY_HOUSE_ENTRANCE, "res://scenes/EmptyHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
+	_add_entrance(HOUSE_ENTRANCE_SCENE, World.HOUSE_ENTRANCE, "res://scenes/House.tscn", Vector2(5 * 32 + 16, 7 * 32 + 16))
+	_add_entrance(HOUSE_ENTRANCE_SCENE, World.ELDER_HOUSE_ENTRANCE, "res://scenes/ElderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
+	_add_entrance(HOUSE_ENTRANCE_SCENE, World.TRADER_HOUSE_ENTRANCE, "res://scenes/TraderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
+	_add_entrance(HOUSE_ENTRANCE_SCENE, World.EMPTY_HOUSE_ENTRANCE, "res://scenes/EmptyHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
+	# Dungeon.tscn regenerates its maze fresh every visit and always spawns
+	# the player at its own entrance, so the target_spawn here is unused.
+	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.DUNGEON_ENTRANCE, "res://scenes/Dungeon.tscn", Vector2.ZERO)
 
-	# Spawn just inside the village's south gate. The 4 gates start solid
-	# (fence/gates tutorial - see quests.gd's meet_villagers), so a spawn
-	# point outside the ring would strand a fresh player with no way in.
-	var spawn_tile: Vector2i = World.VILLAGE_GATES.south + Vector2i(0, -2)
-	player.position = Vector2(spawn_tile.x * 32 + 16, spawn_tile.y * 32 + 16)
+	if not GameState.consume_next_spawn(player):
+		# Spawn just inside the village's south gate. The 4 gates start solid
+		# (fence/gates tutorial - see quests.gd's meet_villagers), so a spawn
+		# point outside the ring would strand a fresh player with no way in.
+		var spawn_tile: Vector2i = World.VILLAGE_GATES.south + Vector2i(0, -2)
+		player.position = Vector2(spawn_tile.x * 32 + 16, spawn_tile.y * 32 + 16)
 
 	var cam: Camera2D = player.get_node("Camera2D")
 	cam.limit_left = 0

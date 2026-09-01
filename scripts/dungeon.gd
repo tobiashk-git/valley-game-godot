@@ -5,6 +5,7 @@ extends Node2D
 # gets erase_cell()'d as the player explores, instead of gating a hand-rolled
 # render loop like the JS canvas version does. The boss stands in
 # gen.boss_room (the deliberately-far 5th room DungeonGen already computes).
+# Entered/left via a Portal pair with the Overworld's dungeon entrance tile.
 
 const WIDTH := 40
 const HEIGHT := 28
@@ -15,6 +16,7 @@ const SRC_FLOOR := 1
 const SRC_FOG := 0 # fog layer has its own single-source TileSet, id 0
 
 const BOSS_SCENE := preload("res://scenes/props/Boss.tscn")
+const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 
 @onready var terrain: TileMapLayer = $TerrainLayer
 @onready var fog: TileMapLayer = $FogLayer
@@ -48,6 +50,19 @@ func _ready() -> void:
 	var boss: StaticBody2D = BOSS_SCENE.instantiate()
 	boss.position = _tile_center(gen.boss_room.center())
 	ysort.add_child(boss)
+
+	# The door tile back to the Overworld — was walkable (DungeonGen paints
+	# it FLOOR) but had no portal at all until now, so there was previously
+	# no way out of the dungeon short of dying in combat.
+	var out_portal: Area2D = PORTAL_SCENE.instantiate()
+	out_portal.position = _tile_center(Vector2i(gen.door_x, gen.door_y))
+	out_portal.target_scene = "res://scenes/Overworld.tscn"
+	out_portal.target_spawn = Vector2(World.DUNGEON_ENTRANCE.x * 32 + 16, (World.DUNGEON_ENTRANCE.y + 1) * 32 + 16)
+	add_child(out_portal)
+
+	# Reaching this scene at all in real play means walking through the
+	# entrance portal on the Overworld first, so this is already "discovered".
+	GameState.discovered_pois["dungeon"] = true
 
 	var cam: Camera2D = player.get_node("Camera2D")
 	cam.limit_left = 0

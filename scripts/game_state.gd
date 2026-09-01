@@ -20,6 +20,12 @@ var boss_defeated: Dictionary = {"dungeon_boss": false}
 # at the exact moment this flips - see world.gd's open_gates().
 var village_gates_open := false
 
+# World Map fast-travel unlocks. House/village start known (the player
+# spawns right there); the dungeon unlocks itself in dungeon.gd's own
+# _ready() - in real play that only ever runs after walking through its
+# entrance portal, so reaching this point already means "discovered".
+var discovered_pois: Dictionary = {"house": true, "village": true, "dungeon": false}
+
 func set_next_spawn(pos: Vector2) -> void:
 	next_spawn_position = pos
 
