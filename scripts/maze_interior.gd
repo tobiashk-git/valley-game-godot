@@ -54,6 +54,19 @@ func _ready() -> void:
 		for x in range(WIDTH):
 			fog.set_cell(Vector2i(x, y), SRC_FOG, Vector2i(0, 0))
 
+	# Every other scene consumes GameState's pending spawn override to place
+	# the player; this one can't use it (the maze regenerates fresh on every
+	# _ready(), so any position an entrance portal set ahead of time can't
+	# possibly line up with THIS run's layout - gen.spawn_tile below is
+	# always authoritative). But leaving it unconsumed left it stuck pending
+	# indefinitely, and a later scene with no override of its own (e.g.
+	# House.tscn on combat defeat) would wrongly pick up this stale,
+	# maze-scale position instead of using its own default - reported as
+	# "respawns outside the house" after dying in a dungeon/castle fight.
+	# Consume it here purely to clear it; the result is immediately
+	# overwritten by the real spawn point below.
+	GameState.consume_next_spawn(player)
+
 	var spawn_tile: Vector2i = gen.spawn_tile
 	player.position = _tile_center(spawn_tile)
 
