@@ -36,7 +36,10 @@ func _slot_text(slot: String) -> String:
 	var item_id: String = Character.equipment[slot]
 	if item_id == "":
 		return "(empty)"
-	return Items.get_item_name(item_id)
+	var stats := Items.describe_stats(item_id)
+	if stats == "":
+		return Items.get_item_name(item_id)
+	return "%s (%s)" % [Items.get_item_name(item_id), stats]
 
 func _process(_delta: float) -> void:
 	if not Combat.in_combat and Input.is_action_just_pressed("toggle_character"):

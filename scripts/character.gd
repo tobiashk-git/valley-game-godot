@@ -20,10 +20,21 @@ var equipment: Dictionary = {
 	"accessory": "",
 }
 
+# Equipping consumes 1 of item_id from the backpack; any item already in
+# that slot is returned to the backpack first (a swap, not a stack).
 func equip(slot: String, item_id: String) -> void:
+	if not Inventory.remove_item(item_id, 1):
+		return
+	var previous: String = equipment[slot]
+	if previous != "":
+		Inventory.add_item(previous, 1)
 	equipment[slot] = item_id
 	changed.emit()
 
 func unequip(slot: String) -> void:
+	var item_id: String = equipment[slot]
+	if item_id == "":
+		return
+	Inventory.add_item(item_id, 1)
 	equipment[slot] = ""
 	changed.emit()

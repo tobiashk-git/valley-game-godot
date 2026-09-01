@@ -1,10 +1,10 @@
 extends Node
-# Autoload — Combat Phase 1+2+3+4: core battle loop, full command set,
-# status effects, and enemy groups. Up to 3 enemies per fight (weighted
-# 60/30/10 solo/duo/trio), click-a-portrait targeting once 2+ are alive
-# (a lone survivor always auto-targets). Port of combat.js up through its
-# "Phase 4". Random encounters trigger only while walking the dungeon
-# interior (see dungeon.gd's tile-change hook).
+# Autoload — Combat Phase 1-5: core battle loop, full command set, status
+# effects, enemy groups, and equipment-driven defense/status-resistance. Up
+# to 3 enemies per fight (weighted 60/30/10 solo/duo/trio), click-a-portrait
+# targeting once 2+ are alive (a lone survivor always auto-targets). Port of
+# combat.js up through its "Phase 5". Random encounters trigger only while
+# walking the dungeon interior (see dungeon.gd's tile-change hook).
 #
 # Status effects are contained to combat: player_status always resets to {}
 # when a fight starts or ends. Enemies can only inflict status on the player
@@ -105,6 +105,21 @@ func _weapon_attack_bonus() -> int:
 	if weapon_id == "":
 		return 0
 	return Items.ITEMS.get(weapon_id, {}).get("attack", 0)
+
+func _player_defense_bonus() -> int:
+	var armor_id: String = Character.equipment.armor
+	if armor_id == "":
+		return 0
+	return Items.ITEMS.get(armor_id, {}).get("defense", 0)
+
+# Generic accessory-bonus reader (parallel to _weapon_attack_bonus): reads
+# the equipped accessory's `bonus` dict by key. Generic-by-field rather than
+# a single hardcoded stat, so future accessories plug in with no code change.
+func _accessory_bonus(field: String) -> float:
+	var accessory_id: String = Character.equipment.accessory
+	if accessory_id == "":
+		return 0.0
+	return Items.ITEMS.get(accessory_id, {}).get("bonus", {}).get(field, 0.0)
 
 func _physical_damage(power: int, defense: int) -> int:
 	var base: float = power - defense
@@ -356,7 +371,7 @@ func _enemy_turn() -> void:
 	var woke_this_round := false
 	for index in alive_enemies():
 		var enemy: Dictionary = current_enemies[index]
-		var dmg := _physical_damage(enemy.attack, 0)
+		var dmg := _physical_damage(enemy.attack, _player_defense_bonus())
 		if player_defending:
 			dmg = max(1, dmg / 2)
 		Character.stats.hp = max(0, Character.stats.hp - dmg)
@@ -368,8 +383,10 @@ func _enemy_turn() -> void:
 			return
 
 		var status_attack: Dictionary = enemy.get("status_attack", {})
-		if not status_attack.is_empty() and randf() < status_attack.chance:
-			_apply_status_to_player(status_attack.status)
+		if not status_attack.is_empty():
+			var chance: float = status_attack.chance * (1.0 - _accessory_bonus("status_resistance"))
+			if randf() < chance:
+				_apply_status_to_player(status_attack.status)
 
 		if was_asleep and not woke_this_round:
 			player_status.erase("sleep")

@@ -50,8 +50,8 @@ func _build_inventory_panel() -> void:
 	var panel := Panel.new()
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	panel.position = Vector2(-260, 12)
-	panel.size = Vector2(240, 220)
+	panel.position = Vector2(-340, 12)
+	panel.size = Vector2(320, 220)
 	layer.add_child(panel)
 	panel.owner = layer
 

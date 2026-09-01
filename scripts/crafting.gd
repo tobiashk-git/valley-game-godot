@@ -1,7 +1,7 @@
 extends Node
 # Autoload — recipe registry + crafting logic, port of crafting.js. Recipes
-# stick to existing materials (wood/stone) since no herb-gathering exists
-# yet; armor/accessory recipes are a later increment once those items exist.
+# stick to existing materials (wood/stone/gold) since no herb-gathering
+# exists yet.
 
 const RECIPES := {
 	"wooden_pickaxe": {
@@ -23,6 +23,16 @@ const RECIPES := {
 		"result": "antidote",
 		"amount": 1,
 		"cost": {"wood": 2, "stone": 2},
+	},
+	"leather_armor": {
+		"result": "leather_armor",
+		"amount": 1,
+		"cost": {"wood": 4, "stone": 4},
+	},
+	"charm_of_warding": {
+		"result": "charm_of_warding",
+		"amount": 1,
+		"cost": {"wood": 2, "stone": 2, "gold": 5},
 	},
 }
 
