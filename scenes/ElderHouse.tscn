@@ -9,12 +9,14 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_d1kqy"]
 size = Vector2(28, 28)
 
-[node name="ElderHouse" type="Node2D" unique_id=1682082521]
+[node name="ElderHouse" type="Node2D" unique_id=1936274699]
 script = ExtResource("1_7rir1")
 has_npc = true
 npc_sprite_path = "res://assets/elder.png"
 npc_name_text = "Village Elder"
 npc_quest_id = "gather_wood"
+npc_id_text = "village_elder"
+npc_intro = "Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler."
 furniture_layout = Array[Dictionary]([{
 "kind": "Bed",
 "x": 2,
@@ -27,22 +29,22 @@ furniture_layout = Array[Dictionary]([{
 window_tiles = Array[Vector2i]([Vector2i(0, 3), Vector2i(0, 4)])
 overworld_return_tile = Vector2i(55, 47)
 
-[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=927169968]
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=754442965]
 tile_set = ExtResource("2_6mxax")
 
-[node name="YSort" type="Node2D" parent="." unique_id=1251365875]
+[node name="YSort" type="Node2D" parent="." unique_id=1852642032]
 y_sort_enabled = true
 
 [node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("3_kic0o")]
 script = ExtResource("4_n8t84")
 
-[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1584620263]
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1678095307]
 zoom = Vector2(2, 2)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
-[node name="OutPortal" type="Area2D" parent="." unique_id=1403286372]
+[node name="OutPortal" type="Area2D" parent="." unique_id=48694106]
 script = ExtResource("5_ieo61")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=78178192]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=2051103981]
 shape = SubResource("RectangleShape2D_d1kqy")

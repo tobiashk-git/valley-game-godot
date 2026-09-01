@@ -33,6 +33,8 @@ func _add_house_entrance(entrance_tile: Vector2i, target_scene: String, target_s
 
 func _ready() -> void:
 	World.build_overworld_map(tilemap)
+	if GameState.village_gates_open:
+		World.open_gates(tilemap)
 
 	for entry in World.scatter_trees_and_rocks(tilemap):
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE
@@ -48,9 +50,10 @@ func _ready() -> void:
 	_add_house_entrance(World.TRADER_HOUSE_ENTRANCE, "res://scenes/TraderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
 	_add_house_entrance(World.EMPTY_HOUSE_ENTRANCE, "res://scenes/EmptyHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
 
-	# Spawn just outside the village's south gate, matching roughly where the
-	# JS game's house/village sits relative to the player's usual start.
-	var spawn_tile: Vector2i = World.VILLAGE_GATES.south + Vector2i(0, 2)
+	# Spawn just inside the village's south gate. The 4 gates start solid
+	# (fence/gates tutorial - see quests.gd's meet_villagers), so a spawn
+	# point outside the ring would strand a fresh player with no way in.
+	var spawn_tile: Vector2i = World.VILLAGE_GATES.south + Vector2i(0, -2)
 	player.position = Vector2(spawn_tile.x * 32 + 16, spawn_tile.y * 32 + 16)
 
 	var cam: Camera2D = player.get_node("Camera2D")

@@ -113,6 +113,13 @@ func build_overworld_map(tilemap: TileMapLayer) -> void:
 	# The altar itself, dead center.
 	tilemap.set_cell(ALTAR_POS, SRC_ALTAR, Vector2i(0, 0))
 
+# Called by overworld.gd after build_overworld_map() when
+# GameState.village_gates_open is true - repaints each gate as walkable
+# village ground, same tile the square inside the fence already uses.
+func open_gates(tilemap: TileMapLayer) -> void:
+	for gate_pos in VILLAGE_GATES.values():
+		tilemap.set_cell(gate_pos, SRC_GRASS, Vector2i(0, 5))
+
 # Port of the two scatterResource() calls in buildOverworld() (game.js) that
 # use isValleyGrass as their placement check — the 4 biome-specific resources
 # (ice/cactus/flower/jewel) are deliberately not included, they never got

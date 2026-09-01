@@ -25,7 +25,20 @@ func _initialize() -> void:
 	for i in range(3):
 		await process_frame
 
-	# --- First contact: offer dialogue with Accept/Not now. ---
+	# --- Dismiss the one-time intro (village fence/gates tutorial) first -
+	# the quest offer is the *second* interaction now, not the first. ---
+	Input.action_press("interact")
+	await process_frame
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	print("Intro shown first: ", dialogue_ui.text_label.text.begins_with("Ah, a new face"))
+	Input.action_press("interact")
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+
+	# --- First contact with the quest offer: Accept/Not now. ---
 	Input.action_press("interact")
 	await process_frame
 	await process_frame
@@ -64,7 +77,14 @@ func _initialize() -> void:
 	Input.action_release("toggle_quests")
 	await process_frame
 	var journal_list: VBoxContainer = quest_panel.get_node("Panel/Margin/VBox/List")
-	print("Journal row: ", journal_list.get_child(0).text)
+	# meet_villagers (the fence/gates tutorial quest) is pre-accepted from
+	# boot too, so it shares the Journal now - find the gather_wood row by
+	# name rather than assuming an index.
+	var wood_quest_row: Label = null
+	for row in journal_list.get_children():
+		if row.text.begins_with("A Village in Need"):
+			wood_quest_row = row
+	print("Journal row: ", wood_quest_row.text)
 	Input.action_press("toggle_quests")
 	await process_frame
 	Input.action_release("toggle_quests")
@@ -124,7 +144,10 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("toggle_quests")
 	await process_frame
-	print("Journal shows Completed: ", journal_list.get_child(0).text.ends_with("Completed"))
+	for row in journal_list.get_children():
+		if row.text.begins_with("A Village in Need"):
+			wood_quest_row = row
+	print("Journal shows Completed: ", wood_quest_row.text.ends_with("Completed"))
 	root.get_texture().get_image().save_png("res://verify_quest_journal_done.png")
 
 	quit()

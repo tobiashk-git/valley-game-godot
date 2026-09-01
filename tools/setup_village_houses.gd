@@ -4,7 +4,7 @@ extends SceneTree
 # loop, where the same buildInterior() call is branched by index).
 # Run via: godot --headless --script res://tools/setup_village_houses.gd
 
-func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "", is_shop: bool = false) -> void:
+func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "", is_shop: bool = false, npc_id: String = "", intro: String = "") -> void:
 	var house_tileset: TileSet = load("res://resources/house_tileset.tres")
 	var player_scene: PackedScene = load("res://scenes/Player.tscn")
 	var player_instance: CharacterBody2D = player_scene.instantiate()
@@ -19,6 +19,8 @@ func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: St
 	root.npc_dialogue = dialogue
 	root.npc_quest_id = quest_id
 	root.npc_is_shop = is_shop
+	root.npc_id_text = npc_id
+	root.npc_intro = intro
 	root.furniture_layout = furniture
 	root.window_tiles = windows
 	root.overworld_return_tile = return_tile
@@ -77,7 +79,8 @@ func _initialize() -> void:
 		],
 		[Vector2i(0, 3), Vector2i(0, 4)],
 		World.ELDER_HOUSE_ENTRANCE,
-		"gather_wood"
+		"gather_wood", false, "village_elder",
+		"Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler."
 	)
 
 	_build(
@@ -90,7 +93,8 @@ func _initialize() -> void:
 		],
 		[Vector2i(8, 1), Vector2i(8, 2)],
 		World.TRADER_HOUSE_ENTRANCE,
-		"", true
+		"", true, "village_trader",
+		"Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell."
 	)
 
 	_build("EmptyHouse", false, "", "", "", [], [], World.EMPTY_HOUSE_ENTRANCE)

@@ -14,6 +14,12 @@ var next_spawn_position: Vector2 = NO_OVERRIDE
 # save/load system exists yet, so this only persists until the game quits).
 var boss_defeated: Dictionary = {"dungeon_boss": false}
 
+# Set once by Quests.mark_npc_met() when the meet_villagers tutorial quest
+# completes. overworld.gd checks this every time it (re)builds the map, since
+# the player is always inside a house interior (never the Overworld itself)
+# at the exact moment this flips - see world.gd's open_gates().
+var village_gates_open := false
+
 func set_next_spawn(pos: Vector2) -> void:
 	next_spawn_position = pos
 

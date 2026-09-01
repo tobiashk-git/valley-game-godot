@@ -24,6 +24,20 @@ func _initialize() -> void:
 	for i in range(3):
 		await process_frame
 
+	# --- Dismiss the one-time intro (village fence/gates tutorial) first -
+	# the shop opens on the *second* interaction now, not the first. ---
+	var dialogue_ui: Node = root.get_node("DialogueUI")
+	Input.action_press("interact")
+	await process_frame
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	print("Intro shown first: ", dialogue_ui.text_label.text.begins_with("Welcome, welcome"))
+	Input.action_press("interact")
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+
 	# --- Walk up + E opens the shop directly (no dialogue step). ---
 	Input.action_press("interact")
 	await process_frame
