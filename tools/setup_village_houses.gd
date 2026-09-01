@@ -4,7 +4,7 @@ extends SceneTree
 # loop, where the same buildInterior() call is branched by index).
 # Run via: godot --headless --script res://tools/setup_village_houses.gd
 
-func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "") -> void:
+func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "", is_shop: bool = false) -> void:
 	var house_tileset: TileSet = load("res://resources/house_tileset.tres")
 	var player_scene: PackedScene = load("res://scenes/Player.tscn")
 	var player_instance: CharacterBody2D = player_scene.instantiate()
@@ -18,6 +18,7 @@ func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: St
 	root.npc_name_text = npc_name
 	root.npc_dialogue = dialogue
 	root.npc_quest_id = quest_id
+	root.npc_is_shop = is_shop
 	root.furniture_layout = furniture
 	root.window_tiles = windows
 	root.overworld_return_tile = return_tile
@@ -81,14 +82,15 @@ func _initialize() -> void:
 
 	_build(
 		"TraderHouse", true, "res://assets/trader.png", "Village Trader",
-		"Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell.",
+		"", # superseded by is_shop - E opens ShopPanel directly, no dialogue step
 		[
 			{"kind": "Table", "x": 2, "y": 2},
 			{"kind": "Barrel", "x": 2, "y": 4},
 			{"kind": "Cabinet", "x": 6, "y": 4},
 		],
 		[Vector2i(8, 1), Vector2i(8, 2)],
-		World.TRADER_HOUSE_ENTRANCE
+		World.TRADER_HOUSE_ENTRANCE,
+		"", true
 	)
 
 	_build("EmptyHouse", false, "", "", "", [], [], World.EMPTY_HOUSE_ENTRANCE)

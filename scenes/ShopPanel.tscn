@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/shop_panel.gd" id="1_0i4jb"]
+
+[node name="ShopPanel" type="CanvasLayer" unique_id=227444146]
+script = ExtResource("1_0i4jb")
+
+[node name="Panel" type="Panel" parent="." unique_id=1766770005]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -190.0
+offset_top = -150.0
+offset_right = 190.0
+offset_bottom = 150.0
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1927631722]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1858275971]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=135178890]
+layout_mode = 2
+theme_type_variation = &"PanelTitle"
+text = "Village Trader"
+
+[node name="GoldLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1497600919]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 13
+
+[node name="Tabs" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1527824649]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BuyTabBtn" type="Button" parent="Panel/Margin/VBox/Tabs" unique_id=1970755352]
+layout_mode = 2
+text = "Buy"
+
+[node name="SellTabBtn" type="Button" parent="Panel/Margin/VBox/Tabs" unique_id=1869915351]
+layout_mode = 2
+text = "Sell"
+
+[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=122420444]
+layout_mode = 2
+theme_override_constants/separation = 6

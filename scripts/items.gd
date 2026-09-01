@@ -1,20 +1,24 @@
 extends Node
-# Autoload — item registry, port of items.js through its Phase 6 (boss
-# drops). Materials/consumables/gear all share one flat dict; gear carries a
-# "slot" field (weapon/armor/accessory) so it can be equipped generically.
+# Autoload — item registry, port of items.js through its shop phase.
+# Materials/consumables/gear all share one flat dict; gear carries a "slot"
+# field (weapon/armor/accessory) so it can be equipped generically, and
+# anything with a "value" field is sellable to the Trader (Shop.SHOP_STOCK
+# curates what's also buyable - see shop.gd).
 
 const ITEMS := {
-	"wood": {"name": "Wood"},
-	"stone": {"name": "Stone"},
+	"wood": {"name": "Wood", "value": 1},
+	"stone": {"name": "Stone", "value": 1},
 	"gold": {"name": "Gold"},
-	"wooden_pickaxe": {"name": "Wooden Pickaxe", "slot": "weapon", "attack": 2},
-	"leather_armor": {"name": "Leather Armor", "slot": "armor", "defense": 3},
-	"charm_of_warding": {"name": "Charm of Warding", "slot": "accessory", "bonus": {"status_resistance": 0.5}},
-	"healing_potion": {"name": "Healing Potion", "effect": {"kind": "heal", "amount": 15}},
-	"mana_potion": {"name": "Mana Potion", "effect": {"kind": "restore_mp", "amount": 8}},
-	"antidote": {"name": "Antidote", "effect": {"kind": "cure", "status": "poison"}},
+	"wooden_pickaxe": {"name": "Wooden Pickaxe", "slot": "weapon", "attack": 2, "value": 15},
+	"leather_armor": {"name": "Leather Armor", "slot": "armor", "defense": 3, "value": 20},
+	"charm_of_warding": {"name": "Charm of Warding", "slot": "accessory", "bonus": {"status_resistance": 0.5}, "value": 25},
+	"healing_potion": {"name": "Healing Potion", "effect": {"kind": "heal", "amount": 15}, "value": 12},
+	"mana_potion": {"name": "Mana Potion", "effect": {"kind": "restore_mp", "amount": 8}, "value": 12},
+	"antidote": {"name": "Antidote", "effect": {"kind": "cure", "status": "poison"}, "value": 10},
 	# Boss-exclusive - no recipe in crafting.gd, only obtainable as a drop.
-	"bone_greatsword": {"name": "Bone Greatsword", "slot": "weapon", "attack": 6},
+	# Sellable for a nice payout (like the plan's boss-drop pricing), but
+	# never appears in Shop.SHOP_STOCK to buy.
+	"bone_greatsword": {"name": "Bone Greatsword", "slot": "weapon", "attack": 6, "value": 100},
 }
 
 func is_usable(item_id: String) -> bool:

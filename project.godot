@@ -36,6 +36,8 @@ Combat="*res://scripts/combat.gd"
 BattlePanel="*res://scenes/BattlePanel.tscn"
 Quests="*res://scripts/quests.gd"
 QuestPanel="*res://scenes/QuestPanel.tscn"
+Shop="*res://scripts/shop.gd"
+ShopPanel="*res://scenes/ShopPanel.tscn"
 
 [gui]
 

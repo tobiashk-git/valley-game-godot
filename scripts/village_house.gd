@@ -15,6 +15,7 @@ const NPC_TILE := Vector2i(4, 2)
 @export var npc_name_text := ""
 @export var npc_dialogue := ""
 @export var npc_quest_id := ""
+@export var npc_is_shop := false
 @export var furniture_layout: Array[Dictionary] = [] # [{"kind": "Bed", "x": 2, "y": 4}, ...]
 @export var window_tiles: Array[Vector2i] = []
 @export var overworld_return_tile := Vector2i.ZERO
@@ -60,6 +61,7 @@ func _ready() -> void:
 		npc.npc_name = npc_name_text
 		npc.dialogue_text = npc_dialogue
 		npc.quest_id = npc_quest_id
+		npc.shop = npc_is_shop
 		ysort.add_child(npc)
 
 	if not GameState.consume_next_spawn(player):

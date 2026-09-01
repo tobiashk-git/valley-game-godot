@@ -9,26 +9,26 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hanrs"]
 size = Vector2(28, 28)
 
-[node name="EmptyHouse" type="Node2D" unique_id=877243293]
+[node name="EmptyHouse" type="Node2D" unique_id=1006515424]
 script = ExtResource("1_smhuy")
 overworld_return_tile = Vector2i(55, 53)
 
-[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=1797134358]
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=1387001911]
 tile_set = ExtResource("2_vanha")
 
-[node name="YSort" type="Node2D" parent="." unique_id=474229342]
+[node name="YSort" type="Node2D" parent="." unique_id=277496415]
 y_sort_enabled = true
 
 [node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("3_0hmpb")]
 script = ExtResource("4_kgc6c")
 
-[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1339027811]
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=377144393]
 zoom = Vector2(2, 2)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
-[node name="OutPortal" type="Area2D" parent="." unique_id=267154969]
+[node name="OutPortal" type="Area2D" parent="." unique_id=1085117363]
 script = ExtResource("5_83lha")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=1842800990]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=1291811076]
 shape = SubResource("RectangleShape2D_hanrs")
