@@ -86,6 +86,13 @@ func _build_battle_panel() -> void:
 	var player_mp_bar := _bar_with_label("PlayerMP", &"MPBar")
 	player_row.add_child(player_mp_bar)
 
+	# Active status badges (poison/paralysis/sleep/confusion/silence) - built
+	# dynamically by battle_panel.gd, empty at build time.
+	var status_row := HBoxContainer.new()
+	status_row.name = "StatusRow"
+	status_row.add_theme_constant_override("separation", 8)
+	player_row.add_child(status_row)
+
 	# Battle log.
 	var log_panel := PanelContainer.new()
 	log_panel.name = "LogPanel"

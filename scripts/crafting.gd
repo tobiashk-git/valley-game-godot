@@ -19,6 +19,11 @@ const RECIPES := {
 		"amount": 1,
 		"cost": {"wood": 1, "stone": 2},
 	},
+	"antidote": {
+		"result": "antidote",
+		"amount": 1,
+		"cost": {"wood": 2, "stone": 2},
+	},
 }
 
 func can_craft(recipe_id: String) -> bool:

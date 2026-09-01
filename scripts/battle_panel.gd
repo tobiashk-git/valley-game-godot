@@ -13,6 +13,7 @@ extends CanvasLayer
 @onready var player_hp_label: Label = $Panel/Margin/VBox/PlayerRow/PlayerHPBar/PlayerHPLabel
 @onready var player_mp_bar: ProgressBar = $Panel/Margin/VBox/PlayerRow/PlayerMPBar
 @onready var player_mp_label: Label = $Panel/Margin/VBox/PlayerRow/PlayerMPBar/PlayerMPLabel
+@onready var status_row: HBoxContainer = $Panel/Margin/VBox/PlayerRow/StatusRow
 @onready var log_label: Label = $Panel/Margin/VBox/LogPanel/LogLabel
 @onready var commands: HBoxContainer = $Panel/Margin/VBox/Commands
 @onready var attack_btn: Button = $Panel/Margin/VBox/Commands/AttackBtn
@@ -51,6 +52,7 @@ func _refresh() -> void:
 	player_mp_bar.max_value = stats.max_mp
 	player_mp_bar.value = stats.mp
 	player_mp_label.text = "MP: %d / %d" % [stats.mp, stats.max_mp]
+	_refresh_status_row()
 
 	var text := ""
 	for i in range(Combat.battle_log.size()):
@@ -60,6 +62,18 @@ func _refresh() -> void:
 	log_label.text = text
 
 	_refresh_submenu()
+
+func _refresh_status_row() -> void:
+	for child in status_row.get_children():
+		child.queue_free()
+	for status_id in Combat.player_status.keys():
+		var def: Dictionary = Statuses.STATUSES[status_id]
+		var turns_left: int = Combat.player_status[status_id].turns_left
+		var badge := Label.new()
+		badge.text = "%s (%d)" % [def.name, turns_left]
+		badge.theme_type_variation = &"DimLabel"
+		badge.add_theme_font_size_override("font_size", 12)
+		status_row.add_child(badge)
 
 func _clear_submenu() -> void:
 	for child in submenu.get_children():
