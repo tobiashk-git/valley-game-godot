@@ -35,6 +35,24 @@ func is_usable(item_id: String) -> bool:
 func is_equippable(item_id: String) -> bool:
 	return ITEMS.has(item_id) and ITEMS[item_id].has("slot")
 
+# A small generated placeholder icon (res://assets/icons/, see
+# tools/setup_item_icons.gd) - not the LPC pixel-art pipeline's polish, just
+# a real, distinct, cross-platform-renderable texture standing in for the
+# emoji that couldn't render on Web export.
+func get_item_icon(item_id: String) -> Texture2D:
+	if ITEMS.has(item_id):
+		return load("res://assets/icons/%s.png" % item_id)
+	return null
+
+# Same idea as get_item_name(), but for RichTextLabel/BBCode contexts
+# (bbcode_enabled = true) that can embed the icon inline within otherwise-
+# plain text - used where a single Label needs to show more than one item's
+# name+icon in the same line (e.g. Crafting's "Axe (3 Wood, 2 Stone)").
+func get_item_name_bbcode(item_id: String) -> String:
+	if ITEMS.has(item_id):
+		return "[img=18x18]res://assets/icons/%s.png[/img] %s" % [item_id, ITEMS[item_id].name]
+	return item_id
+
 func get_item_name(item_id: String) -> String:
 	if ITEMS.has(item_id):
 		var def: Dictionary = ITEMS[item_id]

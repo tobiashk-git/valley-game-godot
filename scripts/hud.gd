@@ -20,9 +20,12 @@ func _ready() -> void:
 	_refresh()
 
 func _refresh() -> void:
-	wood_label.text = "%s: %d" % [Items.get_item_name("wood"), Inventory.get_count("wood")]
-	stone_label.text = "%s: %d" % [Items.get_item_name("stone"), Inventory.get_count("stone")]
-	gold_label.text = "%s: %d" % [Items.get_item_name("gold"), Inventory.get_count("gold")]
+	# Icon now carries identity (see setup_hud_inventory.gd's WoodIcon etc.),
+	# so the label just needs the count - the old "Wood: 3" text duplicated
+	# what the icon already shows.
+	wood_label.text = str(Inventory.get_count("wood"))
+	stone_label.text = str(Inventory.get_count("stone"))
+	gold_label.text = str(Inventory.get_count("gold"))
 
 func _process(_delta: float) -> void:
 	var current: Node = get_tree().current_scene

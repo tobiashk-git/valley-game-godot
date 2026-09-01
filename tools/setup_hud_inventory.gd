@@ -30,7 +30,19 @@ func _build_hud() -> void:
 	margin.add_child(hbox)
 	hbox.owner = layer
 
-	for label_name in ["WoodLabel", "StoneLabel", "GoldLabel"]:
+	for entry in [["wood", "WoodLabel"], ["stone", "StoneLabel"], ["gold", "GoldLabel"]]:
+		var item_id: String = entry[0]
+		var label_name: String = entry[1]
+
+		var icon := TextureRect.new()
+		icon.name = label_name.replace("Label", "Icon")
+		icon.texture = load("res://assets/icons/%s.png" % item_id)
+		icon.custom_minimum_size = Vector2(18, 18)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		hbox.add_child(icon)
+		icon.owner = layer
+
 		var label := Label.new()
 		label.name = label_name
 		label.add_theme_font_size_override("font_size", 14)

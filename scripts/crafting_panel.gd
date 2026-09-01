@@ -10,13 +10,13 @@ func _ready() -> void:
 	panel.visible = false
 	Inventory.changed.connect(_refresh)
 
-func _cost_text(cost: Dictionary) -> String:
+func _cost_text_bbcode(cost: Dictionary) -> String:
 	var text := ""
 	var first := true
 	for item_id in cost.keys():
 		if not first:
 			text += ", "
-		text += "%d %s" % [cost[item_id], Items.get_item_name(item_id)]
+		text += "%d %s" % [cost[item_id], Items.get_item_name_bbcode(item_id)]
 		first = false
 	return text
 
@@ -30,10 +30,21 @@ func _refresh() -> void:
 		row.add_theme_constant_override("separation", 12)
 		list.add_child(row)
 
-		var label := Label.new()
-		label.text = "%s (%s)" % [Items.get_item_name(recipe.result), _cost_text(recipe.cost)]
-		label.custom_minimum_size = Vector2(220, 0)
-		label.add_theme_font_size_override("font_size", 14)
+		# RichTextLabel (not Label) so the result's and each cost material's
+		# icon can be embedded inline via BBCode - a single line can name
+		# more than one item ("Axe (3 Wood, 2 Stone)"), which a plain
+		# Label+TextureRect pair can't express for more than one icon.
+		var label := RichTextLabel.new()
+		label.bbcode_enabled = true
+		label.fit_content = true
+		label.scroll_active = false
+		label.text = "%s (%s)" % [Items.get_item_name_bbcode(recipe.result), _cost_text_bbcode(recipe.cost)]
+		# Wider than the old plain-Label version (220) - inline icons eat
+		# horizontal space BBCode text alone didn't need, and were wrapping
+		# every recipe onto 2 lines even though the panel has plenty of
+		# room to spare to the right of these rows.
+		label.custom_minimum_size = Vector2(480, 0)
+		label.add_theme_font_size_override("normal_font_size", 14)
 		row.add_child(label)
 
 		var btn := Button.new()
