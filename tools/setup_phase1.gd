@@ -48,7 +48,18 @@ func _initialize() -> void:
 	root.add_child(tilemap)
 	tilemap.owner = root
 
-	root.add_child(player_instance)
+	# Player and every scattered prop (trees, rocks, entrance markers) are
+	# direct children of this so Godot's y-sort can depth-sort them against
+	# each other (walk in front of a tree from below, behind it from above) —
+	# they need to be siblings under the SAME y-sorted node, not nested in a
+	# further wrapper, or Godot sorts the wrapper as one unit instead.
+	var ysort := Node2D.new()
+	ysort.name = "YSort"
+	ysort.y_sort_enabled = true
+	root.add_child(ysort)
+	ysort.owner = root
+
+	ysort.add_child(player_instance)
 	player_instance.owner = root
 
 	var camera := Camera2D.new()

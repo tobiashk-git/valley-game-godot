@@ -1,9 +1,9 @@
 extends Node
-# Autoload singleton — ports world.js/game.js's world-generation constants and
-# biomeAt(). This increment covers overworld TERRAIN only (biome fill +
-# village square/fence/gates/path/altar) — resource scattering (trees, rocks,
-# ice/cactus/flower/jewel), dungeon/castle/house entrance markers, and
-# interiors are deliberately not ported yet (next increment).
+# Autoload singleton — ports world.js/game.js's world-generation constants,
+# biomeAt(), and (this increment) trees/rocks/entrance-marker placement.
+# Still not ported: the biome-specific resources (ice/cactus/flower/jewel —
+# these never got real sprites in the JS version either, so there's no art
+# to port yet), dungeon/castle interiors, NPCs, and fog-of-war mazes.
 
 const OVERWORLD_WIDTH := 100
 const OVERWORLD_HEIGHT := 100
@@ -26,6 +26,10 @@ var VILLAGE_GATES := {
 	"east": Vector2i(VILLAGE_BOUNDS.x1, WORLD_CENTER_Y),
 	"west": Vector2i(VILLAGE_BOUNDS.x0, WORLD_CENTER_Y),
 }
+
+const DUNGEON_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - 30)
+const CASTLE_ENTRANCE := Vector2i(WORLD_CENTER_X + 35, WORLD_CENTER_Y)
+const HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y - 3)
 
 # TileSet source ids — must match the order sources were added in
 # tools/setup_phase1.gd when the TileSet resource was built.
@@ -102,3 +106,48 @@ func build_overworld_map(tilemap: TileMapLayer) -> void:
 
 	# The altar itself, dead center.
 	tilemap.set_cell(ALTAR_POS, SRC_ALTAR, Vector2i(0, 0))
+
+# Port of the two scatterResource() calls in buildOverworld() (game.js) that
+# use isValleyGrass as their placement check — the 4 biome-specific resources
+# (ice/cactus/flower/jewel) are deliberately not included, they never got
+# real sprites in the JS version either. Returns an Array of
+# {"pos": Vector2i, "scene": "Tree"|"Rock"} — the caller instances the actual
+# prop scenes, this function only decides where.
+func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
+	var occupied := {}
+	# entrance markers are placed separately (not painted onto the tilemap),
+	# so they need to be reserved here the same way the JS version deletes
+	# any resource that landed on a POI after the fact.
+	occupied[DUNGEON_ENTRANCE] = true
+	occupied[CASTLE_ENTRANCE] = true
+	occupied[HOUSE_ENTRANCE] = true
+
+	var result: Array = []
+	result.append_array(_scatter(tilemap, 70, "Tree", occupied))
+	result.append_array(_scatter(tilemap, 40, "Rock", occupied))
+	return result
+
+func _is_in_village(pos: Vector2i) -> bool:
+	return pos.x >= VILLAGE_BOUNDS.x0 and pos.x <= VILLAGE_BOUNDS.x1 and pos.y >= VILLAGE_BOUNDS.y0 and pos.y <= VILLAGE_BOUNDS.y1
+
+func _scatter(tilemap: TileMapLayer, count: int, scene_name: String, occupied: Dictionary) -> Array:
+	var placed: Array = []
+	var attempts := 0
+	var max_attempts := count * 300
+	while placed.size() < count and attempts < max_attempts:
+		attempts += 1
+		var pos := Vector2i(randi_range(0, OVERWORLD_WIDTH - 1), randi_range(0, OVERWORLD_HEIGHT - 1))
+		if occupied.has(pos):
+			continue
+		if biome_at(pos.x, pos.y).zone != Zone.VALLEY:
+			continue
+		# Village-square tiles are also SRC_GRASS (the JS game renders village
+		# ground as plain grass too), so the source-id check below can't tell
+		# them apart on its own — the village needs to stay resource-free.
+		if _is_in_village(pos):
+			continue
+		if tilemap.get_cell_source_id(pos) != SRC_GRASS:
+			continue
+		occupied[pos] = true
+		placed.append({"pos": pos, "scene": scene_name})
+	return placed

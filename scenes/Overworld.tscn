@@ -75,16 +75,19 @@ sources/6 = SubResource("TileSetAtlasSource_ovrfq")
 sources/7 = SubResource("TileSetAtlasSource_0747q")
 sources/8 = SubResource("TileSetAtlasSource_imkcf")
 
-[node name="Overworld" type="Node2D" unique_id=1052639759]
+[node name="Overworld" type="Node2D" unique_id=779871056]
 script = ExtResource("1_ff6um")
 
-[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1567822407]
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1386343180]
 tile_set = SubResource("TileSet_1y5gq")
 
-[node name="Player" type="CharacterBody2D" parent="." unique_id=1494915939 instance=ExtResource("11_2ltwc")]
+[node name="YSort" type="Node2D" parent="." unique_id=449532988]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("11_2ltwc")]
 script = ExtResource("12_pv64x")
 
-[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1774758119]
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1563136406]
 zoom = Vector2(1.5, 1.5)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
