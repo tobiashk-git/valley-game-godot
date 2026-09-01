@@ -79,6 +79,24 @@ func _initialize() -> void:
 	print("Tracker shows 2 entries: ", tracker.vbox.get_child_count() == 2)
 	root.get_texture().get_image().save_png("res://verify_quest_tracker_overlay.png")
 
+	# --- Each entry's own collapse/expand toggle. ---
+	var wood_entry_expanded: Panel = tracker.vbox.get_child(0)
+	print("First entry starts expanded (boxed): ", wood_entry_expanded is Panel)
+	# owned=false - built at runtime with no .owner set, same as everywhere else.
+	var collapse_btn: Button = wood_entry_expanded.find_children("*", "Button", true, false)[0]
+	print("Expanded entry's toggle reads collapse (▾): ", collapse_btn.text == "▾")
+	collapse_btn.pressed.emit()
+	await process_frame
+	var wood_entry_collapsed: Control = tracker.vbox.get_child(0)
+	print("Collapsing drops the box (no Panel, just a margin-wrapped row): ", wood_entry_collapsed is MarginContainer)
+	print("Other entry (Meet the Village) still boxed: ", tracker.vbox.get_child(1) is Panel)
+	var expand_btn: Button = wood_entry_collapsed.get_child(0).get_child(1)
+	print("Collapsed entry's toggle reads expand (▸): ", expand_btn.text == "▸")
+	root.get_texture().get_image().save_png("res://verify_quest_tracker_collapsed.png")
+	expand_btn.pressed.emit()
+	await process_frame
+	print("Expanding restores the box: ", tracker.vbox.get_child(0) is Panel)
+
 	# --- Live status updates without opening the Journal. ---
 	inventory.add_item("wood", 5)
 	await process_frame
