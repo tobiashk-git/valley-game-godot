@@ -25,7 +25,7 @@ func _initialize() -> void:
 	# --- Drag the joystick straight down - should press move_down only. ---
 	var touch_down := InputEventScreenTouch.new()
 	touch_down.index = 0
-	touch_down.position = touch_controls.JOYSTICK_CENTER
+	touch_down.position = touch_controls._joystick_center()
 	touch_down.pressed = true
 	Input.parse_input_event(touch_down)
 	await process_frame
@@ -33,7 +33,7 @@ func _initialize() -> void:
 
 	var drag := InputEventScreenDrag.new()
 	drag.index = 0
-	drag.position = touch_controls.JOYSTICK_CENTER + Vector2(0, 45)
+	drag.position = touch_controls._joystick_center() + Vector2(0, 45)
 	Input.parse_input_event(drag)
 	await process_frame
 	print("move_down pressed after dragging down: ", Input.is_action_pressed("move_down"))
@@ -42,7 +42,7 @@ func _initialize() -> void:
 	# --- Diagonal drag (down-right) - should press both move_down and move_right. ---
 	var drag_diag := InputEventScreenDrag.new()
 	drag_diag.index = 0
-	drag_diag.position = touch_controls.JOYSTICK_CENTER + Vector2(35, 35)
+	drag_diag.position = touch_controls._joystick_center() + Vector2(35, 35)
 	Input.parse_input_event(drag_diag)
 	await process_frame
 	print("Diagonal drag presses both move_down and move_right: ", Input.is_action_pressed("move_down") and Input.is_action_pressed("move_right"))
@@ -50,14 +50,20 @@ func _initialize() -> void:
 	# --- Release - all directions should clear. ---
 	var touch_up := InputEventScreenTouch.new()
 	touch_up.index = 0
-	touch_up.position = touch_controls.JOYSTICK_CENTER + Vector2(35, 35)
+	touch_up.position = touch_controls._joystick_center() + Vector2(35, 35)
 	touch_up.pressed = false
 	Input.parse_input_event(touch_up)
 	await process_frame
 	print("Releasing clears all movement: ", not Input.is_action_pressed("move_down") and not Input.is_action_pressed("move_right"))
 
-	# --- Interact button: press and hold via its own touch point. ---
+	# --- Interact button position tracks the actual viewport (the
+	# window/stretch/aspect="expand" fix) rather than a stale fixed spot. ---
 	var interact_button: TouchScreenButton = touch_controls.get_node("InteractButton")
+	touch_controls._position_interact_button()
+	var expected_pos: Vector2 = root.get_visible_rect().size - touch_controls.INTERACT_MARGIN
+	print("Interact button repositions against the real viewport size: ", interact_button.position == expected_pos)
+
+	# --- Interact button: press and hold via its own touch point. ---
 	var interact_pos: Vector2 = interact_button.position + Vector2(40, 40) # texture is 80x80, roughly centered
 	var touch_interact_down := InputEventScreenTouch.new()
 	touch_interact_down.index = 1

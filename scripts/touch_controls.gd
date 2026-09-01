@@ -8,13 +8,17 @@ extends CanvasLayer
 # input. Only visible/active when a touchscreen is actually present, so
 # desktop play (keyboard, mouse-clickable UI) is completely unaffected.
 
-const JOYSTICK_CENTER := Vector2(80, 520)
 const JOYSTICK_RADIUS := 50.0
 const JOYSTICK_DEADZONE := 10.0
 const JOYSTICK_ANGLE_THRESHOLD := 0.35 # dot-product-ish threshold per axis, allows diagonals
 
 @onready var joystick_base: Control = $JoystickBase
 @onready var joystick_knob: Control = $JoystickBase/Knob
+@onready var interact_button: TouchScreenButton = $InteractButton
+
+# Margin from the true bottom-right corner, matching the builder's original
+# fixed position (680, 470) in the 800x600 base - 800-680=120, 600-470=130.
+const INTERACT_MARGIN := Vector2(120, 130)
 
 var _joystick_touch_index := -1
 var _active_directions: Array[String] = []
@@ -23,11 +27,33 @@ func _ready() -> void:
 	var touch_available := DisplayServer.is_touchscreen_available()
 	visible = touch_available
 	set_process_input(touch_available)
+	if touch_available:
+		_position_interact_button()
+		get_viewport().size_changed.connect(_position_interact_button)
+
+# TouchScreenButton is a Node2D, not a Control - it has no anchor preset to
+# lean on like the joystick's BOTTOM_LEFT-anchored base, so its bottom-right
+# position has to be recomputed by hand against the actual viewport size.
+# Needed because window/stretch/aspect="expand" means that size varies by
+# device (a tall phone shows more world than the base 800x600) and can
+# change again on an orientation flip, hence the size_changed hook too.
+func _position_interact_button() -> void:
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	interact_button.position = viewport_size - INTERACT_MARGIN
+
+# Computed from the base's actual on-screen rect rather than a fixed
+# constant - window/stretch/aspect="expand" means the effective viewport
+# size varies by device (a tall phone shows more world than the base
+# 800x600), and the joystick's BOTTOM_LEFT anchor already tracks that
+# correctly, so touch-position math needs to track it too instead of
+# assuming a stale fixed coordinate.
+func _joystick_center() -> Vector2:
+	return joystick_base.global_position + joystick_base.size / 2.0
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			if _joystick_touch_index == -1 and event.position.distance_to(JOYSTICK_CENTER) <= JOYSTICK_RADIUS * 2.0:
+			if _joystick_touch_index == -1 and event.position.distance_to(_joystick_center()) <= JOYSTICK_RADIUS * 2.0:
 				_joystick_touch_index = event.index
 				_update_joystick(event.position)
 		elif event.index == _joystick_touch_index:
@@ -37,7 +63,7 @@ func _input(event: InputEvent) -> void:
 		_update_joystick(event.position)
 
 func _update_joystick(touch_pos: Vector2) -> void:
-	var delta: Vector2 = touch_pos - JOYSTICK_CENTER
+	var delta: Vector2 = touch_pos - _joystick_center()
 	var dist: float = min(delta.length(), JOYSTICK_RADIUS)
 	var dir: Vector2 = delta.normalized() if delta.length() > 0.0 else Vector2.ZERO
 	joystick_knob.position = dir * dist - joystick_knob.size / 2.0
