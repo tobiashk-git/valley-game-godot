@@ -79,12 +79,14 @@ func _initialize() -> void:
 	var journal_list: VBoxContainer = quest_panel.get_node("Panel/Margin/VBox/List")
 	# meet_villagers (the fence/gates tutorial quest) is pre-accepted from
 	# boot too, so it shares the Journal now - find the gather_wood row by
-	# name rather than assuming an index.
-	var wood_quest_row: Label = null
+	# name rather than assuming an index. Rows are HBoxContainers now (a
+	# status Label plus a Track button), so dig into child 0 for the text.
+	var wood_quest_label: Label = null
 	for row in journal_list.get_children():
-		if row.text.begins_with("A Village in Need"):
-			wood_quest_row = row
-	print("Journal row: ", wood_quest_row.text)
+		var label: Label = row.get_child(0)
+		if label.text.begins_with("A Village in Need"):
+			wood_quest_label = label
+	print("Journal row: ", wood_quest_label.text)
 	Input.action_press("toggle_quests")
 	await process_frame
 	Input.action_release("toggle_quests")
@@ -145,9 +147,10 @@ func _initialize() -> void:
 	Input.action_release("toggle_quests")
 	await process_frame
 	for row in journal_list.get_children():
-		if row.text.begins_with("A Village in Need"):
-			wood_quest_row = row
-	print("Journal shows Completed: ", wood_quest_row.text.ends_with("Completed"))
+		var label: Label = row.get_child(0)
+		if label.text.begins_with("A Village in Need"):
+			wood_quest_label = label
+	print("Journal shows Completed: ", wood_quest_label.text.ends_with("Completed"))
 	root.get_texture().get_image().save_png("res://verify_quest_journal_done.png")
 
 	quit()

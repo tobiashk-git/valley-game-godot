@@ -42,6 +42,7 @@ WorldMap="*res://scripts/world_map.gd"
 WorldMapPanel="*res://scenes/WorldMapPanel.tscn"
 Altar="*res://scripts/altar.gd"
 PanelButtons="*res://scenes/PanelButtons.tscn"
+QuestTracker="*res://scenes/QuestTracker.tscn"
 
 [display]
 

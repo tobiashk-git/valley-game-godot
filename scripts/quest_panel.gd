@@ -1,7 +1,9 @@
 extends CanvasLayer
 # Autoload — toggled with the "toggle_quests" action (Q key). Lists every
 # quest present in Quests.quest_state (not-yet-offered quests don't show)
-# with a live status/progress line - port of quests.js's Journal panel.
+# with a live status/progress line - port of quests.js's Journal panel. Each
+# row also has a Track button pinning it to the always-visible QuestTracker
+# overlay (see quest_tracker.gd), disabled once Quests.MAX_TRACKED is hit.
 
 @onready var panel: Panel = $Panel
 @onready var list: VBoxContainer = $Panel/Margin/VBox/List
@@ -30,10 +32,26 @@ func _refresh() -> void:
 		return
 	for quest_id in Quests.quest_state.keys():
 		var def: Dictionary = Quests.QUEST_DEFS[quest_id]
-		var row := Label.new()
-		row.text = "%s - %s" % [def.name, _status_text(quest_id)]
-		row.add_theme_font_size_override("font_size", 15)
+
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
 		list.add_child(row)
+
+		var label := Label.new()
+		label.text = "%s - %s" % [def.name, _status_text(quest_id)]
+		label.add_theme_font_size_override("font_size", 15)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
+
+		var tracked: bool = Quests.is_tracked(quest_id)
+		var track_btn := Button.new()
+		track_btn.text = "Tracking" if tracked else "Track"
+		track_btn.disabled = not tracked and Quests.tracked_quests.size() >= Quests.MAX_TRACKED
+		track_btn.pressed.connect(_on_track_pressed.bind(quest_id))
+		row.add_child(track_btn)
+
+func _on_track_pressed(quest_id: String) -> void:
+	Quests.toggle_track(quest_id)
 
 func is_open() -> bool:
 	return panel.visible

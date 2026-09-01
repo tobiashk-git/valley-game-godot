@@ -36,6 +36,24 @@ var quest_state: Dictionary = {"meet_villagers": "accepted"}
 # npc_id -> true once that NPC's one-time intro has played (see npc.gd).
 var npcs_met: Dictionary = {}
 
+# Quest ids currently pinned to the always-visible QuestTracker overlay,
+# toggled from the Journal (QuestPanel). Capped at MAX_TRACKED - tracking a
+# 3rd quest is simply refused (the Journal disables that row's Track button
+# at the cap) rather than evicting an existing one, so the player always
+# chooses what gets dropped.
+const MAX_TRACKED := 2
+var tracked_quests: Array[String] = []
+
+func is_tracked(quest_id: String) -> bool:
+	return tracked_quests.has(quest_id)
+
+func toggle_track(quest_id: String) -> void:
+	if tracked_quests.has(quest_id):
+		tracked_quests.erase(quest_id)
+	elif tracked_quests.size() < MAX_TRACKED:
+		tracked_quests.append(quest_id)
+	changed.emit()
+
 func objective_met(quest_id: String) -> bool:
 	var objective: Dictionary = QUEST_DEFS[quest_id].objective
 	if objective.type == "gather":
