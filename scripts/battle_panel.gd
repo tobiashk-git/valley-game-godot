@@ -125,7 +125,9 @@ func _refresh_submenu() -> void:
 	if Combat.active_submenu == "magic":
 		for spell_id in Spells.SPELLS.keys():
 			var spell: Dictionary = Spells.SPELLS[spell_id]
-			var label := "%s %s (%d MP)" % [spell.icon, spell.name, spell.mp_cost]
+			# Same web-export emoji-rendering gap as Items.get_item_name() -
+			# see its comment in items.gd for why.
+			var label: String = "%s (%d MP)" % [spell.name, spell.mp_cost] if OS.has_feature("web") else "%s %s (%d MP)" % [spell.icon, spell.name, spell.mp_cost]
 			_add_submenu_row(label, Character.stats.mp < spell.mp_cost, Combat.cast_spell.bind(spell_id))
 	elif Combat.active_submenu == "item":
 		var usable := false

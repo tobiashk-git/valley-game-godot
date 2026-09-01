@@ -38,6 +38,13 @@ func is_equippable(item_id: String) -> bool:
 func get_item_name(item_id: String) -> String:
 	if ITEMS.has(item_id):
 		var def: Dictionary = ITEMS[item_id]
+		# Web export renders text through Godot's own rasterizer, with no
+		# access to the browser's/OS's color-emoji font the way a desktop
+		# build gets via native font fallback - the icon prefix rendered as
+		# a blank gap on a real phone (name still showed fine, since it's
+		# plain text). Desktop keeps the icon; it's confirmed working there.
+		if OS.has_feature("web"):
+			return def.name
 		return "%s %s" % [def.icon, def.name]
 	return item_id
 

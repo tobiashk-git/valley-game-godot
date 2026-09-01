@@ -15,9 +15,10 @@ const JOYSTICK_ANGLE_THRESHOLD := 0.35 # dot-product-ish threshold per axis, all
 # window/stretch/aspect="keep_width" keeps the horizontal FOV matching
 # desktop exactly, but a portrait phone still shows a lot more world
 # vertically than a 600-tall desktop view - felt "zoomed out" on a real
-# device. A modest zoom-in tightens the view back up on touch devices only;
-# desktop is untouched since Camera2D.zoom is never set there.
-const MOBILE_ZOOM := Vector2(1.4, 1.4)
+# device. Zooming in tightens the view back up on touch devices only;
+# desktop is untouched since Camera2D.zoom is never set there. First pass
+# (1.4x) wasn't enough per real-device feedback - bumped substantially.
+const MOBILE_ZOOM := Vector2(2.2, 2.2)
 
 @onready var joystick_base: Control = $JoystickBase
 @onready var joystick_knob: Control = $JoystickBase/Knob
