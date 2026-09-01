@@ -12,8 +12,10 @@ func _build_crafting_panel() -> void:
 	var panel := Panel.new()
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.position = Vector2(-170, -110)
-	panel.size = Vector2(340, 220)
+	# Tall enough for all 6 current recipes without clipping the last row -
+	# was 220 (sized for fewer recipes), which cut off Charm of Warding.
+	panel.position = Vector2(-170, -140)
+	panel.size = Vector2(340, 280)
 	layer.add_child(panel)
 	panel.owner = layer
 
