@@ -1,0 +1,140 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/character_panel.gd" id="1_11nhv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ne6hi"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.08, 0.07, 0.06, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.55, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uvshh"]
+bg_color = Color(0.2, 0.05, 0.05, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aq6m7"]
+bg_color = Color(0.75, 0.15, 0.15, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0iodd"]
+bg_color = Color(0.05, 0.1, 0.2, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v8qq2"]
+bg_color = Color(0.15, 0.35, 0.75, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="CharacterPanel" type="CanvasLayer" unique_id=1468737610]
+script = ExtResource("1_11nhv")
+
+[node name="Panel" type="Panel" parent="." unique_id=288153603]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -130.0
+offset_top = -110.0
+offset_right = 130.0
+offset_bottom = 110.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_ne6hi")
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=752602197]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=149057886]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=389111178]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.9, 0.75, 0.35, 1)
+text = "Character"
+
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=726746088]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_uvshh")
+theme_override_styles/fill = SubResource("StyleBoxFlat_aq6m7")
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/HPBar" unique_id=26442261]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=1395934023]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_0iodd")
+theme_override_styles/fill = SubResource("StyleBoxFlat_v8qq2")
+show_percentage = false
+
+[node name="MPLabel" type="Label" parent="Panel/Margin/VBox/MPBar" unique_id=1544312582]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatsRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1111663481]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="StrengthLabel" type="Label" parent="Panel/Margin/VBox/StatsRow" unique_id=1786376485]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="AgilityLabel" type="Label" parent="Panel/Margin/VBox/StatsRow" unique_id=64873576]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Sep" type="HSeparator" parent="Panel/Margin/VBox" unique_id=486810863]
+layout_mode = 2
+
+[node name="EquipTitle" type="Label" parent="Panel/Margin/VBox" unique_id=1923160513]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.9, 0.75, 0.35, 1)
+text = "Equipment"
+
+[node name="WeaponLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1978695135]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="ArmorLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1330034745]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="AccessoryLabel" type="Label" parent="Panel/Margin/VBox" unique_id=482536381]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
