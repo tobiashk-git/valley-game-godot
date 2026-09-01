@@ -1,12 +1,16 @@
 extends CanvasLayer
-# Autoload — a minimal dialogue box (name + text, press E to close). No
-# quest/shop state branching yet (that's a later phase); every NPC just
-# shows its single intro/greeting line each time, matching how the JS
-# game's first NPC pass worked before quests existed.
+# Autoload — a dialogue box (name + text, press E to close). Plain greetings
+# pass no actions and behave exactly as before; a quest offer/turn-in passes
+# 1+ {"label": String, "callback": Callable} actions, which replace the
+# "press E to close" hint with clickable buttons - same dynamic-row pattern
+# as battle_panel.gd's submenu. E still closes either way (equivalent to
+# picking no action), so it's never a dead end.
 
 @onready var panel: Panel = $Panel
 @onready var name_label: Label = $Panel/Margin/VBox/NameLabel
 @onready var text_label: Label = $Panel/Margin/VBox/TextLabel
+@onready var hint_label: Label = $Panel/Margin/VBox/HintLabel
+@onready var actions_row: HBoxContainer = $Panel/Margin/VBox/ActionsRow
 
 var _ignore_close_this_frame := false
 
@@ -20,11 +24,26 @@ func _ready() -> void:
 func is_open() -> bool:
 	return panel.visible
 
-func show_dialogue(npc_name: String, text: String) -> void:
+func show_dialogue(npc_name: String, text: String, actions: Array = []) -> void:
 	name_label.text = npc_name
 	text_label.text = text
 	panel.visible = true
 	_ignore_close_this_frame = true
+
+	for child in actions_row.get_children():
+		child.queue_free()
+	hint_label.visible = actions.is_empty()
+	actions_row.visible = not actions.is_empty()
+	for action in actions:
+		var btn := Button.new()
+		btn.text = action.label
+		btn.pressed.connect(_on_action_pressed.bind(action.callback))
+		actions_row.add_child(btn)
+
+func _on_action_pressed(callback: Callable) -> void:
+	hide_dialogue()
+	if callback.is_valid():
+		callback.call()
 
 func hide_dialogue() -> void:
 	panel.visible = false

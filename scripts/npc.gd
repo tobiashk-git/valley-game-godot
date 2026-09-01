@@ -5,6 +5,7 @@ extends StaticBody2D
 @export var sprite_path := ""
 @export var npc_name := ""
 @export var dialogue_text := ""
+@export var quest_id := "" # if set, dialogue routes through Quests.talk_to_giver() instead
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var interact_area: Area2D = $InteractArea
@@ -33,4 +34,7 @@ func _on_body_exited(body: Node2D) -> void:
 
 func _process(_delta: float) -> void:
 	if _player_inside and not Combat.in_combat and not dialogue_ui.is_open() and Input.is_action_just_pressed("interact"):
-		dialogue_ui.show_dialogue(npc_name, dialogue_text)
+		if quest_id != "":
+			get_node("/root/Quests").talk_to_giver(quest_id)
+		else:
+			dialogue_ui.show_dialogue(npc_name, dialogue_text)

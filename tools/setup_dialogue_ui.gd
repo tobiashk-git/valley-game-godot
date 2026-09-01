@@ -54,6 +54,15 @@ func _initialize() -> void:
 	vbox.add_child(hint_label)
 	hint_label.owner = layer
 
+	# Built dynamically by dialogue_ui.gd for quest offer/turn-in choices;
+	# empty and hidden for a plain greeting (HintLabel shows instead).
+	var actions_row := HBoxContainer.new()
+	actions_row.name = "ActionsRow"
+	actions_row.add_theme_constant_override("separation", 8)
+	actions_row.visible = false
+	vbox.add_child(actions_row)
+	actions_row.owner = layer
+
 	var packed := PackedScene.new()
 	packed.pack(layer)
 	var err := ResourceSaver.save(packed, "res://scenes/DialogueUI.tscn")

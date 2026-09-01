@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/dialogue_ui.gd" id="1_0qyo7"]
 
-[node name="DialogueUI" type="CanvasLayer" unique_id=1354584851]
+[node name="DialogueUI" type="CanvasLayer" unique_id=1698241659]
 script = ExtResource("1_0qyo7")
 
-[node name="Panel" type="Panel" parent="." unique_id=1585102322]
+[node name="Panel" type="Panel" parent="." unique_id=337812536]
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -15,28 +15,33 @@ offset_top = -140.0
 offset_right = -40.0
 offset_bottom = -20.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=2082553336]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1391041901]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1973689768]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1634077720]
 layout_mode = 2
 
-[node name="NameLabel" type="Label" parent="Panel/Margin/VBox" unique_id=745575894]
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1138516726]
 layout_mode = 2
 theme_type_variation = &"PanelTitle"
 theme_override_font_sizes/font_size = 20
 
-[node name="TextLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1717175616]
+[node name="TextLabel" type="Label" parent="Panel/Margin/VBox" unique_id=170209139]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 autowrap_mode = 2
 
-[node name="HintLabel" type="Label" parent="Panel/Margin/VBox" unique_id=76622762]
+[node name="HintLabel" type="Label" parent="Panel/Margin/VBox" unique_id=806338092]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 12
 text = "Press E to close"
+
+[node name="ActionsRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=2032307233]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8

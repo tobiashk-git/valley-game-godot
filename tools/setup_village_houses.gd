@@ -4,7 +4,7 @@ extends SceneTree
 # loop, where the same buildInterior() call is branched by index).
 # Run via: godot --headless --script res://tools/setup_village_houses.gd
 
-func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i) -> void:
+func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "") -> void:
 	var house_tileset: TileSet = load("res://resources/house_tileset.tres")
 	var player_scene: PackedScene = load("res://scenes/Player.tscn")
 	var player_instance: CharacterBody2D = player_scene.instantiate()
@@ -17,6 +17,7 @@ func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: St
 	root.npc_sprite_path = sprite_path
 	root.npc_name_text = npc_name
 	root.npc_dialogue = dialogue
+	root.npc_quest_id = quest_id
 	root.furniture_layout = furniture
 	root.window_tiles = windows
 	root.overworld_return_tile = return_tile
@@ -68,13 +69,14 @@ func _initialize() -> void:
 
 	_build(
 		"ElderHouse", true, "res://assets/elder.png", "Village Elder",
-		"Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler.",
+		"", # superseded by npc_quest_id - Quests.gd's dialogue.offer is the elder's first line now
 		[
 			{"kind": "Bed", "x": 2, "y": 4},
 			{"kind": "Bookshelf", "x": 6, "y": 2},
 		],
 		[Vector2i(0, 3), Vector2i(0, 4)],
-		World.ELDER_HOUSE_ENTRANCE
+		World.ELDER_HOUSE_ENTRANCE,
+		"gather_wood"
 	)
 
 	_build(
