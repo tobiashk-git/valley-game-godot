@@ -1,0 +1,48 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/maze_interior.gd" id="1_fu1ew"]
+[ext_resource type="Texture2D" path="res://assets/castle_wall.png" id="2_mdrjy"]
+[ext_resource type="Texture2D" path="res://assets/castle_floor.png" id="3_nu5hd"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="4_l1urk"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="5_gahtc"]
+[ext_resource type="TileSet" path="res://resources/fog_tileset.tres" id="6_8h0up"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rvkp0"]
+texture = ExtResource("2_mdrjy")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_60fd0"]
+texture = ExtResource("3_nu5hd")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_c5dgt"]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_rvkp0")
+sources/1 = SubResource("TileSetAtlasSource_60fd0")
+
+[node name="Castle" type="Node2D" unique_id=9686189]
+script = ExtResource("1_fu1ew")
+boss_id = "castle_boss"
+entrance_tile = Vector2i(85, 50)
+poi_id = "castle"
+
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=712405823]
+tile_set = SubResource("TileSet_c5dgt")
+
+[node name="YSort" type="Node2D" parent="." unique_id=408478624]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("4_l1urk")]
+script = ExtResource("5_gahtc")
+
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=447594816]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="FogLayer" type="TileMapLayer" parent="." unique_id=1974196681]
+tile_set = ExtResource("6_8h0up")

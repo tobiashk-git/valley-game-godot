@@ -1,7 +1,10 @@
 extends SceneTree
-# Builds the dungeon terrain TileSet, the fog TileSet, and Dungeon.tscn
-# (using the shared scripts/maze_interior.gd - see also tools/setup_castle.gd).
-# Run via: godot --headless --script res://tools/setup_dungeon.gd
+# Builds the castle terrain TileSet and Castle.tscn — same shape as
+# tools/setup_dungeon.gd (both scenes share scripts/maze_interior.gd),
+# just pointed at castle wall/floor art and the castle boss/entrance,
+# reusing the already-built fog_tileset.tres as-is (fog needs no
+# location-specific look).
+# Run via: godot --headless --script res://tools/setup_castle.gd
 
 const FULL_TILE_COLLISION: PackedVector2Array = [Vector2(-16, -16), Vector2(16, -16), Vector2(16, 16), Vector2(-16, 16)]
 
@@ -10,10 +13,6 @@ func _add_source(tile_set: TileSet, path: String, id: int, solid: bool = false) 
 	source.texture = load(path)
 	source.texture_region_size = Vector2i(32, 32)
 	source.create_tile(Vector2i(0, 0))
-	# The source must be attached to the TileSet (which already has its
-	# physics layer added) *before* writing collision data into its TileData —
-	# a standalone, not-yet-attached source has no physics-layer context for
-	# add_collision_polygon() to write into, so it silently no-ops.
 	tile_set.add_source(source, id)
 	if solid:
 		var tile_data: TileData = source.get_tile_data(Vector2i(0, 0), 0)
@@ -21,30 +20,27 @@ func _add_source(tile_set: TileSet, path: String, id: int, solid: bool = false) 
 		tile_data.set_collision_polygon_points(0, 0, FULL_TILE_COLLISION)
 
 func _initialize() -> void:
-	print("=== Dungeon setup starting ===")
+	print("=== Castle setup starting ===")
 
 	var terrain_tileset := TileSet.new()
 	terrain_tileset.tile_size = Vector2i(32, 32)
 	terrain_tileset.add_physics_layer()
-	_add_source(terrain_tileset, "res://assets/dungeon_wall.png", 0, true)
-	_add_source(terrain_tileset, "res://assets/dungeon_floor.png", 1, false)
-	ResourceSaver.save(terrain_tileset, "res://resources/dungeon_terrain_tileset.tres")
+	_add_source(terrain_tileset, "res://assets/castle_wall.png", 0, true)
+	_add_source(terrain_tileset, "res://assets/castle_floor.png", 1, false)
+	ResourceSaver.save(terrain_tileset, "res://resources/castle_terrain_tileset.tres")
 
-	var fog_tileset := TileSet.new()
-	fog_tileset.tile_size = Vector2i(32, 32)
-	_add_source(fog_tileset, "res://assets/fog_black.png", 0)
-	ResourceSaver.save(fog_tileset, "res://resources/fog_tileset.tres")
+	var fog_tileset: TileSet = load("res://resources/fog_tileset.tres")
 
 	var player_scene: PackedScene = load("res://scenes/Player.tscn")
 	var player_instance: CharacterBody2D = player_scene.instantiate()
 	player_instance.name = "Player"
 
 	var root := Node2D.new()
-	root.name = "Dungeon"
+	root.name = "Castle"
 	root.set_script(load("res://scripts/maze_interior.gd"))
-	root.boss_id = "dungeon_boss"
-	root.entrance_tile = World.DUNGEON_ENTRANCE
-	root.poi_id = "dungeon"
+	root.boss_id = "castle_boss"
+	root.entrance_tile = World.CASTLE_ENTRANCE
+	root.poi_id = "castle"
 
 	var terrain := TileMapLayer.new()
 	terrain.name = "TerrainLayer"
@@ -79,8 +75,8 @@ func _initialize() -> void:
 
 	var packed := PackedScene.new()
 	packed.pack(root)
-	var err := ResourceSaver.save(packed, "res://scenes/Dungeon.tscn")
-	print("Dungeon.tscn saved: ", err)
+	var err := ResourceSaver.save(packed, "res://scenes/Castle.tscn")
+	print("Castle.tscn saved: ", err)
 
-	print("=== Dungeon setup complete ===")
+	print("=== Castle setup complete ===")
 	quit()

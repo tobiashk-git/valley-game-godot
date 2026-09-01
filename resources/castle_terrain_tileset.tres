@@ -1,0 +1,21 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/castle_wall.png" id="1_hsthy"]
+[ext_resource type="Texture2D" path="res://assets/castle_floor.png" id="2_0xhx7"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rvkp0"]
+texture = ExtResource("1_hsthy")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_60fd0"]
+texture = ExtResource("2_0xhx7")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_rvkp0")
+sources/1 = SubResource("TileSetAtlasSource_60fd0")

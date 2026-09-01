@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/dungeon.gd" id="1_gajge"]
+[ext_resource type="Script" path="res://scripts/maze_interior.gd" id="1_gajge"]
 [ext_resource type="Texture2D" path="res://assets/dungeon_wall.png" id="2_18g1q"]
 [ext_resource type="Texture2D" path="res://assets/dungeon_floor.png" id="3_ykok4"]
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="4_kco37"]
@@ -33,22 +33,23 @@ texture_region_size = Vector2i(32, 32)
 tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_trxbk")
 
-[node name="Dungeon" type="Node2D" unique_id=430934058]
+[node name="Dungeon" type="Node2D" unique_id=924366774]
 script = ExtResource("1_gajge")
+entrance_tile = Vector2i(50, 20)
 
-[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=697915292]
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=256313754]
 tile_set = SubResource("TileSet_lwrqk")
 
-[node name="YSort" type="Node2D" parent="." unique_id=1639668563]
+[node name="YSort" type="Node2D" parent="." unique_id=1824114215]
 y_sort_enabled = true
 
 [node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("4_kco37")]
 script = ExtResource("5_dj1ww")
 
-[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=898920871]
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1028551245]
 zoom = Vector2(1.5, 1.5)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
-[node name="FogLayer" type="TileMapLayer" parent="." unique_id=1355760540]
+[node name="FogLayer" type="TileMapLayer" parent="." unique_id=155609915]
 tile_set = SubResource("TileSet_5bk5s")

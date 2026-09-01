@@ -1,6 +1,6 @@
 extends Node
-# Autoload — enemy definitions, port of enemies.js through its Phase 6
-# (bosses). BOSSES is a deliberately separate dict from ENEMIES (mirrors the
+# Autoload — enemy definitions, port of enemies.js through its boss-battle
+# phase. BOSSES is a deliberately separate dict from ENEMIES (mirrors the
 # JS reference) so pick_random_id()/Combat's group-picker — which only ever
 # read ENEMIES — can never accidentally roll a boss into a random encounter.
 
@@ -36,12 +36,10 @@ func pick_random_id() -> String:
 	var keys := ENEMIES.keys()
 	return keys[randi() % keys.size()]
 
-# One boss per location; this port only has the Dungeon interior built out,
-# so there's just the one entry for now (Castle would get its own if/when
-# that interior gets built). Reuses the Skeleton sprite with a purple tint
-# (both battle_panel.gd and tools/setup_boss.gd apply this same tint - kept
-# as a plain literal in both rather than adding a shared-constant indirection
-# for one color) rather than sourcing new boss-specific art.
+# One boss per location. Both reuse an existing enemy sprite with a tint
+# (both battle_panel.gd and tools/setup_boss.gd apply the same per-boss tint
+# - kept as plain literals in both rather than adding a shared-constant
+# indirection for two colors) rather than sourcing new boss-specific art.
 const BOSSES := {
 	"dungeon_boss": {
 		"name": "Bone Lord", "sprite": "res://assets/enemies/skeleton.png",
@@ -49,5 +47,12 @@ const BOSSES := {
 		"max_hp": 60, "attack": 8, "defense": 3, "gold_min": 40, "gold_max": 60,
 		"status_attack": {"status": "paralysis", "chance": 0.2},
 		"drop_item_id": "bone_greatsword",
+	},
+	"castle_boss": {
+		"name": "Royal Wraith", "sprite": "res://assets/enemies/ghost.png",
+		"tint": Color(0.85, 0.7, 0.25, 1.0),
+		"max_hp": 80, "attack": 9, "defense": 4, "gold_min": 60, "gold_max": 90,
+		"status_attack": {"status": "silence", "chance": 0.25},
+		"drop_item_id": "royal_plate",
 	},
 }

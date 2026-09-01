@@ -1,11 +1,17 @@
 extends Node2D
-# Fog-of-war dungeon interior. Port of buildDungeonMaze()'s layout generation
-# (see dungeon_gen.gd) plus the JS game's revealTilesAround()/isRevealed()
-# fog system, using a second TileMapLayer filled with an opaque tile that
-# gets erase_cell()'d as the player explores, instead of gating a hand-rolled
-# render loop like the JS canvas version does. The boss stands in
-# gen.boss_room (the deliberately-far 5th room DungeonGen already computes).
-# Entered/left via a Portal pair with the Overworld's dungeon entrance tile.
+# Generic fog-of-war maze interior — Dungeon.tscn and Castle.tscn both use
+# this script (configured per-scene via these exports, same shared-script-
+# via-exports pattern as village_house.gd) rather than duplicating it, since
+# the only real differences between them are the wall/floor art (set on the
+# TileMapLayer's TileSet resource in each scene, not here), which boss
+# stands in the maze, and which Overworld entrance tile leads back out.
+# Port of buildDungeonMaze()'s layout generation (see dungeon_gen.gd) plus
+# the JS game's revealTilesAround()/isRevealed() fog system, using a second
+# TileMapLayer filled with an opaque tile that gets erase_cell()'d as the
+# player explores, instead of gating a hand-rolled render loop like the JS
+# canvas version does. The boss stands in gen.boss_room (the deliberately-far
+# 5th room DungeonGen already computes). Entered/left via a Portal pair with
+# the Overworld's entrance tile.
 
 const WIDTH := 40
 const HEIGHT := 28
@@ -17,6 +23,10 @@ const SRC_FOG := 0 # fog layer has its own single-source TileSet, id 0
 
 const BOSS_SCENE := preload("res://scenes/props/Boss.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
+
+@export var boss_id := "dungeon_boss"
+@export var entrance_tile := Vector2i.ZERO # World.DUNGEON_ENTRANCE / World.CASTLE_ENTRANCE
+@export var poi_id := "dungeon" # GameState.discovered_pois key
 
 @onready var terrain: TileMapLayer = $TerrainLayer
 @onready var fog: TileMapLayer = $FogLayer
@@ -49,21 +59,19 @@ func _ready() -> void:
 
 	var boss: StaticBody2D = BOSS_SCENE.instantiate()
 	boss.position = _tile_center(gen.boss_room.center())
+	boss.boss_id = boss_id
 	ysort.add_child(boss)
 
-	# The door tile back to the Overworld — was walkable (DungeonGen paints
-	# it FLOOR) but had no portal at all until now, so there was previously
-	# no way out of the dungeon short of dying in combat.
+	# The door tile back to the Overworld.
 	var out_portal: Area2D = PORTAL_SCENE.instantiate()
 	out_portal.position = _tile_center(Vector2i(gen.door_x, gen.door_y))
 	out_portal.target_scene = "res://scenes/Overworld.tscn"
-	out_portal.target_spawn = Vector2(World.DUNGEON_ENTRANCE.x * 32 + 16, (World.DUNGEON_ENTRANCE.y + 1) * 32 + 16)
+	out_portal.target_spawn = Vector2(entrance_tile.x * 32 + 16, (entrance_tile.y + 1) * 32 + 16)
 	add_child(out_portal)
 
-	# Same door-tile issue as house.gd/village_house.gd's fix: the door sits
-	# on the very last painted row (HEIGHT-1) with nothing at all beyond it,
-	# so without a blocker the player could walk straight through and off
-	# into undefined space past the map's edge.
+	# The door sits on the very last painted row (HEIGHT-1) with nothing at
+	# all beyond it, so without a blocker the player could walk straight
+	# through and off into undefined space past the map's edge.
 	var door_blocker := StaticBody2D.new()
 	door_blocker.position = _tile_center(Vector2i(gen.door_x, gen.door_y + 1))
 	var blocker_shape := CollisionShape2D.new()
@@ -75,7 +83,7 @@ func _ready() -> void:
 
 	# Reaching this scene at all in real play means walking through the
 	# entrance portal on the Overworld first, so this is already "discovered".
-	GameState.discovered_pois["dungeon"] = true
+	GameState.discovered_pois[poi_id] = true
 
 	var cam: Camera2D = player.get_node("Camera2D")
 	cam.limit_left = 0

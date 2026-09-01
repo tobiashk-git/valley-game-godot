@@ -19,6 +19,7 @@ const ITEMS := {
 	# Sellable for a nice payout (like the plan's boss-drop pricing), but
 	# never appears in Shop.SHOP_STOCK to buy.
 	"bone_greatsword": {"name": "Bone Greatsword", "slot": "weapon", "attack": 6, "value": 100},
+	"royal_plate": {"name": "Royal Plate", "slot": "armor", "defense": 8, "value": 130},
 }
 
 func is_usable(item_id: String) -> bool:

@@ -13,11 +13,13 @@ const POI_NAMES := {
 	"house": "Your House",
 	"village": "Village",
 	"dungeon": "Dungeon",
+	"castle": "Castle",
 }
 
 const LOCATION_NAMES := {
 	"Overworld": "the Valley",
 	"Dungeon": "the Dungeon",
+	"Castle": "the Castle",
 	"House": "your House",
 	"ElderHouse": "the Elder's House",
 	"TraderHouse": "the Trader's House",
@@ -35,6 +37,8 @@ func poi_target(poi_id: String) -> Vector2:
 			return Vector2(t.x * 32 + 16, t.y * 32 + 16)
 		"dungeon":
 			return Vector2(World.DUNGEON_ENTRANCE.x * 32 + 16, (World.DUNGEON_ENTRANCE.y + 1) * 32 + 16)
+		"castle":
+			return Vector2(World.CASTLE_ENTRANCE.x * 32 + 16, (World.CASTLE_ENTRANCE.y + 1) * 32 + 16)
 		_:
 			return Vector2.ZERO
 

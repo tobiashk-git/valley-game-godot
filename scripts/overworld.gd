@@ -68,19 +68,17 @@ func _ready() -> void:
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE
 		_spawn_prop(scene, entry.pos)
 
-	# Castle has no interior scene yet, so it stays a purely visual landmark
-	# for now (see the roadmap) - no portal, no fast-travel entry.
-	_spawn_prop(CASTLE_ENTRANCE_SCENE, World.CASTLE_ENTRANCE)
-
 	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
 	# target spawn is always the tile just inside the door (one row up).
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.HOUSE_ENTRANCE, "res://scenes/House.tscn", Vector2(5 * 32 + 16, 7 * 32 + 16))
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.ELDER_HOUSE_ENTRANCE, "res://scenes/ElderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.TRADER_HOUSE_ENTRANCE, "res://scenes/TraderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.EMPTY_HOUSE_ENTRANCE, "res://scenes/EmptyHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
-	# Dungeon.tscn regenerates its maze fresh every visit and always spawns
-	# the player at its own entrance, so the target_spawn here is unused.
+	# Dungeon.tscn/Castle.tscn both regenerate their maze fresh every visit
+	# and always spawn the player at their own entrance, so the
+	# target_spawn passed here is unused.
 	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.DUNGEON_ENTRANCE, "res://scenes/Dungeon.tscn", Vector2.ZERO)
+	_add_entrance(CASTLE_ENTRANCE_SCENE, World.CASTLE_ENTRANCE, "res://scenes/Castle.tscn", Vector2.ZERO)
 
 	if not GameState.consume_next_spawn(player):
 		# Spawn just inside the village's south gate. The 4 gates start solid
