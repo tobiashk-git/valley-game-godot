@@ -28,6 +28,6 @@ func _on_body_exited(body: Node2D) -> void:
 			prompt_label.visible = false
 
 func _process(_delta: float) -> void:
-	if _player_inside and Input.is_action_just_pressed("interact"):
+	if _player_inside and not Combat.in_combat and Input.is_action_just_pressed("interact"):
 		GameState.set_next_spawn(target_spawn)
 		get_tree().change_scene_to_file(target_scene)

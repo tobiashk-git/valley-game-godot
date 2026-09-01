@@ -7,7 +7,7 @@ const ITEMS := {
 	"wood": {"name": "Wood"},
 	"stone": {"name": "Stone"},
 	"gold": {"name": "Gold"},
-	"wooden_pickaxe": {"name": "Wooden Pickaxe"},
+	"wooden_pickaxe": {"name": "Wooden Pickaxe", "attack": 2},
 }
 
 func get_item_name(item_id: String) -> String:

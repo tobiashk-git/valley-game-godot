@@ -10,6 +10,12 @@ func _ready() -> void:
 	add_to_group("player")
 
 func _physics_process(_delta: float) -> void:
+	if Combat.in_combat:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		sprite.play(facing + "_idle")
+		return
+
 	var input_vector := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = input_vector * SPEED
 	move_and_slide()

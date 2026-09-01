@@ -29,6 +29,9 @@ Storage="*res://scripts/storage.gd"
 StoragePanel="*res://scenes/StoragePanel.tscn"
 Crafting="*res://scripts/crafting.gd"
 CraftingPanel="*res://scenes/CraftingPanel.tscn"
+Enemies="*res://scripts/enemies.gd"
+Combat="*res://scripts/combat.gd"
+BattlePanel="*res://scenes/BattlePanel.tscn"
 
 [gui]
 

@@ -39,7 +39,7 @@ func _slot_text(slot: String) -> String:
 	return Items.get_item_name(item_id)
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed("toggle_character"):
+	if not Combat.in_combat and Input.is_action_just_pressed("toggle_character"):
 		panel.visible = not panel.visible
 		if panel.visible:
 			_refresh()

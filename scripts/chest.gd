@@ -22,5 +22,5 @@ func _on_body_exited(body: Node2D) -> void:
 		_player_inside = false
 
 func _process(_delta: float) -> void:
-	if _player_inside and not storage_panel.is_open() and Input.is_action_just_pressed("interact"):
+	if _player_inside and not Combat.in_combat and not storage_panel.is_open() and Input.is_action_just_pressed("interact"):
 		storage_panel.open_storage(storage_id)

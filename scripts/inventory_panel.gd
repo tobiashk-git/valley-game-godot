@@ -26,7 +26,7 @@ func _refresh() -> void:
 		list.add_child(row)
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed("toggle_inventory"):
+	if not Combat.in_combat and Input.is_action_just_pressed("toggle_inventory"):
 		panel.visible = not panel.visible
 		if panel.visible:
 			_refresh()

@@ -57,6 +57,7 @@ func _process(_delta: float) -> void:
 	if current_tile != _last_revealed_tile:
 		_last_revealed_tile = current_tile
 		_reveal_around(current_tile)
+		Combat.check_random_encounter()
 
 func _reveal_around(center: Vector2i) -> void:
 	for dy in range(-FOG_REVEAL_RADIUS, FOG_REVEAL_RADIUS + 1):

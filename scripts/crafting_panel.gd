@@ -47,7 +47,7 @@ func _on_craft(recipe_id: String) -> void:
 	_refresh()
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed("toggle_crafting"):
+	if not Combat.in_combat and Input.is_action_just_pressed("toggle_crafting"):
 		panel.visible = not panel.visible
 		if panel.visible:
 			_refresh()
