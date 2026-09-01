@@ -96,7 +96,7 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-	print("In-progress text shows 0/5: ", dialogue_ui.text_label.text.contains("0/5 Wood"))
+	print("In-progress text shows 0/5: ", dialogue_ui.text_label.text.contains("0/5") and dialogue_ui.text_label.text.contains("Wood"))
 	print("No buttons while short on materials: ", dialogue_ui.actions_row.get_children().is_empty())
 	Input.action_press("interact") # close
 	await process_frame

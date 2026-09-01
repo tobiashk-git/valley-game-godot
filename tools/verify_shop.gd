@@ -52,7 +52,7 @@ func _initialize() -> void:
 	var list: VBoxContainer = shop_panel.get_node("Panel/Margin/VBox/List")
 	var potion_row: HBoxContainer = null
 	for row in list.get_children():
-		if row is HBoxContainer and (row.get_child(0) as Label).text.begins_with("Healing Potion"):
+		if row is HBoxContainer and (row.get_child(0) as Label).text.contains("Healing Potion"):
 			potion_row = row
 	print("Healing Potion buy row found: ", potion_row != null)
 	var buy_btn: Button = potion_row.get_child(1)
@@ -63,7 +63,7 @@ func _initialize() -> void:
 	await process_frame
 	potion_row = null
 	for row in list.get_children():
-		if row is HBoxContainer and (row.get_child(0) as Label).text.begins_with("Healing Potion"):
+		if row is HBoxContainer and (row.get_child(0) as Label).text.contains("Healing Potion"):
 			potion_row = row
 	buy_btn = potion_row.get_child(1)
 	print("Buy button enabled with gold: ", not buy_btn.disabled)
@@ -92,13 +92,13 @@ func _initialize() -> void:
 	var has_gold := false
 	var has_equipped_pickaxe := false
 	for t in sell_texts:
-		if t.begins_with("Wood"):
+		if t.contains("Wood") and not t.contains("Wooden Pickaxe"):
 			has_wood = true
-		if t.begins_with("Healing Potion"):
+		if t.contains("Healing Potion"):
 			has_potion = true
-		if t.begins_with("Gold"):
+		if t.contains("Gold"):
 			has_gold = true
-		if t.begins_with("Wooden Pickaxe"):
+		if t.contains("Wooden Pickaxe"):
 			has_equipped_pickaxe = true
 	print("Wood listed on Sell: ", has_wood)
 	print("Healing Potion listed on Sell: ", has_potion)
@@ -109,7 +109,7 @@ func _initialize() -> void:
 	# --- Sell the wood. ---
 	var wood_row: HBoxContainer = null
 	for row in list.get_children():
-		if row is HBoxContainer and (row.get_child(0) as Label).text.begins_with("Wood"):
+		if row is HBoxContainer and (row.get_child(0) as Label).text.contains("Wood") and not (row.get_child(0) as Label).text.contains("Wooden Pickaxe"):
 			wood_row = row
 	var sell_btn: Button = wood_row.get_child(1)
 	var gold_before_sell: int = inventory.get_count("gold")

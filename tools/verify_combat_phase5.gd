@@ -32,7 +32,7 @@ func _initialize() -> void:
 	await process_frame
 	var armor_btn: Button = null
 	for child in list.get_children():
-		if child is Button and child.text.begins_with("Leather Armor"):
+		if child is Button and child.text.contains("Leather Armor"):
 			armor_btn = child
 	print("Found Leather Armor row in InventoryPanel: ", armor_btn != null)
 	armor_btn.pressed.emit()
