@@ -31,6 +31,12 @@ const DUNGEON_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - 30)
 const CASTLE_ENTRANCE := Vector2i(WORLD_CENTER_X + 35, WORLD_CENTER_Y)
 const HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y - 3)
 
+# Elder (NE), Trader (SW), and the still-empty 3rd house (SE) — same corners
+# as VILLAGE_HOUSE_POSITIONS in game.js.
+const ELDER_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y - 3)
+const TRADER_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y + 3)
+const EMPTY_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y + 3)
+
 # TileSet source ids — must match the order sources were added in
 # tools/setup_phase1.gd when the TileSet resource was built.
 const SRC_GRASS := 0

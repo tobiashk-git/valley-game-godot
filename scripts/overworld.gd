@@ -19,6 +19,18 @@ func _spawn_prop(scene: PackedScene, tile_pos: Vector2i) -> void:
 	instance.position = _tile_center(tile_pos)
 	ysort.add_child(instance)
 
+# The house entrance tile itself is solid (the HouseEntrance prop blocks it),
+# so the player is always standing on an *adjacent* tile when "at" the
+# house — size this bigger than one tile so it still triggers.
+func _add_house_entrance(entrance_tile: Vector2i, target_scene: String, target_spawn: Vector2) -> void:
+	_spawn_prop(HOUSE_ENTRANCE_SCENE, entrance_tile)
+	var portal: Area2D = PORTAL_SCENE.instantiate()
+	portal.position = _tile_center(entrance_tile)
+	portal.get_node("CollisionShape2D").shape.size = Vector2(56, 56)
+	portal.target_scene = target_scene
+	portal.target_spawn = target_spawn
+	add_child(portal)
+
 func _ready() -> void:
 	World.build_overworld_map(tilemap)
 
@@ -26,19 +38,15 @@ func _ready() -> void:
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE
 		_spawn_prop(scene, entry.pos)
 
-	_spawn_prop(HOUSE_ENTRANCE_SCENE, World.HOUSE_ENTRANCE)
 	_spawn_prop(DUNGEON_ENTRANCE_SCENE, World.DUNGEON_ENTRANCE)
 	_spawn_prop(CASTLE_ENTRANCE_SCENE, World.CASTLE_ENTRANCE)
 
-	# The house entrance tile itself is solid (the HouseEntrance prop above
-	# blocks it), so the player is always standing on an *adjacent* tile when
-	# "at" the house — size this bigger than one tile so it still triggers.
-	var house_portal: Area2D = PORTAL_SCENE.instantiate()
-	house_portal.position = _tile_center(World.HOUSE_ENTRANCE)
-	house_portal.get_node("CollisionShape2D").shape.size = Vector2(56, 56)
-	house_portal.target_scene = "res://scenes/House.tscn"
-	house_portal.target_spawn = Vector2(5 * 32 + 16, 7 * 32 + 16) # House.tscn's DOOR_TILE + (0,-1)
-	add_child(house_portal)
+	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
+	# target spawn is always the tile just inside the door (one row up).
+	_add_house_entrance(World.HOUSE_ENTRANCE, "res://scenes/House.tscn", Vector2(5 * 32 + 16, 7 * 32 + 16))
+	_add_house_entrance(World.ELDER_HOUSE_ENTRANCE, "res://scenes/ElderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
+	_add_house_entrance(World.TRADER_HOUSE_ENTRANCE, "res://scenes/TraderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
+	_add_house_entrance(World.EMPTY_HOUSE_ENTRANCE, "res://scenes/EmptyHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
 
 	# Spawn just outside the village's south gate, matching roughly where the
 	# JS game's house/village sits relative to the player's usual start.

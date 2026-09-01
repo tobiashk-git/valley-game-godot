@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/village_house.gd" id="1_smhuy"]
+[ext_resource type="TileSet" path="res://resources/house_tileset.tres" id="2_vanha"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="3_0hmpb"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="4_kgc6c"]
+[ext_resource type="Script" path="res://scripts/portal.gd" id="5_83lha"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hanrs"]
+size = Vector2(28, 28)
+
+[node name="EmptyHouse" type="Node2D" unique_id=149038300]
+script = ExtResource("1_smhuy")
+overworld_return_tile = Vector2i(55, 53)
+
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=881111101]
+tile_set = ExtResource("2_vanha")
+
+[node name="YSort" type="Node2D" parent="." unique_id=1913220202]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("3_0hmpb")]
+script = ExtResource("4_kgc6c")
+
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1081175169]
+zoom = Vector2(2, 2)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="OutPortal" type="Area2D" parent="." unique_id=55187203]
+script = ExtResource("5_83lha")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=1186968598]
+shape = SubResource("RectangleShape2D_hanrs")

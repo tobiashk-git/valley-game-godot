@@ -1,0 +1,95 @@
+extends SceneTree
+# Builds ElderHouse.tscn, TraderHouse.tscn, EmptyHouse.tscn — all sharing
+# village_house.gd, configured per-house (matching world.js's villageHouses
+# loop, where the same buildInterior() call is branched by index).
+# Run via: godot --headless --script res://tools/setup_village_houses.gd
+
+func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i) -> void:
+	var house_tileset: TileSet = load("res://resources/house_tileset.tres")
+	var player_scene: PackedScene = load("res://scenes/Player.tscn")
+	var player_instance: CharacterBody2D = player_scene.instantiate()
+	player_instance.name = "Player"
+
+	var root := Node2D.new()
+	root.name = scene_name
+	root.set_script(load("res://scripts/village_house.gd"))
+	root.has_npc = has_npc
+	root.npc_sprite_path = sprite_path
+	root.npc_name_text = npc_name
+	root.npc_dialogue = dialogue
+	root.furniture_layout = furniture
+	root.window_tiles = windows
+	root.overworld_return_tile = return_tile
+
+	var terrain := TileMapLayer.new()
+	terrain.name = "TerrainLayer"
+	terrain.tile_set = house_tileset
+	root.add_child(terrain)
+	terrain.owner = root
+
+	var ysort := Node2D.new()
+	ysort.name = "YSort"
+	ysort.y_sort_enabled = true
+	root.add_child(ysort)
+	ysort.owner = root
+
+	ysort.add_child(player_instance)
+	player_instance.owner = root
+
+	var camera := Camera2D.new()
+	camera.name = "Camera2D"
+	camera.zoom = Vector2(2.0, 2.0)
+	camera.position_smoothing_enabled = true
+	camera.position_smoothing_speed = 8.0
+	player_instance.add_child(camera)
+	camera.owner = root
+
+	var out_portal := Area2D.new()
+	out_portal.name = "OutPortal"
+	out_portal.set_script(load("res://scripts/portal.gd"))
+	root.add_child(out_portal)
+	out_portal.owner = root
+
+	var portal_shape := CollisionShape2D.new()
+	portal_shape.name = "CollisionShape2D"
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(28, 28)
+	portal_shape.shape = rect
+	out_portal.add_child(portal_shape)
+	portal_shape.owner = root
+
+	var packed := PackedScene.new()
+	packed.pack(root)
+	var err := ResourceSaver.save(packed, "res://scenes/%s.tscn" % scene_name)
+	print(scene_name, ".tscn saved: ", err)
+
+func _initialize() -> void:
+	print("=== Village houses setup starting ===")
+
+	_build(
+		"ElderHouse", true, "res://assets/elder.png", "Village Elder",
+		"Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler.",
+		[
+			{"kind": "Bed", "x": 2, "y": 4},
+			{"kind": "Bookshelf", "x": 6, "y": 2},
+		],
+		[Vector2i(0, 3), Vector2i(0, 4)],
+		World.ELDER_HOUSE_ENTRANCE
+	)
+
+	_build(
+		"TraderHouse", true, "res://assets/trader.png", "Village Trader",
+		"Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell.",
+		[
+			{"kind": "Table", "x": 2, "y": 2},
+			{"kind": "Barrel", "x": 2, "y": 4},
+			{"kind": "Cabinet", "x": 6, "y": 4},
+		],
+		[Vector2i(8, 1), Vector2i(8, 2)],
+		World.TRADER_HOUSE_ENTRANCE
+	)
+
+	_build("EmptyHouse", false, "", "", "", [], [], World.EMPTY_HOUSE_ENTRANCE)
+
+	print("=== Village houses setup complete ===")
+	quit()

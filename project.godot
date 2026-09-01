@@ -18,6 +18,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 World="*res://scripts/world.gd"
 GameState="*res://scripts/game_state.gd"
+DialogueUI="*res://scenes/DialogueUI.tscn"
 
 [display]
 

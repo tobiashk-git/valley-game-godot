@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/npc.gd" id="1_7gg87"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o7p7j"]
+size = Vector2(28, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3st4a"]
+size = Vector2(48, 48)
+
+[node name="NPC" type="StaticBody2D" unique_id=77474952]
+script = ExtResource("1_7gg87")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=796601104]
+offset = Vector2(0, -16)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=140743092]
+shape = SubResource("RectangleShape2D_o7p7j")
+
+[node name="InteractArea" type="Area2D" parent="." unique_id=1572951217]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractArea" unique_id=419752194]
+shape = SubResource("RectangleShape2D_3st4a")
