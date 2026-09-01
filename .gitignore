@@ -1,3 +1,8 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Stray .import cache files the exporter drops into the Web build output
+# (docs/) when it re-scans its own icon PNGs - not needed to serve the
+# build, only docs/index.html/js/wasm/pck/png themselves are.
+docs/*.import
