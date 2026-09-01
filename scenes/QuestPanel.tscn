@@ -2,34 +2,34 @@
 
 [ext_resource type="Script" path="res://scripts/quest_panel.gd" id="1_d2gg0"]
 
-[node name="QuestPanel" type="CanvasLayer" unique_id=947156739]
+[node name="QuestPanel" type="CanvasLayer" unique_id=1026583665]
 script = ExtResource("1_d2gg0")
 
-[node name="Panel" type="Panel" parent="." unique_id=143687887]
+[node name="Panel" type="Panel" parent="." unique_id=2064429364]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -110.0
-offset_right = 160.0
-offset_bottom = 110.0
+offset_left = -360.0
+offset_top = -240.0
+offset_right = 360.0
+offset_bottom = 260.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=19390624]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=668891156]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1669386474]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1217386337]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=873111494]
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=1467766005]
 layout_mode = 2
 theme_type_variation = &"PanelTitle"
 text = "Journal"
 
-[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=314416340]
+[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1935738924]
 layout_mode = 2
 theme_override_constants/separation = 6

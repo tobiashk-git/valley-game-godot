@@ -12,10 +12,13 @@ func _build_crafting_panel() -> void:
 	var panel := Panel.new()
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	# Tall enough for all 6 current recipes without clipping the last row -
-	# was 220 (sized for fewer recipes), which cut off Charm of Warding.
-	panel.position = Vector2(-170, -140)
-	panel.size = Vector2(340, 280)
+	# Near-fullscreen (720x500 of the 800x600 viewport) - this is a key
+	# interaction area (managing gear/crafting/etc.), not a small corner
+	# popup. Top margin (60px vs. 40 on the other 3 sides) clears the
+	# always-visible PanelButtons toolbar row (y 12-52) so it never overlaps
+	# panel content and stays clickable to switch/close panels.
+	panel.position = Vector2(-360, -240)
+	panel.size = Vector2(720, 500)
 	layer.add_child(panel)
 	panel.owner = layer
 

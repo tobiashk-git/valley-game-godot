@@ -12,8 +12,13 @@ func _build_character_panel() -> void:
 	var panel := Panel.new()
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.position = Vector2(-130, -110)
-	panel.size = Vector2(260, 220)
+	# Near-fullscreen (720x500 of the 800x600 viewport) - this is a key
+	# interaction area (managing gear/crafting/etc.), not a small corner
+	# popup. Top margin (60px vs. 40 on the other 3 sides) clears the
+	# always-visible PanelButtons toolbar row (y 12-52) so it never overlaps
+	# panel content and stays clickable to switch/close panels.
+	panel.position = Vector2(-360, -240)
+	panel.size = Vector2(720, 500)
 	layer.add_child(panel)
 	panel.owner = layer
 

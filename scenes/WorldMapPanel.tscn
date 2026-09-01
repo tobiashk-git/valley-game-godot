@@ -2,39 +2,39 @@
 
 [ext_resource type="Script" path="res://scripts/world_map_panel.gd" id="1_2r4ht"]
 
-[node name="WorldMapPanel" type="CanvasLayer" unique_id=1946447051]
+[node name="WorldMapPanel" type="CanvasLayer" unique_id=1281894524]
 script = ExtResource("1_2r4ht")
 
-[node name="Panel" type="Panel" parent="." unique_id=361310065]
+[node name="Panel" type="Panel" parent="." unique_id=669320302]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -170.0
-offset_top = -120.0
-offset_right = 170.0
-offset_bottom = 120.0
+offset_left = -360.0
+offset_top = -240.0
+offset_right = 360.0
+offset_bottom = 260.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=445783969]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=908208070]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1490046040]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=161326659]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=490745343]
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=1545647513]
 layout_mode = 2
 theme_type_variation = &"PanelTitle"
 text = "World Map"
 
-[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1639832722]
+[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox" unique_id=923100635]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 13
 
-[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1911327794]
+[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=396233134]
 layout_mode = 2
 theme_override_constants/separation = 6

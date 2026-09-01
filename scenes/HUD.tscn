@@ -2,37 +2,37 @@
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_qpvh6"]
 
-[node name="HUD" type="CanvasLayer" unique_id=706504489]
+[node name="HUD" type="CanvasLayer" unique_id=1830821126]
 script = ExtResource("1_qpvh6")
 
-[node name="Panel" type="Panel" parent="." unique_id=1440976316]
+[node name="Panel" type="Panel" parent="." unique_id=1821097595]
 offset_left = 12.0
 offset_top = 12.0
 offset_right = 352.0
 offset_bottom = 52.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=849929330]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=2063740183]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="HBox" type="HBoxContainer" parent="Panel/Margin" unique_id=1182947116]
+[node name="HBox" type="HBoxContainer" parent="Panel/Margin" unique_id=1325608324]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="WoodLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1940167588]
+[node name="WoodLabel" type="Label" parent="Panel/Margin/HBox" unique_id=453469133]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 
-[node name="StoneLabel" type="Label" parent="Panel/Margin/HBox" unique_id=421609903]
+[node name="StoneLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1300082038]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 
-[node name="GoldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=315467857]
+[node name="GoldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=68801401]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 
-[node name="WorldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1749834418]
+[node name="WorldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1588800894]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 14
