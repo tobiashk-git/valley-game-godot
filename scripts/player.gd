@@ -6,6 +6,9 @@ const SPEED := 160.0
 
 var facing := "down"
 
+func _ready() -> void:
+	add_to_group("player")
+
 func _physics_process(_delta: float) -> void:
 	var input_vector := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = input_vector * SPEED

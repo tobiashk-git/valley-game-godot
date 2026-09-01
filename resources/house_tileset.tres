@@ -1,0 +1,29 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/house_wall.png" id="1_kurc6"]
+[ext_resource type="Texture2D" path="res://assets/house_floor.png" id="2_5kbam"]
+[ext_resource type="Texture2D" path="res://assets/window.png" id="3_6hhmj"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3s3t4"]
+texture = ExtResource("1_kurc6")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vqlxd"]
+texture = ExtResource("2_5kbam")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j2bcy"]
+texture = ExtResource("3_6hhmj")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_3s3t4")
+sources/1 = SubResource("TileSetAtlasSource_vqlxd")
+sources/2 = SubResource("TileSetAtlasSource_j2bcy")

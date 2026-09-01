@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/furniture/bed.png" id="1_4qh0t"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s2y8q"]
+size = Vector2(28, 28)
+
+[node name="Bed" type="StaticBody2D" unique_id=1157764044]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1316869583]
+texture = ExtResource("1_4qh0t")
+offset = Vector2(0, -48)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2130211282]
+shape = SubResource("RectangleShape2D_s2y8q")

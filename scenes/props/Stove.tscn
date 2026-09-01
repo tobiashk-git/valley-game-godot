@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/furniture/stove.png" id="1_an0m7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lqi5h"]
+size = Vector2(28, 28)
+
+[node name="Stove" type="StaticBody2D" unique_id=986916031]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1765448234]
+texture = ExtResource("1_an0m7")
+offset = Vector2(0, -2)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1395837210]
+shape = SubResource("RectangleShape2D_lqi5h")
