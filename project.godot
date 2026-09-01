@@ -25,6 +25,8 @@ HUD="*res://scenes/HUD.tscn"
 InventoryPanel="*res://scenes/InventoryPanel.tscn"
 Character="*res://scripts/character.gd"
 CharacterPanel="*res://scenes/CharacterPanel.tscn"
+Storage="*res://scripts/storage.gd"
+StoragePanel="*res://scenes/StoragePanel.tscn"
 
 [display]
 

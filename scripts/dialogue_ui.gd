@@ -12,6 +12,10 @@ var _ignore_close_this_frame := false
 
 func _ready() -> void:
 	panel.visible = false
+	# Process after interactables (npc.gd etc, default priority 0) so a
+	# close-press is seen by them as "still open" this frame and they don't
+	# immediately reopen what this same press just closed.
+	process_priority = 10
 
 func is_open() -> bool:
 	return panel.visible

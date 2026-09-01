@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/storage_panel.gd" id="1_0wa10"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lbq4g"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.08, 0.07, 0.06, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.55, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="StoragePanel" type="CanvasLayer" unique_id=81907393]
+script = ExtResource("1_0wa10")
+
+[node name="Panel" type="Panel" parent="." unique_id=913061635]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -140.0
+offset_right = 200.0
+offset_bottom = 140.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_lbq4g")
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=316624960]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="HBox" type="HBoxContainer" parent="Panel/Margin" unique_id=196497133]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ChestColumn" type="VBoxContainer" parent="Panel/Margin/HBox" unique_id=363573852]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+
+[node name="ChestTitle" type="Label" parent="Panel/Margin/HBox/ChestColumn" unique_id=734411187]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.9, 0.75, 0.35, 1)
+text = "Chest"
+
+[node name="ChestList" type="VBoxContainer" parent="Panel/Margin/HBox/ChestColumn" unique_id=2012068219]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BackpackColumn" type="VBoxContainer" parent="Panel/Margin/HBox" unique_id=1325536316]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+
+[node name="BackpackTitle" type="Label" parent="Panel/Margin/HBox/BackpackColumn" unique_id=802032761]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.9, 0.75, 0.35, 1)
+text = "Backpack"
+
+[node name="BackpackList" type="VBoxContainer" parent="Panel/Margin/HBox/BackpackColumn" unique_id=1942913462]
+layout_mode = 2
+theme_override_constants/separation = 4
