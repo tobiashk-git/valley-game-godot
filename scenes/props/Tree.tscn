@@ -1,16 +1,27 @@
 [gd_scene format=3]
 
-[ext_resource type="Texture2D" path="res://assets/tree.png" id="1_v66lu"]
+[ext_resource type="Script" path="res://scripts/gatherable.gd" id="1_qt0gd"]
+[ext_resource type="Texture2D" path="res://assets/tree.png" id="2_5x4hs"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_qt0gd"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q4d81"]
 size = Vector2(28, 28)
 
-[node name="Tree" type="StaticBody2D" unique_id=2013593749]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_th81n"]
+size = Vector2(48, 48)
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=570726275]
+[node name="Tree" type="StaticBody2D" unique_id=809127880]
+script = ExtResource("1_qt0gd")
+item_id = "wood"
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1856370761]
 scale = Vector2(0.6, 0.6)
-texture = ExtResource("1_v66lu")
+texture = ExtResource("2_5x4hs")
 offset = Vector2(0, -8)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1970530684]
-shape = SubResource("RectangleShape2D_qt0gd")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=248794445]
+shape = SubResource("RectangleShape2D_q4d81")
+
+[node name="InteractArea" type="Area2D" parent="." unique_id=1054015117]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractArea" unique_id=2010048125]
+shape = SubResource("RectangleShape2D_th81n")

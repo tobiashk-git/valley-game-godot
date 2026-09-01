@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_qpvh6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fls4u"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.08, 0.07, 0.06, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.55, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="HUD" type="CanvasLayer" unique_id=1770952967]
+script = ExtResource("1_qpvh6")
+
+[node name="Panel" type="Panel" parent="." unique_id=210671950]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 272.0
+offset_bottom = 52.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_fls4u")
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=491666188]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="HBox" type="HBoxContainer" parent="Panel/Margin" unique_id=1306099819]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="WoodLabel" type="Label" parent="Panel/Margin/HBox" unique_id=138824027]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="StoneLabel" type="Label" parent="Panel/Margin/HBox" unique_id=259155885]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="GoldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1693111829]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
