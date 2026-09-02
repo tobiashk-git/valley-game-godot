@@ -9,6 +9,7 @@ const WATCHTOWER_RUIN_ENTRANCE_SCENE := preload("res://scenes/props/WatchtowerRu
 const DRUID_CIRCLE_ENTRANCE_SCENE := preload("res://scenes/props/DruidCircleEntrance.tscn")
 const VOLCANO_ENTRANCE_SCENE := preload("res://scenes/props/VolcanoEntrance.tscn")
 const SUBMERGED_TEMPLE_ENTRANCE_SCENE := preload("res://scenes/props/SubmergedTempleEntrance.tscn")
+const ANCIENT_BARROW_ENTRANCE_SCENE := preload("res://scenes/props/AncientBarrowEntrance.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
@@ -18,6 +19,7 @@ const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
 @onready var player: CharacterBody2D = $YSort/Player
 
 var _final_boss_entrance_spawned := false
+var _golden_plains_entrance_spawned := false
 var _last_tile := Vector2i(-9999, -9999)
 
 const ZONE_KEYS := {
@@ -57,6 +59,19 @@ func reveal_final_boss_entrance() -> void:
 	_final_boss_entrance_spawned = true
 	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.FINAL_BOSS_ENTRANCE, "res://scenes/FinalBoss.tscn", Vector2.ZERO)
 
+# Same reveal-on-completion pattern as reveal_final_boss_entrance() above -
+# called once from _ready() below if GameState.world_progress already has it
+# revealed. Golden Plains IS the valley (no ford to physically block it), so
+# unlike the other 4 biome interiors, the entrance simply doesn't exist at
+# all until the open_ancient_barrow quest completes - the quest completes
+# while the player is inside TraderHouse.tscn, not this live scene, so there's
+# no need for a direct cross-scene call here.
+func reveal_golden_plains_entrance() -> void:
+	if _golden_plains_entrance_spawned:
+		return
+	_golden_plains_entrance_spawned = true
+	_add_entrance(ANCIENT_BARROW_ENTRANCE_SCENE, World.GOLDEN_PLAINS_INTERIOR_ENTRANCE, "res://scenes/GoldenPlainsInterior.tscn", Vector2.ZERO)
+
 func _ready() -> void:
 	World.build_overworld_map(tilemap)
 	World.add_world_boundary(self)
@@ -90,6 +105,8 @@ func _ready() -> void:
 	_add_entrance(SUBMERGED_TEMPLE_ENTRANCE_SCENE, World.GLOOMFEN_INTERIOR_ENTRANCE, "res://scenes/GloomfenInterior.tscn", Vector2.ZERO)
 	if GameState.world_progress.final_boss_revealed:
 		reveal_final_boss_entrance()
+	if GameState.world_progress.golden_plains_revealed:
+		reveal_golden_plains_entrance()
 
 	# The Verdantwood ford-crossing quest giver - unlike the Frostpeak
 	# Ranger (housed in EmptyHouse.tscn, Phase 2's only empty village slot),

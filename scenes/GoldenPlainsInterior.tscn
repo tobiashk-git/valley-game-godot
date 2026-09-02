@@ -1,0 +1,48 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/golden_plains_interior.gd" id="1_pewqs"]
+[ext_resource type="Texture2D" path="res://assets/golden_plains_wall.png" id="2_kvpav"]
+[ext_resource type="Texture2D" path="res://assets/golden_plains_floor.png" id="3_3uhny"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="4_61lae"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="5_q2si4"]
+[ext_resource type="TileSet" path="res://resources/fog_tileset.tres" id="6_yoph4"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_m7sgd"]
+texture = ExtResource("2_kvpav")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pp5py"]
+texture = ExtResource("3_3uhny")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_nx24h"]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_m7sgd")
+sources/1 = SubResource("TileSetAtlasSource_pp5py")
+
+[node name="GoldenPlainsInterior" type="Node2D" unique_id=1668953373]
+script = ExtResource("1_pewqs")
+boss_id = "golden_plains_boss"
+entrance_tile = Vector2i(87, 87)
+poi_id = "golden_plains_interior"
+
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=710265163]
+tile_set = SubResource("TileSet_nx24h")
+
+[node name="YSort" type="Node2D" parent="." unique_id=100869937]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("4_61lae")]
+script = ExtResource("5_q2si4")
+
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1140520113]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="FogLayer" type="TileMapLayer" parent="." unique_id=778264333]
+tile_set = ExtResource("6_yoph4")

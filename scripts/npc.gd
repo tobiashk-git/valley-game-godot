@@ -51,7 +51,15 @@ func _process(_delta: float) -> void:
 			text += " The village gates have opened!"
 		dialogue_ui.show_dialogue(npc_name, text)
 		return
-	if shop:
+	# An NPC can have both shop and quest_id set (Phase 6's Village Trader) -
+	# an active quest (not yet completed) takes priority over the shop so it
+	# can actually be reached, then falls back to the shop once it's done -
+	# equivalent to the old shop-first / quest-only branches below for every
+	# existing NPC that only ever has one of the two set.
+	var quest_active: bool = quest_id != "" and quests.quest_state.get(quest_id, "") != "completed"
+	if quest_active:
+		quests.talk_to_giver(quest_id)
+	elif shop:
 		shop_panel.open()
 	elif quest_id != "":
 		quests.talk_to_giver(quest_id)

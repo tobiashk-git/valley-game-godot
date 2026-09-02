@@ -130,15 +130,18 @@ func _initialize() -> void:
 	Input.action_release("interact")
 	await process_frame
 
-	# --- Second Trader talk: shop opens normally (regression check). ---
+	# --- Second Trader talk: the Trader now also has a quest (Phase 6a's
+	# open_ancient_barrow), and npc.gd gives an active quest priority over the
+	# shop so it's actually reachable - shows the quest offer here, not the
+	# shop (shop-still-works-once-the-quest-completes is covered by
+	# verify_golden_plains_interior.gd instead). ---
 	var shop_panel: Node = root.get_node("ShopPanel")
 	Input.action_press("interact")
 	await process_frame
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-	print("Second Trader talk opens shop (regression check): ", shop_panel.is_open())
-	shop_panel.close()
+	print("Second Trader talk shows the barrow quest offer (not the shop): ", dialogue_ui.text_label.text.begins_with("There's an old barrow") and not shop_panel.is_open())
 
 	root.remove_child(trader_house)
 	trader_house.queue_free()

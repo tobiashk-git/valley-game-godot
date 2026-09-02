@@ -18,6 +18,7 @@ const POI_NAMES := {
 	"verdantwood_interior": "Verdantwood Grove",
 	"badlands_interior": "Emberfall Caldera",
 	"gloomfen_interior": "Sunken Gloomfen Temple",
+	"golden_plains_interior": "The Ancient Barrow",
 }
 
 const LOCATION_NAMES := {
@@ -32,6 +33,7 @@ const LOCATION_NAMES := {
 	"VerdantwoodInterior": "the Verdantwood Grove",
 	"BadlandsInterior": "the Caldera",
 	"GloomfenInterior": "the Sunken Temple",
+	"GoldenPlainsInterior": "the Ancient Barrow",
 }
 
 # Computed lazily (not a const dict) since it reads World.VILLAGE_GATES,
@@ -55,6 +57,8 @@ func poi_target(poi_id: String) -> Vector2:
 			return Vector2(World.BADLANDS_INTERIOR_ENTRANCE.x * 32 + 16, (World.BADLANDS_INTERIOR_ENTRANCE.y + 1) * 32 + 16)
 		"gloomfen_interior":
 			return Vector2(World.GLOOMFEN_INTERIOR_ENTRANCE.x * 32 + 16, (World.GLOOMFEN_INTERIOR_ENTRANCE.y + 1) * 32 + 16)
+		"golden_plains_interior":
+			return Vector2(World.GOLDEN_PLAINS_INTERIOR_ENTRANCE.x * 32 + 16, (World.GOLDEN_PLAINS_INTERIOR_ENTRANCE.y + 1) * 32 + 16)
 		_:
 			return Vector2.ZERO
 

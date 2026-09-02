@@ -15,6 +15,7 @@ has_npc = true
 npc_sprite_path = "res://assets/trader.png"
 npc_name_text = "Village Trader"
 npc_is_shop = true
+npc_quest_id = "open_ancient_barrow"
 npc_id_text = "village_trader"
 npc_intro = "Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell."
 furniture_layout = Array[Dictionary]([{

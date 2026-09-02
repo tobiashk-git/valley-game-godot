@@ -11,6 +11,7 @@ func _initialize() -> void:
 	var inventory: Node = root.get_node("Inventory")
 	var shop: Node = root.get_node("Shop")
 	var shop_panel: Node = root.get_node("ShopPanel")
+	var quests: Node = root.get_node("Quests")
 	var player: CharacterBody2D = trader_house.get_node("YSort/Player")
 
 	var ysort: Node2D = trader_house.get_node("YSort")
@@ -37,6 +38,35 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
+
+	# --- The Trader now also gives the open_ancient_barrow quest (Phase 6a) -
+	# npc.gd gives an active quest priority over the shop, so it must be
+	# completed first before the shop becomes reachable at all, same as a
+	# real player would need to. ---
+	Input.action_press("interact")
+	await process_frame
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	var offer_actions: Array = dialogue_ui.actions_row.get_children()
+	offer_actions[0].pressed.emit() # Accept
+	await process_frame
+	inventory.add_item("stone", 6)
+	Input.action_press("interact")
+	await process_frame
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	var ready_actions: Array = dialogue_ui.actions_row.get_children()
+	ready_actions[0].pressed.emit() # Turn In
+	await process_frame
+	print("Barrow quest completed so the shop becomes reachable: ", quests.quest_state.get("open_ancient_barrow", "") == "completed")
+	# The quest reward (25 gold + 1 healing potion) would otherwise break the
+	# "broke" and "bought exactly 1 potion" assumptions every check below this
+	# point was already written around - reset back to the clean slate the
+	# rest of this test expects.
+	inventory.remove_item("gold", inventory.get_count("gold"))
+	inventory.remove_item("healing_potion", inventory.get_count("healing_potion"))
 
 	# --- Walk up + E opens the shop directly (no dialogue step). ---
 	Input.action_press("interact")

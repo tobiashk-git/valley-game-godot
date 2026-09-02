@@ -76,6 +76,23 @@ const QUEST_DEFS := {
 			"completed": "The boardwalk's holding, thanks to you.",
 		},
 	},
+	# The Golden Plains gating quest - unlike the 4 ford quests above, this
+	# doesn't open a river crossing (Golden Plains IS the valley, no river to
+	# cross). Reuses the Village Trader (previously shop-only) rather than a
+	# new standalone NPC - a lighter ask (6 items vs 8-12) and lighter reward
+	# than the ford quests, matching its "light gate" framing.
+	"open_ancient_barrow": {
+		"giver_name": "Village Trader",
+		"name": "What Lies Beneath",
+		"objective": {"type": "gather", "item_id": "stone", "amount": 6},
+		"reward": {"gold": 25, "item_id": "healing_potion", "item_amount": 1},
+		"dialogue": {
+			"offer": "There's an old barrow at the edge of the valley - sealed for as long as anyone can remember. Bring me 6 Stone to clear the collapsed entrance and I'll show you where it lies.",
+			"in_progress": "Still need more stone to clear the barrow's entrance - what have you got?",
+			"ready": "That's enough. Let me show you where it opens up.",
+			"completed": "The old barrow's open now, thanks to you.",
+		},
+	},
 }
 
 # quest_id -> "accepted" | "completed" (absent = not yet offered).
@@ -208,6 +225,8 @@ func _complete_quest(quest_id: String) -> void:
 		GameState.biome_paths_open.badlands = true
 	elif quest_id == "cross_gloomfen":
 		GameState.biome_paths_open.gloomfen = true
+	elif quest_id == "open_ancient_barrow":
+		GameState.world_progress.golden_plains_revealed = true
 	changed.emit()
 
 # Called by npc.gd the first time (and only the first time) the player

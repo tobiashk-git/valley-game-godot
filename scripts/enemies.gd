@@ -184,6 +184,19 @@ const BOSSES := {
 		"status_attack": {"status": "silence", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
 	},
+	# Golden Plains' own interior boss (Phase 6) - unlike the 4 outer-biome
+	# bosses above, this one is deliberately weak (below even dungeon_boss'
+	# tier): the roadmap frames Golden Plains as low-danger/story-forward, a
+	# "guardian spirit" testing the player rather than threatening them, not
+	# a combat gauntlet. Reuses the Skeleton sprite (already used once for
+	# dungeon_boss, tinted purple there) with a warm gold/tan tint instead.
+	# No magic_crystal drop, same rule as every non-Guardian boss.
+	"golden_plains_boss": {
+		"name": "The Barrow Warden", "sprite": "res://assets/enemies/skeleton.png",
+		"tint": Color(0.8, 0.7, 0.45, 1.0),
+		"max_hp": 40, "attack": 5, "defense": 2, "gold_min": 25, "gold_max": 40,
+		"drop_item_ids": ["healing_potion"],
+	},
 	# The two Guardians' crystals reveal this one's hiding place (see
 	# altar.gd); roughly double their stats, per the plan's own first-pass
 	# tuning note. Reuses the Giant Spider sprite, tinted dark red/black -

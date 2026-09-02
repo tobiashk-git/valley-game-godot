@@ -77,6 +77,13 @@ const GLOOMFEN_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X - 30, WORLD_CENTER_Y
 # ford's direct line, offset so it doesn't block the crossing.
 const MARSH_GUIDE_POS := Vector2i(WORLD_CENTER_X - VALLEY_RADIUS + 5, WORLD_CENTER_Y - 4)
 
+# Golden Plains IS the central Zone.VALLEY (the safe starting zone) - there's
+# no river ring around it, so unlike the 4 outer-biome interior entrances
+# above, this one sits inside VALLEY_RADIUS rather than past it. sqrt(13²+13²)
+# ~= 18.4 < VALLEY_RADIUS (22), clear of VILLAGE_BOUNDS and every other
+# in-valley entrance/landmark.
+const GOLDEN_PLAINS_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X - 13, WORLD_CENTER_Y - 13)
+
 # TileSet source ids — must match the order sources were added in
 # tools/setup_phase1.gd when the TileSet resource was built (0-8), plus 2
 # more added later by tools/setup_biome_revamp.gd (9-10, the river/ford).
@@ -261,6 +268,7 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 	_reserve_entrance_clearance(occupied, DRUID_GLADE_POS)
 	_reserve_entrance_clearance(occupied, PROSPECTOR_CAMP_POS)
 	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS)
+	_reserve_entrance_clearance(occupied, GOLDEN_PLAINS_INTERIOR_ENTRANCE)
 
 	# Was 70/40 - scaled ~2.15x with the valley's new area (radius 15->22,
 	# area grows with radius²) so the enlarged valley doesn't end up feeling
