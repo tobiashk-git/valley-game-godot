@@ -52,6 +52,18 @@ const QUEST_DEFS := {
 			"completed": "The crossing's clear, thanks to you.",
 		},
 	},
+	"cross_badlands": {
+		"giver_name": "Badlands Prospector",
+		"name": "Shoring Up the Crossing",
+		"objective": {"type": "gather", "item_id": "stone", "amount": 12},
+		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
+		"dialogue": {
+			"offer": "The ford into Emberfall's crumbling at the edges - bring me 12 Stone and I'll get it packed solid again.",
+			"in_progress": "Still need more stone for the crossing - what have you got?",
+			"ready": "That'll do it. Should hold against the heat now.",
+			"completed": "Crossing's solid, thanks to you.",
+		},
+	},
 }
 
 # quest_id -> "accepted" | "completed" (absent = not yet offered).
@@ -180,6 +192,8 @@ func _complete_quest(quest_id: String) -> void:
 		GameState.biome_paths_open.frostpeak = true
 	elif quest_id == "cross_verdantwood":
 		GameState.biome_paths_open.verdantwood = true
+	elif quest_id == "cross_badlands":
+		GameState.biome_paths_open.badlands = true
 	changed.emit()
 
 # Called by npc.gd the first time (and only the first time) the player

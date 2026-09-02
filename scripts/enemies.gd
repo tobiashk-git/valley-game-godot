@@ -164,6 +164,16 @@ const BOSSES := {
 		"status_attack": {"status": "sleep", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
 	},
+	# Emberfall Badlands' own interior boss (Phase 4) - same no-magic_crystal
+	# reasoning as frostpeak_boss/verdantwood_boss above. Reuses the Rat
+	# sprite (not yet used for a biome boss), tinted volcanic orange/red.
+	"badlands_boss": {
+		"name": "Cinderjaw", "sprite": "res://assets/enemies/rat.png",
+		"tint": Color(0.75, 0.25, 0.1, 1.0),
+		"max_hp": 78, "attack": 9, "defense": 3, "gold_min": 45, "gold_max": 65,
+		"status_attack": {"status": "poison", "chance": 0.25},
+		"drop_item_ids": ["healing_potion"],
+	},
 	# The two Guardians' crystals reveal this one's hiding place (see
 	# altar.gd); roughly double their stats, per the plan's own first-pass
 	# tuning note. Reuses the Giant Spider sprite, tinted dark red/black -

@@ -64,6 +64,12 @@ const VERDANTWOOD_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X + 30, WORLD_CENTE
 # the crossing - see overworld.gd. Kept here (not a magic number there) so
 # scatter_trees_and_rocks() can reserve clearance around it below.
 const DRUID_GLADE_POS := Vector2i(WORLD_CENTER_X + VALLEY_RADIUS - 5, WORLD_CENTER_Y + 4)
+# Same reasoning as VERDANTWOOD_INTERIOR_ENTRANCE, mirrored onto the south
+# axis for Badlands (dx=0, dy=30 -> abs(dy) >= abs(dx) and dy >= 0 -> Zone.BADLANDS).
+const BADLANDS_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y + 30)
+# Same reasoning as DRUID_GLADE_POS - the Badlands Prospector stands near
+# that ford's direct line, offset so it doesn't block the crossing.
+const PROSPECTOR_CAMP_POS := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y + VALLEY_RADIUS - 5)
 
 # TileSet source ids — must match the order sources were added in
 # tools/setup_phase1.gd when the TileSet resource was built (0-8), plus 2
@@ -247,6 +253,7 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 	_reserve_entrance_clearance(occupied, HOUSE_ENTRANCE)
 	_reserve_entrance_clearance(occupied, FINAL_BOSS_ENTRANCE)
 	_reserve_entrance_clearance(occupied, DRUID_GLADE_POS)
+	_reserve_entrance_clearance(occupied, PROSPECTOR_CAMP_POS)
 
 	# Was 70/40 - scaled ~2.15x with the valley's new area (radius 15->22,
 	# area grows with radius²) so the enlarged valley doesn't end up feeling

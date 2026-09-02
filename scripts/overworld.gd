@@ -7,6 +7,7 @@ const DUNGEON_ENTRANCE_SCENE := preload("res://scenes/props/DungeonEntrance.tscn
 const CASTLE_ENTRANCE_SCENE := preload("res://scenes/props/CastleEntrance.tscn")
 const WATCHTOWER_RUIN_ENTRANCE_SCENE := preload("res://scenes/props/WatchtowerRuinEntrance.tscn")
 const DRUID_CIRCLE_ENTRANCE_SCENE := preload("res://scenes/props/DruidCircleEntrance.tscn")
+const VOLCANO_ENTRANCE_SCENE := preload("res://scenes/props/VolcanoEntrance.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
@@ -84,6 +85,7 @@ func _ready() -> void:
 	# cross_frostpeak quest opens it.
 	_add_entrance(WATCHTOWER_RUIN_ENTRANCE_SCENE, World.FROSTPEAK_INTERIOR_ENTRANCE, "res://scenes/FrostpeakInterior.tscn", Vector2.ZERO)
 	_add_entrance(DRUID_CIRCLE_ENTRANCE_SCENE, World.VERDANTWOOD_INTERIOR_ENTRANCE, "res://scenes/VerdantwoodInterior.tscn", Vector2.ZERO)
+	_add_entrance(VOLCANO_ENTRANCE_SCENE, World.BADLANDS_INTERIOR_ENTRANCE, "res://scenes/BadlandsInterior.tscn", Vector2.ZERO)
 	if GameState.world_progress.final_boss_revealed:
 		reveal_final_boss_entrance()
 
@@ -100,6 +102,17 @@ func _ready() -> void:
 	druid.npc_id = "forest_druid"
 	druid.intro_text = "You've wandered far from the village. Verdantwood lies beyond that ford - if you can call it a ford anymore. The old crossing's overgrown; I could use a hand clearing it."
 	ysort.add_child(druid)
+
+	# The Badlands ford-crossing quest giver - same standalone pattern as the Druid.
+	var prospector: StaticBody2D = NPC_SCENE.instantiate()
+	prospector.position = _tile_center(World.PROSPECTOR_CAMP_POS)
+	prospector.sprite_path = "res://assets/trader.png"
+	prospector.sprite_tint = Color(0.75, 0.45, 0.25, 1.0)
+	prospector.npc_name = "Badlands Prospector"
+	prospector.quest_id = "cross_badlands"
+	prospector.npc_id = "badlands_prospector"
+	prospector.intro_text = "Emberfall's past that ford - if the heat don't get you, the ground giving way underfoot will. I've been meaning to shore up the crossing, just need the stone for it."
+	ysort.add_child(prospector)
 
 	# The altar tile (painted solid by build_overworld_map()) just needs an
 	# interact trigger on top of it - it isn't a separate prop/scene like

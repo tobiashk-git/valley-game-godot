@@ -1,0 +1,35 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/badlands_wall.png" id="1_d8gcl"]
+[ext_resource type="Texture2D" path="res://assets/badlands_floor.png" id="2_mdfw4"]
+[ext_resource type="Texture2D" path="res://assets/badlands_rim.png" id="3_cci2c"]
+[ext_resource type="Texture2D" path="res://assets/badlands_geyser.png" id="4_00bpt"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jyvx6"]
+texture = ExtResource("1_d8gcl")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xj7ea"]
+texture = ExtResource("2_mdfw4")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jawmv"]
+texture = ExtResource("3_cci2c")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_u8j4w"]
+texture = ExtResource("4_00bpt")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_jyvx6")
+sources/1 = SubResource("TileSetAtlasSource_xj7ea")
+sources/2 = SubResource("TileSetAtlasSource_jawmv")
+sources/3 = SubResource("TileSetAtlasSource_u8j4w")

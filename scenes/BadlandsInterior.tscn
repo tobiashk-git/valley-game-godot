@@ -1,0 +1,63 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/badlands_interior.gd" id="1_b8041"]
+[ext_resource type="Texture2D" path="res://assets/badlands_wall.png" id="2_lvs0y"]
+[ext_resource type="Texture2D" path="res://assets/badlands_floor.png" id="3_iqvxy"]
+[ext_resource type="Texture2D" path="res://assets/badlands_rim.png" id="4_li0an"]
+[ext_resource type="Texture2D" path="res://assets/badlands_geyser.png" id="5_ajdkt"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="6_lm78y"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="7_3xbn5"]
+[ext_resource type="TileSet" path="res://resources/fog_tileset.tres" id="8_8d8xl"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jyvx6"]
+texture = ExtResource("2_lvs0y")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xj7ea"]
+texture = ExtResource("3_iqvxy")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jawmv"]
+texture = ExtResource("4_li0an")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_u8j4w"]
+texture = ExtResource("5_ajdkt")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_xx13u"]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_jyvx6")
+sources/1 = SubResource("TileSetAtlasSource_xj7ea")
+sources/2 = SubResource("TileSetAtlasSource_jawmv")
+sources/3 = SubResource("TileSetAtlasSource_u8j4w")
+
+[node name="BadlandsInterior" type="Node2D" unique_id=1038244277]
+script = ExtResource("1_b8041")
+boss_id = "badlands_boss"
+entrance_tile = Vector2i(100, 130)
+poi_id = "badlands_interior"
+encounter_zone = 3
+
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=1461983176]
+tile_set = SubResource("TileSet_xx13u")
+
+[node name="YSort" type="Node2D" parent="." unique_id=1174927190]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("6_lm78y")]
+script = ExtResource("7_3xbn5")
+
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1113588474]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="FogLayer" type="TileMapLayer" parent="." unique_id=1692189800]
+tile_set = ExtResource("8_8d8xl")

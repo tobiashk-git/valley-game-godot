@@ -67,6 +67,7 @@ func _initialize() -> void:
 	_build_drawn_prop("CastleEntrance", "res://scripts/castle_entrance.gd")
 	_build_drawn_prop("WatchtowerRuinEntrance", "res://scripts/watchtower_entrance.gd")
 	_build_drawn_prop("DruidCircleEntrance", "res://scripts/druid_circle_entrance.gd")
+	_build_drawn_prop("VolcanoEntrance", "res://scripts/volcano_entrance.gd")
 
 	print("=== Props setup complete ===")
 	quit()
