@@ -86,9 +86,15 @@ func _ready() -> void:
 	boss.boss_id = boss_id
 	ysort.add_child(boss)
 
-	# The door tile back to the Overworld.
+	# The door tile back to the Overworld. Resized to 56x56, matching every
+	# overworld entrance's own _add_entrance() sizing (Portal.tscn's default
+	# 28x28 is too tight for move_and_slide()'s stopping position after a
+	# long approach walk to reliably land inside - confirmed directly via
+	# tools/verify_boundaries.gd's dungeon-exit check, which failed this way
+	# on 2 separate occasions before this fix).
 	var out_portal: Area2D = PORTAL_SCENE.instantiate()
 	out_portal.position = _tile_center(Vector2i(gen.door_x, gen.door_y))
+	out_portal.get_node("CollisionShape2D").shape.size = Vector2(56, 56)
 	out_portal.target_scene = "res://scenes/Overworld.tscn"
 	out_portal.target_spawn = Vector2(entrance_tile.x * 32 + 16, (entrance_tile.y + 1) * 32 + 16)
 	add_child(out_portal)

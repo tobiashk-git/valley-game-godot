@@ -72,17 +72,38 @@ func reveal_golden_plains_entrance() -> void:
 	_golden_plains_entrance_spawned = true
 	_add_entrance(ANCIENT_BARROW_ENTRANCE_SCENE, World.GOLDEN_PLAINS_INTERIOR_ENTRANCE, "res://scenes/GoldenPlainsInterior.tscn", Vector2.ZERO)
 
-func _ready() -> void:
-	World.build_overworld_map(tilemap)
-	World.add_world_boundary(self)
-	if GameState.village_gates_open:
-		World.open_gates(tilemap)
+# Repaints every ford/seam whose GameState flag is already true - safe to
+# call repeatedly (repainting an already-open tile is a harmless no-op).
+# Called once from _ready() (the state may already be true on a scene
+# reload), and again on every Quests.changed signal (see _ready()'s connect
+# below) - a housed quest-giver (Elder/Trader/Frostpeak Ranger) always
+# reaches this via a fresh _ready() anyway, since turning in their quest and
+# then leaving the house reloads Overworld.tscn - but a STANDALONE NPC
+# (Druid/Prospector/Guide, all 4 wedge-seam NPCs) stands directly in this
+# already-live scene, so completing their quest doesn't reload anything at
+# all. Without this signal connection the ford/seam flag flips correctly but
+# the tile the player is standing right next to stays solid until they
+# happen to leave and re-enter the Overworld some other way (fast travel,
+# a house visit) - reported directly by the user as "the bridge does not
+# appear" after turning in a quest.
+func _repaint_open_paths() -> void:
 	for zone in ZONE_KEYS:
 		if GameState.biome_paths_open[ZONE_KEYS[zone]]:
 			World.open_biome_path(tilemap, zone)
 	for seam_key in GameState.seam_paths_open:
 		if GameState.seam_paths_open[seam_key]:
 			World.open_seam_path(tilemap, seam_key)
+
+func _on_quests_changed() -> void:
+	_repaint_open_paths()
+
+func _ready() -> void:
+	World.build_overworld_map(tilemap)
+	World.add_world_boundary(self)
+	if GameState.village_gates_open:
+		World.open_gates(tilemap)
+	_repaint_open_paths()
+	Quests.changed.connect(_on_quests_changed)
 
 	for entry in World.scatter_trees_and_rocks(tilemap):
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE

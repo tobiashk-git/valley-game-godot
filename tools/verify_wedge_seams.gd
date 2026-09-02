@@ -163,6 +163,15 @@ func _initialize() -> void:
 		await process_frame
 		print("[%s] Quest marked completed: " % seam.key, quests.quest_state.get(seam.quest_id, "") == "completed")
 		print("[%s] Seam flag opened: " % seam.key, game_state.seam_paths_open[seam.key] == true)
+		# Real bug found via a live user report: the flag flipping is not the
+		# same as the ford actually being walkable - overworld.gd only ever
+		# painted it in _ready(), so a standalone NPC's quest (no scene
+		# reload involved) left the tile solid in this SAME live scene until
+		# the player happened to leave and re-enter some other way. Check
+		# the tile right here, in the instance the quest was just turned in
+		# on, not just a freshly-reloaded one below.
+		var terrain_live: TileMapLayer = overworld.get_node("TileMapLayer")
+		print("[%s] Ford walkable LIVE in this same scene, no reload needed: " % seam.key, terrain_live.get_cell_source_id(world.SEAM_FORDS[seam.key]) == world.SRC_FORD)
 
 		root.remove_child(overworld)
 		overworld.queue_free()

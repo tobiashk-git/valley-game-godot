@@ -117,6 +117,15 @@ func _initialize() -> void:
 	print("Potions granted: ", inventory.get_count("healing_potion") == potions_before + 2)
 	print("Quest marked completed: ", quests.quest_state.get("cross_gloomfen", "") == "completed")
 	print("Gloomfen ford flag opened: ", game_state.biome_paths_open.gloomfen == true)
+	# Real bug found via a live user report: the ford flag flipping is not
+	# the same as the ford actually being walkable - overworld.gd only ever
+	# painted it in _ready(), so a standalone NPC's quest (no scene reload
+	# involved, unlike a housed NPC's) left the tile solid in this SAME live
+	# scene until the player happened to leave and re-enter some other way.
+	# Check the tile right here, in the instance the quest was just turned in
+	# on, not just a freshly-reloaded one below.
+	var terrain0: TileMapLayer = overworld.get_node("TileMapLayer")
+	print("Ford walkable LIVE in this same scene, no reload needed: ", terrain0.get_cell_source_id(world.BIOME_FORDS[world.Zone.GLOOMFEN]) == world.SRC_FORD)
 
 	root.remove_child(overworld)
 	overworld.queue_free()
