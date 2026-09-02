@@ -65,11 +65,14 @@ func _initialize() -> void:
 	_build_sprite_prop("HouseEntrance", "res://assets/house.png", 69.0, 123.0, 0.75)
 	_build_drawn_prop("DungeonEntrance", "res://scripts/dungeon_entrance.gd")
 	_build_drawn_prop("CastleEntrance", "res://scripts/castle_entrance.gd")
-	_build_drawn_prop("WatchtowerRuinEntrance", "res://scripts/watchtower_entrance.gd")
-	_build_drawn_prop("DruidCircleEntrance", "res://scripts/druid_circle_entrance.gd")
-	_build_drawn_prop("VolcanoEntrance", "res://scripts/volcano_entrance.gd")
-	_build_drawn_prop("SubmergedTempleEntrance", "res://scripts/submerged_temple_entrance.gd")
-	_build_drawn_prop("AncientBarrowEntrance", "res://scripts/ancient_barrow_entrance.gd")
+	# Phase 7b - real cropped-sprite entrance props (LPC Cavern & Ruin Tiles /
+	# LPC Base Assets, see assets_source/lpc/CREDITS.md), replacing the
+	# hand-drawn _draw() placeholders these 5 used through Phase 6.
+	_build_sprite_prop("WatchtowerRuinEntrance", "res://assets/watchtower_ruin.png", 192.0, 96.0, 0.35)
+	_build_sprite_prop("DruidCircleEntrance", "res://assets/druid_circle.png", 96.0, 64.0, 0.55)
+	_build_sprite_prop("VolcanoEntrance", "res://assets/volcano.png", 192.0, 78.0, 0.4)
+	_build_sprite_prop("SubmergedTempleEntrance", "res://assets/submerged_temple.png", 192.0, 96.0, 0.35)
+	_build_sprite_prop("AncientBarrowEntrance", "res://assets/ancient_barrow.png", 26.0, 61.0, 1.1)
 
 	print("=== Props setup complete ===")
 	quit()

@@ -1,12 +1,16 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/ancient_barrow_entrance.gd" id="1_yqvmg"]
+[ext_resource type="Texture2D" path="res://assets/ancient_barrow.png" id="1_yqvmg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g3i74"]
 size = Vector2(28, 28)
 
-[node name="AncientBarrowEntrance" type="StaticBody2D" unique_id=856184412]
-script = ExtResource("1_yqvmg")
+[node name="AncientBarrowEntrance" type="StaticBody2D" unique_id=1284234315]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=225088642]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=168614834]
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("1_yqvmg")
+offset = Vector2(0, -17.55)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=900073502]
 shape = SubResource("RectangleShape2D_g3i74")

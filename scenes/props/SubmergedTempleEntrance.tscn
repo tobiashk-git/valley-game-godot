@@ -1,12 +1,16 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/submerged_temple_entrance.gd" id="1_plpxl"]
+[ext_resource type="Texture2D" path="res://assets/submerged_temple.png" id="1_plpxl"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_414tl"]
 size = Vector2(28, 28)
 
-[node name="SubmergedTempleEntrance" type="StaticBody2D" unique_id=1122834032]
-script = ExtResource("1_plpxl")
+[node name="SubmergedTempleEntrance" type="StaticBody2D" unique_id=2040597532]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=135478364]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1982338018]
+scale = Vector2(0.35, 0.35)
+texture = ExtResource("1_plpxl")
+offset = Vector2(0, -0.8)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=834156199]
 shape = SubResource("RectangleShape2D_414tl")
