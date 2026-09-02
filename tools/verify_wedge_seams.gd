@@ -23,6 +23,24 @@ func _walk(player: CharacterBody2D, actions: Array, frames: int) -> void:
 		Input.action_release(action)
 	await physics_frame
 
+# scatter_biome_obstacles() has no fixed seed (same as scatter_trees_and_rocks())
+# and can now place a MightyOak directly in a seam-crossing's continue_action
+# path (frostpeak_verdantwood's walk ends up in real Zone.VERDANTWOOD
+# territory) - clear a band along whichever axis stays constant during that
+# walk, same technique as verify_frostpeak_interior.gd's _clear_corridor()/
+# verify_verdantwood_interior.gd's _clear_corridor_row().
+func _clear_seam_corridor(overworld: Node2D, player: CharacterBody2D, continue_action: String) -> void:
+	var ysort: Node2D = overworld.get_node("YSort")
+	var horizontal := continue_action == "move_left" or continue_action == "move_right"
+	for child in ysort.get_children():
+		if child == player or not child is Node2D:
+			continue
+		var delta: float = absf(child.position.y - player.position.y) if horizontal else absf(child.position.x - player.position.x)
+		if delta < 56.0:
+			child.queue_free()
+	await process_frame
+	await process_frame
+
 func _clear_combat(combat: Node) -> void:
 	if combat.in_combat:
 		combat.player_run()
@@ -200,6 +218,7 @@ func _initialize() -> void:
 		for i in range(3):
 			await process_frame
 		await _clear_combat(combat)
+		await _clear_seam_corridor(overworld2, player2, seam.continue_action)
 		# A pure diagonal walk stays exactly on the seam's tie line forever -
 		# biome_at()'s own tie-break always resolves an exact dx==dy tile to
 		# the dy-branch (Frostpeak/Badlands), so it can never reach a

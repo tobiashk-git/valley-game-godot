@@ -73,6 +73,11 @@ func _initialize() -> void:
 	_build_sprite_prop("VolcanoEntrance", "res://assets/volcano.png", 192.0, 78.0, 0.4)
 	_build_sprite_prop("SubmergedTempleEntrance", "res://assets/submerged_temple.png", 192.0, 96.0, 0.35)
 	_build_sprite_prop("AncientBarrowEntrance", "res://assets/ancient_barrow.png", 26.0, 61.0, 1.1)
+	# Outer-biome obstacles (AI-generated, color-keyed + auto-cropped from a
+	# 1024x1024 isolated-object generation) - MightyOak scatters into
+	# Zone.VERDANTWOOD via World.scatter_biome_obstacles(), same single-tile
+	# collision convention as every prop above despite the larger visual size.
+	_build_sprite_prop("MightyOak", "res://assets/mighty_oak.png", 629.0, 598.0, 0.134)
 
 	print("=== Props setup complete ===")
 	quit()

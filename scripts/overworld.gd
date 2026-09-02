@@ -10,6 +10,7 @@ const DRUID_CIRCLE_ENTRANCE_SCENE := preload("res://scenes/props/DruidCircleEntr
 const VOLCANO_ENTRANCE_SCENE := preload("res://scenes/props/VolcanoEntrance.tscn")
 const SUBMERGED_TEMPLE_ENTRANCE_SCENE := preload("res://scenes/props/SubmergedTempleEntrance.tscn")
 const ANCIENT_BARROW_ENTRANCE_SCENE := preload("res://scenes/props/AncientBarrowEntrance.tscn")
+const MIGHTY_OAK_SCENE := preload("res://scenes/props/MightyOak.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
@@ -108,6 +109,9 @@ func _ready() -> void:
 	for entry in World.scatter_trees_and_rocks(tilemap):
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE
 		_spawn_prop(scene, entry.pos)
+
+	for entry in World.scatter_biome_obstacles(tilemap):
+		_spawn_prop(MIGHTY_OAK_SCENE, entry.pos)
 
 	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
 	# target spawn is always the tile just inside the door (one row up).

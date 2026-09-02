@@ -87,9 +87,9 @@ const GOLDEN_PLAINS_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X - 13, WORLD_CEN
 # The 4 wedge-seam crossing NPCs (Phase 6b) - each stands just past its seam,
 # offset from the exact diagonal (abs(dx) == abs(dy)) so biome_at() resolves
 # it unambiguously to one specific adjacent biome, reachable once the player
-# has already crossed that biome's own ford (no scatter-clearance
-# reservation needed - _scatter() only ever places trees/rocks inside
-# Zone.VALLEY, never in the outer biomes these sit in).
+# has already crossed that biome's own ford. Now that scatter_biome_obstacles()
+# scatters MightyOak into Zone.VERDANTWOOD too, RAVINE_RUNNER_POS gets a real
+# clearance reservation there - see scatter_biome_obstacles() below.
 const FROST_TRAILBLAZER_POS := Vector2i(WORLD_CENTER_X + 18, WORLD_CENTER_Y - 22)   # Frostpeak side of the NE seam
 const RAVINE_RUNNER_POS := Vector2i(WORLD_CENTER_X + 22, WORLD_CENTER_Y + 18)       # Verdantwood side of the SE seam (the ravine)
 const BOG_ASH_WANDERER_POS := Vector2i(WORLD_CENTER_X - 18, WORLD_CENTER_Y + 22)    # Badlands side of the SW seam
@@ -328,14 +328,21 @@ func open_gates(tilemap: TileMapLayer) -> void:
 # real sprites in the JS version either. Returns an Array of
 # {"pos": Vector2i, "scene": "Tree"|"Rock"} — the caller instances the actual
 # prop scenes, this function only decides where.
-func _reserve_entrance_clearance(occupied: Dictionary, entrance: Vector2i) -> void:
-	# A 2-tile buffer around the entrance itself, not just its own tile - the
+func _reserve_entrance_clearance(occupied: Dictionary, entrance: Vector2i, radius: int = 2) -> void:
+	# A buffer around the entrance itself, not just its own tile - the
 	# tests (and real players) approach these in a straight line, and with
 	# the biome revamp's doubled scatter density plus entrances now sitting
 	# inside VALLEY_RADIUS instead of past it, a tree could otherwise land
-	# directly in that approach path.
-	for dy in range(-2, 3):
-		for dx in range(-2, 3):
+	# directly in that approach path. Default radius (2) matches every
+	# existing valley-interior call; scatter_biome_obstacles() below passes a
+	# slightly wider radius (3) for VERDANTWOOD_INTERIOR_ENTRANCE since a
+	# MightyOak visually overhangs multiple tiles, unlike a single-tile
+	# Tree/Rock. This alone isn't airtight for any one fixed test position
+	# arbitrarily close to the boundary - verify_verdantwood_interior.gd
+	# additionally clears its own fixed entrance-approach teleport points
+	# directly (same "fix belongs in the test" reasoning as _clear_corridor_row).
+	for dy in range(-radius, radius + 1):
+		for dx in range(-radius, radius + 1):
 			occupied[entrance + Vector2i(dx, dy)] = true
 
 func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
@@ -356,30 +363,55 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 	# area grows with radius²) so the enlarged valley doesn't end up feeling
 	# sparser than it did before the biome revamp's map-size increase.
 	var result: Array = []
-	result.append_array(_scatter(tilemap, 150, "Tree", occupied))
-	result.append_array(_scatter(tilemap, 86, "Rock", occupied))
+	var full_map := Rect2i(0, 0, OVERWORLD_WIDTH, OVERWORLD_HEIGHT)
+	result.append_array(_scatter(tilemap, 150, "Tree", occupied, Zone.VALLEY, SRC_GRASS, full_map))
+	result.append_array(_scatter(tilemap, 86, "Rock", occupied, Zone.VALLEY, SRC_GRASS, full_map))
+	return result
+
+# Outer-biome counterpart to scatter_trees_and_rocks() above - impassable
+# navigate-around obstacles scattered into the 4 outer biomes (mighty oaks in
+# Verdantwood so far; ice boulders/lakes for the other 3 are future passes).
+# Called separately from scatter_trees_and_rocks() by overworld.gd/
+# overworld2.gd, same pattern.
+func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
+	var occupied := {}
+	_reserve_entrance_clearance(occupied, VERDANTWOOD_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.VERDANTWOOD])
+	_reserve_entrance_clearance(occupied, RAVINE_RUNNER_POS)
+	_reserve_entrance_clearance(occupied, SEAM_FORDS["frostpeak_verdantwood"])
+	_reserve_entrance_clearance(occupied, SEAM_FORDS["verdantwood_badlands"])
+
+	# A tight box around the wedge (out to SEAM_LENGTH, same reach as the
+	# wedge-seam dividers) instead of the full 200x200 map - outer biomes are
+	# huge and mostly empty past this distance, so a full-map bounds would
+	# waste most of _scatter()'s attempt budget on tiles nobody ever visits.
+	var bounds := Rect2i(WORLD_CENTER_X - SEAM_LENGTH, WORLD_CENTER_Y - SEAM_LENGTH, SEAM_LENGTH * 2, SEAM_LENGTH * 2)
+
+	var result: Array = []
+	result.append_array(_scatter(tilemap, 18, "MightyOak", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))
 	return result
 
 func _is_in_village(pos: Vector2i) -> bool:
 	return pos.x >= VILLAGE_BOUNDS.x0 and pos.x <= VILLAGE_BOUNDS.x1 and pos.y >= VILLAGE_BOUNDS.y0 and pos.y <= VILLAGE_BOUNDS.y1
 
-func _scatter(tilemap: TileMapLayer, count: int, scene_name: String, occupied: Dictionary) -> Array:
+func _scatter(tilemap: TileMapLayer, count: int, scene_name: String, occupied: Dictionary, zone: int, ground_source: int, bounds: Rect2i) -> Array:
 	var placed: Array = []
 	var attempts := 0
 	var max_attempts := count * 300
 	while placed.size() < count and attempts < max_attempts:
 		attempts += 1
-		var pos := Vector2i(randi_range(0, OVERWORLD_WIDTH - 1), randi_range(0, OVERWORLD_HEIGHT - 1))
+		var pos := Vector2i(randi_range(bounds.position.x, bounds.end.x - 1), randi_range(bounds.position.y, bounds.end.y - 1))
 		if occupied.has(pos):
 			continue
-		if biome_at(pos.x, pos.y).zone != Zone.VALLEY:
+		if biome_at(pos.x, pos.y).zone != zone:
 			continue
 		# Village-square tiles are also SRC_GRASS (the JS game renders village
 		# ground as plain grass too), so the source-id check below can't tell
 		# them apart on its own — the village needs to stay resource-free.
-		if _is_in_village(pos):
+		# Only relevant for the Zone.VALLEY caller; harmless no-op otherwise.
+		if zone == Zone.VALLEY and _is_in_village(pos):
 			continue
-		if tilemap.get_cell_source_id(pos) != SRC_GRASS:
+		if tilemap.get_cell_source_id(pos) != ground_source:
 			continue
 		occupied[pos] = true
 		placed.append({"pos": pos, "scene": scene_name})

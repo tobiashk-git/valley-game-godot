@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/mighty_oak.png" id="1_jykn8"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sprxm"]
+size = Vector2(28, 28)
+
+[node name="MightyOak" type="StaticBody2D" unique_id=1529648209]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=189229497]
+scale = Vector2(0.134, 0.134)
+texture = ExtResource("1_jykn8")
+offset = Vector2(0, -24.066)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1253035702]
+shape = SubResource("RectangleShape2D_sprxm")
