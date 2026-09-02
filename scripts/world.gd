@@ -55,6 +55,15 @@ const EMPTY_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y + 3)
 # Frostpeak test (abs(dy) >= abs(dx) and dy < 0) with room to spare past
 # VALLEY_RADIUS (22) and the river ring painted at exactly that offset.
 const FROSTPEAK_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - 30)
+# Same reasoning as FROSTPEAK_INTERIOR_ENTRANCE, mirrored onto the east axis
+# for Verdantwood (dx=30, dy=0 -> abs(dy) < abs(dx) -> Zone.VERDANTWOOD).
+const VERDANTWOOD_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X + 30, WORLD_CENTER_Y)
+
+# The Forest Druid (Verdantwood's ford-crossing quest giver) stands in the
+# valley itself, a few tiles off the ford's direct line so it doesn't block
+# the crossing - see overworld.gd. Kept here (not a magic number there) so
+# scatter_trees_and_rocks() can reserve clearance around it below.
+const DRUID_GLADE_POS := Vector2i(WORLD_CENTER_X + VALLEY_RADIUS - 5, WORLD_CENTER_Y + 4)
 
 # TileSet source ids — must match the order sources were added in
 # tools/setup_phase1.gd when the TileSet resource was built (0-8), plus 2
@@ -237,6 +246,7 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 	_reserve_entrance_clearance(occupied, CASTLE_ENTRANCE)
 	_reserve_entrance_clearance(occupied, HOUSE_ENTRANCE)
 	_reserve_entrance_clearance(occupied, FINAL_BOSS_ENTRANCE)
+	_reserve_entrance_clearance(occupied, DRUID_GLADE_POS)
 
 	# Was 70/40 - scaled ~2.15x with the valley's new area (radius 15->22,
 	# area grows with radius²) so the enlarged valley doesn't end up feeling

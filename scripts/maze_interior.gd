@@ -126,9 +126,12 @@ func _process(_delta: float) -> void:
 		_reveal_around(current_tile)
 		Combat.check_random_encounter(encounter_zone)
 
-func _reveal_around(center: Vector2i) -> void:
-	for dy in range(-FOG_REVEAL_RADIUS, FOG_REVEAL_RADIUS + 1):
-		for dx in range(-FOG_REVEAL_RADIUS, FOG_REVEAL_RADIUS + 1):
-			if dx * dx + dy * dy > FOG_REVEAL_RADIUS * FOG_REVEAL_RADIUS:
+# radius defaults to FOG_REVEAL_RADIUS - a subclass can override this method
+# (e.g. Verdantwood's canopy-fog hazard) to pass a smaller radius for
+# specific tiles; _process()'s own call below is unaffected either way.
+func _reveal_around(center: Vector2i, radius: int = FOG_REVEAL_RADIUS) -> void:
+	for dy in range(-radius, radius + 1):
+		for dx in range(-radius, radius + 1):
+			if dx * dx + dy * dy > radius * radius:
 				continue
 			fog.erase_cell(center + Vector2i(dx, dy))

@@ -40,6 +40,18 @@ const QUEST_DEFS := {
 			"completed": "The ford's holding steady, thanks to you.",
 		},
 	},
+	"cross_verdantwood": {
+		"giver_name": "Forest Druid",
+		"name": "Clearing the Crossing",
+		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
+		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
+		"dialogue": {
+			"offer": "The ford into Verdantwood is choked with fallen branches - bring me 12 Wood and I'll see it cleared.",
+			"in_progress": "Still need more wood to clear the crossing - what have you got?",
+			"ready": "That should do it. Let the forest breathe again...",
+			"completed": "The crossing's clear, thanks to you.",
+		},
+	},
 }
 
 # quest_id -> "accepted" | "completed" (absent = not yet offered).
@@ -166,6 +178,8 @@ func _complete_quest(quest_id: String) -> void:
 	_mark_completed(quest_id)
 	if quest_id == "cross_frostpeak":
 		GameState.biome_paths_open.frostpeak = true
+	elif quest_id == "cross_verdantwood":
+		GameState.biome_paths_open.verdantwood = true
 	changed.emit()
 
 # Called by npc.gd the first time (and only the first time) the player

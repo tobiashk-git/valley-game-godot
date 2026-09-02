@@ -1,0 +1,63 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/verdantwood_interior.gd" id="1_v3smt"]
+[ext_resource type="Texture2D" path="res://assets/verdantwood_wall.png" id="2_80j84"]
+[ext_resource type="Texture2D" path="res://assets/verdantwood_floor.png" id="3_kon7x"]
+[ext_resource type="Texture2D" path="res://assets/verdantwood_root.png" id="4_0kefr"]
+[ext_resource type="Texture2D" path="res://assets/verdantwood_canopy.png" id="5_o6wo5"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="6_uog40"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="7_fknho"]
+[ext_resource type="TileSet" path="res://resources/fog_tileset.tres" id="8_norw3"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_b6fm8"]
+texture = ExtResource("2_80j84")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_osn80"]
+texture = ExtResource("3_kon7x")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rpt5c"]
+texture = ExtResource("4_0kefr")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_y3f41"]
+texture = ExtResource("5_o6wo5")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_xwilw"]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_b6fm8")
+sources/1 = SubResource("TileSetAtlasSource_osn80")
+sources/2 = SubResource("TileSetAtlasSource_rpt5c")
+sources/3 = SubResource("TileSetAtlasSource_y3f41")
+
+[node name="VerdantwoodInterior" type="Node2D" unique_id=1586379547]
+script = ExtResource("1_v3smt")
+boss_id = "verdantwood_boss"
+entrance_tile = Vector2i(130, 100)
+poi_id = "verdantwood_interior"
+encounter_zone = 2
+
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=573456559]
+tile_set = SubResource("TileSet_xwilw")
+
+[node name="YSort" type="Node2D" parent="." unique_id=1253328482]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("6_uog40")]
+script = ExtResource("7_fknho")
+
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=304146624]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="FogLayer" type="TileMapLayer" parent="." unique_id=177526955]
+tile_set = ExtResource("8_norw3")

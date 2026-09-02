@@ -6,6 +6,8 @@ const HOUSE_ENTRANCE_SCENE := preload("res://scenes/props/HouseEntrance.tscn")
 const DUNGEON_ENTRANCE_SCENE := preload("res://scenes/props/DungeonEntrance.tscn")
 const CASTLE_ENTRANCE_SCENE := preload("res://scenes/props/CastleEntrance.tscn")
 const WATCHTOWER_RUIN_ENTRANCE_SCENE := preload("res://scenes/props/WatchtowerRuinEntrance.tscn")
+const DRUID_CIRCLE_ENTRANCE_SCENE := preload("res://scenes/props/DruidCircleEntrance.tscn")
+const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
 
@@ -81,8 +83,23 @@ func _ready() -> void:
 	# above) already physically blocks reaching this entrance until the
 	# cross_frostpeak quest opens it.
 	_add_entrance(WATCHTOWER_RUIN_ENTRANCE_SCENE, World.FROSTPEAK_INTERIOR_ENTRANCE, "res://scenes/FrostpeakInterior.tscn", Vector2.ZERO)
+	_add_entrance(DRUID_CIRCLE_ENTRANCE_SCENE, World.VERDANTWOOD_INTERIOR_ENTRANCE, "res://scenes/VerdantwoodInterior.tscn", Vector2.ZERO)
 	if GameState.world_progress.final_boss_revealed:
 		reveal_final_boss_entrance()
+
+	# The Verdantwood ford-crossing quest giver - unlike the Frostpeak
+	# Ranger (housed in EmptyHouse.tscn, Phase 2's only empty village slot),
+	# this one stands directly in the valley near the ford itself, a few
+	# tiles off the direct crossing line so it doesn't block the path.
+	var druid: StaticBody2D = NPC_SCENE.instantiate()
+	druid.position = _tile_center(World.DRUID_GLADE_POS)
+	druid.sprite_path = "res://assets/elder.png"
+	druid.sprite_tint = Color(0.55, 0.75, 0.4, 1.0)
+	druid.npc_name = "Forest Druid"
+	druid.quest_id = "cross_verdantwood"
+	druid.npc_id = "forest_druid"
+	druid.intro_text = "You've wandered far from the village. Verdantwood lies beyond that ford - if you can call it a ford anymore. The old crossing's overgrown; I could use a hand clearing it."
+	ysort.add_child(druid)
 
 	# The altar tile (painted solid by build_overworld_map()) just needs an
 	# interact trigger on top of it - it isn't a separate prop/scene like

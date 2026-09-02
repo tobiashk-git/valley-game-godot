@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/druid_circle_entrance.gd" id="1_1ev8t"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mu3wu"]
+size = Vector2(28, 28)
+
+[node name="DruidCircleEntrance" type="StaticBody2D" unique_id=88871386]
+script = ExtResource("1_1ev8t")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=795411309]
+shape = SubResource("RectangleShape2D_mu3wu")

@@ -153,6 +153,17 @@ const BOSSES := {
 		"status_attack": {"status": "paralysis", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
 	},
+	# Verdantwood Forest's own interior boss (Phase 3) - same no-magic_crystal
+	# reasoning as frostpeak_boss above. Reuses the Giant Spider sprite,
+	# tinted deep forest green - distinct from final_boss's dark red/black
+	# tint on the same base sprite.
+	"verdantwood_boss": {
+		"name": "Elder Bramblewood", "sprite": "res://assets/enemies/spider.png",
+		"tint": Color(0.2, 0.45, 0.15, 1.0),
+		"max_hp": 75, "attack": 8, "defense": 4, "gold_min": 45, "gold_max": 65,
+		"status_attack": {"status": "sleep", "chance": 0.25},
+		"drop_item_ids": ["healing_potion"],
+	},
 	# The two Guardians' crystals reveal this one's hiding place (see
 	# altar.gd); roughly double their stats, per the plan's own first-pass
 	# tuning note. Reuses the Giant Spider sprite, tinted dark red/black -

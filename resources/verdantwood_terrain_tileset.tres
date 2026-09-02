@@ -1,0 +1,35 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/verdantwood_wall.png" id="1_1l76b"]
+[ext_resource type="Texture2D" path="res://assets/verdantwood_floor.png" id="2_0ml7a"]
+[ext_resource type="Texture2D" path="res://assets/verdantwood_root.png" id="3_0fgxh"]
+[ext_resource type="Texture2D" path="res://assets/verdantwood_canopy.png" id="4_ivsbm"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_b6fm8"]
+texture = ExtResource("1_1l76b")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_osn80"]
+texture = ExtResource("2_0ml7a")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rpt5c"]
+texture = ExtResource("3_0fgxh")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_y3f41"]
+texture = ExtResource("4_ivsbm")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_b6fm8")
+sources/1 = SubResource("TileSetAtlasSource_osn80")
+sources/2 = SubResource("TileSetAtlasSource_rpt5c")
+sources/3 = SubResource("TileSetAtlasSource_y3f41")
