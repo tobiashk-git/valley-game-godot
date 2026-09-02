@@ -182,13 +182,25 @@ func _blend_source(tx: int, ty: int, primary_source: int) -> int:
 # build_overworld_map() below and World 2 (overworld2.gd), which skips the
 # village/fence/altar entirely (that onboarding tutorial is World-1-only).
 # All tiles use atlas coord (0,0) except grass, which uses (0,5) to match
-# the JS game's groundSpriteFor() crop (sy:160 / 32 = row 5).
+# the JS game's groundSpriteFor() crop (sy:160 / 32 = row 5); the 4 outer
+# biomes (Frostpeak/Badlands/Verdantwood/Gloomfen) dither in a second
+# "flecked" ground tile at (1,0) - see tools/integrate_terrain_variety.gd -
+# on roughly a third of tiles for visual variety, deterministic on tile
+# coords (not randf()) so it's stable across reloads/rebuilds, same
+# dithering approach as _blend_source() but with a different salt so the
+# two patterns don't visually line up.
+const OUTER_BIOME_SOURCES := [SRC_FROSTPEAK, SRC_BADLANDS, SRC_VERDANTWOOD, SRC_GLOOMFEN]
+
 func build_biome_layer(tilemap: TileMapLayer) -> void:
 	for y in range(OVERWORLD_HEIGHT):
 		for x in range(OVERWORLD_WIDTH):
 			var biome := biome_at(x, y)
 			var source := _blend_source(x, y, biome.source)
-			var atlas_coords := Vector2i(0, 5) if source == SRC_GRASS else Vector2i(0, 0)
+			var atlas_coords := Vector2i(0, 0)
+			if source == SRC_GRASS:
+				atlas_coords = Vector2i(0, 5)
+			elif source in OUTER_BIOME_SOURCES and (x * 17 + y * 11) % 3 == 0:
+				atlas_coords = Vector2i(1, 0)
 			tilemap.set_cell(Vector2i(x, y), source, atlas_coords)
 
 # Paints the overworld's terrain layer onto the given TileMapLayer — port of

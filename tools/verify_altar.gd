@@ -4,7 +4,7 @@ func _initialize() -> void:
 	var scene: PackedScene = load("res://scenes/Overworld.tscn")
 	var instance: Node2D = scene.instantiate()
 	root.add_child(instance)
-	var player: CharacterBody2D = instance.get_node("Player")
+	var player: CharacterBody2D = instance.get_node("YSort/Player")
 	var cam: Camera2D = player.get_node("Camera2D")
 
 	# overworld.gd's own _ready() (which sets the default gate-side spawn) is
