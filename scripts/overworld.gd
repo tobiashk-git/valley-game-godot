@@ -8,6 +8,7 @@ const CASTLE_ENTRANCE_SCENE := preload("res://scenes/props/CastleEntrance.tscn")
 const WATCHTOWER_RUIN_ENTRANCE_SCENE := preload("res://scenes/props/WatchtowerRuinEntrance.tscn")
 const DRUID_CIRCLE_ENTRANCE_SCENE := preload("res://scenes/props/DruidCircleEntrance.tscn")
 const VOLCANO_ENTRANCE_SCENE := preload("res://scenes/props/VolcanoEntrance.tscn")
+const SUBMERGED_TEMPLE_ENTRANCE_SCENE := preload("res://scenes/props/SubmergedTempleEntrance.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
@@ -86,6 +87,7 @@ func _ready() -> void:
 	_add_entrance(WATCHTOWER_RUIN_ENTRANCE_SCENE, World.FROSTPEAK_INTERIOR_ENTRANCE, "res://scenes/FrostpeakInterior.tscn", Vector2.ZERO)
 	_add_entrance(DRUID_CIRCLE_ENTRANCE_SCENE, World.VERDANTWOOD_INTERIOR_ENTRANCE, "res://scenes/VerdantwoodInterior.tscn", Vector2.ZERO)
 	_add_entrance(VOLCANO_ENTRANCE_SCENE, World.BADLANDS_INTERIOR_ENTRANCE, "res://scenes/BadlandsInterior.tscn", Vector2.ZERO)
+	_add_entrance(SUBMERGED_TEMPLE_ENTRANCE_SCENE, World.GLOOMFEN_INTERIOR_ENTRANCE, "res://scenes/GloomfenInterior.tscn", Vector2.ZERO)
 	if GameState.world_progress.final_boss_revealed:
 		reveal_final_boss_entrance()
 
@@ -113,6 +115,17 @@ func _ready() -> void:
 	prospector.npc_id = "badlands_prospector"
 	prospector.intro_text = "Emberfall's past that ford - if the heat don't get you, the ground giving way underfoot will. I've been meaning to shore up the crossing, just need the stone for it."
 	ysort.add_child(prospector)
+
+	# The Gloomfen ford-crossing quest giver - same standalone pattern as the Druid/Prospector.
+	var guide: StaticBody2D = NPC_SCENE.instantiate()
+	guide.position = _tile_center(World.MARSH_GUIDE_POS)
+	guide.sprite_path = "res://assets/elder.png"
+	guide.sprite_tint = Color(0.35, 0.42, 0.32, 1.0)
+	guide.npc_name = "Marsh Guide"
+	guide.quest_id = "cross_gloomfen"
+	guide.npc_id = "marsh_guide"
+	guide.intro_text = "Gloomfen's past that ford, if you can call it that anymore - the old boards rotted through years back. Bring me wood and I'll lay a new crossing."
+	ysort.add_child(guide)
 
 	# The altar tile (painted solid by build_overworld_map()) just needs an
 	# interact trigger on top of it - it isn't a separate prop/scene like

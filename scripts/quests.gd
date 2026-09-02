@@ -64,6 +64,18 @@ const QUEST_DEFS := {
 			"completed": "Crossing's solid, thanks to you.",
 		},
 	},
+	"cross_gloomfen": {
+		"giver_name": "Marsh Guide",
+		"name": "Laying the Boardwalk",
+		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
+		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
+		"dialogue": {
+			"offer": "The old boardwalk into Gloomfen rotted through long ago - bring me 12 Wood and I'll lay a new one.",
+			"in_progress": "Still need more wood for the boardwalk - what have you got?",
+			"ready": "That'll do it. Should hold you over the worst of the mire now.",
+			"completed": "The boardwalk's holding, thanks to you.",
+		},
+	},
 }
 
 # quest_id -> "accepted" | "completed" (absent = not yet offered).
@@ -194,6 +206,8 @@ func _complete_quest(quest_id: String) -> void:
 		GameState.biome_paths_open.verdantwood = true
 	elif quest_id == "cross_badlands":
 		GameState.biome_paths_open.badlands = true
+	elif quest_id == "cross_gloomfen":
+		GameState.biome_paths_open.gloomfen = true
 	changed.emit()
 
 # Called by npc.gd the first time (and only the first time) the player

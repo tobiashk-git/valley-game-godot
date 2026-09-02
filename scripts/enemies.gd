@@ -174,6 +174,16 @@ const BOSSES := {
 		"status_attack": {"status": "poison", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
 	},
+	# Gloomfen Marsh's own interior boss (Phase 5) - same no-magic_crystal
+	# reasoning as frostpeak_boss/verdantwood_boss/badlands_boss above. Reuses
+	# the Bat sprite (not yet used for a biome boss), tinted murky purple-green.
+	"gloomfen_boss": {
+		"name": "The Bogmaw", "sprite": "res://assets/enemies/bat.png",
+		"tint": Color(0.4, 0.3, 0.45, 1.0),
+		"max_hp": 80, "attack": 9, "defense": 4, "gold_min": 45, "gold_max": 65,
+		"status_attack": {"status": "silence", "chance": 0.25},
+		"drop_item_ids": ["healing_potion"],
+	},
 	# The two Guardians' crystals reveal this one's hiding place (see
 	# altar.gd); roughly double their stats, per the plan's own first-pass
 	# tuning note. Reuses the Giant Spider sprite, tinted dark red/black -

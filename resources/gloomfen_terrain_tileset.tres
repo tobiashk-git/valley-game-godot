@@ -1,0 +1,35 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/gloomfen_wall.png" id="1_72cev"]
+[ext_resource type="Texture2D" path="res://assets/gloomfen_floor.png" id="2_h1oa3"]
+[ext_resource type="Texture2D" path="res://assets/gloomfen_platform.png" id="3_hr0f0"]
+[ext_resource type="Texture2D" path="res://assets/gloomfen_mud.png" id="4_w2pwc"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5o1aq"]
+texture = ExtResource("1_72cev")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cbmim"]
+texture = ExtResource("2_h1oa3")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wo0go"]
+texture = ExtResource("3_hr0f0")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_it728"]
+texture = ExtResource("4_w2pwc")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_5o1aq")
+sources/1 = SubResource("TileSetAtlasSource_cbmim")
+sources/2 = SubResource("TileSetAtlasSource_wo0go")
+sources/3 = SubResource("TileSetAtlasSource_it728")
