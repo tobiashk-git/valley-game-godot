@@ -4,7 +4,7 @@ extends SceneTree
 # loop, where the same buildInterior() call is branched by index).
 # Run via: godot --headless --script res://tools/setup_village_houses.gd
 
-func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "", is_shop: bool = false, npc_id: String = "", intro: String = "") -> void:
+func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "", is_shop: bool = false, npc_id: String = "", intro: String = "", tint: Color = Color(1, 1, 1, 1)) -> void:
 	var house_tileset: TileSet = load("res://resources/house_tileset.tres")
 	var player_scene: PackedScene = load("res://scenes/Player.tscn")
 	var player_instance: CharacterBody2D = player_scene.instantiate()
@@ -21,6 +21,7 @@ func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: St
 	root.npc_is_shop = is_shop
 	root.npc_id_text = npc_id
 	root.npc_intro = intro
+	root.npc_sprite_tint = tint
 	root.furniture_layout = furniture
 	root.window_tiles = windows
 	root.overworld_return_tile = return_tile
@@ -97,7 +98,15 @@ func _initialize() -> void:
 		"Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell."
 	)
 
-	_build("EmptyHouse", false, "", "", "", [], [], World.EMPTY_HOUSE_ENTRANCE)
+	_build(
+		"EmptyHouse", true, "res://assets/trader.png", "Frostpeak Ranger",
+		"", # superseded by npc_quest_id
+		[], [],
+		World.EMPTY_HOUSE_ENTRANCE,
+		"cross_frostpeak", false, "frostpeak_ranger",
+		"You made it this far? Frostpeak Ridge lies past that river to the north - the old ford's been washed out for ages, or I'd be up there myself.",
+		Color(0.75, 0.88, 1.0, 1.0)
+	)
 
 	print("=== Village houses setup complete ===")
 	quit()

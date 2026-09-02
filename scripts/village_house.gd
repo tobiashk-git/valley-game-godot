@@ -18,6 +18,7 @@ const NPC_TILE := Vector2i(4, 2)
 @export var npc_is_shop := false
 @export var npc_id_text := ""
 @export var npc_intro := ""
+@export var npc_sprite_tint := Color(1, 1, 1, 1)
 @export var furniture_layout: Array[Dictionary] = [] # [{"kind": "Bed", "x": 2, "y": 4}, ...]
 @export var window_tiles: Array[Vector2i] = []
 @export var overworld_return_tile := Vector2i.ZERO
@@ -83,6 +84,7 @@ func _ready() -> void:
 		npc.shop = npc_is_shop
 		npc.npc_id = npc_id_text
 		npc.intro_text = npc_intro
+		npc.sprite_tint = npc_sprite_tint
 		ysort.add_child(npc)
 
 	if not GameState.consume_next_spawn(player):

@@ -5,6 +5,7 @@ const ROCK_SCENE := preload("res://scenes/props/Rock.tscn")
 const HOUSE_ENTRANCE_SCENE := preload("res://scenes/props/HouseEntrance.tscn")
 const DUNGEON_ENTRANCE_SCENE := preload("res://scenes/props/DungeonEntrance.tscn")
 const CASTLE_ENTRANCE_SCENE := preload("res://scenes/props/CastleEntrance.tscn")
+const WATCHTOWER_RUIN_ENTRANCE_SCENE := preload("res://scenes/props/WatchtowerRuinEntrance.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
 
@@ -76,6 +77,10 @@ func _ready() -> void:
 	# target_spawn passed here is unused.
 	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.DUNGEON_ENTRANCE, "res://scenes/Dungeon.tscn", Vector2.ZERO)
 	_add_entrance(CASTLE_ENTRANCE_SCENE, World.CASTLE_ENTRANCE, "res://scenes/Castle.tscn", Vector2.ZERO)
+	# No conditional gating needed here - the closed ford (see biome_paths_open
+	# above) already physically blocks reaching this entrance until the
+	# cross_frostpeak quest opens it.
+	_add_entrance(WATCHTOWER_RUIN_ENTRANCE_SCENE, World.FROSTPEAK_INTERIOR_ENTRANCE, "res://scenes/FrostpeakInterior.tscn", Vector2.ZERO)
 	if GameState.world_progress.final_boss_revealed:
 		reveal_final_boss_entrance()
 

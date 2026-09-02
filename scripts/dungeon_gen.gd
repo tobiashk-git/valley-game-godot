@@ -77,23 +77,28 @@ static func _carve_room(map: Array, room: Room) -> void:
 		for x in range(room.x, room.x + room.w):
 			map[y][x] = FLOOR
 
-static func _carve_corridor(map: Array, width: int, height: int, from: Vector2i, to: Vector2i) -> void:
+static func _carve_corridor(map: Array, width: int, height: int, from: Vector2i, to: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
 	var x := from.x
 	var y := from.y
 	var steps := 0
 	var max_steps := width + height + 40
 	while (x != to.x or y != to.y) and steps < max_steps:
 		map[y][x] = FLOOR
+		cells.append(Vector2i(x, y))
 		var move_x: bool = x != to.x and (y == to.y or randf() < 0.5)
 		if move_x:
 			x += signi(to.x - x)
 		else:
 			y += signi(to.y - y)
 		map[y][x] = FLOOR
+		cells.append(Vector2i(x, y))
 		if randf() < 0.15:
 			x = clampi(x + (-1 if randf() < 0.5 else 1), 1, width - 2)
 		steps += 1
 	map[to.y][to.x] = FLOOR
+	cells.append(Vector2i(to.x, to.y))
+	return cells
 
 # Returns a Dictionary: map (Array of Array of int), width, height, door_x,
 # door_y, spawn_tile (Vector2i), rooms (Array of Room), boss_room (Room —
@@ -132,12 +137,20 @@ static func generate(width: int, height: int) -> Dictionary:
 		var db: float = Vector2(b.center()).distance_to(Vector2(entrance_center))
 		return da < db
 	)
+	# The actual entrance->intermediates->boss traversal order, surfaced for
+	# consumers (e.g. a biome interior's hazard-tile placement) that need to
+	# know which room is "the middle one" or "the corridor right before the
+	# boss" - previously computed here and thrown away.
+	var room_chain: Array = [entrance_room]
+	room_chain.append_array(intermediate_rooms)
+	room_chain.append(boss_room)
+	var corridors: Array = []
 	var prev_center := entrance_center
 	for room in intermediate_rooms:
 		var c: Vector2i = room.center()
-		_carve_corridor(map, width, height, prev_center, c)
+		corridors.append(_carve_corridor(map, width, height, prev_center, c))
 		prev_center = c
-	_carve_corridor(map, width, height, prev_center, boss_room.center())
+	corridors.append(_carve_corridor(map, width, height, prev_center, boss_room.center()))
 
 	return {
 		"map": map,
@@ -148,4 +161,6 @@ static func generate(width: int, height: int) -> Dictionary:
 		"spawn_tile": Vector2i(door_x, door_y - 1),
 		"rooms": rooms,
 		"boss_room": boss_room,
+		"room_chain": room_chain,
+		"corridors": corridors,
 	}

@@ -65,6 +65,7 @@ func _initialize() -> void:
 	_build_sprite_prop("HouseEntrance", "res://assets/house.png", 69.0, 123.0, 0.75)
 	_build_drawn_prop("DungeonEntrance", "res://scripts/dungeon_entrance.gd")
 	_build_drawn_prop("CastleEntrance", "res://scripts/castle_entrance.gd")
+	_build_drawn_prop("WatchtowerRuinEntrance", "res://scripts/watchtower_entrance.gd")
 
 	print("=== Props setup complete ===")
 	quit()

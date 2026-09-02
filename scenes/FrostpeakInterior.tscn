@@ -1,0 +1,63 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/frostpeak_interior.gd" id="1_76qt7"]
+[ext_resource type="Texture2D" path="res://assets/frostpeak_wall.png" id="2_eda1a"]
+[ext_resource type="Texture2D" path="res://assets/frostpeak_floor.png" id="3_52a6o"]
+[ext_resource type="Texture2D" path="res://assets/frostpeak_ice.png" id="4_nw3r7"]
+[ext_resource type="Texture2D" path="res://assets/frostpeak_bridge.png" id="5_crtxk"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="6_asclx"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="7_ab8ro"]
+[ext_resource type="TileSet" path="res://resources/fog_tileset.tres" id="8_8kim1"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fq2aw"]
+texture = ExtResource("2_eda1a")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_msqqv"]
+texture = ExtResource("3_52a6o")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6q5d3"]
+texture = ExtResource("4_nw3r7")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_q085u"]
+texture = ExtResource("5_crtxk")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_q2xjj"]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_fq2aw")
+sources/1 = SubResource("TileSetAtlasSource_msqqv")
+sources/2 = SubResource("TileSetAtlasSource_6q5d3")
+sources/3 = SubResource("TileSetAtlasSource_q085u")
+
+[node name="FrostpeakInterior" type="Node2D" unique_id=1873665158]
+script = ExtResource("1_76qt7")
+boss_id = "frostpeak_boss"
+entrance_tile = Vector2i(100, 70)
+poi_id = "frostpeak_interior"
+encounter_zone = 1
+
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=415829783]
+tile_set = SubResource("TileSet_q2xjj")
+
+[node name="YSort" type="Node2D" parent="." unique_id=1927316756]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("6_asclx")]
+script = ExtResource("7_ab8ro")
+
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1720767772]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="FogLayer" type="TileMapLayer" parent="." unique_id=1172574409]
+tile_set = ExtResource("8_8kim1")

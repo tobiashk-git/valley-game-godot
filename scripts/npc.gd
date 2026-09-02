@@ -10,6 +10,7 @@ extends StaticBody2D
 @export var shop := false # if true, opens ShopPanel instead of any dialogue
 @export var npc_id := "" # stable id for Quests.npcs_met; "" skips the one-time intro entirely
 @export var intro_text := "" # shown once, the very first interaction, before shop/quest/greeting
+@export var sprite_tint := Color(1, 1, 1, 1) # lets a new NPC reuse an existing sprite with a distinct tint (matches enemies.gd's convention)
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var interact_area: Area2D = $InteractArea
@@ -28,6 +29,7 @@ var _player_inside := false
 func _ready() -> void:
 	if sprite_path != "":
 		sprite.texture = load(sprite_path)
+	sprite.modulate = sprite_tint
 	interact_area.body_entered.connect(_on_body_entered)
 	interact_area.body_exited.connect(_on_body_exited)
 

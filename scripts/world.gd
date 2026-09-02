@@ -48,6 +48,14 @@ const ELDER_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y - 3)
 const TRADER_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y + 3)
 const EMPTY_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y + 3)
 
+# Unlike DUNGEON/CASTLE/HOUSE/FINAL_BOSS_ENTRANCE above (all kept inside
+# VALLEY_RADIUS), this one is deliberately past the river ring, in real
+# Frostpeak territory - Phase 2's whole point is that reaching it requires
+# the ford-crossing quest done first. dy=-30 satisfies biome_at()'s
+# Frostpeak test (abs(dy) >= abs(dx) and dy < 0) with room to spare past
+# VALLEY_RADIUS (22) and the river ring painted at exactly that offset.
+const FROSTPEAK_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - 30)
+
 # TileSet source ids — must match the order sources were added in
 # tools/setup_phase1.gd when the TileSet resource was built (0-8), plus 2
 # more added later by tools/setup_biome_revamp.gd (9-10, the river/ford).

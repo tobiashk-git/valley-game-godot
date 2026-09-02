@@ -139,6 +139,20 @@ const BOSSES := {
 		"status_attack": {"status": "silence", "chance": 0.25},
 		"drop_item_ids": ["royal_plate", "magic_crystal"],
 	},
+	# Frostpeak Ridge's own interior boss (Phase 2 of the biome revamp) - no
+	# magic_crystal drop deliberately. altar.gd only checks the *count* of
+	# magic_crystal in inventory, not its source, so adding a third crystal
+	# source would let a third boss substitute for either of the two
+	# Guardians (dungeon_boss/castle_boss), which the altar's reveal
+	# condition is written around as a fixed pair. Reuses the Ghost sprite,
+	# tinted pale icy blue.
+	"frostpeak_boss": {
+		"name": "Glacial Revenant", "sprite": "res://assets/enemies/ghost.png",
+		"tint": Color(0.65, 0.85, 1.0, 1.0),
+		"max_hp": 70, "attack": 8, "defense": 4, "gold_min": 45, "gold_max": 65,
+		"status_attack": {"status": "paralysis", "chance": 0.25},
+		"drop_item_ids": ["healing_potion"],
+	},
 	# The two Guardians' crystals reveal this one's hiding place (see
 	# altar.gd); roughly double their stats, per the plan's own first-pass
 	# tuning note. Reuses the Giant Spider sprite, tinted dark red/black -

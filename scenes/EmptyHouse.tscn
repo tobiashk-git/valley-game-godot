@@ -9,26 +9,33 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hanrs"]
 size = Vector2(28, 28)
 
-[node name="EmptyHouse" type="Node2D" unique_id=2140501640]
+[node name="EmptyHouse" type="Node2D" unique_id=823976851]
 script = ExtResource("1_smhuy")
-overworld_return_tile = Vector2i(55, 53)
+has_npc = true
+npc_sprite_path = "res://assets/trader.png"
+npc_name_text = "Frostpeak Ranger"
+npc_quest_id = "cross_frostpeak"
+npc_id_text = "frostpeak_ranger"
+npc_intro = "You made it this far? Frostpeak Ridge lies past that river to the north - the old ford's been washed out for ages, or I'd be up there myself."
+npc_sprite_tint = Color(0.75, 0.88, 1, 1)
+overworld_return_tile = Vector2i(105, 103)
 
-[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=119242093]
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=1427224123]
 tile_set = ExtResource("2_vanha")
 
-[node name="YSort" type="Node2D" parent="." unique_id=51118029]
+[node name="YSort" type="Node2D" parent="." unique_id=2091023996]
 y_sort_enabled = true
 
 [node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("3_0hmpb")]
 script = ExtResource("4_kgc6c")
 
-[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1458232114]
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1624915327]
 zoom = Vector2(2, 2)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
-[node name="OutPortal" type="Area2D" parent="." unique_id=38843029]
+[node name="OutPortal" type="Area2D" parent="." unique_id=213865586]
 script = ExtResource("5_83lha")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=2082688000]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=1781596091]
 shape = SubResource("RectangleShape2D_hanrs")

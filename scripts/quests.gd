@@ -25,6 +25,21 @@ const QUEST_DEFS := {
 		"name": "Meet the Village",
 		"objective": {"type": "talk_to_npcs", "npc_ids": ["village_elder", "village_trader"]},
 	},
+	"cross_frostpeak": {
+		"giver_name": "Frostpeak Ranger",
+		"name": "Reinforcing the Ford",
+		"objective": {"type": "gather_multi", "items": [
+			{"item_id": "wood", "amount": 8},
+			{"item_id": "stone", "amount": 8},
+		]},
+		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
+		"dialogue": {
+			"offer": "The ford north of here washed out ages ago - Frostpeak's been cut off ever since. Bring me 8 Wood and 8 Stone and I'll get it shored up.",
+			"in_progress": "Still need more Wood and Stone for the ford - can you spare any?",
+			"ready": "That's enough to shore up the crossing. Give me a moment... there, it'll hold now.",
+			"completed": "The ford's holding steady, thanks to you.",
+		},
+	},
 }
 
 # quest_id -> "accepted" | "completed" (absent = not yet offered).
@@ -61,6 +76,11 @@ func objective_met(quest_id: String) -> bool:
 	var objective: Dictionary = QUEST_DEFS[quest_id].objective
 	if objective.type == "gather":
 		return Inventory.get_count(objective.item_id) >= objective.amount
+	if objective.type == "gather_multi":
+		for entry in objective.items:
+			if Inventory.get_count(entry.item_id) < entry.amount:
+				return false
+		return true
 	if objective.type == "talk_to_npcs":
 		for npc_id in objective.npc_ids:
 			if not npcs_met.get(npc_id, false):
@@ -78,6 +98,12 @@ func objective_progress_text(quest_id: String) -> String:
 	if objective.type == "gather":
 		var have: int = min(Inventory.get_count(objective.item_id), objective.amount)
 		return "%d/%d %s" % [have, objective.amount, Items.get_item_name_bbcode(objective.item_id)]
+	if objective.type == "gather_multi":
+		var parts: Array[String] = []
+		for entry in objective.items:
+			var have_entry: int = min(Inventory.get_count(entry.item_id), entry.amount)
+			parts.append("%d/%d %s" % [have_entry, entry.amount, Items.get_item_name_bbcode(entry.item_id)])
+		return ", ".join(parts)
 	if objective.type == "talk_to_npcs":
 		var have := 0
 		for npc_id in objective.npc_ids:
@@ -127,13 +153,19 @@ func _mark_completed(quest_id: String) -> void:
 func _complete_quest(quest_id: String) -> void:
 	var def: Dictionary = QUEST_DEFS[quest_id]
 	var objective: Dictionary = def.objective
-	Inventory.remove_item(objective.item_id, objective.amount)
+	if objective.has("items"):
+		for entry in objective.items:
+			Inventory.remove_item(entry.item_id, entry.amount)
+	else:
+		Inventory.remove_item(objective.item_id, objective.amount)
 	var reward: Dictionary = def.reward
 	if reward.has("gold"):
 		Inventory.add_item("gold", reward.gold)
 	if reward.has("item_id"):
 		Inventory.add_item(reward.item_id, reward.get("item_amount", 1))
 	_mark_completed(quest_id)
+	if quest_id == "cross_frostpeak":
+		GameState.biome_paths_open.frostpeak = true
 	changed.emit()
 
 # Called by npc.gd the first time (and only the first time) the player

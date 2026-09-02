@@ -27,6 +27,12 @@ const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 @export var boss_id := "dungeon_boss"
 @export var entrance_tile := Vector2i.ZERO # World.DUNGEON_ENTRANCE / World.CASTLE_ENTRANCE
 @export var poi_id := "dungeon" # GameState.discovered_pois key
+# -1 (default) preserves every existing interior's behavior byte-for-byte -
+# Combat.check_random_encounter(-1) routes to Enemies.pick_random_id(), the
+# same empty-zones 5-enemy pool as before this export existed. A biome
+# interior subclass (e.g. frostpeak_interior.gd) sets this to a World.Zone
+# value instead, to pull from that biome's own outdoor monster pool.
+@export var encounter_zone: int = -1
 
 @onready var terrain: TileMapLayer = $TerrainLayer
 @onready var fog: TileMapLayer = $FogLayer
@@ -34,12 +40,17 @@ const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 @onready var player: CharacterBody2D = $YSort/Player
 
 var _last_revealed_tile: Vector2i = Vector2i(-9999, -9999)
+# The generated layout, kept around (not just a local in _ready()) so a
+# subclass can read gen.room_chain/corridors/rooms after super._ready() to
+# place its own hazard tiles, without generating a second, different maze.
+var _gen: Dictionary
 
 func _tile_center(pos: Vector2i) -> Vector2:
 	return Vector2(pos.x * 32 + 16, pos.y * 32 + 16)
 
 func _ready() -> void:
-	var gen: Dictionary = DungeonGen.generate(WIDTH, HEIGHT)
+	_gen = DungeonGen.generate(WIDTH, HEIGHT)
+	var gen: Dictionary = _gen
 	var map: Array = gen.map
 
 	for y in range(HEIGHT):
@@ -113,7 +124,7 @@ func _process(_delta: float) -> void:
 	if current_tile != _last_revealed_tile:
 		_last_revealed_tile = current_tile
 		_reveal_around(current_tile)
-		Combat.check_random_encounter()
+		Combat.check_random_encounter(encounter_zone)
 
 func _reveal_around(center: Vector2i) -> void:
 	for dy in range(-FOG_REVEAL_RADIUS, FOG_REVEAL_RADIUS + 1):

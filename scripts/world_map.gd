@@ -14,6 +14,7 @@ const POI_NAMES := {
 	"village": "Village",
 	"dungeon": "Dungeon",
 	"castle": "Castle",
+	"frostpeak_interior": "Frostpeak Ice Caves",
 }
 
 const LOCATION_NAMES := {
@@ -24,6 +25,7 @@ const LOCATION_NAMES := {
 	"ElderHouse": "the Elder's House",
 	"TraderHouse": "the Trader's House",
 	"EmptyHouse": "an empty house",
+	"FrostpeakInterior": "the Ice Caves",
 }
 
 # Computed lazily (not a const dict) since it reads World.VILLAGE_GATES,
@@ -39,6 +41,8 @@ func poi_target(poi_id: String) -> Vector2:
 			return Vector2(World.DUNGEON_ENTRANCE.x * 32 + 16, (World.DUNGEON_ENTRANCE.y + 1) * 32 + 16)
 		"castle":
 			return Vector2(World.CASTLE_ENTRANCE.x * 32 + 16, (World.CASTLE_ENTRANCE.y + 1) * 32 + 16)
+		"frostpeak_interior":
+			return Vector2(World.FROSTPEAK_INTERIOR_ENTRANCE.x * 32 + 16, (World.FROSTPEAK_INTERIOR_ENTRANCE.y + 1) * 32 + 16)
 		_:
 			return Vector2.ZERO
 
