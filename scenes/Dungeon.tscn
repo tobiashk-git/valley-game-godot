@@ -35,7 +35,7 @@ sources/0 = SubResource("TileSetAtlasSource_trxbk")
 
 [node name="Dungeon" type="Node2D" unique_id=924366774]
 script = ExtResource("1_gajge")
-entrance_tile = Vector2i(50, 20)
+entrance_tile = Vector2i(100, 81)
 
 [node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=256313754]
 tile_set = SubResource("TileSet_lwrqk")

@@ -3,37 +3,119 @@ extends Node
 # phase. BOSSES is a deliberately separate dict from ENEMIES (mirrors the
 # JS reference) so pick_random_id()/Combat's group-picker — which only ever
 # read ENEMIES — can never accidentally roll a boss into a random encounter.
+#
+# Every entry has a "zones" field for the biome revamp's per-biome encounter
+# pools (see pick_random_id_for_zone()). The original 5 (dungeon-only) get
+# "zones": [] - empty means "the interior/dungeon pool", never picked for an
+# overworld biome, and pick_random_id() (used by every existing maze_
+# interior.gd call site, unchanged) filters to exactly that empty-zones set,
+# so those 5 keep behaving byte-for-byte as before. The 12 new ones below
+# are each tagged with exactly one outer biome's Zone, reusing the 5
+# existing sprite files with a distinct tint - the exact technique already
+# used for all 3 bosses - so this needs zero new art assets.
 
 const ENEMIES := {
 	"dungeon_rat": {
 		"name": "Dungeon Rat", "sprite": "res://assets/enemies/rat.png",
 		"max_hp": 12, "attack": 3, "defense": 0, "gold_min": 3, "gold_max": 6,
-		"status_attack": {"status": "poison", "chance": 0.25},
+		"status_attack": {"status": "poison", "chance": 0.25}, "zones": [],
 	},
 	"cave_bat": {
 		"name": "Cave Bat", "sprite": "res://assets/enemies/bat.png",
 		"max_hp": 8, "attack": 4, "defense": 0, "gold_min": 2, "gold_max": 4,
-		"status_attack": {"status": "confusion", "chance": 0.25},
+		"status_attack": {"status": "confusion", "chance": 0.25}, "zones": [],
 	},
 	"skeleton": {
 		"name": "Skeleton", "sprite": "res://assets/enemies/skeleton.png",
 		"max_hp": 18, "attack": 5, "defense": 2, "gold_min": 8, "gold_max": 12,
-		"status_attack": {"status": "paralysis", "chance": 0.25},
+		"status_attack": {"status": "paralysis", "chance": 0.25}, "zones": [],
 	},
 	"giant_spider": {
 		"name": "Giant Spider", "sprite": "res://assets/enemies/spider.png",
 		"max_hp": 14, "attack": 4, "defense": 1, "gold_min": 5, "gold_max": 8,
-		"status_attack": {"status": "sleep", "chance": 0.3},
+		"status_attack": {"status": "sleep", "chance": 0.3}, "zones": [],
 	},
 	"ghost": {
 		"name": "Ghost", "sprite": "res://assets/enemies/ghost.png",
 		"max_hp": 10, "attack": 3, "defense": 0, "gold_min": 6, "gold_max": 10,
-		"status_attack": {"status": "silence", "chance": 0.3},
+		"status_attack": {"status": "silence", "chance": 0.3}, "zones": [],
+	},
+
+	# --- Frostpeak Ridge (north) ---
+	"ice_wraith": {
+		"name": "Ice Wraith", "sprite": "res://assets/enemies/ghost.png", "tint": Color(0.55, 0.8, 0.95, 1.0),
+		"max_hp": 16, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 10,
+		"status_attack": {"status": "paralysis", "chance": 0.25}, "zones": [World.Zone.FROSTPEAK],
+	},
+	"frost_wolf": {
+		"name": "Frost Wolf", "sprite": "res://assets/enemies/spider.png", "tint": Color(0.75, 0.85, 0.95, 1.0),
+		"max_hp": 14, "attack": 6, "defense": 0, "gold_min": 5, "gold_max": 9,
+		"status_attack": {"status": "sleep", "chance": 0.2}, "zones": [World.Zone.FROSTPEAK],
+	},
+	"stone_sentinel": {
+		"name": "Stone Sentinel", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.5, 0.5, 0.52, 1.0),
+		"max_hp": 22, "attack": 5, "defense": 4, "gold_min": 8, "gold_max": 14, "zones": [World.Zone.FROSTPEAK],
+	},
+
+	# --- Verdantwood Forest (east) ---
+	"forest_spirit": {
+		"name": "Forest Spirit", "sprite": "res://assets/enemies/ghost.png", "tint": Color(0.3, 0.75, 0.35, 1.0),
+		"max_hp": 15, "attack": 4, "defense": 1, "gold_min": 6, "gold_max": 10,
+		"status_attack": {"status": "confusion", "chance": 0.25}, "zones": [World.Zone.VERDANTWOOD],
+	},
+	"bandit": {
+		"name": "Bandit", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.55, 0.4, 0.25, 1.0),
+		"max_hp": 18, "attack": 6, "defense": 2, "gold_min": 10, "gold_max": 16, "zones": [World.Zone.VERDANTWOOD],
+	},
+	"corrupted_fauna": {
+		"name": "Corrupted Fauna", "sprite": "res://assets/enemies/spider.png", "tint": Color(0.35, 0.15, 0.4, 1.0),
+		"max_hp": 16, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 11,
+		"status_attack": {"status": "poison", "chance": 0.25}, "zones": [World.Zone.VERDANTWOOD],
+	},
+
+	# --- Emberfall Badlands (south) ---
+	"magma_slime": {
+		"name": "Magma Slime", "sprite": "res://assets/enemies/rat.png", "tint": Color(0.9, 0.35, 0.1, 1.0),
+		"max_hp": 16, "attack": 5, "defense": 0, "gold_min": 6, "gold_max": 10,
+		"status_attack": {"status": "poison", "chance": 0.2}, "zones": [World.Zone.BADLANDS],
+	},
+	"fire_drake": {
+		"name": "Fire Drake", "sprite": "res://assets/enemies/bat.png", "tint": Color(0.85, 0.3, 0.1, 1.0),
+		"max_hp": 18, "attack": 7, "defense": 1, "gold_min": 9, "gold_max": 15, "zones": [World.Zone.BADLANDS],
+	},
+	"ash_golem": {
+		"name": "Ash Golem", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.25, 0.22, 0.2, 1.0),
+		"max_hp": 24, "attack": 6, "defense": 4, "gold_min": 10, "gold_max": 16, "zones": [World.Zone.BADLANDS],
+	},
+
+	# --- Gloomfen Marsh (west) ---
+	"swamp_hag": {
+		"name": "Swamp Hag", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.35, 0.45, 0.3, 1.0),
+		"max_hp": 17, "attack": 5, "defense": 2, "gold_min": 7, "gold_max": 12,
+		"status_attack": {"status": "silence", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
+	},
+	"giant_insect": {
+		"name": "Giant Insect", "sprite": "res://assets/enemies/spider.png", "tint": Color(0.4, 0.55, 0.25, 1.0),
+		"max_hp": 15, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 10,
+		"status_attack": {"status": "poison", "chance": 0.3}, "zones": [World.Zone.GLOOMFEN],
+	},
+	"spectral_undead": {
+		"name": "Spectral Undead", "sprite": "res://assets/enemies/ghost.png", "tint": Color(0.55, 0.6, 0.55, 1.0),
+		"max_hp": 19, "attack": 6, "defense": 1, "gold_min": 8, "gold_max": 13,
+		"status_attack": {"status": "sleep", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
 	},
 }
 
+# The dungeon/castle/final-boss interior pool - unchanged behavior, still a
+# uniform pick over exactly the same 5 ids as before the biome revamp.
 func pick_random_id() -> String:
-	var keys := ENEMIES.keys()
+	var keys: Array = ENEMIES.keys().filter(func(id): return ENEMIES[id].zones.is_empty())
+	return keys[randi() % keys.size()]
+
+# The biome revamp's per-outer-biome pool (Golden Plains/VALLEY has no
+# entries and is never passed here - see overworld.gd's zone != VALLEY guard).
+func pick_random_id_for_zone(zone: int) -> String:
+	var keys: Array = ENEMIES.keys().filter(func(id): return ENEMIES[id].zones.has(zone))
 	return keys[randi() % keys.size()]
 
 # One boss per location, each reusing an existing enemy sprite with a tint

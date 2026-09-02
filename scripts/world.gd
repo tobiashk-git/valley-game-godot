@@ -5,11 +5,11 @@ extends Node
 # these never got real sprites in the JS version either, so there's no art
 # to port yet), dungeon/castle interiors, NPCs, and fog-of-war mazes.
 
-const OVERWORLD_WIDTH := 100
-const OVERWORLD_HEIGHT := 100
+const OVERWORLD_WIDTH := 200   # was 100 - the biome revamp needs room for
+const OVERWORLD_HEIGHT := 200  # was 100 - multiple distinct landmarks per biome
 const WORLD_CENTER_X := OVERWORLD_WIDTH / 2
 const WORLD_CENTER_Y := OVERWORLD_HEIGHT / 2
-const VALLEY_RADIUS := 15
+const VALLEY_RADIUS := 22 # was 15 - grows too, so the safe zone doesn't shrink relative to the doubled biomes
 
 const VILLAGE_BOUNDS := {
 	"x0": WORLD_CENTER_X - 8,
@@ -27,12 +27,20 @@ var VILLAGE_GATES := {
 	"west": Vector2i(VILLAGE_BOUNDS.x0, WORLD_CENTER_Y),
 }
 
-const DUNGEON_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - 30)
-const CASTLE_ENTRANCE := Vector2i(WORLD_CENTER_X + 35, WORLD_CENTER_Y)
+# Kept inside VALLEY_RADIUS (22) deliberately, not pushed out to use the
+# doubled map - the new river ring (see _paint_river_ring()) sits right at
+# VALLEY_RADIUS, and these 3 entrances predate the biome revamp with their
+# own passing tests that walk straight to them with no quest-gating. Pushing
+# them past the ring would silently lock already-working content behind an
+# unbuilt river-crossing quest. Offset 19 (was 30/35) still uses noticeably
+# more of the village's breathing room than before, just stays on the safe
+# side of the ring - revisit once the river-crossing quests actually exist.
+const DUNGEON_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - 19)
+const CASTLE_ENTRANCE := Vector2i(WORLD_CENTER_X + 19, WORLD_CENTER_Y)
 const HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y - 3)
 # Hidden until the altar reveals it (2 Magic Crystals) - an outer biome
 # zone, well away from the village and the other two entrances.
-const FINAL_BOSS_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y + 35)
+const FINAL_BOSS_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y + 19)
 
 # Elder (NE), Trader (SW), and the still-empty 3rd house (SE) — same corners
 # as VILLAGE_HOUSE_POSITIONS in game.js.
@@ -41,21 +49,39 @@ const TRADER_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y + 3)
 const EMPTY_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y + 3)
 
 # TileSet source ids — must match the order sources were added in
-# tools/setup_phase1.gd when the TileSet resource was built.
+# tools/setup_phase1.gd when the TileSet resource was built (0-8), plus 2
+# more added later by tools/setup_biome_revamp.gd (9-10, the river/ford).
 const SRC_GRASS := 0
-const SRC_SNOW := 1
-const SRC_SAND := 2
-const SRC_FOREST := 3
-const SRC_HILLS := 4
+const SRC_FROSTPEAK := 1   # was SRC_SNOW - same texture, same compass position (north)
+const SRC_BADLANDS := 2    # was SRC_SAND - same texture, same compass position (south)
+const SRC_VERDANTWOOD := 3 # was SRC_FOREST - same texture, now placed EAST (was west)
+const SRC_GLOOMFEN := 4    # was SRC_HILLS - hills_ground.png reused as a marsh placeholder, now placed WEST (was east)
 const SRC_PATH := 5
 const SRC_FENCE := 6
 const SRC_GATE := 7
 const SRC_ALTAR := 8
+const SRC_RIVER := 9  # solid - blocks the 4 outer biomes until a ford opens
+const SRC_FORD := 10  # walkable - what a river tile flips to via open_biome_path()
 
-enum Zone { VALLEY, SNOW, DESERT, FOREST, HILLS }
+enum Zone { VALLEY, FROSTPEAK, VERDANTWOOD, BADLANDS, GLOOMFEN }
+
+# One ford position per outer biome, at the midpoint of that biome's edge of
+# the river ring (see _paint_river_ring()) - var, not const, since it's
+# built from WORLD_CENTER_X/Y + VALLEY_RADIUS rather than being literal
+# values, same reasoning as VILLAGE_GATES below.
+var BIOME_FORDS := {
+	Zone.FROSTPEAK: Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - VALLEY_RADIUS),
+	Zone.BADLANDS: Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y + VALLEY_RADIUS),
+	Zone.GLOOMFEN: Vector2i(WORLD_CENTER_X - VALLEY_RADIUS, WORLD_CENTER_Y),
+	Zone.VERDANTWOOD: Vector2i(WORLD_CENTER_X + VALLEY_RADIUS, WORLD_CENTER_Y),
+}
 
 # Direct port of biomeAt() in game.js — which cardinal zone a tile belongs
-# to: a central valley, surrounded by four wedge-shaped biomes.
+# to: a central valley, surrounded by four wedge-shaped biomes. North/south
+# keep their original compass position (Frostpeak/Badlands); west/east are
+# swapped from the original Forest/Hills split so Verdantwood Forest sits
+# east and the new Gloomfen Marsh (replacing Hills entirely) sits west,
+# matching the biome revamp's requested layout.
 func biome_at(tx: int, ty: int) -> Dictionary:
 	var dx := tx - WORLD_CENTER_X
 	var dy := ty - WORLD_CENTER_Y
@@ -63,8 +89,8 @@ func biome_at(tx: int, ty: int) -> Dictionary:
 	if abs(dx) < VALLEY_RADIUS and abs(dy) < VALLEY_RADIUS:
 		return {"zone": Zone.VALLEY, "source": SRC_GRASS}
 	if abs(dy) >= abs(dx):
-		return {"zone": Zone.SNOW, "source": SRC_SNOW} if dy < 0 else {"zone": Zone.DESERT, "source": SRC_SAND}
-	return {"zone": Zone.FOREST, "source": SRC_FOREST} if dx < 0 else {"zone": Zone.HILLS, "source": SRC_HILLS}
+		return {"zone": Zone.FROSTPEAK, "source": SRC_FROSTPEAK} if dy < 0 else {"zone": Zone.BADLANDS, "source": SRC_BADLANDS}
+	return {"zone": Zone.GLOOMFEN, "source": SRC_GLOOMFEN} if dx < 0 else {"zone": Zone.VERDANTWOOD, "source": SRC_VERDANTWOOD}
 
 # Just the biome fill, no village/altar - shared by World 1's full
 # build_overworld_map() below and World 2 (overworld2.gd), which skips the
@@ -122,6 +148,30 @@ func build_overworld_map(tilemap: TileMapLayer) -> void:
 	# The altar itself, dead center.
 	tilemap.set_cell(ALTAR_POS, SRC_ALTAR, Vector2i(0, 0))
 
+	_paint_river_ring(tilemap)
+
+# A 1-tile-thick square outline of SRC_RIVER right at the valley/outer-biome
+# seam (every tile where dx or dy == ±VALLEY_RADIUS), blocking all 4 outer
+# biomes until their ford opens (see open_biome_path()). World-1-only for
+# now, same as the village/fence/altar above - World 2 (overworld2.gd, which
+# calls build_biome_layer() directly, skipping this function) doesn't get a
+# river yet.
+func _paint_river_ring(tilemap: TileMapLayer) -> void:
+	for d in range(-VALLEY_RADIUS, VALLEY_RADIUS + 1):
+		tilemap.set_cell(Vector2i(WORLD_CENTER_X + d, WORLD_CENTER_Y - VALLEY_RADIUS), SRC_RIVER, Vector2i(0, 0)) # north edge
+		tilemap.set_cell(Vector2i(WORLD_CENTER_X + d, WORLD_CENTER_Y + VALLEY_RADIUS), SRC_RIVER, Vector2i(0, 0)) # south edge
+		tilemap.set_cell(Vector2i(WORLD_CENTER_X - VALLEY_RADIUS, WORLD_CENTER_Y + d), SRC_RIVER, Vector2i(0, 0)) # west edge
+		tilemap.set_cell(Vector2i(WORLD_CENTER_X + VALLEY_RADIUS, WORLD_CENTER_Y + d), SRC_RIVER, Vector2i(0, 0)) # east edge
+
+# Called once per already-unlocked biome from overworld.gd's _ready() (the
+# way open_gates() already is for the village) - flips that biome's ford
+# from SRC_RIVER (blocked) to SRC_FORD (walkable). No quest sets
+# GameState.biome_paths_open yet in this phase; this just needs to exist and
+# be independently flippable/verifiable, same as village_gates_open did
+# before meet_villagers was built.
+func open_biome_path(tilemap: TileMapLayer, zone: int) -> void:
+	tilemap.set_cell(BIOME_FORDS[zone], SRC_FORD, Vector2i(0, 0))
+
 # Shared by overworld.gd and overworld2.gd: 4 long invisible colliders, one
 # along each edge of the OVERWORLD_WIDTH x OVERWORLD_HEIGHT grid, since a
 # fully-painted map otherwise has nothing at all stopping the player from
@@ -160,18 +210,32 @@ func open_gates(tilemap: TileMapLayer) -> void:
 # real sprites in the JS version either. Returns an Array of
 # {"pos": Vector2i, "scene": "Tree"|"Rock"} — the caller instances the actual
 # prop scenes, this function only decides where.
+func _reserve_entrance_clearance(occupied: Dictionary, entrance: Vector2i) -> void:
+	# A 2-tile buffer around the entrance itself, not just its own tile - the
+	# tests (and real players) approach these in a straight line, and with
+	# the biome revamp's doubled scatter density plus entrances now sitting
+	# inside VALLEY_RADIUS instead of past it, a tree could otherwise land
+	# directly in that approach path.
+	for dy in range(-2, 3):
+		for dx in range(-2, 3):
+			occupied[entrance + Vector2i(dx, dy)] = true
+
 func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 	var occupied := {}
 	# entrance markers are placed separately (not painted onto the tilemap),
 	# so they need to be reserved here the same way the JS version deletes
 	# any resource that landed on a POI after the fact.
-	occupied[DUNGEON_ENTRANCE] = true
-	occupied[CASTLE_ENTRANCE] = true
-	occupied[HOUSE_ENTRANCE] = true
+	_reserve_entrance_clearance(occupied, DUNGEON_ENTRANCE)
+	_reserve_entrance_clearance(occupied, CASTLE_ENTRANCE)
+	_reserve_entrance_clearance(occupied, HOUSE_ENTRANCE)
+	_reserve_entrance_clearance(occupied, FINAL_BOSS_ENTRANCE)
 
+	# Was 70/40 - scaled ~2.15x with the valley's new area (radius 15->22,
+	# area grows with radius²) so the enlarged valley doesn't end up feeling
+	# sparser than it did before the biome revamp's map-size increase.
 	var result: Array = []
-	result.append_array(_scatter(tilemap, 70, "Tree", occupied))
-	result.append_array(_scatter(tilemap, 40, "Rock", occupied))
+	result.append_array(_scatter(tilemap, 150, "Tree", occupied))
+	result.append_array(_scatter(tilemap, 86, "Rock", occupied))
 	return result
 
 func _is_in_village(pos: Vector2i) -> bool:

@@ -9,7 +9,7 @@
 [node name="FinalBoss" type="Node2D" unique_id=1671836562]
 script = ExtResource("1_bla8t")
 boss_id = "final_boss"
-entrance_tile = Vector2i(50, 85)
+entrance_tile = Vector2i(100, 119)
 poi_id = "final_boss"
 
 [node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=819100030]

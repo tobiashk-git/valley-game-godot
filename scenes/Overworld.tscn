@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/overworld.gd" id="1_ff6um"]
 [ext_resource type="Texture2D" path="res://assets/grass.png" id="2_vvo0y"]
 [ext_resource type="Texture2D" path="res://assets/snow.png" id="3_8xaq6"]
+[ext_resource type="Texture2D" path="res://assets/ford.png" id="4_8xaq6"]
 [ext_resource type="Texture2D" path="res://assets/sand.png" id="4_dysil"]
 [ext_resource type="Texture2D" path="res://assets/forest_ground.png" id="5_8wcqk"]
 [ext_resource type="Texture2D" path="res://assets/hills_ground.png" id="6_667vx"]
@@ -11,6 +12,7 @@
 [ext_resource type="Texture2D" path="res://assets/gate.png" id="9_r1q4c"]
 [ext_resource type="Texture2D" path="res://assets/altar.png" id="10_8gr22"]
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="11_2ltwc"]
+[ext_resource type="Texture2D" path="res://assets/river.png" id="12_dysil"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="12_pv64x"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bj42m"]
@@ -25,6 +27,11 @@ texture_region_size = Vector2i(32, 32)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s5cm4"]
 texture = ExtResource("3_8xaq6")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_8wcqk"]
+texture = ExtResource("4_8xaq6")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 
@@ -66,6 +73,12 @@ texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_667vx"]
+texture = ExtResource("12_dysil")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
 [sub_resource type="TileSet" id="TileSet_1y5gq"]
 tile_size = Vector2i(32, 32)
 physics_layer_0/collision_layer = 1
@@ -78,6 +91,8 @@ sources/5 = SubResource("TileSetAtlasSource_od55l")
 sources/6 = SubResource("TileSetAtlasSource_ovrfq")
 sources/7 = SubResource("TileSetAtlasSource_0747q")
 sources/8 = SubResource("TileSetAtlasSource_imkcf")
+sources/9 = SubResource("TileSetAtlasSource_667vx")
+sources/10 = SubResource("TileSetAtlasSource_8wcqk")
 
 [node name="Overworld" type="Node2D" unique_id=310149965]
 script = ExtResource("1_ff6um")

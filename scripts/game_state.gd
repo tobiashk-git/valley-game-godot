@@ -32,6 +32,14 @@ var discovered_pois: Dictionary = {"house": true, "village": true, "dungeon": fa
 # opens the portal to World 2. See altar.gd.
 var world_progress: Dictionary = {"final_boss_revealed": false, "world2_unlocked": false}
 
+# The biome revamp's river dividers - each outer biome starts blocked by a
+# river with one ford (see world.gd's _paint_river_ring()/open_biome_path()).
+# No quest sets any of these true yet in this phase (geometry now, quests
+# later, matching how village_gates_open existed before meet_villagers) -
+# these are here purely so the mechanism exists and is independently
+# flippable/verifiable.
+var biome_paths_open: Dictionary = {"frostpeak": false, "verdantwood": false, "badlands": false, "gloomfen": false}
+
 func set_next_spawn(pos: Vector2) -> void:
 	next_spawn_position = pos
 

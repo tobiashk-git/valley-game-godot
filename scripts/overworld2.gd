@@ -15,6 +15,8 @@ const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 @onready var ysort: Node2D = $YSort
 @onready var player: CharacterBody2D = $YSort/Player
 
+var _last_tile := Vector2i(-9999, -9999)
+
 func _tile_center(pos: Vector2i) -> Vector2:
 	return Vector2(pos.x * 32 + 16, pos.y * 32 + 16)
 
@@ -46,3 +48,14 @@ func _ready() -> void:
 	cam.limit_right = World.OVERWORLD_WIDTH * 32
 	cam.limit_bottom = World.OVERWORLD_HEIGHT * 32
 	cam.reset_smoothing()
+
+# Same tile-change hook as overworld.gd - see its comment for why. World 2
+# has no river/fords of its own yet (Phase 1 of the biome revamp is World-1
+# scoped for that part), just the same per-biome encounter pool.
+func _process(_delta: float) -> void:
+	var current_tile := Vector2i(int(player.position.x / 32), int(player.position.y / 32))
+	if current_tile != _last_tile:
+		_last_tile = current_tile
+		var zone: int = World.biome_at(current_tile.x, current_tile.y).zone
+		if zone != World.Zone.VALLEY:
+			Combat.check_random_encounter(zone)

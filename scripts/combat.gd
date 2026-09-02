@@ -54,7 +54,7 @@ func _join_names(names: Array) -> String:
 		head += names[i]
 	return "A %s, and a %s" % [head, names[-1]]
 
-func _pick_encounter_group() -> Array:
+func _pick_encounter_group(zone: int = -1) -> Array:
 	var roll := randf()
 	var size := 1
 	if roll < 0.10:
@@ -63,10 +63,14 @@ func _pick_encounter_group() -> Array:
 		size = 2
 	var group: Array = []
 	for i in range(size):
-		group.append(Enemies.pick_random_id())
+		group.append(Enemies.pick_random_id() if zone == -1 else Enemies.pick_random_id_for_zone(zone))
 	return group
 
-func check_random_encounter() -> void:
+# zone: an outer-biome World.Zone value from the overworld's per-tile
+# check (see overworld.gd/overworld2.gd), or the default -1 for every
+# existing interior call site (maze_interior.gd) - keeps their behavior
+# byte-for-byte unchanged, still drawing from the original 5-enemy pool.
+func check_random_encounter(zone: int = -1) -> void:
 	if in_combat:
 		return
 	_steps_since_encounter += 1
@@ -74,7 +78,7 @@ func check_random_encounter() -> void:
 		return
 	if randf() < ENCOUNTER_CHANCE:
 		_steps_since_encounter = 0
-		start_combat(_pick_encounter_group())
+		start_combat(_pick_encounter_group(zone))
 
 func _build_enemy_entry(def: Dictionary) -> Dictionary:
 	return {

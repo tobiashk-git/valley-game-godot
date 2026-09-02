@@ -13,6 +13,14 @@ const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
 @onready var player: CharacterBody2D = $YSort/Player
 
 var _final_boss_entrance_spawned := false
+var _last_tile := Vector2i(-9999, -9999)
+
+const ZONE_KEYS := {
+	World.Zone.FROSTPEAK: "frostpeak",
+	World.Zone.VERDANTWOOD: "verdantwood",
+	World.Zone.BADLANDS: "badlands",
+	World.Zone.GLOOMFEN: "gloomfen",
+}
 
 func _tile_center(pos: Vector2i) -> Vector2:
 	return Vector2(pos.x * 32 + 16, pos.y * 32 + 16)
@@ -49,6 +57,9 @@ func _ready() -> void:
 	World.add_world_boundary(self)
 	if GameState.village_gates_open:
 		World.open_gates(tilemap)
+	for zone in ZONE_KEYS:
+		if GameState.biome_paths_open[ZONE_KEYS[zone]]:
+			World.open_biome_path(tilemap, zone)
 
 	for entry in World.scatter_trees_and_rocks(tilemap):
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE
@@ -103,3 +114,17 @@ func _ready() -> void:
 	# frames — reset_smoothing() snaps it straight to the new position
 	# instead. Also needed at every future teleport (portals, fast travel).
 	cam.reset_smoothing()
+
+# The biome revamp's random encounters - the open overworld had none at all
+# before this (Combat.check_random_encounter() was only ever called from
+# maze_interior.gd). Golden Plains (Zone.VALLEY, which includes the village)
+# stays encounter-free by simply never calling it there - no special-casing
+# needed beyond the guard below, and it's what keeps the existing "walk many
+# steps across the village, confirm zero encounters" test passing unchanged.
+func _process(_delta: float) -> void:
+	var current_tile := Vector2i(int(player.position.x / 32), int(player.position.y / 32))
+	if current_tile != _last_tile:
+		_last_tile = current_tile
+		var zone: int = World.biome_at(current_tile.x, current_tile.y).zone
+		if zone != World.Zone.VALLEY:
+			Combat.check_random_encounter(zone)
