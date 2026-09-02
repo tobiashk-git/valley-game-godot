@@ -6,3 +6,9 @@
 # (docs/) when it re-scans its own icon PNGs - not needed to serve the
 # build, only docs/index.html/js/wasm/pck/png themselves are.
 docs/*.import
+
+# assets_source/ is raw, unmodified staged material for a later art
+# integration pass (see assets_source/lpc/CREDITS.md) - deliberately kept
+# outside Godot's own asset pipeline, so any .import cache files a
+# `--headless --import` rescan generates for it aren't wanted either.
+assets_source/**/*.import
