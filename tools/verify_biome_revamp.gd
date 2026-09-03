@@ -32,6 +32,13 @@ func _clear_corridor(overworld: Node2D, player: CharacterBody2D, x: float) -> vo
 	await process_frame
 	await process_frame
 
+func _clear_combat(cb: Node) -> void:
+	var attempts := 0
+	while cb.in_combat and attempts < 10:
+		cb.player_run()
+		await physics_frame
+		attempts += 1
+
 func _initialize() -> void:
 	var world: Node = root.get_node("World")
 	var game_state: Node = root.get_node("GameState")
@@ -128,7 +135,15 @@ func _initialize() -> void:
 	await _clear_corridor(overworld2, player2, start2_x)
 	player2.position = Vector2(start2_x, (world.WORLD_CENTER_Y - world.VALLEY_RADIUS + 5) * 32 + 16)
 	cam2.reset_smoothing()
-	await _walk(player2, "move_up", 120) # 5 tiles to the ring + a few more past it
+	# A fixed tick count here flaked once (density-driven, same class of
+	# issue as verify_frostpeak_interior.gd's ford crossing) - retry in
+	# chunks against the actual position instead of trusting one walk to
+	# cover the distance.
+	var walk_attempts := 0
+	while player2.position.y >= river_y and walk_attempts < 8:
+		await _walk(player2, "move_up", 100)
+		await _clear_combat(combat)
+		walk_attempts += 1
 	print("Frostpeak ford is walkable once opened (crossed north of the ring): ", player2.position.y < river_y)
 	root.get_texture().get_image().save_png("res://verify_biome_ford_crossed.png")
 
