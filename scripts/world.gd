@@ -466,31 +466,47 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	result.append_array(_scatter(tilemap, 22, "BadlandsTumbleweed", occupied, Zone.BADLANDS, SRC_BADLANDS, bounds, false, elevated_buffer, flush_buffer))
 	return result
 
-# Phase 1 "overland dungeon" prototype: a hand-picked box in Verdantwood's
-# north half, carved with the same DungeonGen room+corridor algorithm the
-# real Dungeon/Castle/biome interiors use (rooms become glades, corridors
-# become paths) - but painted directly onto the LIVE OVERWORLD tilemap
-# instead of a fresh interior scene, and only the WALL cells get painted (as
-# a new solid SRC_FOREST_WALL source); FLOOR/DOOR cells are left alone since
-# they're already plain SRC_VERDANTWOOD ground from build_biome_layer(). One
-# glade (the "boss room", DungeonGen's biggest/farthest room) is gated: its
-# only connecting corridor tile is blocked by a FallenLog prop guarded by a
-# stationary Boss.tscn guardian, cleared once the guardian is defeated.
+# Phase 1 "overland dungeon" prototype (now expanded - see below): a
+# hand-picked box in Verdantwood's north half, carved with the same
+# DungeonGen room+corridor algorithm the real Dungeon/Castle/biome interiors
+# use (rooms become glades, corridors become paths) - but painted directly
+# onto the LIVE OVERWORLD tilemap instead of a fresh interior scene, and only
+# the WALL cells get painted (as a new solid SRC_FOREST_WALL source);
+# FLOOR/DOOR cells are left alone since they're already plain SRC_VERDANTWOOD
+# ground from build_biome_layer(). One glade (the "boss room", DungeonGen's
+# biggest/farthest room) is gated: its only connecting corridor tile is
+# blocked by a FallenLog prop guarded by a stationary Boss.tscn guardian,
+# cleared once the guardian is defeated.
 #
-# Origin/size chosen and checked directly against biome_at()'s wedge test and
-# paint_outer_biome_mountains()'s band test: box spans world x:133-149,
-# y:74-91 -> dx:33-49, dy:-26..-9. The tightest corner (dx=33, |dy|=26) still
-# clears the wedge test (|dy|<dx, 7-tile margin) and the mountain band
-# (|dx-|dy||=7 > MOUNTAIN_BAND(4), 3-tile margin). Comfortably clears
-# VALLEY_RADIUS (22) and every fixed Verdantwood landmark (all near y~100-104,
-# 9+ tiles south of this box). DungeonGen always places its entrance room in
-# the bottom ~35% of its own local grid with the door on the southmost row -
-# offset into world coords that puts the maze's one entrance at the box's
-# south edge, facing back toward the rest of open Verdantwood - a free fit,
-# not a forced one.
-const VERDANTWOOD_MAZE_ORIGIN := Vector2i(133, 74)
-const VERDANTWOOD_MAZE_WIDTH := 17
-const VERDANTWOOD_MAZE_HEIGHT := 18
+# Expanded per direct user request ("expand the northern forest") from the
+# original 17x18 test patch. The wedge only gets taller (more north-south
+# room) the farther out (larger dx) you go - biome_at()'s test is
+# `abs(dy) >= abs(dx)` fails -> stays Verdantwood, i.e. dx must exceed |dy| -
+# so growing north-south extent while staying close to the valley isn't
+# possible with a plain rectangle; anchoring the near edge further out (dx=40
+# instead of 33) buys the row for a genuinely bigger box rather than trying
+# to keep the old near-valley edge. Growing WIDTH (dx) is unconstrained by
+# comparison, so most of the growth went there.
+#
+# Origin/size checked directly against biome_at()'s wedge test and
+# paint_outer_biome_mountains()'s band test at every corner: box spans world
+# x:140-190, y:70-91 -> dx:40-90, dy:-30..-9. The tightest corner (dx=40,
+# |dy|=30) clears the wedge test (|dy|<dx, 10-tile margin) and the mountain
+# band (|dx-|dy||=10 > MOUNTAIN_BAND(4), 6-tile margin) - both wider margins
+# than the original box had. Every other corner has strictly more margin on
+# both tests (dx grows toward the far edge, |dy| shrinks toward the
+# equator-side edge). Comfortably clears VALLEY_RADIUS (22), OVERWORLD_WIDTH's
+# own bound (dx=90 well under the map-edge max of 99), and every fixed
+# Verdantwood landmark - VERDANTWOOD_INTERIOR_ENTRANCE (dx=30) is now 10
+# tiles clear of the box's own near edge, on top of its own clearance
+# reservation. door_y (origin.y + height - 1 = 91) lands on the exact same
+# world row as the original box's entrance, so the maze's one entrance still
+# faces back toward the rest of open Verdantwood along a familiar approach -
+# just spread across a much wider stretch of that row now, since door_x is
+# randomized across the new WIDTH.
+const VERDANTWOOD_MAZE_ORIGIN := Vector2i(140, 70)
+const VERDANTWOOD_MAZE_WIDTH := 51
+const VERDANTWOOD_MAZE_HEIGHT := 22
 const VERDANTWOOD_MAZE_RESERVE_BUFFER := 2
 const VERDANTWOOD_MAZE_GUARDIAN_ID := "verdantwood_maze_guardian_1"
 
