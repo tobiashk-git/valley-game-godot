@@ -17,10 +17,39 @@ func _walk(player: CharacterBody2D, action: String, frames: int) -> void:
 func _clear_corridor(overworld: Node2D, player: CharacterBody2D, x: float) -> void:
 	var ysort: Node2D = overworld.get_node("YSort")
 	for child in ysort.get_children():
-		if child != player and child is Node2D and absf(child.position.x - x) < 56.0:
+		if child != player and child is Node2D and absf(child.position.x - x) < 100.0:
 			child.queue_free()
 	await process_frame
 	await process_frame
+
+# scatter_biome_obstacles() has no fixed seed - an IceBoulder can
+# occasionally land close enough to FROSTPEAK_INTERIOR_ENTRANCE to
+# destabilize the fixed teleport-and-interact approach below even with the
+# gameplay-side clearance reservation alone (confirmed directly for the
+# equivalent Verdantwood/MightyOak case - a ~1-in-6 intermittent failure
+# that _clear_corridor()'s own column-clear didn't fully cover). Clear a
+# generous radius around one fixed world position - same "fix belongs in
+# the test" reasoning as _clear_corridor() above, just keyed to a point.
+func _clear_point(overworld: Node2D, player: CharacterBody2D, pos: Vector2, radius: float) -> void:
+	var ysort: Node2D = overworld.get_node("YSort")
+	for child in ysort.get_children():
+		if child != player and child is Node2D and child.position.distance_to(pos) < radius:
+			child.queue_free()
+	await process_frame
+	await process_frame
+
+# Loop (not a single call) - a single physics_frame isn't always enough for
+# combat.in_combat to actually settle back to false after player_run(),
+# confirmed directly this session on the equivalent Verdantwood/MightyOak
+# case (visually caught mid-battle in a real-rendered run - a Stone Sentinel
+# encounter firing near the entrance approach and not being fully cleared
+# before the portal interact).
+func _clear_combat(cb: Node) -> void:
+	var attempts := 0
+	while cb.in_combat and attempts < 10:
+		cb.player_run()
+		await physics_frame
+		attempts += 1
 
 func _initialize() -> void:
 	var world: Node = root.get_node("World")
@@ -128,12 +157,17 @@ func _initialize() -> void:
 	player.position = Vector2(center_x, (world.WORLD_CENTER_Y - 3) * 32 + 16)
 	cam.reset_smoothing()
 	# village edge (-3) to just past the ring (-25): 22 tiles = 704px, ~264
-	# ticks minimum at ~2.67px/tick - generous margin. A single-file straight
-	# walk the WHOLE way to the entrance would just slide around its 1-tile
-	# collision rather than stopping there (same lesson as Phase 1's
-	# DUNGEON_ENTRANCE) - teleport for the actual approach instead, matching
-	# verify_castle.gd/verify_dungeon.gd's convention.
-	await _walk(player, "move_up", 350)
+	# ticks minimum at ~2.67px/tick. Bumped from 350 to 400 (was already
+	# "generous margin", but IceBoulder scatter now means this walk can
+	# occasionally graze a boulder just outside _clear_corridor()'s cleared
+	# band and lose a few ticks' worth of distance to deflection - confirmed
+	# directly, a real (if low-severity) flake on this exact assertion). A
+	# single-file straight walk the WHOLE way to the entrance would just
+	# slide around its 1-tile collision rather than stopping there (same
+	# lesson as Phase 1's DUNGEON_ENTRANCE) - teleport for the actual
+	# approach instead, matching verify_castle.gd/verify_dungeon.gd's
+	# convention.
+	await _walk(player, "move_up", 400)
 	var river_y: float = float(world.WORLD_CENTER_Y - world.VALLEY_RADIUS) * 32.0
 	print("Crossed the now-open ford into Frostpeak territory: ", player.position.y < river_y)
 	# That walk crosses real Frostpeak territory (past the ring), where
@@ -141,10 +175,10 @@ func _initialize() -> void:
 	# is an autoload, so leaving it in_combat would permanently block the
 	# watchtower portal's own "not Combat.in_combat" guard (same lesson as
 	# Phase 1's verify_biome_revamp.gd).
-	if combat.in_combat:
-		combat.player_run()
-		await physics_frame
+	await _clear_combat(combat)
 
+	var entrance_world_pos: Vector2 = Vector2(world.FROSTPEAK_INTERIOR_ENTRANCE.x * 32 + 16, world.FROSTPEAK_INTERIOR_ENTRANCE.y * 32 + 16)
+	await _clear_point(overworld, player, entrance_world_pos, 200.0)
 	var approach: Vector2i = world.FROSTPEAK_INTERIOR_ENTRANCE + Vector2i(0, 2)
 	player.position = Vector2(approach.x * 32 + 16, approach.y * 32 + 16)
 	cam.reset_smoothing()
@@ -154,13 +188,9 @@ func _initialize() -> void:
 	# can roll its own encounter during these settle frames - if uncleared,
 	# player.gd zeroes velocity for the entire walk below, leaving the
 	# player stranded 2 tiles short of the portal's trigger range.
-	if combat.in_combat:
-		combat.player_run()
-		await physics_frame
+	await _clear_combat(combat)
 	await _walk(player, "move_up", 20) # short approach, proves movement isn't broken near the entrance
-	if combat.in_combat:
-		combat.player_run()
-		await physics_frame
+	await _clear_combat(combat)
 	# A straight walk into a single-tile obstacle is inherently variable
 	# (move_and_slide() can deflect sideways enough to land just outside the
 	# portal's 56x56 trigger, or just inside it, depending on exact contact
@@ -172,15 +202,20 @@ func _initialize() -> void:
 	var entrance_center: Vector2 = Vector2(world.FROSTPEAK_INTERIOR_ENTRANCE.x * 32 + 16, world.FROSTPEAK_INTERIOR_ENTRANCE.y * 32 + 16)
 	player.position = entrance_center + Vector2(0, 20)
 	await process_frame
-	if combat.in_combat:
-		combat.player_run()
-		await physics_frame
+	await _clear_combat(combat)
 
-	Input.action_press("interact")
-	await process_frame
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
+	# Retry the interact press a few times, same reasoning as the
+	# strengthened _clear_combat() above - a real player whose first E press
+	# lands during a one-frame UI/combat-clearing race just presses E again.
+	var interact_attempts := 0
+	while current_scene.name != "FrostpeakInterior" and interact_attempts < 5:
+		await _clear_combat(combat)
+		Input.action_press("interact")
+		await process_frame
+		await process_frame
+		Input.action_release("interact")
+		await process_frame
+		interact_attempts += 1
 	print("Entered FrostpeakInterior via the real portal: ", current_scene.name == "FrostpeakInterior")
 	print("Frostpeak interior marked discovered: ", game_state.discovered_pois.frostpeak_interior == true)
 	root.get_texture().get_image().save_png("res://verify_frostpeak_entrance.png")

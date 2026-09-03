@@ -361,9 +361,9 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 
 # Outer-biome counterpart to scatter_trees_and_rocks() above - impassable
 # navigate-around obstacles scattered into the 4 outer biomes (mighty oaks in
-# Verdantwood so far; ice boulders/lakes for the other 3 are future passes).
-# Called separately from scatter_trees_and_rocks() by overworld.gd/
-# overworld2.gd, same pattern.
+# Verdantwood, ice boulders in Frostpeak so far; lakes for the other 2 are a
+# future pass). Called separately from scatter_trees_and_rocks() by
+# overworld.gd/overworld2.gd, same pattern.
 # Distance from center a scatter's bounding box reaches (see
 # scatter_biome_obstacles() below) - comfortably past the interior
 # entrances' own distance-30 placement, without wastefully sampling all the
@@ -374,6 +374,8 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	var occupied := {}
 	_reserve_entrance_clearance(occupied, VERDANTWOOD_INTERIOR_ENTRANCE, 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.VERDANTWOOD])
+	_reserve_entrance_clearance(occupied, FROSTPEAK_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.FROSTPEAK])
 
 	# A tight box around the wedge instead of the full 200x200 map - outer
 	# biomes are huge and mostly empty past this distance, so a full-map
@@ -383,6 +385,7 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 
 	var result: Array = []
 	result.append_array(_scatter(tilemap, 18, "MightyOak", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))
+	result.append_array(_scatter(tilemap, 18, "IceBoulder", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds))
 	return result
 
 func _is_in_village(pos: Vector2i) -> bool:

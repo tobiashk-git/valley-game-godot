@@ -78,6 +78,7 @@ func _initialize() -> void:
 	# Zone.VERDANTWOOD via World.scatter_biome_obstacles(), same single-tile
 	# collision convention as every prop above despite the larger visual size.
 	_build_sprite_prop("MightyOak", "res://assets/mighty_oak.png", 629.0, 598.0, 0.134)
+	_build_sprite_prop("IceBoulder", "res://assets/ice_boulder.png", 477.0, 519.0, 0.116)
 
 	print("=== Props setup complete ===")
 	quit()

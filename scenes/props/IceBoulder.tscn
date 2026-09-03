@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ice_boulder.png" id="1_675ft"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_j215b"]
+size = Vector2(28, 28)
+
+[node name="IceBoulder" type="StaticBody2D" unique_id=347395204]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=792330185]
+scale = Vector2(0.116, 0.116)
+texture = ExtResource("1_675ft")
+offset = Vector2(0, -14.102)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1253453100]
+shape = SubResource("RectangleShape2D_j215b")

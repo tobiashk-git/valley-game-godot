@@ -10,6 +10,7 @@ extends Node2D
 const TREE_SCENE := preload("res://scenes/props/Tree.tscn")
 const ROCK_SCENE := preload("res://scenes/props/Rock.tscn")
 const MIGHTY_OAK_SCENE := preload("res://scenes/props/MightyOak.tscn")
+const ICE_BOULDER_SCENE := preload("res://scenes/props/IceBoulder.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 
 @onready var tilemap: TileMapLayer = $TileMapLayer
@@ -38,7 +39,8 @@ func _ready() -> void:
 		ysort.add_child(instance)
 
 	for entry in World.scatter_biome_obstacles(tilemap):
-		var instance: Node2D = MIGHTY_OAK_SCENE.instantiate()
+		var obstacle_scene: PackedScene = MIGHTY_OAK_SCENE if entry.scene == "MightyOak" else ICE_BOULDER_SCENE
+		var instance: Node2D = obstacle_scene.instantiate()
 		instance.position = _tile_center(entry.pos)
 		ysort.add_child(instance)
 
