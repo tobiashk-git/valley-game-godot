@@ -13,6 +13,7 @@ const ANCIENT_BARROW_ENTRANCE_SCENE := preload("res://scenes/props/AncientBarrow
 const MIGHTY_OAK_SCENE := preload("res://scenes/props/MightyOak.tscn")
 const ICE_BOULDER_SCENE := preload("res://scenes/props/IceBoulder.tscn")
 const ICE_CRYSTAL_SHARD_SCENE := preload("res://scenes/props/IceCrystalShard.tscn")
+const ICE_POOL_SCENE := preload("res://scenes/props/IcePool.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
@@ -112,6 +113,7 @@ func _ready() -> void:
 		"MightyOak": MIGHTY_OAK_SCENE,
 		"IceBoulder": ICE_BOULDER_SCENE,
 		"IceCrystalShard": ICE_CRYSTAL_SHARD_SCENE,
+		"IcePool": ICE_POOL_SCENE,
 	}
 	for entry in World.scatter_biome_obstacles(tilemap):
 		_spawn_prop(obstacle_scenes[entry.scene], entry.pos)

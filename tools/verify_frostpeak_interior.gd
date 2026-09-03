@@ -17,7 +17,7 @@ func _walk(player: CharacterBody2D, action: String, frames: int) -> void:
 func _clear_corridor(overworld: Node2D, player: CharacterBody2D, x: float) -> void:
 	var ysort: Node2D = overworld.get_node("YSort")
 	for child in ysort.get_children():
-		if child != player and child is Node2D and absf(child.position.x - x) < 100.0:
+		if child != player and child is Node2D and absf(child.position.x - x) < 160.0:
 			child.queue_free()
 	await process_frame
 	await process_frame
@@ -157,18 +157,24 @@ func _initialize() -> void:
 	player.position = Vector2(center_x, (world.WORLD_CENTER_Y - 3) * 32 + 16)
 	cam.reset_smoothing()
 	# village edge (-3) to just past the ring (-25): 22 tiles = 704px, ~264
-	# ticks minimum at ~2.67px/tick. Bumped from 350 to 400 (was already
-	# "generous margin", but IceBoulder scatter now means this walk can
-	# occasionally graze a boulder just outside _clear_corridor()'s cleared
-	# band and lose a few ticks' worth of distance to deflection - confirmed
-	# directly, a real (if low-severity) flake on this exact assertion). A
-	# single-file straight walk the WHOLE way to the entrance would just
-	# slide around its 1-tile collision rather than stopping there (same
-	# lesson as Phase 1's DUNGEON_ENTRANCE) - teleport for the actual
-	# approach instead, matching verify_castle.gd/verify_dungeon.gd's
-	# convention.
-	await _walk(player, "move_up", 400)
+	# ticks minimum at ~2.67px/tick. A fixed tick count kept flaking as
+	# Frostpeak's obstacle density grew (now 3 scattered types) - even
+	# generous margin (bumped 350->400->450) still occasionally lost a few
+	# ticks' worth of distance to deflection off something just outside
+	# _clear_corridor()'s cleared band. Retry in chunks instead of guessing
+	# a single count that's "enough" - walk 100 ticks at a time, clearing
+	# combat between attempts, until the actual distance is covered or a
+	# generous attempt cap is hit. A single-file straight walk the WHOLE way
+	# to the entrance would just slide around its 1-tile collision rather
+	# than stopping there (same lesson as Phase 1's DUNGEON_ENTRANCE) -
+	# teleport for the actual approach instead, matching
+	# verify_castle.gd/verify_dungeon.gd's convention.
 	var river_y: float = float(world.WORLD_CENTER_Y - world.VALLEY_RADIUS) * 32.0
+	var walk_attempts := 0
+	while player.position.y >= river_y and walk_attempts < 8:
+		await _walk(player, "move_up", 100)
+		await _clear_combat(combat)
+		walk_attempts += 1
 	print("Crossed the now-open ford into Frostpeak territory: ", player.position.y < river_y)
 	# That walk crosses real Frostpeak territory (past the ring), where
 	# outdoor encounters are live - it can genuinely trigger combat. Combat

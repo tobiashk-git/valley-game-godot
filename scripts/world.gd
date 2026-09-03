@@ -390,6 +390,9 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	# shared across every _scatter() call in this function, so this can't
 	# land on an already-placed IceBoulder.
 	result.append_array(_scatter(tilemap, 22, "IceCrystalShard", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds))
+	# Third Frostpeak obstacle - a flat meltwater pool sitting in the snow,
+	# unlike the two raised/elevated obstacles above.
+	result.append_array(_scatter(tilemap, 16, "IcePool", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds))
 	return result
 
 func _is_in_village(pos: Vector2i) -> bool:

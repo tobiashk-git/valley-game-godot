@@ -12,6 +12,7 @@ const ROCK_SCENE := preload("res://scenes/props/Rock.tscn")
 const MIGHTY_OAK_SCENE := preload("res://scenes/props/MightyOak.tscn")
 const ICE_BOULDER_SCENE := preload("res://scenes/props/IceBoulder.tscn")
 const ICE_CRYSTAL_SHARD_SCENE := preload("res://scenes/props/IceCrystalShard.tscn")
+const ICE_POOL_SCENE := preload("res://scenes/props/IcePool.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 
 @onready var tilemap: TileMapLayer = $TileMapLayer
@@ -43,6 +44,7 @@ func _ready() -> void:
 		"MightyOak": MIGHTY_OAK_SCENE,
 		"IceBoulder": ICE_BOULDER_SCENE,
 		"IceCrystalShard": ICE_CRYSTAL_SHARD_SCENE,
+		"IcePool": ICE_POOL_SCENE,
 	}
 	for entry in World.scatter_biome_obstacles(tilemap):
 		var instance: Node2D = obstacle_scenes[entry.scene].instantiate()
