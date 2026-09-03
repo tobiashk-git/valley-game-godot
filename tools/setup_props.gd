@@ -114,6 +114,8 @@ func _initialize() -> void:
 	# vent, same "second, taller obstacle" role IceBoulder/SwampTree's own
 	# variety-piece counterparts play elsewhere.
 	_build_sprite_prop("BadlandsFireGeyser", "res://assets/badlands_fire_geyser.png", 533.0, 729.0, 0.1576)
+	# Third Badlands obstacle for variety - a dry tumbleweed bush.
+	_build_sprite_prop("BadlandsTumbleweed", "res://assets/badlands_tumbleweed.png", 398.0, 384.0, 0.1382)
 
 	print("=== Props setup complete ===")
 	quit()

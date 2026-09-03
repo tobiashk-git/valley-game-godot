@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/badlands_tumbleweed.png" id="1_pg2kj"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hidyv"]
+size = Vector2(28, 28)
+
+[node name="BadlandsTumbleweed" type="StaticBody2D" unique_id=2100713792]
+z_index = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1050037821]
+scale = Vector2(0.1382, 0.1382)
+texture = ExtResource("1_pg2kj")
+offset = Vector2(0, -10.5344)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1687877021]
+shape = SubResource("RectangleShape2D_hidyv")
