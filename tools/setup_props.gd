@@ -101,6 +101,9 @@ func _initialize() -> void:
 	# Gloomfen's first prop-scatter obstacle - a gnarled swamp tree, MightyOak's
 	# elevated counterpart for Zone.GLOOMFEN.
 	_build_sprite_prop("SwampTree", "res://assets/swamp_tree.png", 501.0, 600.0, 0.1677)
+	# Second Gloomfen obstacle for variety - a dense fern/reed cluster, same
+	# "second, smaller obstacle" role FallenLog/TangledBush play in Verdantwood.
+	_build_sprite_prop("SwampFerns", "res://assets/swamp_ferns.png", 733.0, 841.0, 0.0955)
 
 	print("=== Props setup complete ===")
 	quit()
