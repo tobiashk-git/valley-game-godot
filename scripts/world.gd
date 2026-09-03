@@ -614,12 +614,21 @@ func _find_exit_stub(gen: Dictionary, entrance_dir: Vector2i) -> Dictionary:
 		return {"blocker": stub, "approach": approach, "dir": dir}
 	return {}
 
+# Chance a given boundary wall cell gets a TangledBush instead of a
+# MightyOak - a little variety in the treeline rather than a uniform wall of
+# identical canopies, per direct user request. Both are already-proven
+# impassable Verdantwood props (TangledBush is elevated, same z_index/
+# collision treatment as MightyOak - see world.gd's own scatter_biome_
+# obstacles() comments) - reused as-is, no new art needed.
+const VERDANTWOOD_MAZE_BUSH_CHANCE := 0.15
+
 # Paints the maze's WALL cells onto the live overworld tilemap and returns
 # the data the caller (overworld.gd) needs to instance the guardian, blocker,
-# and boundary MightyOak trees at runtime - guardian_pos/guardian_id,
+# and boundary trees/bushes at runtime - guardian_pos/guardian_id,
 # blocker_pos (+ approach_pos, the room-side cell next to it, for
-# direction-aware tests), door_pos/spawn_pos, and oak_positions
-# (Array[Vector2i]) - all in world coordinates.
+# direction-aware tests), door_pos/spawn_pos, and boundary_positions (Array
+# of {"pos": Vector2i, "scene": "MightyOak"|"TangledBush"}, same shape
+# _scatter() already returns elsewhere) - all in world coordinates.
 func carve_verdantwood_maze(tilemap: TileMapLayer) -> Dictionary:
 	var gen: Dictionary
 	var stub: Dictionary
@@ -648,7 +657,7 @@ func carve_verdantwood_maze(tilemap: TileMapLayer) -> Dictionary:
 	gen.map[stub.blocker.y][stub.blocker.x] = DungeonGen.FLOOR
 
 	var map: Array = gen.map
-	var oak_positions: Array = []
+	var boundary_positions: Array = []
 	for y in range(VERDANTWOOD_MAZE_HEIGHT):
 		for x in range(VERDANTWOOD_MAZE_WIDTH):
 			if map[y][x] != DungeonGen.WALL:
@@ -656,23 +665,25 @@ func carve_verdantwood_maze(tilemap: TileMapLayer) -> Dictionary:
 			var world_pos := VERDANTWOOD_MAZE_ORIGIN + Vector2i(x, y)
 			var atlas_coords := Vector2i(1, 0) if (world_pos.x * 17 + world_pos.y * 11) % 3 == 0 else Vector2i(0, 0)
 			tilemap.set_cell(world_pos, SRC_FOREST_WALL, atlas_coords)
-			# Real MightyOak trees provide the actual "thick lush forest"
-			# visual (the underlying tile is what guarantees collision - see
-			# header comment on tools/setup_forest_wall.gd) - only along the
-			# wall mass's visible boundary (a WALL cell with at least one
-			# non-WALL neighbor, including a neighbor outside the maze's own
-			# local grid, which is just ordinary un-touched ground). An
-			# interior wall cell fully surrounded by other wall cells is
-			# never actually seen (always occluded behind the boundary ring,
-			# never walkable-adjacent), so skipping it halves-plus the
-			# instance count for zero visual difference to the player.
+			# Real MightyOak/TangledBush props provide the actual "thick
+			# lush forest" visual (the underlying tile is what guarantees
+			# collision - see header comment on tools/setup_forest_wall.gd)
+			# - only along the wall mass's visible boundary (a WALL cell
+			# with at least one non-WALL neighbor, including a neighbor
+			# outside the maze's own local grid, which is just ordinary
+			# un-touched ground). An interior wall cell fully surrounded by
+			# other wall cells is never actually seen (always occluded
+			# behind the boundary ring, never walkable-adjacent), so
+			# skipping it halves-plus the instance count for zero visual
+			# difference to the player.
 			var has_open_neighbor := false
 			for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 				if not _wall_cell(map, VERDANTWOOD_MAZE_WIDTH, VERDANTWOOD_MAZE_HEIGHT, x + offset.x, y + offset.y):
 					has_open_neighbor = true
 					break
 			if has_open_neighbor:
-				oak_positions.append(world_pos)
+				var scene_name := "TangledBush" if randf() < VERDANTWOOD_MAZE_BUSH_CHANCE else "MightyOak"
+				boundary_positions.append({"pos": world_pos, "scene": scene_name})
 
 	return {
 		"guardian_pos": VERDANTWOOD_MAZE_ORIGIN + gen.boss_room.center(),
@@ -681,7 +692,7 @@ func carve_verdantwood_maze(tilemap: TileMapLayer) -> Dictionary:
 		"approach_pos": VERDANTWOOD_MAZE_ORIGIN + stub.approach,
 		"door_pos": VERDANTWOOD_MAZE_ORIGIN + Vector2i(gen.door_x, gen.door_y),
 		"spawn_pos": VERDANTWOOD_MAZE_ORIGIN + gen.spawn_tile,
-		"oak_positions": oak_positions,
+		"boundary_positions": boundary_positions,
 	}
 
 # Gloomfen's counterpart to scatter_biome_obstacles() above - unlike every

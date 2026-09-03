@@ -99,20 +99,27 @@ func _initialize() -> void:
 	print("Guardian room tile is floor: ", tilemap.get_cell_source_id(guardian_pos) == world.SRC_VERDANTWOOD)
 	print("Blocker tile is floor (log sits on top, not a wall cell): ", tilemap.get_cell_source_id(blocker_pos) == world.SRC_VERDANTWOOD)
 
-	# --- 2b. Boundary MightyOak trees - the actual "thick lush forest"
-	# visual - were instanced at every returned oak_positions cell. ---
-	var oak_positions: Array = maze.oak_positions
-	var oak_tiles := {}
+	# --- 2b. Boundary trees/bushes - the actual "thick lush forest" visual,
+	# mostly MightyOak with a little TangledBush mixed in for variety - were
+	# instanced at every returned boundary_positions cell, with the correct
+	# scene at each. ---
+	var boundary_positions: Array = maze.boundary_positions
+	var boundary_tiles := {} # Vector2i -> scene_file_path found there
 	for child in ysort.get_children():
-		if child.scene_file_path == "res://scenes/props/MightyOak.tscn":
-			oak_tiles[Vector2i(int(child.position.x / 32), int(child.position.y / 32))] = true
-	var all_oaks_present := true
-	for oak_pos in oak_positions:
-		if not oak_tiles.has(oak_pos):
-			all_oaks_present = false
+		if child.scene_file_path == "res://scenes/props/MightyOak.tscn" or child.scene_file_path == "res://scenes/props/TangledBush.tscn":
+			boundary_tiles[Vector2i(int(child.position.x / 32), int(child.position.y / 32))] = child.scene_file_path
+	var all_present := true
+	var bush_count := 0
+	for entry in boundary_positions:
+		var expected_path: String = "res://scenes/props/%s.tscn" % entry.scene
+		if boundary_tiles.get(entry.pos, "") != expected_path:
+			all_present = false
 			break
-	print("Boundary oak positions returned: ", oak_positions.size(), " (>0: ", oak_positions.size() > 0, ")")
-	print("A MightyOak instance exists at every boundary oak position: ", all_oaks_present)
+		if entry.scene == "TangledBush":
+			bush_count += 1
+	print("Boundary positions returned: ", boundary_positions.size(), " (>0: ", boundary_positions.size() > 0, ")")
+	print("The correct prop (oak or bush) exists at every boundary position: ", all_present)
+	print("TangledBush mixed in for variety: ", bush_count, " of ", boundary_positions.size(), " (>0: ", bush_count > 0, ")")
 
 	# --- 3. A wall tile actually blocks movement. ---
 	var wall_world: Vector2 = Vector2(sample_wall_pos.x * 32 + 16, sample_wall_pos.y * 32 + 16)
@@ -245,23 +252,23 @@ func _initialize() -> void:
 	print("Exit now walkable after the guardian is defeated: ", _reached(player.position, blocker_world))
 
 	# --- 9. Regression: normal Verdantwood scatter never lands inside the
-	# reserved maze box. MightyOak is excluded from this check for any tile
-	# that's one of our OWN intentional oak_positions - those are the
-	# boundary trees just verified in check 2b, not a leak. A MightyOak at
-	# any OTHER tile inside the box would still correctly be flagged (that
-	# would mean the box reservation failed). ---
+	# reserved maze box. MightyOak/TangledBush are excluded from this check
+	# for any tile that's one of our OWN intentional boundary_positions -
+	# those are the boundary trees/bushes just verified in check 2b, not a
+	# leak. Either prop at any OTHER tile inside the box would still
+	# correctly be flagged (that would mean the box reservation failed). ---
 	var buffer: int = world.VERDANTWOOD_MAZE_RESERVE_BUFFER
 	var box_min := origin - Vector2i(buffer, buffer)
 	var box_max := origin + Vector2i(w + buffer, h + buffer)
-	var known_oak_tiles := {}
-	for oak_pos in oak_positions:
-		known_oak_tiles[oak_pos] = true
+	var known_boundary_tiles := {} # Vector2i -> scene_file_path
+	for entry in boundary_positions:
+		known_boundary_tiles[entry.pos] = "res://scenes/props/%s.tscn" % entry.scene
 	var scatter_paths := ["res://scenes/props/MightyOak.tscn", "res://scenes/props/FallenLog.tscn", "res://scenes/props/TangledBush.tscn"]
 	var leaked_into_maze := false
 	for child in ysort.get_children():
 		if child.scene_file_path in scatter_paths:
 			var tile := Vector2i(int(child.position.x / 32), int(child.position.y / 32))
-			if child.scene_file_path == "res://scenes/props/MightyOak.tscn" and known_oak_tiles.has(tile):
+			if known_boundary_tiles.get(tile, "") == child.scene_file_path:
 				continue
 			if tile.x >= box_min.x and tile.x < box_max.x and tile.y >= box_min.y and tile.y < box_max.y:
 				leaked_into_maze = true

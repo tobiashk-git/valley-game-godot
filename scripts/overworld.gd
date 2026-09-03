@@ -166,13 +166,15 @@ func _ready() -> void:
 	_verdantwood_maze_blocker = FALLEN_LOG_SCENE.instantiate()
 	_verdantwood_maze_blocker.position = _tile_center(verdantwood_maze.blocker_pos)
 	ysort.add_child(_verdantwood_maze_blocker)
-	# Real MightyOak trees along the wall mass's visible boundary - the
-	# actual "thick lush forest" visual; the tile underneath (SRC_FOREST_WALL)
-	# is what guarantees collision, these are the same reused canopy prop
-	# already scattered elsewhere in Verdantwood, packed densely here instead
-	# of sparsely.
-	for oak_pos in verdantwood_maze.oak_positions:
-		_spawn_prop(MIGHTY_OAK_SCENE, oak_pos)
+	# Real MightyOak/TangledBush props along the wall mass's visible boundary
+	# - the actual "thick lush forest" visual; the tile underneath
+	# (SRC_FOREST_WALL) is what guarantees collision. Mostly oaks with a
+	# little TangledBush mixed in for variety (see VERDANTWOOD_MAZE_BUSH_CHANCE
+	# in world.gd), reusing the same obstacle_scenes lookup already built
+	# above for the normal biome scatter, packed densely here instead of
+	# sparsely.
+	for entry in verdantwood_maze.boundary_positions:
+		_spawn_prop(obstacle_scenes[entry.scene], entry.pos)
 
 	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
 	# target spawn is always the tile just inside the door (one row up).

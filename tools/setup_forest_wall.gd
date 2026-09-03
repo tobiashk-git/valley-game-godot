@@ -14,7 +14,7 @@ extends SceneTree
 # dithered ground texture) directly, just with full-tile collision added.
 # The actual "this is a thick forest" visual comes from real MightyOak props
 # densely instanced along the wall mass's visible boundary (see
-# carve_verdantwood_maze()'s oak_positions / overworld.gd's wiring) - their
+# carve_verdantwood_maze()'s boundary_positions / overworld.gd's wiring) - their
 # canopies do the visual work, so the tile underneath just needs to read as
 # plain forest floor for the slivers that peek through, exactly like the
 # ground everywhere else in this biome already does.
