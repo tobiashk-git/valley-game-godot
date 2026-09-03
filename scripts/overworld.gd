@@ -73,27 +73,23 @@ func reveal_golden_plains_entrance() -> void:
 	_golden_plains_entrance_spawned = true
 	_add_entrance(ANCIENT_BARROW_ENTRANCE_SCENE, World.GOLDEN_PLAINS_INTERIOR_ENTRANCE, "res://scenes/GoldenPlainsInterior.tscn", Vector2.ZERO)
 
-# Repaints every ford/seam whose GameState flag is already true - safe to
-# call repeatedly (repainting an already-open tile is a harmless no-op).
-# Called once from _ready() (the state may already be true on a scene
-# reload), and again on every Quests.changed signal (see _ready()'s connect
-# below) - a housed quest-giver (Elder/Trader/Frostpeak Ranger) always
-# reaches this via a fresh _ready() anyway, since turning in their quest and
-# then leaving the house reloads Overworld.tscn - but a STANDALONE NPC
-# (Druid/Prospector/Guide, all 4 wedge-seam NPCs) stands directly in this
-# already-live scene, so completing their quest doesn't reload anything at
-# all. Without this signal connection the ford/seam flag flips correctly but
-# the tile the player is standing right next to stays solid until they
-# happen to leave and re-enter the Overworld some other way (fast travel,
-# a house visit) - reported directly by the user as "the bridge does not
-# appear" after turning in a quest.
+# Repaints every ford whose GameState flag is already true - safe to call
+# repeatedly (repainting an already-open tile is a harmless no-op). Called
+# once from _ready() (the state may already be true on a scene reload), and
+# again on every Quests.changed signal (see _ready()'s connect below) - a
+# housed quest-giver (Elder/Trader/Frostpeak Ranger) always reaches this via
+# a fresh _ready() anyway, since turning in their quest and then leaving the
+# house reloads Overworld.tscn - but a STANDALONE NPC (Druid/Prospector/Guide)
+# stands directly in this already-live scene, so completing their quest
+# doesn't reload anything at all. Without this signal connection the ford
+# flag flips correctly but the tile the player is standing right next to
+# stays solid until they happen to leave and re-enter the Overworld some
+# other way (fast travel, a house visit) - reported directly by the user as
+# "the bridge does not appear" after turning in a quest.
 func _repaint_open_paths() -> void:
 	for zone in ZONE_KEYS:
 		if GameState.biome_paths_open[ZONE_KEYS[zone]]:
 			World.open_biome_path(tilemap, zone)
-	for seam_key in GameState.seam_paths_open:
-		if GameState.seam_paths_open[seam_key]:
-			World.open_seam_path(tilemap, seam_key)
 
 func _on_quests_changed() -> void:
 	_repaint_open_paths()
@@ -171,50 +167,6 @@ func _ready() -> void:
 	guide.npc_id = "marsh_guide"
 	guide.intro_text = "Gloomfen's past that ford, if you can call it that anymore - the old boards rotted through years back. Bring me wood and I'll lay a new crossing."
 	ysort.add_child(guide)
-
-	# Phase 6b's 4 wedge-seam crossing NPCs - same standalone pattern as the
-	# 4 ford-crossing NPCs above, but each stands in an OUTER biome (past that
-	# biome's own ford) rather than the valley, since the seam they gate is
-	# between two outer biomes, not valley -> outer biome.
-	var trailblazer: StaticBody2D = NPC_SCENE.instantiate()
-	trailblazer.position = _tile_center(World.FROST_TRAILBLAZER_POS)
-	trailblazer.sprite_path = "res://assets/trader.png"
-	trailblazer.sprite_tint = Color(0.65, 0.8, 0.9, 1.0)
-	trailblazer.npc_name = "Frost-Wood Trailblazer"
-	trailblazer.quest_id = "cross_frostpeak_verdantwood"
-	trailblazer.npc_id = "frost_wood_trailblazer"
-	trailblazer.intro_text = "Verdantwood's just past this thaw-line, if you don't mind the meltwater. I've been meaning to lay a proper crossing - just need the wood for it."
-	ysort.add_child(trailblazer)
-
-	var ravine_runner: StaticBody2D = NPC_SCENE.instantiate()
-	ravine_runner.position = _tile_center(World.RAVINE_RUNNER_POS)
-	ravine_runner.sprite_path = "res://assets/elder.png"
-	ravine_runner.sprite_tint = Color(0.3, 0.55, 0.35, 1.0)
-	ravine_runner.npc_name = "Ravine Runner"
-	ravine_runner.quest_id = "cross_verdantwood_badlands"
-	ravine_runner.npc_id = "ravine_runner"
-	ravine_runner.intro_text = "That ravine's the only thing between here and Emberfall - a bad drop if you slip. I could span it properly, given some Wood and Stone."
-	ysort.add_child(ravine_runner)
-
-	var bog_ash_wanderer: StaticBody2D = NPC_SCENE.instantiate()
-	bog_ash_wanderer.position = _tile_center(World.BOG_ASH_WANDERER_POS)
-	bog_ash_wanderer.sprite_path = "res://assets/trader.png"
-	bog_ash_wanderer.sprite_tint = Color(0.55, 0.35, 0.3, 1.0)
-	bog_ash_wanderer.npc_name = "Bog-Ash Wanderer"
-	bog_ash_wanderer.quest_id = "cross_badlands_gloomfen"
-	bog_ash_wanderer.npc_id = "bog_ash_wanderer"
-	bog_ash_wanderer.intro_text = "Gloomfen's past that bog - ash and mire mixed together, worst crossing in the valley. I could pack a path down, given the stone for it."
-	ysort.add_child(bog_ash_wanderer)
-
-	var frozen_mire_scout: StaticBody2D = NPC_SCENE.instantiate()
-	frozen_mire_scout.position = _tile_center(World.FROZEN_MIRE_SCOUT_POS)
-	frozen_mire_scout.sprite_path = "res://assets/elder.png"
-	frozen_mire_scout.sprite_tint = Color(0.5, 0.6, 0.65, 1.0)
-	frozen_mire_scout.npc_name = "Frozen-Mire Scout"
-	frozen_mire_scout.quest_id = "cross_gloomfen_frostpeak"
-	frozen_mire_scout.npc_id = "frozen_mire_scout"
-	frozen_mire_scout.intro_text = "Frostpeak's just past this mire - frozen solid in patches, soft as anything in between. I could lay planking, given the wood for it."
-	ysort.add_child(frozen_mire_scout)
 
 	# The altar tile (painted solid by build_overworld_map()) just needs an
 	# interact trigger on top of it - it isn't a separate prop/scene like

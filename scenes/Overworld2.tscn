@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://assets/sand.png" id="4_rl5du"]
 [ext_resource type="Texture2D" path="res://assets/ford.png" id="4_yb7yv"]
 [ext_resource type="Texture2D" path="res://assets/forest_ground.png" id="5_0gbks"]
+[ext_resource type="Texture2D" path="res://assets/mountain_range.png" id="5_rl5du"]
 [ext_resource type="Texture2D" path="res://assets/hills_ground.png" id="6_l6syv"]
 [ext_resource type="Texture2D" path="res://assets/path.png" id="7_fqnsi"]
 [ext_resource type="Texture2D" path="res://assets/fence.png" id="8_ybgal"]
@@ -35,6 +36,14 @@ texture_region_size = Vector2i(32, 32)
 texture = ExtResource("4_yb7yv")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fqnsi"]
+texture = ExtResource("5_rl5du")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_udwd7"]
 texture = ExtResource("4_rl5du")
@@ -97,6 +106,7 @@ sources/7 = SubResource("TileSetAtlasSource_0747q")
 sources/8 = SubResource("TileSetAtlasSource_imkcf")
 sources/9 = SubResource("TileSetAtlasSource_l6syv")
 sources/10 = SubResource("TileSetAtlasSource_0gbks")
+sources/12 = SubResource("TileSetAtlasSource_fqnsi")
 
 [node name="Overworld2" type="Node2D" unique_id=1080697735]
 script = ExtResource("1_7isxj")

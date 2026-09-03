@@ -84,17 +84,6 @@ const MARSH_GUIDE_POS := Vector2i(WORLD_CENTER_X - VALLEY_RADIUS + 5, WORLD_CENT
 # in-valley entrance/landmark.
 const GOLDEN_PLAINS_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X - 13, WORLD_CENTER_Y - 13)
 
-# The 4 wedge-seam crossing NPCs (Phase 6b) - each stands just past its seam,
-# offset from the exact diagonal (abs(dx) == abs(dy)) so biome_at() resolves
-# it unambiguously to one specific adjacent biome, reachable once the player
-# has already crossed that biome's own ford. Now that scatter_biome_obstacles()
-# scatters MightyOak into Zone.VERDANTWOOD too, RAVINE_RUNNER_POS gets a real
-# clearance reservation there - see scatter_biome_obstacles() below.
-const FROST_TRAILBLAZER_POS := Vector2i(WORLD_CENTER_X + 18, WORLD_CENTER_Y - 22)   # Frostpeak side of the NE seam
-const RAVINE_RUNNER_POS := Vector2i(WORLD_CENTER_X + 22, WORLD_CENTER_Y + 18)       # Verdantwood side of the SE seam (the ravine)
-const BOG_ASH_WANDERER_POS := Vector2i(WORLD_CENTER_X - 18, WORLD_CENTER_Y + 22)    # Badlands side of the SW seam
-const FROZEN_MIRE_SCOUT_POS := Vector2i(WORLD_CENTER_X - 22, WORLD_CENTER_Y - 18)   # Gloomfen side of the NW seam
-
 # TileSet source ids — must match the order sources were added in
 # tools/setup_phase1.gd when the TileSet resource was built (0-8), plus 2
 # more added later by tools/setup_biome_revamp.gd (9-10, the river/ford).
@@ -108,36 +97,28 @@ const SRC_FENCE := 6
 const SRC_GATE := 7
 const SRC_ALTAR := 8
 const SRC_RIVER := 9   # solid - blocks the 4 outer biomes until a ford opens
-const SRC_FORD := 10   # walkable - what a river tile flips to via open_biome_path()/open_seam_path()
-const SRC_RAVINE := 11 # solid - the Verdantwood<->Badlands wedge seam specifically (distinct canyon art)
+const SRC_FORD := 10   # walkable - what a river tile flips to via open_biome_path()
+# 11 (SRC_RAVINE) is retired - the wedge-seam crossings it served no longer
+# exist (see paint_outer_biome_mountains()). Its embedded TileSetAtlasSource/
+# ravine.png are left in place in Overworld.tscn rather than surgically
+# removed, but nothing references source 11 anymore.
+const SRC_MOUNTAIN := 12 # solid - the permanent, impassable range along each of the 4 outer-biome wedge boundaries
 
 enum Zone { VALLEY, FROSTPEAK, VERDANTWOOD, BADLANDS, GLOOMFEN }
 
 # One ford position per outer biome, at the midpoint of that biome's edge of
 # the river ring (see _paint_river_ring()) - var, not const, since it's
 # built from WORLD_CENTER_X/Y + VALLEY_RADIUS rather than being literal
-# values, same reasoning as VILLAGE_GATES below.
+# values, same reasoning as VILLAGE_GATES below. This is now the ONLY way
+# into or out of any outer biome - the valley is the sole hub (see
+# paint_outer_biome_mountains(), which replaced the old wedge-seam crossings
+# between two outer biomes with a permanent, impassable divider).
 var BIOME_FORDS := {
 	Zone.FROSTPEAK: Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - VALLEY_RADIUS),
 	Zone.BADLANDS: Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y + VALLEY_RADIUS),
 	Zone.GLOOMFEN: Vector2i(WORLD_CENTER_X - VALLEY_RADIUS, WORLD_CENTER_Y),
 	Zone.VERDANTWOOD: Vector2i(WORLD_CENTER_X + VALLEY_RADIUS, WORLD_CENTER_Y),
 }
-
-# One ford position per inter-biome wedge seam (see _paint_wedge_seams()),
-# partway along that seam's divider - the Phase 6b crossings between two
-# OUTER biomes, distinct from BIOME_FORDS above (valley -> outer biome).
-var SEAM_FORDS := {
-	"frostpeak_verdantwood": Vector2i(WORLD_CENTER_X + VALLEY_RADIUS + 20, WORLD_CENTER_Y - VALLEY_RADIUS - 20),
-	"verdantwood_badlands": Vector2i(WORLD_CENTER_X + VALLEY_RADIUS + 20, WORLD_CENTER_Y + VALLEY_RADIUS + 20),
-	"badlands_gloomfen": Vector2i(WORLD_CENTER_X - VALLEY_RADIUS - 20, WORLD_CENTER_Y + VALLEY_RADIUS + 20),
-	"gloomfen_frostpeak": Vector2i(WORLD_CENTER_X - VALLEY_RADIUS - 20, WORLD_CENTER_Y - VALLEY_RADIUS - 20),
-}
-
-# Distance from center where each of the 4 dividers below stops - comfortably
-# past the interior entrances' own distance-30 placement, without wastefully
-# painting all the way out to the (otherwise-empty) map edges.
-const SEAM_LENGTH := 50
 
 # Direct port of biomeAt() in game.js — which cardinal zone a tile belongs
 # to: a central valley, surrounded by four wedge-shaped biomes. North/south
@@ -160,9 +141,11 @@ func biome_at(tx: int, ty: int) -> Dictionary:
 # those diagonals (and only outside the valley - inside it's uniformly
 # grass), dither in the adjacent wedge's own source instead of always using
 # primary_source, on alternating tiles (deterministic on tile coords, not
-# randf(), so it's stable across reloads/rebuilds). The exact seam tiles
-# painted by _paint_wedge_seams() afterward always win regardless, since that
-# happens in a later pass.
+# randf(), so it's stable across reloads/rebuilds). SEAM_BLEND_BAND (2) is
+# narrower than paint_outer_biome_mountains()'s own MOUNTAIN_BAND (4), so
+# that later pass fully overwrites every tile this dithers - dead weight for
+# those specific tiles now, but harmless, and left in place rather than
+# removed since it costs nothing to keep running.
 const SEAM_BLEND_BAND := 2
 
 func _blend_source(tx: int, ty: int, primary_source: int) -> int:
@@ -248,7 +231,7 @@ func build_overworld_map(tilemap: TileMapLayer) -> void:
 	tilemap.set_cell(ALTAR_POS, SRC_ALTAR, Vector2i(0, 0))
 
 	_paint_river_ring(tilemap)
-	_paint_wedge_seams(tilemap)
+	paint_outer_biome_mountains(tilemap)
 
 # A 1-tile-thick square outline of SRC_RIVER right at the valley/outer-biome
 # seam (every tile where dx or dy == ±VALLEY_RADIUS), blocking all 4 outer
@@ -272,23 +255,31 @@ func _paint_river_ring(tilemap: TileMapLayer) -> void:
 func open_biome_path(tilemap: TileMapLayer, zone: int) -> void:
 	tilemap.set_cell(BIOME_FORDS[zone], SRC_FORD, Vector2i(0, 0))
 
-# One diagonal divider, from the river ring's corner out to SEAM_LENGTH,
-# along the wedge boundary between two adjacent OUTER biomes (Phase 6b) -
-# distinct from _paint_river_ring() above (valley <-> outer biome).
-func _paint_wedge_seam(tilemap: TileMapLayer, sign_x: int, sign_y: int, source: int) -> void:
-	for d in range(VALLEY_RADIUS, SEAM_LENGTH + 1):
-		tilemap.set_cell(Vector2i(WORLD_CENTER_X + sign_x * d, WORLD_CENTER_Y + sign_y * d), source, Vector2i(0, 0))
+# Permanent, impassable divider between each pair of adjacent OUTER biomes -
+# replaces the old wedge-seam river/ravine crossings (their quests/NPCs are
+# gone; the valley is now the sole hub, the only way into or out of any
+# outer biome is that biome's own BIOME_FORDS crossing above). Wide (not a
+# 1-tile line, like the old seam was) so it actually reads as a mountain
+# range, and reaches the map edge - not just some fixed distance like the old
+# seam's SEAM_LENGTH stop - so there's no way to walk around it by going
+# further out. The old version could stop partway because a crossing was
+# always meant to exist somewhere; this one can't, since the entire point is
+# "no crossing, ever." Distance-from-diagonal metric matches _blend_source()'s
+# own (absi(absi(dx)-absi(dy))), just with a wider band and no dithering -
+# solid stone the whole way across.
+const MOUNTAIN_BAND := 4
 
-func _paint_wedge_seams(tilemap: TileMapLayer) -> void:
-	_paint_wedge_seam(tilemap, 1, -1, SRC_RIVER)  # NE: Frostpeak <-> Verdantwood
-	_paint_wedge_seam(tilemap, 1, 1, SRC_RAVINE)  # SE: Verdantwood <-> Badlands (the ravine, distinct art)
-	_paint_wedge_seam(tilemap, -1, 1, SRC_RIVER)  # SW: Badlands <-> Gloomfen
-	_paint_wedge_seam(tilemap, -1, -1, SRC_RIVER) # NW: Gloomfen <-> Frostpeak
-
-# Same open-on-completion pattern as open_biome_path() above, for one of the
-# 4 wedge-seam crossings between two outer biomes.
-func open_seam_path(tilemap: TileMapLayer, seam_key: String) -> void:
-	tilemap.set_cell(SEAM_FORDS[seam_key], SRC_FORD, Vector2i(0, 0))
+func paint_outer_biome_mountains(tilemap: TileMapLayer) -> void:
+	for y in range(OVERWORLD_HEIGHT):
+		for x in range(OVERWORLD_WIDTH):
+			var dx := x - WORLD_CENTER_X
+			var dy := y - WORLD_CENTER_Y
+			if abs(dx) < VALLEY_RADIUS and abs(dy) < VALLEY_RADIUS:
+				continue
+			if absi(absi(dx) - absi(dy)) > MOUNTAIN_BAND:
+				continue
+			var atlas_coords := Vector2i(1, 0) if (x * 17 + y * 11) % 3 == 0 else Vector2i(0, 0)
+			tilemap.set_cell(Vector2i(x, y), SRC_MOUNTAIN, atlas_coords)
 
 # Shared by overworld.gd and overworld2.gd: 4 long invisible colliders, one
 # along each edge of the OVERWORLD_WIDTH x OVERWORLD_HEIGHT grid, since a
@@ -373,19 +364,22 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 # Verdantwood so far; ice boulders/lakes for the other 3 are future passes).
 # Called separately from scatter_trees_and_rocks() by overworld.gd/
 # overworld2.gd, same pattern.
+# Distance from center a scatter's bounding box reaches (see
+# scatter_biome_obstacles() below) - comfortably past the interior
+# entrances' own distance-30 placement, without wastefully sampling all the
+# way out to the (otherwise-empty) map edges.
+const OBSTACLE_SCATTER_REACH := 50
+
 func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	var occupied := {}
 	_reserve_entrance_clearance(occupied, VERDANTWOOD_INTERIOR_ENTRANCE, 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.VERDANTWOOD])
-	_reserve_entrance_clearance(occupied, RAVINE_RUNNER_POS)
-	_reserve_entrance_clearance(occupied, SEAM_FORDS["frostpeak_verdantwood"])
-	_reserve_entrance_clearance(occupied, SEAM_FORDS["verdantwood_badlands"])
 
-	# A tight box around the wedge (out to SEAM_LENGTH, same reach as the
-	# wedge-seam dividers) instead of the full 200x200 map - outer biomes are
-	# huge and mostly empty past this distance, so a full-map bounds would
-	# waste most of _scatter()'s attempt budget on tiles nobody ever visits.
-	var bounds := Rect2i(WORLD_CENTER_X - SEAM_LENGTH, WORLD_CENTER_Y - SEAM_LENGTH, SEAM_LENGTH * 2, SEAM_LENGTH * 2)
+	# A tight box around the wedge instead of the full 200x200 map - outer
+	# biomes are huge and mostly empty past this distance, so a full-map
+	# bounds would waste most of _scatter()'s attempt budget on tiles nobody
+	# ever visits.
+	var bounds := Rect2i(WORLD_CENTER_X - OBSTACLE_SCATTER_REACH, WORLD_CENTER_Y - OBSTACLE_SCATTER_REACH, OBSTACLE_SCATTER_REACH * 2, OBSTACLE_SCATTER_REACH * 2)
 
 	var result: Array = []
 	result.append_array(_scatter(tilemap, 18, "MightyOak", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))

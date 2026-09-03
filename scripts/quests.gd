@@ -93,60 +93,6 @@ const QUEST_DEFS := {
 			"completed": "The old barrow's open now, thanks to you.",
 		},
 	},
-	# Phase 6b's 4 inter-biome wedge-seam crossings - between two OUTER
-	# biomes (unlike the 5 quests above, all valley -> outer biome), each
-	# reached only after already crossing that biome's own ford.
-	"cross_frostpeak_verdantwood": {
-		"giver_name": "Frost-Wood Trailblazer",
-		"name": "Bridging the Thaw",
-		"objective": {"type": "gather", "item_id": "wood", "amount": 10},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
-		"dialogue": {
-			"offer": "Verdantwood's just past this thaw-line, if you don't mind the meltwater. Bring me 10 Wood and I'll lay a crossing you can actually trust.",
-			"in_progress": "Still need more wood for the crossing - what have you got?",
-			"ready": "That'll hold. Should get you across the thaw-line dry.",
-			"completed": "The crossing's holding, thanks to you.",
-		},
-	},
-	"cross_verdantwood_badlands": {
-		"giver_name": "Ravine Runner",
-		"name": "Spanning the Ravine",
-		"objective": {"type": "gather_multi", "items": [
-			{"item_id": "wood", "amount": 8},
-			{"item_id": "stone", "amount": 8},
-		]},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
-		"dialogue": {
-			"offer": "That ravine's the only thing between here and Emberfall - a bad drop if you slip. Bring me 8 Wood and 8 Stone and I'll get a proper span built.",
-			"in_progress": "Still need more Wood and Stone for the span - can you spare any?",
-			"ready": "That's enough to span it. Give me a moment... there, it'll hold now.",
-			"completed": "The span's holding steady, thanks to you.",
-		},
-	},
-	"cross_badlands_gloomfen": {
-		"giver_name": "Bog-Ash Wanderer",
-		"name": "Draining the Bog-Path",
-		"objective": {"type": "gather", "item_id": "stone", "amount": 10},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
-		"dialogue": {
-			"offer": "Gloomfen's past that bog - ash and mire mixed together, worst crossing in the valley. Bring me 10 Stone and I'll get a path packed down.",
-			"in_progress": "Still need more stone for the bog-path - what have you got?",
-			"ready": "That'll pack down solid. Should hold you over the worst of it.",
-			"completed": "The bog-path's packed and holding, thanks to you.",
-		},
-	},
-	"cross_gloomfen_frostpeak": {
-		"giver_name": "Frozen-Mire Scout",
-		"name": "The Frozen Mire Crossing",
-		"objective": {"type": "gather", "item_id": "wood", "amount": 10},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
-		"dialogue": {
-			"offer": "Frostpeak's just past this mire - frozen solid in patches, soft as anything in between. Bring me 10 Wood and I'll lay planking you can trust.",
-			"in_progress": "Still need more wood for the planking - what have you got?",
-			"ready": "That'll do it. Should hold you over the soft ground now.",
-			"completed": "The planking's holding, thanks to you.",
-		},
-	},
 }
 
 # quest_id -> "accepted" | "completed" (absent = not yet offered).
@@ -281,14 +227,6 @@ func _complete_quest(quest_id: String) -> void:
 		GameState.biome_paths_open.gloomfen = true
 	elif quest_id == "open_ancient_barrow":
 		GameState.world_progress.golden_plains_revealed = true
-	elif quest_id == "cross_frostpeak_verdantwood":
-		GameState.seam_paths_open.frostpeak_verdantwood = true
-	elif quest_id == "cross_verdantwood_badlands":
-		GameState.seam_paths_open.verdantwood_badlands = true
-	elif quest_id == "cross_badlands_gloomfen":
-		GameState.seam_paths_open.badlands_gloomfen = true
-	elif quest_id == "cross_gloomfen_frostpeak":
-		GameState.seam_paths_open.gloomfen_frostpeak = true
 	changed.emit()
 
 # Called by npc.gd the first time (and only the first time) the player

@@ -44,12 +44,6 @@ var world_progress: Dictionary = {"final_boss_revealed": false, "world2_unlocked
 # flippable/verifiable.
 var biome_paths_open: Dictionary = {"frostpeak": false, "verdantwood": false, "badlands": false, "gloomfen": false}
 
-# The biome revamp's inter-biome wedge-seam dividers (Phase 6b) - each of the
-# 4 seams between two adjacent OUTER biomes starts blocked by a river/ravine
-# with one ford (see world.gd's _paint_wedge_seams()/open_seam_path()),
-# distinct from biome_paths_open above (valley -> outer biome).
-var seam_paths_open: Dictionary = {"frostpeak_verdantwood": false, "verdantwood_badlands": false, "badlands_gloomfen": false, "gloomfen_frostpeak": false}
-
 func set_next_spawn(pos: Vector2) -> void:
 	next_spawn_position = pos
 

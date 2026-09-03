@@ -23,6 +23,12 @@ func _tile_center(pos: Vector2i) -> Vector2:
 
 func _ready() -> void:
 	World.build_biome_layer(tilemap)
+	# World 1 gets this as part of its own build_overworld_map() (after its
+	# river ring); World 2 skips that whole function (no village/river of its
+	# own), so it needs the same call directly - otherwise the 4 outer
+	# biomes would stay fully walkable into each other here even though
+	# World 1 permanently blocks it, an inconsistency not worth leaving.
+	World.paint_outer_biome_mountains(tilemap)
 	World.add_world_boundary(self)
 
 	for entry in World.scatter_trees_and_rocks(tilemap):
