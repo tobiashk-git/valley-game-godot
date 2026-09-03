@@ -393,6 +393,10 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	# Third Frostpeak obstacle - a flat meltwater pool sitting in the snow,
 	# unlike the two raised/elevated obstacles above.
 	result.append_array(_scatter(tilemap, 16, "IcePool", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds))
+	# Second, smaller Verdantwood obstacle for visual variety - same "one
+	# elevated, one lower-profile" pairing as MightyOak/IceBoulder alongside
+	# IceCrystalShard/IcePool.
+	result.append_array(_scatter(tilemap, 20, "FallenLog", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))
 	return result
 
 func _is_in_village(pos: Vector2i) -> bool:

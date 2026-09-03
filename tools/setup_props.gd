@@ -81,6 +81,7 @@ func _initialize() -> void:
 	_build_sprite_prop("IceBoulder", "res://assets/ice_boulder.png", 477.0, 519.0, 0.116)
 	_build_sprite_prop("IceCrystalShard", "res://assets/ice_crystal_shard.png", 543.0, 586.0, 0.0853)
 	_build_sprite_prop("IcePool", "res://assets/ice_pool.png", 761.0, 757.0, 0.0859)
+	_build_sprite_prop("FallenLog", "res://assets/fallen_log.png", 526.0, 185.0, 0.1597)
 
 	print("=== Props setup complete ===")
 	quit()
