@@ -370,8 +370,41 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 # way out to the (otherwise-empty) map edges.
 const OBSTACLE_SCATTER_REACH := 50
 
+# Keeps every scattered obstacle a few tiles clear of the outer river ring -
+# without this, a tall canopy (MightyOak) can visually overhang the water,
+# and a flat/linear one (FallenLog) can read as a bridge/crossing that isn't
+# actually there. Both reported directly by the user from real screenshots.
+# The river ring is 1 tile wide at exactly VALLEY_RADIUS from center on the
+# axis matching each zone's own BIOME_FORDS entry (see _paint_river_ring()) -
+# FROSTPEAK/BADLANDS' ford only varies in Y, GLOOMFEN/VERDANTWOOD's only in
+# X, so checking distance along that single axis is enough; the diagonal
+# mountain ranges (paint_outer_biome_mountains()) are solid ground, not
+# water, so they don't need the same clearance.
+const OBSTACLE_RIVER_CLEARANCE := 3
+
+func _far_enough_from_river(pos: Vector2i, zone: int) -> bool:
+	if zone == Zone.VALLEY:
+		return true
+	var ford: Vector2i = BIOME_FORDS[zone]
+	if zone == Zone.FROSTPEAK or zone == Zone.BADLANDS:
+		return absi(pos.y - ford.y) >= OBSTACLE_RIVER_CLEARANCE
+	return absi(pos.x - ford.x) >= OBSTACLE_RIVER_CLEARANCE
+
+# Keeps a ground-flush obstacle (FallenLog, IcePool) from landing close
+# enough to an elevated one (MightyOak, IceBoulder, IceCrystalShard,
+# TangledBush) that their sprites appear to fuse at the base - e.g. a log
+# whose end touches a tree's trunk reads as "growing out of the tree"
+# instead of two separate objects, per direct user feedback from a real
+# screenshot. Elevated objects overlapping EACH OTHER (a tree's canopy over
+# a rock, a bush against a tree) already reads fine via plain Y-sort and
+# needs no buffer - this only separates the two categories from each other,
+# symmetrically (checked/reserved regardless of which one scatters first).
+const OBSTACLE_CATEGORY_BUFFER := 1
+
 func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	var occupied := {}
+	var elevated_buffer := {}
+	var flush_buffer := {}
 	_reserve_entrance_clearance(occupied, VERDANTWOOD_INTERIOR_ENTRANCE, 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.VERDANTWOOD])
 	_reserve_entrance_clearance(occupied, FROSTPEAK_INTERIOR_ENTRANCE, 3)
@@ -384,28 +417,28 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	var bounds := Rect2i(WORLD_CENTER_X - OBSTACLE_SCATTER_REACH, WORLD_CENTER_Y - OBSTACLE_SCATTER_REACH, OBSTACLE_SCATTER_REACH * 2, OBSTACLE_SCATTER_REACH * 2)
 
 	var result: Array = []
-	result.append_array(_scatter(tilemap, 18, "MightyOak", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))
-	result.append_array(_scatter(tilemap, 18, "IceBoulder", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds))
+	result.append_array(_scatter(tilemap, 18, "MightyOak", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds, false, elevated_buffer, flush_buffer))
+	result.append_array(_scatter(tilemap, 18, "IceBoulder", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds, false, elevated_buffer, flush_buffer))
 	# Second, smaller Frostpeak obstacle for visual variety - occupied is
 	# shared across every _scatter() call in this function, so this can't
 	# land on an already-placed IceBoulder.
-	result.append_array(_scatter(tilemap, 22, "IceCrystalShard", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds))
+	result.append_array(_scatter(tilemap, 22, "IceCrystalShard", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds, false, elevated_buffer, flush_buffer))
 	# Third Frostpeak obstacle - a flat meltwater pool sitting in the snow,
 	# unlike the two raised/elevated obstacles above.
-	result.append_array(_scatter(tilemap, 16, "IcePool", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds))
+	result.append_array(_scatter(tilemap, 16, "IcePool", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds, true, elevated_buffer, flush_buffer))
 	# Second, smaller Verdantwood obstacle for visual variety - same "one
 	# elevated, one lower-profile" pairing as MightyOak/IceBoulder alongside
 	# IceCrystalShard/IcePool.
-	result.append_array(_scatter(tilemap, 20, "FallenLog", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))
+	result.append_array(_scatter(tilemap, 20, "FallenLog", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds, true, elevated_buffer, flush_buffer))
 	# Third Verdantwood obstacle - a large tangled bush, same "third obstacle
 	# for variety" role IcePool plays in Frostpeak.
-	result.append_array(_scatter(tilemap, 18, "TangledBush", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))
+	result.append_array(_scatter(tilemap, 18, "TangledBush", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds, false, elevated_buffer, flush_buffer))
 	return result
 
 func _is_in_village(pos: Vector2i) -> bool:
 	return pos.x >= VILLAGE_BOUNDS.x0 and pos.x <= VILLAGE_BOUNDS.x1 and pos.y >= VILLAGE_BOUNDS.y0 and pos.y <= VILLAGE_BOUNDS.y1
 
-func _scatter(tilemap: TileMapLayer, count: int, scene_name: String, occupied: Dictionary, zone: int, ground_source: int, bounds: Rect2i) -> Array:
+func _scatter(tilemap: TileMapLayer, count: int, scene_name: String, occupied: Dictionary, zone: int, ground_source: int, bounds: Rect2i, is_flush: bool = false, elevated_buffer: Dictionary = {}, flush_buffer: Dictionary = {}) -> Array:
 	var placed: Array = []
 	var attempts := 0
 	var max_attempts := count * 300
@@ -424,6 +457,16 @@ func _scatter(tilemap: TileMapLayer, count: int, scene_name: String, occupied: D
 			continue
 		if tilemap.get_cell_source_id(pos) != ground_source:
 			continue
+		if not _far_enough_from_river(pos, zone):
+			continue
+		if is_flush and elevated_buffer.has(pos):
+			continue
+		if not is_flush and flush_buffer.has(pos):
+			continue
 		occupied[pos] = true
+		var same_category_buffer := flush_buffer if is_flush else elevated_buffer
+		for dy in range(-OBSTACLE_CATEGORY_BUFFER, OBSTACLE_CATEGORY_BUFFER + 1):
+			for dx in range(-OBSTACLE_CATEGORY_BUFFER, OBSTACLE_CATEGORY_BUFFER + 1):
+				same_category_buffer[pos + Vector2i(dx, dy)] = true
 		placed.append({"pos": pos, "scene": scene_name})
 	return placed
