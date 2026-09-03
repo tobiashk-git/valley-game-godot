@@ -415,6 +415,9 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	_reserve_entrance_clearance(occupied, GLOOMFEN_INTERIOR_ENTRANCE, 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.GLOOMFEN])
 	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS, 3)
+	_reserve_entrance_clearance(occupied, BADLANDS_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.BADLANDS])
+	_reserve_entrance_clearance(occupied, PROSPECTOR_CAMP_POS, 3)
 
 	# A tight box around the wedge instead of the full 200x200 map - outer
 	# biomes are huge and mostly empty past this distance, so a full-map
@@ -452,6 +455,9 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	# Third Gloomfen obstacle - a mushroom cluster, same "third obstacle for
 	# variety" role IcePool/TangledBush play in Frostpeak/Verdantwood.
 	result.append_array(_scatter(tilemap, 22, "SwampMushrooms", occupied, Zone.GLOOMFEN, SRC_GLOOMFEN, bounds, false, elevated_buffer, flush_buffer))
+	# Badlands' first prop-scatter obstacle - a spreading cluster of palm
+	# trees, MightyOak/SwampTree's elevated anchor counterpart for this biome.
+	result.append_array(_scatter(tilemap, 18, "BadlandsPalms", occupied, Zone.BADLANDS, SRC_BADLANDS, bounds, false, elevated_buffer, flush_buffer))
 	return result
 
 # Gloomfen's counterpart to scatter_biome_obstacles() above - unlike every

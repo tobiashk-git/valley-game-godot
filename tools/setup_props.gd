@@ -107,6 +107,9 @@ func _initialize() -> void:
 	# Third Gloomfen obstacle - a mushroom cluster, same "third obstacle for
 	# variety" role IcePool/TangledBush play in Frostpeak/Verdantwood.
 	_build_sprite_prop("SwampMushrooms", "res://assets/swamp_mushrooms.png", 385.0, 343.0, 0.1558)
+	# Badlands' first prop-scatter obstacle - a spreading cluster of palm
+	# trees, MightyOak/SwampTree's elevated anchor counterpart for Zone.BADLANDS.
+	_build_sprite_prop("BadlandsPalms", "res://assets/badlands_palms.png", 357.0, 422.0, 0.2353)
 
 	print("=== Props setup complete ===")
 	quit()

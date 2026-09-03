@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/badlands_palms.png" id="1_3bjkx"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_osihn"]
+size = Vector2(28, 28)
+
+[node name="BadlandsPalms" type="StaticBody2D" unique_id=677387657]
+z_index = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1019139557]
+scale = Vector2(0.2353, 0.2353)
+texture = ExtResource("1_3bjkx")
+offset = Vector2(0, -33.6483)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1623298652]
+shape = SubResource("RectangleShape2D_osihn")
