@@ -18,9 +18,11 @@ func _walk(player: CharacterBody2D, action: String, frames: int) -> void:
 	await physics_frame
 
 func _clear_combat(combat: Node) -> void:
-	if combat.in_combat:
+	var attempts := 0
+	while combat.in_combat and attempts < 10:
 		combat.player_run()
 		await physics_frame
+		attempts += 1
 
 # Badlands' ford crossing is a vertical (north-south) walk along
 # x=WORLD_CENTER_X - which runs directly through DUNGEON_ENTRANCE, sitting
@@ -143,12 +145,19 @@ func _initialize() -> void:
 	await _clear_corridor_column(overworld2, player2, center_x)
 	player2.position = Vector2(center_x, (world.WORLD_CENTER_Y + 3) * 32 + 16)
 	cam2.reset_smoothing()
-	# village edge (+3) to just past the ring (+25): 22 tiles = 704px, ~264
-	# ticks minimum at ~2.67px/tick - generous margin.
-	await _walk(player2, "move_down", 350)
+	# Retry-until-actually-true instead of a single fixed-tick walk - a fixed
+	# count only ever buys temporary headroom against Badlands' own scatter
+	# density (now 3 obstacle types), same lesson already learned for
+	# Frostpeak/Gloomfen/Verdantwood's equivalent checks. Walk 100 ticks at a
+	# time, clearing combat between attempts, until the river is actually
+	# crossed or a generous attempt cap is hit.
 	var river_y: float = float(world.WORLD_CENTER_Y + world.VALLEY_RADIUS) * 32.0
+	var walk_attempts := 0
+	while player2.position.y <= river_y and walk_attempts < 8:
+		await _walk(player2, "move_down", 100)
+		await _clear_combat(combat)
+		walk_attempts += 1
 	print("Crossed the now-open ford into Badlands territory: ", player2.position.y > river_y)
-	await _clear_combat(combat)
 
 	var entrance_center: Vector2 = Vector2(world.BADLANDS_INTERIOR_ENTRANCE.x * 32 + 16, world.BADLANDS_INTERIOR_ENTRANCE.y * 32 + 16)
 	player2.position = entrance_center + Vector2(0, -20) # real margin inside the 56x56 trigger, not right at its edge
@@ -162,11 +171,20 @@ func _initialize() -> void:
 	await process_frame
 	await _clear_combat(combat)
 
-	Input.action_press("interact")
-	await process_frame
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
+	# Retry the interact press a few times, same reasoning already proven in
+	# verify_frostpeak_interior.gd - a real player whose first E press lands
+	# during a one-frame UI/combat-clearing race, or before the Area2D's
+	# physics-based overlap has actually updated after the teleport above,
+	# just presses E again rather than getting stuck forever.
+	var interact_attempts := 0
+	while current_scene.name != "BadlandsInterior" and interact_attempts < 5:
+		await _clear_combat(combat)
+		Input.action_press("interact")
+		await process_frame
+		await process_frame
+		Input.action_release("interact")
+		await process_frame
+		interact_attempts += 1
 	print("Entered BadlandsInterior via the real portal: ", current_scene.name == "BadlandsInterior")
 	print("Badlands interior marked discovered: ", game_state.discovered_pois.badlands_interior == true)
 	root.get_texture().get_image().save_png("res://verify_badlands_entrance.png")
