@@ -104,6 +104,7 @@ const SRC_FORD := 10   # walkable - what a river tile flips to via open_biome_pa
 # removed, but nothing references source 11 anymore.
 const SRC_MOUNTAIN := 12 # solid - the permanent, impassable range along each of the 4 outer-biome wedge boundaries
 const SRC_GLOOMFEN_WATER := 13 # solid - scattered swamp-lake blobs, see scatter_biome_lakes()
+const SRC_FOREST_WALL := 14 # solid - thick treeline walls of the Verdantwood overland maze, see carve_verdantwood_maze()
 
 enum Zone { VALLEY, FROSTPEAK, VERDANTWOOD, BADLANDS, GLOOMFEN }
 
@@ -418,6 +419,7 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	_reserve_entrance_clearance(occupied, BADLANDS_INTERIOR_ENTRANCE, 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.BADLANDS])
 	_reserve_entrance_clearance(occupied, PROSPECTOR_CAMP_POS, 3)
+	_reserve_verdantwood_maze_clearance(occupied)
 
 	# A tight box around the wedge instead of the full 200x200 map - outer
 	# biomes are huge and mostly empty past this distance, so a full-map
@@ -463,6 +465,192 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	# Third Badlands obstacle for variety - a dry tumbleweed bush.
 	result.append_array(_scatter(tilemap, 22, "BadlandsTumbleweed", occupied, Zone.BADLANDS, SRC_BADLANDS, bounds, false, elevated_buffer, flush_buffer))
 	return result
+
+# Phase 1 "overland dungeon" prototype: a hand-picked box in Verdantwood's
+# north half, carved with the same DungeonGen room+corridor algorithm the
+# real Dungeon/Castle/biome interiors use (rooms become glades, corridors
+# become paths) - but painted directly onto the LIVE OVERWORLD tilemap
+# instead of a fresh interior scene, and only the WALL cells get painted (as
+# a new solid SRC_FOREST_WALL source); FLOOR/DOOR cells are left alone since
+# they're already plain SRC_VERDANTWOOD ground from build_biome_layer(). One
+# glade (the "boss room", DungeonGen's biggest/farthest room) is gated: its
+# only connecting corridor tile is blocked by a FallenLog prop guarded by a
+# stationary Boss.tscn guardian, cleared once the guardian is defeated.
+#
+# Origin/size chosen and checked directly against biome_at()'s wedge test and
+# paint_outer_biome_mountains()'s band test: box spans world x:133-149,
+# y:74-91 -> dx:33-49, dy:-26..-9. The tightest corner (dx=33, |dy|=26) still
+# clears the wedge test (|dy|<dx, 7-tile margin) and the mountain band
+# (|dx-|dy||=7 > MOUNTAIN_BAND(4), 3-tile margin). Comfortably clears
+# VALLEY_RADIUS (22) and every fixed Verdantwood landmark (all near y~100-104,
+# 9+ tiles south of this box). DungeonGen always places its entrance room in
+# the bottom ~35% of its own local grid with the door on the southmost row -
+# offset into world coords that puts the maze's one entrance at the box's
+# south edge, facing back toward the rest of open Verdantwood - a free fit,
+# not a forced one.
+const VERDANTWOOD_MAZE_ORIGIN := Vector2i(133, 74)
+const VERDANTWOOD_MAZE_WIDTH := 17
+const VERDANTWOOD_MAZE_HEIGHT := 18
+const VERDANTWOOD_MAZE_RESERVE_BUFFER := 2
+const VERDANTWOOD_MAZE_GUARDIAN_ID := "verdantwood_maze_guardian_1"
+
+# See scatter_biome_obstacles() above, which calls this alongside its other
+# _reserve_entrance_clearance() calls. WALL cells are already protected for
+# free by _scatter()'s own ground_source check (painted SRC_FOREST_WALL, not
+# SRC_VERDANTWOOD) once carve_verdantwood_maze() has run - this reservation
+# exists specifically for FLOOR/DOOR cells, which deliberately stay plain
+# SRC_VERDANTWOOD ground and so are NOT protected by that check. Without it a
+# randomly scattered MightyOak/FallenLog/TangledBush could land on a
+# 1-tile-wide corridor and softlock it. The buffer also covers the door's
+# south approach tile, the maze's only entrance.
+func _reserve_verdantwood_maze_clearance(occupied: Dictionary) -> void:
+	var b := VERDANTWOOD_MAZE_RESERVE_BUFFER
+	for y in range(VERDANTWOOD_MAZE_ORIGIN.y - b, VERDANTWOOD_MAZE_ORIGIN.y + VERDANTWOOD_MAZE_HEIGHT + b):
+		for x in range(VERDANTWOOD_MAZE_ORIGIN.x - b, VERDANTWOOD_MAZE_ORIGIN.x + VERDANTWOOD_MAZE_WIDTH + b):
+			occupied[Vector2i(x, y)] = true
+
+func _pos_in_room(pos: Vector2i, room) -> bool:
+	return pos.x >= room.x and pos.x < room.x + room.w and pos.y >= room.y and pos.y < room.y + room.h
+
+# True if (x,y) is a WALL cell of the LOCAL gen.map grid. A position outside
+# the grid's own [0,w)x[0,h) bounds is treated as NOT a wall (it's ordinary,
+# un-touched Verdantwood ground just past the maze's own footprint) -
+# relevant for oak-boundary detection on cells right at the box edge.
+func _wall_cell(map: Array, w: int, h: int, x: int, y: int) -> bool:
+	if x < 0 or x >= w or y < 0 or y >= h:
+		return false
+	return map[y][x] == DungeonGen.WALL
+
+# The corridor cell immediately outside the boss/glade room's doorway -
+# walking backward from the room along the final corridor leg, same "corridor
+# leading into the boss room" concept badlands_interior.gd/
+# frostpeak_interior.gd/gloomfen_interior.gd already use for hazard placement,
+# just picking the single threshold cell instead of the whole run. Also
+# returns the cells immediately on either side of it - `approach` (one step
+# further out along the corridor, away from the room) and `entry` (one step
+# further in, the first room-floor cell) - since DungeonGen's random walk can
+# approach the room from any direction, not just "south"; a caller that needs
+# to walk toward/through the threshold (verify_verdantwood_maze.gd) can use
+# entry-threshold as the correct direction instead of guessing.
+func _glade_threshold(gen: Dictionary) -> Dictionary:
+	var corridors: Array = gen.corridors
+	var final_corridor: Array = corridors[corridors.size() - 1]
+	for i in range(final_corridor.size() - 1, -1, -1):
+		var pos: Vector2i = final_corridor[i]
+		if not _pos_in_room(pos, gen.boss_room):
+			# _carve_corridor() can append the same cell twice in a row (once
+			# per iteration boundary when its 15% jitter doesn't fire that
+			# step) - a naive i-1/i+1 neighbor lookup can land on a literal
+			# duplicate of `pos` itself, which would make the approach/entry
+			# direction a zero vector. Search outward for the nearest
+			# genuinely DIFFERENT cell on each side instead.
+			var approach := pos
+			for j in range(i - 1, -1, -1):
+				if final_corridor[j] != pos:
+					approach = final_corridor[j]
+					break
+			var entry := pos
+			for j in range(i + 1, final_corridor.size()):
+				if _pos_in_room(final_corridor[j], gen.boss_room):
+					entry = final_corridor[j]
+					break
+			return {"threshold": pos, "approach": approach, "entry": entry}
+	# Degenerate fallback, should not happen given room padding.
+	return {"threshold": final_corridor[0], "approach": final_corridor[0], "entry": final_corridor[0]}
+
+# DungeonGen gives no guarantee two independently-random corridor legs can't
+# run adjacent near the boss room and create a bypass around the intended
+# chokepoint - flood-fills the floor graph from spawn_tile with `threshold`
+# treated as an extra wall, and confirms no boss_room tile is still
+# reachable. Cheap (a 17x18 grid) insurance that "beat the guardian or you're
+# stuck" genuinely holds every time this scene loads, not just usually.
+func _is_sole_chokepoint(gen: Dictionary, threshold: Vector2i) -> bool:
+	var map: Array = gen.map
+	var w: int = gen.width
+	var h: int = gen.height
+	var visited := {}
+	var stack: Array = [gen.spawn_tile]
+	while not stack.is_empty():
+		var pos: Vector2i = stack.pop_back()
+		if visited.has(pos) or pos == threshold:
+			continue
+		if pos.x < 0 or pos.x >= w or pos.y < 0 or pos.y >= h or map[pos.y][pos.x] == DungeonGen.WALL:
+			continue
+		visited[pos] = true
+		for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			stack.append(pos + offset)
+	for pos in visited.keys():
+		if _pos_in_room(pos, gen.boss_room):
+			return false # reachable without crossing threshold - bypass exists, reject this layout
+	return true
+
+# Paints the maze's WALL cells onto the live overworld tilemap and returns
+# the data the caller (overworld.gd) needs to instance the guardian, blocker,
+# and boundary MightyOak trees at runtime - guardian_pos/guardian_id,
+# blocker_pos (+ approach_pos/entry_pos either side of it for direction-aware
+# tests), door_pos/spawn_pos, and oak_positions (Array[Vector2i]) - all in
+# world coordinates.
+func carve_verdantwood_maze(tilemap: TileMapLayer) -> Dictionary:
+	var gen: Dictionary
+	var threshold: Dictionary
+	var attempts := 0
+	var verified := false
+	# Generation is cheap (a 17x18 grid) - budget a generous number of
+	# attempts, same "count * 300"-style convention _scatter()/_paint_lakes()
+	# use elsewhere, rather than a tight cap. A previous 20-attempt cap could
+	# exhaust without ever finding a verified layout and would then silently
+	# fall through using the LAST (unverified) attempt regardless of pass/
+	# fail - confirmed as a real gap via verify_verdantwood_maze.gd
+	# intermittently finding an actual bypass, not just a test artifact.
+	# `verified` makes that failure mode impossible: it only stays false if
+	# every one of 300 independent random layouts failed the chokepoint
+	# check, which should not happen in practice for a grid this size.
+	while attempts < 300:
+		attempts += 1
+		gen = DungeonGen.generate(VERDANTWOOD_MAZE_WIDTH, VERDANTWOOD_MAZE_HEIGHT)
+		threshold = _glade_threshold(gen)
+		if _is_sole_chokepoint(gen, threshold.threshold):
+			verified = true
+			break
+	assert(verified, "carve_verdantwood_maze(): exhausted 300 attempts without a verified sole-chokepoint layout")
+
+	var map: Array = gen.map
+	var oak_positions: Array = []
+	for y in range(VERDANTWOOD_MAZE_HEIGHT):
+		for x in range(VERDANTWOOD_MAZE_WIDTH):
+			if map[y][x] != DungeonGen.WALL:
+				continue # FLOOR/DOOR stay plain SRC_VERDANTWOOD ground - already painted by build_biome_layer
+			var world_pos := VERDANTWOOD_MAZE_ORIGIN + Vector2i(x, y)
+			var atlas_coords := Vector2i(1, 0) if (world_pos.x * 17 + world_pos.y * 11) % 3 == 0 else Vector2i(0, 0)
+			tilemap.set_cell(world_pos, SRC_FOREST_WALL, atlas_coords)
+			# Real MightyOak trees provide the actual "thick lush forest"
+			# visual (the underlying tile is what guarantees collision - see
+			# header comment on tools/setup_forest_wall.gd) - only along the
+			# wall mass's visible boundary (a WALL cell with at least one
+			# non-WALL neighbor, including a neighbor outside the maze's own
+			# local grid, which is just ordinary un-touched ground). An
+			# interior wall cell fully surrounded by other wall cells is
+			# never actually seen (always occluded behind the boundary ring,
+			# never walkable-adjacent), so skipping it halves-plus the
+			# instance count for zero visual difference to the player.
+			var has_open_neighbor := false
+			for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				if not _wall_cell(map, VERDANTWOOD_MAZE_WIDTH, VERDANTWOOD_MAZE_HEIGHT, x + offset.x, y + offset.y):
+					has_open_neighbor = true
+					break
+			if has_open_neighbor:
+				oak_positions.append(world_pos)
+
+	return {
+		"guardian_pos": VERDANTWOOD_MAZE_ORIGIN + gen.boss_room.center(),
+		"guardian_id": VERDANTWOOD_MAZE_GUARDIAN_ID,
+		"blocker_pos": VERDANTWOOD_MAZE_ORIGIN + threshold.threshold,
+		"approach_pos": VERDANTWOOD_MAZE_ORIGIN + threshold.approach,
+		"entry_pos": VERDANTWOOD_MAZE_ORIGIN + threshold.entry,
+		"door_pos": VERDANTWOOD_MAZE_ORIGIN + Vector2i(gen.door_x, gen.door_y),
+		"spawn_pos": VERDANTWOOD_MAZE_ORIGIN + gen.spawn_tile,
+		"oak_positions": oak_positions,
+	}
 
 # Gloomfen's counterpart to scatter_biome_obstacles() above - unlike every
 # other obstacle (a single-tile prop scene instanced at one point), a lake is

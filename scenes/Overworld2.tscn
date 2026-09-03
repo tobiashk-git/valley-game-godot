@@ -54,6 +54,14 @@ texture_region_size = Vector2i(32, 32)
 1:0/0 = 0
 1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_u5v1u"]
+texture = ExtResource("5_0gbks")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_udwd7"]
 texture = ExtResource("4_rl5du")
 texture_region_size = Vector2i(32, 32)
@@ -117,6 +125,7 @@ sources/9 = SubResource("TileSetAtlasSource_l6syv")
 sources/10 = SubResource("TileSetAtlasSource_0gbks")
 sources/12 = SubResource("TileSetAtlasSource_fqnsi")
 sources/13 = SubResource("TileSetAtlasSource_ybgal")
+sources/14 = SubResource("TileSetAtlasSource_u5v1u")
 
 [node name="Overworld2" type="Node2D" unique_id=1080697735]
 script = ExtResource("1_7isxj")

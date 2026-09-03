@@ -164,6 +164,19 @@ const BOSSES := {
 		"status_attack": {"status": "sleep", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
 	},
+	# Guards the one gated glade in the Verdantwood overland maze (Phase 1
+	# prototype, see World.carve_verdantwood_maze()) - an overworld "mini
+	# guardian", not a dungeon final boss, so stats are scaled down from
+	# verdantwood_boss (roughly half HP/gold) rather than reusing them
+	# outright. Distinct id from verdantwood_boss, already claimed by
+	# VerdantwoodInterior.tscn's own dungeon boss.
+	"verdantwood_maze_guardian_1": {
+		"name": "Thornback Warden", "sprite": "res://assets/enemies/skeleton.png",
+		"tint": Color(0.35, 0.5, 0.25, 1.0),
+		"max_hp": 38, "attack": 7, "defense": 3, "gold_min": 20, "gold_max": 35,
+		"status_attack": {"status": "sleep", "chance": 0.2},
+		"drop_item_ids": ["healing_potion"],
+	},
 	# Emberfall Badlands' own interior boss (Phase 4) - same no-magic_crystal
 	# reasoning as frostpeak_boss/verdantwood_boss above. Reuses the Rat
 	# sprite (not yet used for a biome boss), tinted volcanic orange/red.

@@ -12,7 +12,7 @@ var next_spawn_position: Vector2 = NO_OVERRIDE
 
 # Boss checkpoints: once true, that boss stays defeated for the session (no
 # save/load system exists yet, so this only persists until the game quits).
-var boss_defeated: Dictionary = {"dungeon_boss": false, "castle_boss": false, "final_boss": false, "frostpeak_boss": false, "verdantwood_boss": false, "badlands_boss": false, "gloomfen_boss": false, "golden_plains_boss": false}
+var boss_defeated: Dictionary = {"dungeon_boss": false, "castle_boss": false, "final_boss": false, "frostpeak_boss": false, "verdantwood_boss": false, "badlands_boss": false, "gloomfen_boss": false, "golden_plains_boss": false, "verdantwood_maze_guardian_1": false}
 
 # Set once by Quests.mark_npc_met() when the meet_villagers tutorial quest
 # completes. overworld.gd checks this every time it (re)builds the map, since

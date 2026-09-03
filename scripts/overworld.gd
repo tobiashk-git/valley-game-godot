@@ -22,6 +22,7 @@ const SWAMP_MUSHROOMS_SCENE := preload("res://scenes/props/SwampMushrooms.tscn")
 const BADLANDS_PALMS_SCENE := preload("res://scenes/props/BadlandsPalms.tscn")
 const BADLANDS_FIRE_GEYSER_SCENE := preload("res://scenes/props/BadlandsFireGeyser.tscn")
 const BADLANDS_TUMBLEWEED_SCENE := preload("res://scenes/props/BadlandsTumbleweed.tscn")
+const BOSS_SCENE := preload("res://scenes/props/Boss.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
@@ -33,6 +34,12 @@ const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
 var _final_boss_entrance_spawned := false
 var _golden_plains_entrance_spawned := false
 var _last_tile := Vector2i(-9999, -9999)
+var _verdantwood_maze_blocker: StaticBody2D = null
+var _verdantwood_guardian_cleared := false
+# Kept around (not just a local in _ready()) so verify_verdantwood_maze.gd
+# can read back the actual generated positions after the scene loads, same
+# reason maze_interior.gd keeps its own _gen around.
+var verdantwood_maze_data: Dictionary = {}
 
 const ZONE_KEYS := {
 	World.Zone.FROSTPEAK: "frostpeak",
@@ -107,6 +114,14 @@ func _on_quests_changed() -> void:
 
 func _ready() -> void:
 	World.build_overworld_map(tilemap)
+	# Phase 1 "overland dungeon" prototype - carved before add_world_boundary/
+	# obstacle scatter so the maze's WALL cells are already painted (and thus
+	# excluded by _scatter()'s ground_source check) by the time
+	# scatter_biome_obstacles() runs below. Overworld.tscn (this scene) only
+	# for now - see World.carve_verdantwood_maze()'s header comment for why
+	# bringing it to Overworld2.tscn needs a distinct per-world boss_id first.
+	var verdantwood_maze: Dictionary = World.carve_verdantwood_maze(tilemap)
+	verdantwood_maze_data = verdantwood_maze
 	World.add_world_boundary(self)
 	if GameState.village_gates_open:
 		World.open_gates(tilemap)
@@ -139,6 +154,25 @@ func _ready() -> void:
 	}
 	for entry in World.scatter_biome_obstacles(tilemap):
 		_spawn_prop(obstacle_scenes[entry.scene], entry.pos)
+
+	# Verdantwood overland maze's guardian + blocker - instanced directly
+	# (not via _spawn_prop()/obstacle_scenes above) since the guardian needs
+	# boss_id set before it starts running, same order maze_interior.gd uses
+	# for every dungeon/biome-interior boss.
+	var guardian: StaticBody2D = BOSS_SCENE.instantiate()
+	guardian.position = _tile_center(verdantwood_maze.guardian_pos)
+	guardian.boss_id = verdantwood_maze.guardian_id
+	ysort.add_child(guardian)
+	_verdantwood_maze_blocker = FALLEN_LOG_SCENE.instantiate()
+	_verdantwood_maze_blocker.position = _tile_center(verdantwood_maze.blocker_pos)
+	ysort.add_child(_verdantwood_maze_blocker)
+	# Real MightyOak trees along the wall mass's visible boundary - the
+	# actual "thick lush forest" visual; the tile underneath (SRC_FOREST_WALL)
+	# is what guarantees collision, these are the same reused canopy prop
+	# already scattered elsewhere in Verdantwood, packed densely here instead
+	# of sparsely.
+	for oak_pos in verdantwood_maze.oak_positions:
+		_spawn_prop(MIGHTY_OAK_SCENE, oak_pos)
 
 	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
 	# target spawn is always the tile just inside the door (one row up).
@@ -248,3 +282,13 @@ func _process(_delta: float) -> void:
 		var zone: int = World.biome_at(current_tile.x, current_tile.y).zone
 		if zone != World.Zone.VALLEY:
 			Combat.check_random_encounter(zone)
+
+	# Verdantwood overland maze's gated glade - once the guardian is
+	# defeated, free its blocker so the glade's exit opens. Same one-shot
+	# latch idiom badlands_interior.gd/frostpeak_interior.gd/
+	# gloomfen_interior.gd already use for "once boss_defeated flips, mutate
+	# the world", just targeting a prop instance instead of a tile repaint.
+	if not _verdantwood_guardian_cleared and GameState.boss_defeated.get(World.VERDANTWOOD_MAZE_GUARDIAN_ID, false):
+		_verdantwood_guardian_cleared = true
+		if is_instance_valid(_verdantwood_maze_blocker):
+			_verdantwood_maze_blocker.queue_free()
