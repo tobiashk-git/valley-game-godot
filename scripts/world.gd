@@ -397,6 +397,9 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	# elevated, one lower-profile" pairing as MightyOak/IceBoulder alongside
 	# IceCrystalShard/IcePool.
 	result.append_array(_scatter(tilemap, 20, "FallenLog", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))
+	# Third Verdantwood obstacle - a large tangled bush, same "third obstacle
+	# for variety" role IcePool plays in Frostpeak.
+	result.append_array(_scatter(tilemap, 18, "TangledBush", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))
 	return result
 
 func _is_in_village(pos: Vector2i) -> bool:
