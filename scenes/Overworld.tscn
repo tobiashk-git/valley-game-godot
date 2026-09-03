@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" path="res://assets/ravine.png" id="5_dysil"]
 [ext_resource type="Texture2D" path="res://assets/mountain_range.png" id="6_8wcqk"]
 [ext_resource type="Texture2D" path="res://assets/hills_ground.png" id="6_667vx"]
+[ext_resource type="Texture2D" path="res://assets/gloomfen_water.png" id="7_667vx"]
 [ext_resource type="Texture2D" path="res://assets/path.png" id="7_ojbe6"]
 [ext_resource type="Texture2D" path="res://assets/fence.png" id="8_yb8sh"]
 [ext_resource type="Texture2D" path="res://assets/gate.png" id="9_r1q4c"]
@@ -46,6 +47,14 @@ texture_region_size = Vector2i(32, 32)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yb8sh"]
 texture = ExtResource("6_8wcqk")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_r1q4c"]
+texture = ExtResource("7_667vx")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
@@ -115,6 +124,7 @@ sources/9 = SubResource("TileSetAtlasSource_667vx")
 sources/10 = SubResource("TileSetAtlasSource_8wcqk")
 sources/11 = SubResource("TileSetAtlasSource_ojbe6")
 sources/12 = SubResource("TileSetAtlasSource_yb8sh")
+sources/13 = SubResource("TileSetAtlasSource_r1q4c")
 
 [node name="Overworld" type="Node2D" unique_id=310149965]
 script = ExtResource("1_ff6um")
@@ -126,6 +136,7 @@ tile_set = SubResource("TileSet_1y5gq")
 y_sort_enabled = true
 
 [node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("11_2ltwc")]
+z_index = 1
 script = ExtResource("12_pv64x")
 
 [node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=592954177]

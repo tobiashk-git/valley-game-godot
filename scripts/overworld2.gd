@@ -54,6 +54,7 @@ func _ready() -> void:
 		var instance: Node2D = obstacle_scenes[entry.scene].instantiate()
 		instance.position = _tile_center(entry.pos)
 		ysort.add_child(instance)
+	World.scatter_biome_lakes(tilemap)
 
 	# Return trip lands back at World 1's village altar plaza (walkable
 	# path tile just south of the altar itself, which is solid).

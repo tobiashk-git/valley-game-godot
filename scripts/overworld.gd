@@ -121,6 +121,7 @@ func _ready() -> void:
 	}
 	for entry in World.scatter_biome_obstacles(tilemap):
 		_spawn_prop(obstacle_scenes[entry.scene], entry.pos)
+	World.scatter_biome_lakes(tilemap)
 
 	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
 	# target spawn is always the tile just inside the door (one row up).

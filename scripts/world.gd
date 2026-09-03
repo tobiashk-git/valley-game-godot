@@ -103,6 +103,7 @@ const SRC_FORD := 10   # walkable - what a river tile flips to via open_biome_pa
 # ravine.png are left in place in Overworld.tscn rather than surgically
 # removed, but nothing references source 11 anymore.
 const SRC_MOUNTAIN := 12 # solid - the permanent, impassable range along each of the 4 outer-biome wedge boundaries
+const SRC_GLOOMFEN_WATER := 13 # solid - scattered swamp-lake blobs, see scatter_biome_lakes()
 
 enum Zone { VALLEY, FROSTPEAK, VERDANTWOOD, BADLANDS, GLOOMFEN }
 
@@ -436,6 +437,93 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	# for variety" role IcePool plays in Frostpeak.
 	result.append_array(_scatter(tilemap, 18, "TangledBush", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds, false, elevated_buffer, flush_buffer))
 	return result
+
+# Gloomfen's counterpart to scatter_biome_obstacles() above - unlike every
+# other obstacle (a single-tile prop scene instanced at one point), a lake is
+# a multi-tile organic blob painted directly onto the terrain, closer in kind
+# to _paint_river_ring()/paint_outer_biome_mountains() than to _scatter()'s
+# single-point placement - no prop scene, no StaticBody2D, the water tiles
+# themselves carry solid collision via the TileSet source.
+const GLOOMFEN_LAKE_COUNT := 4
+const LAKE_CIRCLE_COUNT := 3        # circles unioned per lake, tuned visually after first screenshot
+const LAKE_CIRCLE_RADIUS_MIN := 1
+const LAKE_CIRCLE_RADIUS_MAX := 3   # radius 2-4 (an earlier tuning pass) read organic but dominated the
+# screen at ~45 tiles/lake, more like a terrain feature than a scatterable
+# obstacle - the two-pass erosion below does the real work of keeping the
+# silhouette irregular, so radius can come back down without losing that
+const LAKE_CIRCLE_JITTER := 2       # how far each extra circle's center can drift from the seed - kept close
+# to the radius range so circles genuinely displace from each other (a
+# jitter much smaller than the radius just stacks near-concentric circles,
+# which reads as a symmetric geometric shape - a cross, in the first visual
+# test - rather than an organic pond)
+const LAKE_EDGE_KEEP_CHANCE := 0.7  # boundary tiles are randomly dropped to
+# ragged-edge the silhouette - a pure circle union has a crisp geometric
+# edge at this tile resolution (radius 2-4 is only a handful of tiles wide),
+# which reads as artificial no matter how the circles are jittered
+
+func scatter_biome_lakes(tilemap: TileMapLayer) -> void:
+	var occupied := {}
+	_reserve_entrance_clearance(occupied, GLOOMFEN_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.GLOOMFEN])
+	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS, 3)
+	var bounds := Rect2i(WORLD_CENTER_X - OBSTACLE_SCATTER_REACH, WORLD_CENTER_Y - OBSTACLE_SCATTER_REACH, OBSTACLE_SCATTER_REACH * 2, OBSTACLE_SCATTER_REACH * 2)
+	_paint_lakes(tilemap, GLOOMFEN_LAKE_COUNT, Zone.GLOOMFEN, SRC_GLOOMFEN, SRC_GLOOMFEN_WATER, occupied, bounds)
+
+# Unions LAKE_CIRCLE_COUNT jittered circles into one organic blob - the
+# simplest reliable way to get a non-circular pond shape without real
+# flood-fill/random-walk complexity (no infinite-loop risk, predictable size
+# range). Every tile within radius of ANY circle center is part of the lake,
+# then a ragged-edge erosion pass randomly drops boundary tiles so the
+# silhouette doesn't read as a crisp, geometric circle union.
+func _lake_footprint(seed_pos: Vector2i) -> Array:
+	var footprint := {}
+	for i in range(LAKE_CIRCLE_COUNT):
+		var center := seed_pos if i == 0 else seed_pos + Vector2i(randi_range(-LAKE_CIRCLE_JITTER, LAKE_CIRCLE_JITTER), randi_range(-LAKE_CIRCLE_JITTER, LAKE_CIRCLE_JITTER))
+		var radius := randi_range(LAKE_CIRCLE_RADIUS_MIN, LAKE_CIRCLE_RADIUS_MAX)
+		for dy in range(-radius, radius + 1):
+			for dx in range(-radius, radius + 1):
+				if dx * dx + dy * dy <= radius * radius:
+					footprint[center + Vector2i(dx, dy)] = true
+
+	# Two erosion passes, not one - the first pass alone still left a few long
+	# straight/blocky edges from the original circle union (confirmed via a
+	# real screenshot); a second pass over the newly-exposed edge roughs the
+	# coastline up further into something that reads as a natural pond.
+	for pass_i in range(2):
+		var eroded := {}
+		for pos in footprint.keys():
+			var is_edge := false
+			for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				if not footprint.has(pos + offset):
+					is_edge = true
+					break
+			if not is_edge or randf() < LAKE_EDGE_KEEP_CHANCE:
+				eroded[pos] = true
+		footprint = eroded
+	return footprint.keys()
+
+func _paint_lakes(tilemap: TileMapLayer, count: int, zone: int, ground_source: int, water_source: int, occupied: Dictionary, bounds: Rect2i) -> void:
+	var placed := 0
+	var attempts := 0
+	var max_attempts := count * 300 # same budget convention as _scatter()
+	while placed < count and attempts < max_attempts:
+		attempts += 1
+		var seed_pos := Vector2i(randi_range(bounds.position.x, bounds.end.x - 1), randi_range(bounds.position.y, bounds.end.y - 1))
+		if not _far_enough_from_river(seed_pos, zone):
+			continue
+		var footprint := _lake_footprint(seed_pos)
+		var valid := true
+		for pos in footprint:
+			if occupied.has(pos) or biome_at(pos.x, pos.y).zone != zone or tilemap.get_cell_source_id(pos) != ground_source or not _far_enough_from_river(pos, zone):
+				valid = false
+				break
+		if not valid:
+			continue
+		for pos in footprint:
+			var atlas_coords := Vector2i(1, 0) if (pos.x * 13 + pos.y * 7) % 3 == 0 else Vector2i(0, 0) # different salt than the mountain band's/ground textures' own hash
+			tilemap.set_cell(pos, water_source, atlas_coords)
+			occupied[pos] = true
+		placed += 1
 
 func _is_in_village(pos: Vector2i) -> bool:
 	return pos.x >= VILLAGE_BOUNDS.x0 and pos.x <= VILLAGE_BOUNDS.x1 and pos.y >= VILLAGE_BOUNDS.y0 and pos.y <= VILLAGE_BOUNDS.y1
