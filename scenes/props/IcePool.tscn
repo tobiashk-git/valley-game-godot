@@ -5,12 +5,12 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_q12l8"]
 size = Vector2(28, 28)
 
-[node name="IcePool" type="StaticBody2D" unique_id=435635232]
+[node name="IcePool" type="StaticBody2D" unique_id=1944165520]
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=183104869]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1265909320]
 scale = Vector2(0.0859, 0.0859)
 texture = ExtResource("1_u3dtq")
 offset = Vector2(0, -16.51315)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1562066748]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2024256620]
 shape = SubResource("RectangleShape2D_q12l8")

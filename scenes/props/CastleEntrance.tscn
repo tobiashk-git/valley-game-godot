@@ -5,8 +5,9 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bsb3r"]
 size = Vector2(28, 28)
 
-[node name="CastleEntrance" type="StaticBody2D" unique_id=1998365881]
+[node name="CastleEntrance" type="StaticBody2D" unique_id=1724388589]
+z_index = 1
 script = ExtResource("1_i6sm1")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2098878405]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2137868973]
 shape = SubResource("RectangleShape2D_bsb3r")

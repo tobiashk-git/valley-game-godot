@@ -5,12 +5,13 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_414tl"]
 size = Vector2(28, 28)
 
-[node name="SubmergedTempleEntrance" type="StaticBody2D" unique_id=2040597532]
+[node name="SubmergedTempleEntrance" type="StaticBody2D" unique_id=2032312689]
+z_index = 1
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1982338018]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=446840183]
 scale = Vector2(0.35, 0.35)
 texture = ExtResource("1_plpxl")
 offset = Vector2(0, -0.8)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=834156199]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1900469263]
 shape = SubResource("RectangleShape2D_414tl")

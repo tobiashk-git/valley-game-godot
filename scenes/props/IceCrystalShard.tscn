@@ -5,12 +5,13 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ymj3q"]
 size = Vector2(28, 28)
 
-[node name="IceCrystalShard" type="StaticBody2D" unique_id=1841160341]
+[node name="IceCrystalShard" type="StaticBody2D" unique_id=1301191429]
+z_index = 1
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=544164762]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=989186487]
 scale = Vector2(0.0853, 0.0853)
 texture = ExtResource("1_is7r3")
 offset = Vector2(0, -8.9929)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1031894291]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1119600594]
 shape = SubResource("RectangleShape2D_ymj3q")

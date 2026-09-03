@@ -5,12 +5,13 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4ae2u"]
 size = Vector2(28, 28)
 
-[node name="TangledBush" type="StaticBody2D" unique_id=942142404]
+[node name="TangledBush" type="StaticBody2D" unique_id=1309739926]
+z_index = 1
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1004823695]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=515859262]
 scale = Vector2(0.1028, 0.1028)
 texture = ExtResource("1_jn7v3")
 offset = Vector2(0, -17.2558)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=149614046]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=574664215]
 shape = SubResource("RectangleShape2D_4ae2u")

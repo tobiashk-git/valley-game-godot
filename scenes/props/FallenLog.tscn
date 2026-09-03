@@ -5,12 +5,12 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pcgiv"]
 size = Vector2(28, 28)
 
-[node name="FallenLog" type="StaticBody2D" unique_id=784127649]
+[node name="FallenLog" type="StaticBody2D" unique_id=1597628294]
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=81133120]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=798822327]
 scale = Vector2(0.1597, 0.1597)
 texture = ExtResource("1_bcc2o")
 offset = Vector2(0, 1.22775)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=655932586]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=517263155]
 shape = SubResource("RectangleShape2D_pcgiv")

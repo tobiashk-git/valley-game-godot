@@ -5,12 +5,13 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vw7s4"]
 size = Vector2(28, 28)
 
-[node name="WatchtowerRuinEntrance" type="StaticBody2D" unique_id=1833448314]
+[node name="WatchtowerRuinEntrance" type="StaticBody2D" unique_id=911342637]
+z_index = 1
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2112170799]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=506988258]
 scale = Vector2(0.35, 0.35)
 texture = ExtResource("1_wiift")
 offset = Vector2(0, -0.8)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1036919086]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=678888952]
 shape = SubResource("RectangleShape2D_vw7s4")

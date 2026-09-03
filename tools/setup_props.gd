@@ -8,9 +8,19 @@ extends SceneTree
 const TILE := 32.0
 const HALF := TILE / 2.0
 
-func _build_sprite_prop(scene_name: String, tex_path: String, src_w: float, src_h: float, scale: float, region: Rect2 = Rect2()) -> void:
+func _build_sprite_prop(scene_name: String, tex_path: String, src_w: float, src_h: float, scale: float, region: Rect2 = Rect2(), z_index: int = 1) -> void:
 	var body := StaticBody2D.new()
 	body.name = scene_name
+	body.z_index = z_index # Two-tier layering: everything that stands proud of the
+	# ground (default 1, matching Player.tscn's own z_index=1) mutually Y-sorts as
+	# normal - unchanged from before this existed. Ground-flush objects (FallenLog,
+	# IcePool) pass 0 instead - still above the TileMapLayer terrain (which is also
+	# 0, drawn first by sibling order), but strictly BEHIND the z=1 tier, so a flat
+	# object can never appear to float in front of a taller neighbor (tree, boulder,
+	# bush) or the player, regardless of which tile row either one is on. A single
+	# scalar z_index can't express "loses to elevated, ties with player" at once -
+	# this bumps the elevated+player tier up together instead of pushing flush down,
+	# which would otherwise sink it below the terrain and make it invisible.
 
 	var sprite := Sprite2D.new()
 	sprite.name = "Sprite2D"
@@ -37,9 +47,10 @@ func _build_sprite_prop(scene_name: String, tex_path: String, src_w: float, src_
 	var err := ResourceSaver.save(packed, "res://scenes/props/%s.tscn" % scene_name)
 	print(scene_name, ".tscn saved: ", err)
 
-func _build_drawn_prop(scene_name: String, script_path: String) -> void:
+func _build_drawn_prop(scene_name: String, script_path: String, z_index: int = 1) -> void:
 	var body := StaticBody2D.new()
 	body.name = scene_name
+	body.z_index = z_index
 	body.set_script(load(script_path))
 
 	var collision := CollisionShape2D.new()
@@ -80,8 +91,12 @@ func _initialize() -> void:
 	_build_sprite_prop("MightyOak", "res://assets/mighty_oak.png", 629.0, 598.0, 0.134)
 	_build_sprite_prop("IceBoulder", "res://assets/ice_boulder.png", 477.0, 519.0, 0.116)
 	_build_sprite_prop("IceCrystalShard", "res://assets/ice_crystal_shard.png", 543.0, 586.0, 0.0853)
-	_build_sprite_prop("IcePool", "res://assets/ice_pool.png", 761.0, 757.0, 0.0859)
-	_build_sprite_prop("FallenLog", "res://assets/fallen_log.png", 526.0, 185.0, 0.1597)
+	# IcePool/FallenLog lie flush with the ground (unlike every other obstacle
+	# above, which stands proud of it) - z_index 0 (below the z=1 default every
+	# other prop and the Player use) keeps them from ever floating in front of
+	# a taller neighbor they happen to visually overlap.
+	_build_sprite_prop("IcePool", "res://assets/ice_pool.png", 761.0, 757.0, 0.0859, Rect2(), 0)
+	_build_sprite_prop("FallenLog", "res://assets/fallen_log.png", 526.0, 185.0, 0.1597, Rect2(), 0)
 	_build_sprite_prop("TangledBush", "res://assets/tangled_bush.png", 681.0, 647.0, 0.1028)
 
 	print("=== Props setup complete ===")

@@ -5,12 +5,13 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0b6aj"]
 size = Vector2(28, 28)
 
-[node name="VolcanoEntrance" type="StaticBody2D" unique_id=1902267320]
+[node name="VolcanoEntrance" type="StaticBody2D" unique_id=254841241]
+z_index = 1
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=457128857]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1417458147]
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("1_dkhu1")
 offset = Vector2(0, 0.4)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1495396486]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=480500595]
 shape = SubResource("RectangleShape2D_0b6aj")
