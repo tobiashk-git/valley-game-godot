@@ -269,6 +269,13 @@ func _ready() -> void:
 	# instead. Also needed at every future teleport (portals, fast travel).
 	cam.reset_smoothing()
 
+# TEMP: overworld random encounters disabled for playtesting the Verdantwood
+# maze (too many fights on the walk out there to test quickly) - flip back
+# to true when done. Doesn't touch check_random_encounter()/Combat itself,
+# just this call site - verify_biome_revamp.gd's/verify_village_gates.gd's
+# own random-encounter checks will fail while this is false, expected.
+const OVERWORLD_ENCOUNTERS_ENABLED := false
+
 # The biome revamp's random encounters - the open overworld had none at all
 # before this (Combat.check_random_encounter() was only ever called from
 # maze_interior.gd). Golden Plains (Zone.VALLEY, which includes the village)
@@ -280,7 +287,7 @@ func _process(_delta: float) -> void:
 	if current_tile != _last_tile:
 		_last_tile = current_tile
 		var zone: int = World.biome_at(current_tile.x, current_tile.y).zone
-		if zone != World.Zone.VALLEY:
+		if zone != World.Zone.VALLEY and OVERWORLD_ENCOUNTERS_ENABLED:
 			Combat.check_random_encounter(zone)
 
 	# Verdantwood overland maze's gated glade - once the guardian is
