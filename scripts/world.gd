@@ -386,6 +386,10 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	var result: Array = []
 	result.append_array(_scatter(tilemap, 18, "MightyOak", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds))
 	result.append_array(_scatter(tilemap, 18, "IceBoulder", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds))
+	# Second, smaller Frostpeak obstacle for visual variety - occupied is
+	# shared across every _scatter() call in this function, so this can't
+	# land on an already-placed IceBoulder.
+	result.append_array(_scatter(tilemap, 22, "IceCrystalShard", occupied, Zone.FROSTPEAK, SRC_FROSTPEAK, bounds))
 	return result
 
 func _is_in_village(pos: Vector2i) -> bool:

@@ -1,12 +1,13 @@
 extends SceneTree
 # Outer-biome scattered-obstacle verification (mighty oaks/Verdantwood, ice
-# boulders/Frostpeak so far). Run via:
+# boulders + ice crystal shards/Frostpeak so far). Run via:
 # godot --script res://tools/verify_outer_biome_obstacles.gd (NOT --headless -
 # this takes real screenshots via get_texture()).
 
 const OBSTACLES := [
 	{"scene_path": "res://scenes/props/MightyOak.tscn", "zone_name": "VERDANTWOOD"},
 	{"scene_path": "res://scenes/props/IceBoulder.tscn", "zone_name": "FROSTPEAK"},
+	{"scene_path": "res://scenes/props/IceCrystalShard.tscn", "zone_name": "FROSTPEAK"},
 ]
 
 func _walk(player: CharacterBody2D, action: String, frames: int) -> void:
@@ -28,6 +29,10 @@ func _initialize() -> void:
 
 	for obstacle in OBSTACLES:
 		var zone: int = world.Zone[obstacle.zone_name]
+		# e.g. "res://scenes/props/IceCrystalShard.tscn" -> "IceCrystalShard" -
+		# distinguishes 2 obstacles sharing the same zone_name (IceBoulder and
+		# IceCrystalShard both scatter into FROSTPEAK).
+		var label: String = obstacle.scene_path.get_file().get_basename()
 
 		# Confirmed directly this session: Godot's sibling auto-rename for
 		# repeated same-scene instances does NOT produce "Name2"/"Name3" -
@@ -40,8 +45,8 @@ func _initialize() -> void:
 		for child in ysort.get_children():
 			if child.scene_file_path == obstacle.scene_path:
 				instances.append(child)
-		print("[%s] instances scattered: " % obstacle.zone_name, instances.size())
-		print("[%s] At least one present: " % obstacle.zone_name, instances.size() > 0)
+		print("[%s] instances scattered: " % label, instances.size())
+		print("[%s] At least one present: " % label, instances.size() > 0)
 
 		if instances.is_empty():
 			continue
@@ -54,7 +59,7 @@ func _initialize() -> void:
 			if world.biome_at(tile.x, tile.y).zone != zone:
 				all_in_zone = false
 				break
-		print("[%s] Every scattered instance is in the right zone: " % obstacle.zone_name, all_in_zone)
+		print("[%s] Every scattered instance is in the right zone: " % label, all_in_zone)
 
 		# --- Real collision check: walk straight into a known instance,
 		# confirm it actually blocks movement rather than just rendering on
@@ -68,12 +73,12 @@ func _initialize() -> void:
 			combat.player_run()
 			await physics_frame
 		await _walk(player, "move_up", 60) # 60 ticks * ~2.67px/tick ~= 160px, well past it if unobstructed
-		print("[%s] Blocks movement (player stopped short of it): " % obstacle.zone_name, player.position.y > target.position.y + 8.0)
+		print("[%s] Blocks movement (player stopped short of it): " % label, player.position.y > target.position.y + 8.0)
 
 		cam.reset_smoothing()
 		for i in range(3):
 			await process_frame
-		root.get_texture().get_image().save_png("res://verify_outer_biome_%s.png" % obstacle.zone_name.to_lower())
-		print("Saved verify_outer_biome_%s.png" % obstacle.zone_name.to_lower())
+		root.get_texture().get_image().save_png("res://verify_outer_biome_%s.png" % label.to_lower())
+		print("Saved verify_outer_biome_%s.png" % label.to_lower())
 
 	quit()
