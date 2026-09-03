@@ -10,6 +10,10 @@ const HALF := TILE / 2.0
 func _build(scene_name: String, tex_path: String, src_w: float, src_h: float, scale: float, item_id: String, amount: int, region: Rect2 = Rect2()) -> void:
 	var body := StaticBody2D.new()
 	body.name = scene_name
+	body.z_index = 1 # matches setup_props.gd's default for every prop that stands
+	# proud of the ground (see tools/setup_props.gd) - Tree/Rock need the same
+	# explicit value here since this script rebuilds them independently rather
+	# than layering on top of setup_props.gd's output.
 	body.set_script(load("res://scripts/gatherable.gd"))
 	body.item_id = item_id
 	body.amount = amount
