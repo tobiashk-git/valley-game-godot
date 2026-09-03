@@ -458,6 +458,8 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	# Badlands' first prop-scatter obstacle - a spreading cluster of palm
 	# trees, MightyOak/SwampTree's elevated anchor counterpart for this biome.
 	result.append_array(_scatter(tilemap, 18, "BadlandsPalms", occupied, Zone.BADLANDS, SRC_BADLANDS, bounds, false, elevated_buffer, flush_buffer))
+	# Second Badlands obstacle for variety - a tall fire geyser vent.
+	result.append_array(_scatter(tilemap, 20, "BadlandsFireGeyser", occupied, Zone.BADLANDS, SRC_BADLANDS, bounds, false, elevated_buffer, flush_buffer))
 	return result
 
 # Gloomfen's counterpart to scatter_biome_obstacles() above - unlike every

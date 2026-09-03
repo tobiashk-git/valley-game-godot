@@ -20,6 +20,7 @@ const SWAMP_TREE_SCENE := preload("res://scenes/props/SwampTree.tscn")
 const SWAMP_FERNS_SCENE := preload("res://scenes/props/SwampFerns.tscn")
 const SWAMP_MUSHROOMS_SCENE := preload("res://scenes/props/SwampMushrooms.tscn")
 const BADLANDS_PALMS_SCENE := preload("res://scenes/props/BadlandsPalms.tscn")
+const BADLANDS_FIRE_GEYSER_SCENE := preload("res://scenes/props/BadlandsFireGeyser.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
@@ -132,6 +133,7 @@ func _ready() -> void:
 		"SwampFerns": SWAMP_FERNS_SCENE,
 		"SwampMushrooms": SWAMP_MUSHROOMS_SCENE,
 		"BadlandsPalms": BADLANDS_PALMS_SCENE,
+		"BadlandsFireGeyser": BADLANDS_FIRE_GEYSER_SCENE,
 	}
 	for entry in World.scatter_biome_obstacles(tilemap):
 		_spawn_prop(obstacle_scenes[entry.scene], entry.pos)

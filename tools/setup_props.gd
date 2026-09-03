@@ -110,6 +110,10 @@ func _initialize() -> void:
 	# Badlands' first prop-scatter obstacle - a spreading cluster of palm
 	# trees, MightyOak/SwampTree's elevated anchor counterpart for Zone.BADLANDS.
 	_build_sprite_prop("BadlandsPalms", "res://assets/badlands_palms.png", 357.0, 422.0, 0.2353)
+	# Second Badlands obstacle for variety - a tall cone-shaped fire geyser
+	# vent, same "second, taller obstacle" role IceBoulder/SwampTree's own
+	# variety-piece counterparts play elsewhere.
+	_build_sprite_prop("BadlandsFireGeyser", "res://assets/badlands_fire_geyser.png", 533.0, 729.0, 0.1576)
 
 	print("=== Props setup complete ===")
 	quit()

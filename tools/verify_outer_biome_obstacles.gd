@@ -15,6 +15,7 @@ const OBSTACLES := [
 	{"scene_path": "res://scenes/props/SwampFerns.tscn", "zone_name": "GLOOMFEN"},
 	{"scene_path": "res://scenes/props/SwampMushrooms.tscn", "zone_name": "GLOOMFEN"},
 	{"scene_path": "res://scenes/props/BadlandsPalms.tscn", "zone_name": "BADLANDS"},
+	{"scene_path": "res://scenes/props/BadlandsFireGeyser.tscn", "zone_name": "BADLANDS"},
 ]
 
 func _walk(player: CharacterBody2D, action: String, frames: int) -> void:
