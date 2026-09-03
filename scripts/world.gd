@@ -521,18 +521,22 @@ func _wall_cell(map: Array, w: int, h: int, x: int, y: int) -> bool:
 		return false
 	return map[y][x] == DungeonGen.WALL
 
-# The corridor cell immediately outside the boss/glade room's doorway -
-# walking backward from the room along the final corridor leg, same "corridor
-# leading into the boss room" concept badlands_interior.gd/
-# frostpeak_interior.gd/gloomfen_interior.gd already use for hazard placement,
-# just picking the single threshold cell instead of the whole run. Also
-# returns the cells immediately on either side of it - `approach` (one step
-# further out along the corridor, away from the room) and `entry` (one step
-# further in, the first room-floor cell) - since DungeonGen's random walk can
-# approach the room from any direction, not just "south"; a caller that needs
-# to walk toward/through the threshold (verify_verdantwood_maze.gd) can use
-# entry-threshold as the correct direction instead of guessing.
-func _glade_threshold(gen: Dictionary) -> Dictionary:
+# Where the corridor enters gen.boss_room - the direction (Vector2i unit
+# vector, pointing INTO the room) and the specific cell just inside where it
+# arrives. Walks the final corridor leg backward from the room, same
+# "corridor leading into the boss room" concept badlands_interior.gd/
+# frostpeak_interior.gd/gloomfen_interior.gd already use for hazard
+# placement.
+#
+# Corrected design (see history: an earlier version of this feature placed
+# the blocker directly ON this entrance, sealing the room's only way in -
+# the guardian standing inside became permanently unreachable, a genuine
+# soft-lock caught by live playtesting, not something a bot walking straight
+# to a hardcoded guardian_pos in the verify script would ever catch). The
+# entrance itself must always stay freely walkable - this function now only
+# reports which side it's on, so _find_exit_stub() below can pick a
+# DIFFERENT side for the actual gate.
+func _room_entrance(gen: Dictionary) -> Dictionary:
 	var corridors: Array = gen.corridors
 	var final_corridor: Array = corridors[corridors.size() - 1]
 	for i in range(final_corridor.size() - 1, -1, -1):
@@ -540,79 +544,108 @@ func _glade_threshold(gen: Dictionary) -> Dictionary:
 		if not _pos_in_room(pos, gen.boss_room):
 			# _carve_corridor() can append the same cell twice in a row (once
 			# per iteration boundary when its 15% jitter doesn't fire that
-			# step) - a naive i-1/i+1 neighbor lookup can land on a literal
-			# duplicate of `pos` itself, which would make the approach/entry
-			# direction a zero vector. Search outward for the nearest
-			# genuinely DIFFERENT cell on each side instead.
-			var approach := pos
-			for j in range(i - 1, -1, -1):
-				if final_corridor[j] != pos:
-					approach = final_corridor[j]
-					break
+			# step) - a naive i+1 neighbor lookup can land on a literal
+			# duplicate of `pos` itself, which would make the direction a
+			# zero vector. Search outward for the nearest genuinely
+			# DIFFERENT cell instead.
 			var entry := pos
 			for j in range(i + 1, final_corridor.size()):
-				if _pos_in_room(final_corridor[j], gen.boss_room):
+				if final_corridor[j] != pos:
 					entry = final_corridor[j]
 					break
-			return {"threshold": pos, "approach": approach, "entry": entry}
+			return {"dir": entry - pos, "entry": entry}
 	# Degenerate fallback, should not happen given room padding.
-	return {"threshold": final_corridor[0], "approach": final_corridor[0], "entry": final_corridor[0]}
+	return {"dir": Vector2i.ZERO, "entry": final_corridor[0]}
 
-# DungeonGen gives no guarantee two independently-random corridor legs can't
-# run adjacent near the boss room and create a bypass around the intended
-# chokepoint - flood-fills the floor graph from spawn_tile with `threshold`
-# treated as an extra wall, and confirms no boss_room tile is still
-# reachable. Cheap (a 17x18 grid) insurance that "beat the guardian or you're
-# stuck" genuinely holds every time this scene loads, not just usually.
-func _is_sole_chokepoint(gen: Dictionary, threshold: Vector2i) -> bool:
+# Picks a side of gen.boss_room - preferring the side directly opposite the
+# entrance, matching the user's own framing ("the log is supposed to block
+# the exit... allow exit to a next phase of the maze, if the maze was bigger
+# of course") - and carves exactly ONE new floor cell just past that side: a
+# small isolated pocket standing in for the "next phase" this Phase 1
+# prototype doesn't have room to build out yet. The room's real entrance is
+# never touched here.
+#
+# Returns {"blocker": stub cell, "approach": the room's own boundary cell
+# next to it, "dir": stub - approach} in LOCAL grid coordinates, or an empty
+# Dictionary if every side failed (caller should just regenerate - cheap,
+# and should essentially never actually happen given normal room sizes).
+func _find_exit_stub(gen: Dictionary, entrance_dir: Vector2i) -> Dictionary:
+	var room = gen.boss_room
 	var map: Array = gen.map
 	var w: int = gen.width
 	var h: int = gen.height
-	var visited := {}
-	var stack: Array = [gen.spawn_tile]
-	while not stack.is_empty():
-		var pos: Vector2i = stack.pop_back()
-		if visited.has(pos) or pos == threshold:
+	var center: Vector2i = room.center()
+	# entrance_dir points from the corridor INTO the room (the direction of
+	# travel on arrival) - continuing in that SAME direction reaches the
+	# room's FAR wall, the genuine "opposite side" the header comment
+	# describes. -entrance_dir points back toward the entrance's own side,
+	# so it's tried last (and would usually fail the isolation check below
+	# anyway, being right next to the entrance corridor's own cells).
+	var dirs: Array = [entrance_dir, Vector2i(entrance_dir.y, entrance_dir.x), Vector2i(-entrance_dir.y, -entrance_dir.x), -entrance_dir]
+	for dir in dirs:
+		if dir == Vector2i.ZERO:
 			continue
-		if pos.x < 0 or pos.x >= w or pos.y < 0 or pos.y >= h or map[pos.y][pos.x] == DungeonGen.WALL:
+		var approach: Vector2i
+		if dir.x != 0:
+			approach = Vector2i(room.x if dir.x < 0 else room.x + room.w - 1, center.y)
+		else:
+			approach = Vector2i(center.x, room.y if dir.y < 0 else room.y + room.h - 1)
+		var stub: Vector2i = approach + dir
+		if stub.x < 0 or stub.x >= w or stub.y < 0 or stub.y >= h:
 			continue
-		visited[pos] = true
+		if map[stub.y][stub.x] != DungeonGen.WALL:
+			continue
+		# Confirm the stub is a genuine isolated pocket - its only non-WALL
+		# neighbor should be `approach` (the room side). A candidate whose
+		# other neighbors are already floor would create an unintended
+		# shortcut into some other corridor/room instead of a clean dead end.
+		var isolated := true
 		for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-			stack.append(pos + offset)
-	for pos in visited.keys():
-		if _pos_in_room(pos, gen.boss_room):
-			return false # reachable without crossing threshold - bypass exists, reject this layout
-	return true
+			var neighbor: Vector2i = stub + offset
+			if neighbor == approach:
+				continue
+			if neighbor.x < 0 or neighbor.x >= w or neighbor.y < 0 or neighbor.y >= h:
+				continue
+			if map[neighbor.y][neighbor.x] != DungeonGen.WALL:
+				isolated = false
+				break
+		if not isolated:
+			continue
+		return {"blocker": stub, "approach": approach, "dir": dir}
+	return {}
 
 # Paints the maze's WALL cells onto the live overworld tilemap and returns
 # the data the caller (overworld.gd) needs to instance the guardian, blocker,
 # and boundary MightyOak trees at runtime - guardian_pos/guardian_id,
-# blocker_pos (+ approach_pos/entry_pos either side of it for direction-aware
-# tests), door_pos/spawn_pos, and oak_positions (Array[Vector2i]) - all in
-# world coordinates.
+# blocker_pos (+ approach_pos, the room-side cell next to it, for
+# direction-aware tests), door_pos/spawn_pos, and oak_positions
+# (Array[Vector2i]) - all in world coordinates.
 func carve_verdantwood_maze(tilemap: TileMapLayer) -> Dictionary:
 	var gen: Dictionary
-	var threshold: Dictionary
+	var stub: Dictionary
 	var attempts := 0
-	var verified := false
 	# Generation is cheap (a 17x18 grid) - budget a generous number of
 	# attempts, same "count * 300"-style convention _scatter()/_paint_lakes()
-	# use elsewhere, rather than a tight cap. A previous 20-attempt cap could
-	# exhaust without ever finding a verified layout and would then silently
-	# fall through using the LAST (unverified) attempt regardless of pass/
-	# fail - confirmed as a real gap via verify_verdantwood_maze.gd
-	# intermittently finding an actual bypass, not just a test artifact.
-	# `verified` makes that failure mode impossible: it only stays false if
-	# every one of 300 independent random layouts failed the chokepoint
-	# check, which should not happen in practice for a grid this size.
+	# use elsewhere, rather than a tight cap (a previous 20-attempt version of
+	# an earlier chokepoint-verification scheme here could silently exhaust
+	# and fall through unverified - fixed by raising the cap, kept generous
+	# here for the same reason even though _find_exit_stub()'s condition is
+	# much simpler and should essentially always succeed on the first try).
 	while attempts < 300:
 		attempts += 1
 		gen = DungeonGen.generate(VERDANTWOOD_MAZE_WIDTH, VERDANTWOOD_MAZE_HEIGHT)
-		threshold = _glade_threshold(gen)
-		if _is_sole_chokepoint(gen, threshold.threshold):
-			verified = true
+		var entrance := _room_entrance(gen)
+		stub = _find_exit_stub(gen, entrance.dir)
+		if not stub.is_empty():
 			break
-	assert(verified, "carve_verdantwood_maze(): exhausted 300 attempts without a verified sole-chokepoint layout")
+	assert(not stub.is_empty(), "carve_verdantwood_maze(): exhausted 300 attempts without a valid exit stub")
+
+	# Carve the stub itself as floor - the "next phase" exit this Phase 1
+	# prototype doesn't have room to build out yet, currently a 1-tile dead
+	# end. Must happen before the WALL-painting loop below so it's correctly
+	# skipped there (left as plain SRC_VERDANTWOOD ground, same as every
+	# other FLOOR/DOOR cell).
+	gen.map[stub.blocker.y][stub.blocker.x] = DungeonGen.FLOOR
 
 	var map: Array = gen.map
 	var oak_positions: Array = []
@@ -644,9 +677,8 @@ func carve_verdantwood_maze(tilemap: TileMapLayer) -> Dictionary:
 	return {
 		"guardian_pos": VERDANTWOOD_MAZE_ORIGIN + gen.boss_room.center(),
 		"guardian_id": VERDANTWOOD_MAZE_GUARDIAN_ID,
-		"blocker_pos": VERDANTWOOD_MAZE_ORIGIN + threshold.threshold,
-		"approach_pos": VERDANTWOOD_MAZE_ORIGIN + threshold.approach,
-		"entry_pos": VERDANTWOOD_MAZE_ORIGIN + threshold.entry,
+		"blocker_pos": VERDANTWOOD_MAZE_ORIGIN + stub.blocker,
+		"approach_pos": VERDANTWOOD_MAZE_ORIGIN + stub.approach,
 		"door_pos": VERDANTWOOD_MAZE_ORIGIN + Vector2i(gen.door_x, gen.door_y),
 		"spawn_pos": VERDANTWOOD_MAZE_ORIGIN + gen.spawn_tile,
 		"oak_positions": oak_positions,

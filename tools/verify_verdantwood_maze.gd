@@ -24,19 +24,17 @@ func _clear_combat(combat: Node) -> void:
 		await physics_frame
 		attempts += 1
 
-# True once `pos` has moved past `target` along `dir` (one of the 4 cardinal
-# unit vectors) by at least `margin` pixels - used to check whether a walk
-# toward the blocker's tile actually reached/passed it, without assuming any
-# fixed compass direction (DungeonGen's corridor can approach the glade from
-# any side, not just "south").
-func _crossed(pos: Vector2, target: Vector2, dir: Vector2i, margin: float) -> bool:
-	if dir.x > 0:
-		return pos.x > target.x + margin
-	if dir.x < 0:
-		return pos.x < target.x - margin
-	if dir.y > 0:
-		return pos.y > target.y + margin
-	return pos.y < target.y - margin
+# True once `pos` is standing in the blocker's own tile. NOT a "crossed past
+# its center by some margin" check - the blocker sits on a deliberate 1-tile
+# dead-end pocket (see _find_exit_stub() in scripts/world.gd), walled solid
+# on the far side, so a margin-past-center criterion is sometimes physically
+# unreachable (confirmed directly: a debug trace showed the player
+# consistently stopping ~2-6px short of an 8px-past-center margin, held
+# there by that far wall, not by anything actually wrong - it just never had
+# room to go that far). Within half a tile of the blocker's center is "you
+# made it into the tile", which is all this is actually meant to prove.
+func _reached(pos: Vector2, target: Vector2) -> bool:
+	return pos.distance_to(target) < 16.0
 
 func _action_for_dir(dir: Vector2i) -> String:
 	if dir.x > 0:
@@ -138,13 +136,12 @@ func _initialize() -> void:
 	await _clear_combat(combat)
 	print("Glade floor is walkable (player actually moved): ", player.position.distance_to(before_move) > 2.0)
 
-	# --- 5. Blocker prop exists at blocker_pos and blocks the exit. ---
-	# approach_pos/entry_pos (both returned by carve_verdantwood_maze()) sit
-	# one corridor step on either side of blocker_pos, on whatever axis the
-	# corridor actually approaches from - DungeonGen's random walk can enter
-	# the glade from any of the 4 directions, not just "south", so the
-	# movement direction here is derived from the real generated layout
-	# rather than assumed.
+	# --- 5. Blocker prop exists at blocker_pos and blocks the exit stub. ---
+	# approach_pos (returned by carve_verdantwood_maze()) is the room's own
+	# boundary cell right next to blocker_pos (the newly-carved stub cell) -
+	# whatever side of the room _find_exit_stub() picked, not necessarily
+	# related to the entrance's own direction, so the movement direction
+	# here is derived from the real generated layout rather than assumed.
 	var approach_pos: Vector2i = maze.approach_pos
 	var blocker: Node2D = null
 	for child in ysort.get_children():
@@ -162,11 +159,16 @@ func _initialize() -> void:
 		await process_frame
 	await _clear_combat(combat)
 	await _walk(player, _action_for_dir(approach_dir), 30)
-	print("Blocker blocks the exit before the guardian is defeated: ", not _crossed(player.position, blocker_world, approach_dir, 8.0))
+	print("Blocker blocks the exit before the guardian is defeated: ", not _reached(player.position, blocker_world))
 
-	# --- 6. Independent chokepoint check: the glade is unreachable any other
-	# way - flood-fill from the door with the blocker cell treated as an
-	# extra wall, confirm the guardian's room tile is never reached. ---
+	# --- 6. The glade's own entrance must always be freely reachable - this
+	# is the exact bug a live user report caught: an earlier version placed
+	# the blocker directly on the room's only entrance, sealing the guardian
+	# inside forever unreachable. Independent flood-fill from the door (the
+	# blocker cell treated as an extra wall, since the log genuinely
+	# occupies it) should reach the guardian's room tile freely, and should
+	# NOT reach the exit stub beyond the blocker - that's the part still
+	# meant to be gated. ---
 	var visited := {}
 	var stack: Array = [door_pos]
 	while not stack.is_empty():
@@ -180,7 +182,8 @@ func _initialize() -> void:
 		visited[pos] = true
 		for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			stack.append(pos + offset)
-	print("Glade is unreachable without crossing the blocker (no bypass): ", not visited.has(guardian_pos))
+	print("Boss room is freely reachable through its own entrance (not sealed by the blocker): ", visited.has(guardian_pos))
+	print("Exit stub beyond the blocker is NOT reachable pre-defeat (still genuinely gated): ", not visited.has(blocker_pos))
 
 	# --- 7. Interacting with the guardian starts the correct fight. ---
 	var guardian: Node = null
@@ -228,18 +231,18 @@ func _initialize() -> void:
 	for i in range(3):
 		await process_frame
 	await _clear_combat(combat)
-	# Retry-until-actually-crossed, not a single fixed-tick walk - this scene
+	# Retry-until-actually-reached, not a single fixed-tick walk - this scene
 	# is a live Overworld instance with its own _process() still running
 	# random encounters in Verdantwood, same lesson already learned
 	# repeatedly for this project's interior verify scripts: an encounter
 	# firing mid-walk zeroes player velocity for the rest of a single-attempt
 	# walk with nothing to retry it.
-	var cross_attempts := 0
-	while not _crossed(player.position, blocker_world, approach_dir, 8.0) and cross_attempts < 8:
+	var reach_attempts := 0
+	while not _reached(player.position, blocker_world) and reach_attempts < 8:
 		await _walk(player, _action_for_dir(approach_dir), 20)
 		await _clear_combat(combat)
-		cross_attempts += 1
-	print("Exit now walkable after the guardian is defeated: ", _crossed(player.position, blocker_world, approach_dir, 8.0))
+		reach_attempts += 1
+	print("Exit now walkable after the guardian is defeated: ", _reached(player.position, blocker_world))
 
 	# --- 9. Regression: normal Verdantwood scatter never lands inside the
 	# reserved maze box. MightyOak is excluded from this check for any tile
