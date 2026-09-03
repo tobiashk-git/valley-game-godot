@@ -394,11 +394,13 @@ func _far_enough_from_river(pos: Vector2i, zone: int) -> bool:
 # enough to an elevated one (MightyOak, IceBoulder, IceCrystalShard,
 # TangledBush) that their sprites appear to fuse at the base - e.g. a log
 # whose end touches a tree's trunk reads as "growing out of the tree"
-# instead of two separate objects, per direct user feedback from a real
-# screenshot. Elevated objects overlapping EACH OTHER (a tree's canopy over
+# instead of two separate objects - or close enough to ANOTHER flush
+# obstacle that two circular shapes (e.g. two ice pools) merge into a single
+# shared-edge blob. Both reported directly by the user from real
+# screenshots. Elevated objects overlapping EACH OTHER (a tree's canopy over
 # a rock, a bush against a tree) already reads fine via plain Y-sort and
-# needs no buffer - this only separates the two categories from each other,
-# symmetrically (checked/reserved regardless of which one scatters first).
+# stays unrestricted - flat/hard-edged flush shapes are the ones that read
+# wrong when they visibly fuse, soft/irregular canopy silhouettes don't.
 const OBSTACLE_CATEGORY_BUFFER := 1
 
 func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
@@ -459,7 +461,14 @@ func _scatter(tilemap: TileMapLayer, count: int, scene_name: String, occupied: D
 			continue
 		if not _far_enough_from_river(pos, zone):
 			continue
-		if is_flush and elevated_buffer.has(pos):
+		# Flush obstacles avoid both elevated ones (the "growing out of the
+		# tree" case) AND each other (two circular ice pools overlapping into
+		# a shared-edge figure-8 reads just as wrong - flat, hard-edged
+		# shapes visibly fuse where soft/irregular canopy silhouettes don't).
+		# Elevated obstacles only avoid flush ones - elevated-vs-elevated
+		# overlap (tree canopy over a rock, a bush against a tree) is
+		# confirmed to look fine via plain Y-sort and stays unrestricted.
+		if is_flush and (elevated_buffer.has(pos) or flush_buffer.has(pos)):
 			continue
 		if not is_flush and flush_buffer.has(pos):
 			continue
