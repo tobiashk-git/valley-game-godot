@@ -98,6 +98,9 @@ func _initialize() -> void:
 	_build_sprite_prop("IcePool", "res://assets/ice_pool.png", 761.0, 757.0, 0.0859, Rect2(), 0)
 	_build_sprite_prop("FallenLog", "res://assets/fallen_log.png", 526.0, 185.0, 0.1597, Rect2(), 0)
 	_build_sprite_prop("TangledBush", "res://assets/tangled_bush.png", 681.0, 647.0, 0.1028)
+	# Gloomfen's first prop-scatter obstacle - a gnarled swamp tree, MightyOak's
+	# elevated counterpart for Zone.GLOOMFEN.
+	_build_sprite_prop("SwampTree", "res://assets/swamp_tree.png", 501.0, 600.0, 0.1677)
 
 	print("=== Props setup complete ===")
 	quit()

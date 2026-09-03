@@ -15,6 +15,7 @@ const ICE_CRYSTAL_SHARD_SCENE := preload("res://scenes/props/IceCrystalShard.tsc
 const ICE_POOL_SCENE := preload("res://scenes/props/IcePool.tscn")
 const FALLEN_LOG_SCENE := preload("res://scenes/props/FallenLog.tscn")
 const TANGLED_BUSH_SCENE := preload("res://scenes/props/TangledBush.tscn")
+const SWAMP_TREE_SCENE := preload("res://scenes/props/SwampTree.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 
 @onready var tilemap: TileMapLayer = $TileMapLayer
@@ -42,6 +43,9 @@ func _ready() -> void:
 		instance.position = _tile_center(entry.pos)
 		ysort.add_child(instance)
 
+	# Lakes paint before obstacles scatter - see overworld.gd's copy of this
+	# comment for why the order matters.
+	World.scatter_biome_lakes(tilemap)
 	var obstacle_scenes := {
 		"MightyOak": MIGHTY_OAK_SCENE,
 		"IceBoulder": ICE_BOULDER_SCENE,
@@ -49,12 +53,12 @@ func _ready() -> void:
 		"IcePool": ICE_POOL_SCENE,
 		"FallenLog": FALLEN_LOG_SCENE,
 		"TangledBush": TANGLED_BUSH_SCENE,
+		"SwampTree": SWAMP_TREE_SCENE,
 	}
 	for entry in World.scatter_biome_obstacles(tilemap):
 		var instance: Node2D = obstacle_scenes[entry.scene].instantiate()
 		instance.position = _tile_center(entry.pos)
 		ysort.add_child(instance)
-	World.scatter_biome_lakes(tilemap)
 
 	# Return trip lands back at World 1's village altar plaza (walkable
 	# path tile just south of the altar itself, which is solid).

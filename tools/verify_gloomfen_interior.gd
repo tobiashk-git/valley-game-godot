@@ -145,12 +145,20 @@ func _initialize() -> void:
 	await _clear_corridor_row(overworld2, player2, center_y)
 	player2.position = Vector2((world.WORLD_CENTER_X - 3) * 32 + 16, center_y)
 	cam2.reset_smoothing()
-	# village edge (-3) to just past the ring (-25): 22 tiles = 704px, ~264
-	# ticks minimum at ~2.67px/tick - generous margin.
-	await _walk(player2, "move_left", 350)
+	# Retry-until-actually-true instead of a single fixed-tick walk - a fixed
+	# count only ever buys temporary headroom against Gloomfen's own scatter
+	# density (SwampTree obstacles, lake blobs) and starts flaking again as
+	# density grows, same lesson already learned for Frostpeak's equivalent
+	# check (see tools/verify_frostpeak_interior.gd). Walk 100 ticks at a
+	# time, clearing combat between attempts, until the river is actually
+	# crossed or a generous attempt cap is hit.
 	var river_x: float = float(world.WORLD_CENTER_X - world.VALLEY_RADIUS) * 32.0
+	var walk_attempts := 0
+	while player2.position.x >= river_x and walk_attempts < 8:
+		await _walk(player2, "move_left", 100)
+		await _clear_combat(combat)
+		walk_attempts += 1
 	print("Crossed the now-open ford into Gloomfen territory: ", player2.position.x < river_x)
-	await _clear_combat(combat)
 
 	var entrance_center: Vector2 = Vector2(world.GLOOMFEN_INTERIOR_ENTRANCE.x * 32 + 16, world.GLOOMFEN_INTERIOR_ENTRANCE.y * 32 + 16)
 	player2.position = entrance_center + Vector2(20, 0) # real margin inside the 56x56 trigger, not right at its edge

@@ -16,6 +16,7 @@ const ICE_CRYSTAL_SHARD_SCENE := preload("res://scenes/props/IceCrystalShard.tsc
 const ICE_POOL_SCENE := preload("res://scenes/props/IcePool.tscn")
 const FALLEN_LOG_SCENE := preload("res://scenes/props/FallenLog.tscn")
 const TANGLED_BUSH_SCENE := preload("res://scenes/props/TangledBush.tscn")
+const SWAMP_TREE_SCENE := preload("res://scenes/props/SwampTree.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
@@ -111,6 +112,12 @@ func _ready() -> void:
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE
 		_spawn_prop(scene, entry.pos)
 
+	# Lakes paint before obstacles scatter - a scattered prop's ground_source
+	# check (tilemap.get_cell_source_id(pos) != ground_source) automatically
+	# excludes any tile a lake already claimed, the same way mountain/river
+	# tiles are already excluded for free, but only if the lake painted
+	# first. Getting this backwards would let a tree land on top of water.
+	World.scatter_biome_lakes(tilemap)
 	var obstacle_scenes := {
 		"MightyOak": MIGHTY_OAK_SCENE,
 		"IceBoulder": ICE_BOULDER_SCENE,
@@ -118,10 +125,10 @@ func _ready() -> void:
 		"IcePool": ICE_POOL_SCENE,
 		"FallenLog": FALLEN_LOG_SCENE,
 		"TangledBush": TANGLED_BUSH_SCENE,
+		"SwampTree": SWAMP_TREE_SCENE,
 	}
 	for entry in World.scatter_biome_obstacles(tilemap):
 		_spawn_prop(obstacle_scenes[entry.scene], entry.pos)
-	World.scatter_biome_lakes(tilemap)
 
 	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
 	# target spawn is always the tile just inside the door (one row up).

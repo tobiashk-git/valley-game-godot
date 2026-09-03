@@ -412,6 +412,9 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.VERDANTWOOD])
 	_reserve_entrance_clearance(occupied, FROSTPEAK_INTERIOR_ENTRANCE, 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.FROSTPEAK])
+	_reserve_entrance_clearance(occupied, GLOOMFEN_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.GLOOMFEN])
+	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS, 3)
 
 	# A tight box around the wedge instead of the full 200x200 map - outer
 	# biomes are huge and mostly empty past this distance, so a full-map
@@ -436,6 +439,13 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	# Third Verdantwood obstacle - a large tangled bush, same "third obstacle
 	# for variety" role IcePool plays in Frostpeak.
 	result.append_array(_scatter(tilemap, 18, "TangledBush", occupied, Zone.VERDANTWOOD, SRC_VERDANTWOOD, bounds, false, elevated_buffer, flush_buffer))
+	# Gloomfen's first prop-scatter obstacle (it already has the lake blobs,
+	# painted earlier in world-gen - see overworld.gd/overworld2.gd's call
+	# order) - a gnarled swamp tree, same elevated role MightyOak plays in
+	# Verdantwood. ground_source's SRC_GLOOMFEN check automatically excludes
+	# any tile a lake already claimed, the same way it already excludes
+	# mountain/river tiles, since lakes paint before this call runs.
+	result.append_array(_scatter(tilemap, 18, "SwampTree", occupied, Zone.GLOOMFEN, SRC_GLOOMFEN, bounds, false, elevated_buffer, flush_buffer))
 	return result
 
 # Gloomfen's counterpart to scatter_biome_obstacles() above - unlike every
