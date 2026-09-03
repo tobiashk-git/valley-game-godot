@@ -142,6 +142,18 @@ func _build_items() -> void:
 	_fill_diamond(crystal, 9, 8, 3, Color(0.75, 0.98, 1.0))
 	_save(crystal, "magic_crystal")
 
+	# monster_fur: tan/brown tuft - clustered blob (same technique as
+	# "stone") in warmer tones, plus a couple of short strand lines on top
+	# for texture so it doesn't read as another rock.
+	var fur := _new_img()
+	_fill_circle(fur, 9, 15, 6, Color(0.5, 0.36, 0.22))
+	_fill_circle(fur, 16, 13, 5, Color(0.62, 0.46, 0.28))
+	_fill_circle(fur, 12, 9, 4.5, Color(0.72, 0.55, 0.35))
+	_draw_line(fur, 8, 6, 10, 11, Color(0.4, 0.28, 0.16), 1)
+	_draw_line(fur, 14, 5, 15, 10, Color(0.4, 0.28, 0.16), 1)
+	_draw_line(fur, 18, 9, 18, 15, Color(0.4, 0.28, 0.16), 1)
+	_save(fur, "monster_fur")
+
 func _build_spells() -> void:
 	# fireball: layered orange/red circles + flame tip
 	var fire := _new_img()

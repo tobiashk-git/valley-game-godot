@@ -29,6 +29,11 @@ const ITEMS := {
 	# Quest item for the altar/world-advance loop - deliberately no "value"
 	# (not sellable), no "slot"/"effect" (not equippable or usable).
 	"magic_crystal": {"name": "Magic Crystal", "icon": "💎"},
+	# First resource drop from the overworld's static farmable wild monsters
+	# (see wild_monster.gd) - a placeholder single resource type for now, more
+	# variety and crafting uses planned later. Sellable at the same basic-
+	# material tier as wood/stone.
+	"monster_fur": {"name": "Monster Fur", "icon": "🧶", "value": 4},
 }
 
 func is_usable(item_id: String) -> bool:

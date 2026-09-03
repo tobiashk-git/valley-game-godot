@@ -91,11 +91,19 @@ func _ready() -> void:
 
 # Same tile-change hook as overworld.gd - see its comment for why. World 2
 # has no river/fords of its own yet (Phase 1 of the biome revamp is World-1
-# scoped for that part), just the same per-biome encounter pool.
+# scoped for that part), just the same per-biome encounter pool. Gated off
+# for the same reason overworld.gd's own copy is - random encounters
+# replaced by static wild monsters in the open world (see
+# World.scatter_wild_monsters()) - but World 2 doesn't get wild monsters in
+# this first pass (kept World-1-scoped, same precedent as the Verdantwood
+# maze's own initial rollout), so it just goes quiet here rather than
+# gaining the new system too.
+const OVERWORLD_ENCOUNTERS_ENABLED := false
+
 func _process(_delta: float) -> void:
 	var current_tile := Vector2i(int(player.position.x / 32), int(player.position.y / 32))
 	if current_tile != _last_tile:
 		_last_tile = current_tile
 		var zone: int = World.biome_at(current_tile.x, current_tile.y).zone
-		if zone != World.Zone.VALLEY:
+		if zone != World.Zone.VALLEY and OVERWORLD_ENCOUNTERS_ENABLED:
 			Combat.check_random_encounter(zone)

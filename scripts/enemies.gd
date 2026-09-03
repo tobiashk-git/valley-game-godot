@@ -46,15 +46,18 @@ const ENEMIES := {
 		"name": "Ice Wraith", "sprite": "res://assets/enemies/ghost.png", "tint": Color(0.55, 0.8, 0.95, 1.0),
 		"max_hp": 16, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "paralysis", "chance": 0.25}, "zones": [World.Zone.FROSTPEAK],
+		"drop_item_ids": ["monster_fur"],
 	},
 	"frost_wolf": {
 		"name": "Frost Wolf", "sprite": "res://assets/enemies/spider.png", "tint": Color(0.75, 0.85, 0.95, 1.0),
 		"max_hp": 14, "attack": 6, "defense": 0, "gold_min": 5, "gold_max": 9,
 		"status_attack": {"status": "sleep", "chance": 0.2}, "zones": [World.Zone.FROSTPEAK],
+		"drop_item_ids": ["monster_fur"],
 	},
 	"stone_sentinel": {
 		"name": "Stone Sentinel", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.5, 0.5, 0.52, 1.0),
 		"max_hp": 22, "attack": 5, "defense": 4, "gold_min": 8, "gold_max": 14, "zones": [World.Zone.FROSTPEAK],
+		"drop_item_ids": ["monster_fur"],
 	},
 
 	# --- Verdantwood Forest (east) ---
@@ -62,15 +65,18 @@ const ENEMIES := {
 		"name": "Forest Spirit", "sprite": "res://assets/enemies/ghost.png", "tint": Color(0.3, 0.75, 0.35, 1.0),
 		"max_hp": 15, "attack": 4, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "confusion", "chance": 0.25}, "zones": [World.Zone.VERDANTWOOD],
+		"drop_item_ids": ["monster_fur"],
 	},
 	"bandit": {
 		"name": "Bandit", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.55, 0.4, 0.25, 1.0),
 		"max_hp": 18, "attack": 6, "defense": 2, "gold_min": 10, "gold_max": 16, "zones": [World.Zone.VERDANTWOOD],
+		"drop_item_ids": ["monster_fur"],
 	},
 	"corrupted_fauna": {
 		"name": "Corrupted Fauna", "sprite": "res://assets/enemies/spider.png", "tint": Color(0.35, 0.15, 0.4, 1.0),
 		"max_hp": 16, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 11,
 		"status_attack": {"status": "poison", "chance": 0.25}, "zones": [World.Zone.VERDANTWOOD],
+		"drop_item_ids": ["monster_fur"],
 	},
 
 	# --- Emberfall Badlands (south) ---
@@ -78,14 +84,17 @@ const ENEMIES := {
 		"name": "Magma Slime", "sprite": "res://assets/enemies/rat.png", "tint": Color(0.9, 0.35, 0.1, 1.0),
 		"max_hp": 16, "attack": 5, "defense": 0, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "poison", "chance": 0.2}, "zones": [World.Zone.BADLANDS],
+		"drop_item_ids": ["monster_fur"],
 	},
 	"fire_drake": {
 		"name": "Fire Drake", "sprite": "res://assets/enemies/bat.png", "tint": Color(0.85, 0.3, 0.1, 1.0),
 		"max_hp": 18, "attack": 7, "defense": 1, "gold_min": 9, "gold_max": 15, "zones": [World.Zone.BADLANDS],
+		"drop_item_ids": ["monster_fur"],
 	},
 	"ash_golem": {
 		"name": "Ash Golem", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.25, 0.22, 0.2, 1.0),
 		"max_hp": 24, "attack": 6, "defense": 4, "gold_min": 10, "gold_max": 16, "zones": [World.Zone.BADLANDS],
+		"drop_item_ids": ["monster_fur"],
 	},
 
 	# --- Gloomfen Marsh (west) ---
@@ -93,16 +102,19 @@ const ENEMIES := {
 		"name": "Swamp Hag", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.35, 0.45, 0.3, 1.0),
 		"max_hp": 17, "attack": 5, "defense": 2, "gold_min": 7, "gold_max": 12,
 		"status_attack": {"status": "silence", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
+		"drop_item_ids": ["monster_fur"],
 	},
 	"giant_insect": {
 		"name": "Giant Insect", "sprite": "res://assets/enemies/spider.png", "tint": Color(0.4, 0.55, 0.25, 1.0),
 		"max_hp": 15, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "poison", "chance": 0.3}, "zones": [World.Zone.GLOOMFEN],
+		"drop_item_ids": ["monster_fur"],
 	},
 	"spectral_undead": {
 		"name": "Spectral Undead", "sprite": "res://assets/enemies/ghost.png", "tint": Color(0.55, 0.6, 0.55, 1.0),
 		"max_hp": 19, "attack": 6, "defense": 1, "gold_min": 8, "gold_max": 13,
 		"status_attack": {"status": "sleep", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
+		"drop_item_ids": ["monster_fur"],
 	},
 }
 

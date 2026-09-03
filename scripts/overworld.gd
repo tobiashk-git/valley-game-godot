@@ -23,6 +23,7 @@ const BADLANDS_PALMS_SCENE := preload("res://scenes/props/BadlandsPalms.tscn")
 const BADLANDS_FIRE_GEYSER_SCENE := preload("res://scenes/props/BadlandsFireGeyser.tscn")
 const BADLANDS_TUMBLEWEED_SCENE := preload("res://scenes/props/BadlandsTumbleweed.tscn")
 const BOSS_SCENE := preload("res://scenes/props/Boss.tscn")
+const WILD_MONSTER_SCENE := preload("res://scenes/props/WildMonster.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
@@ -40,6 +41,11 @@ var _verdantwood_guardian_cleared := false
 # can read back the actual generated positions after the scene loads, same
 # reason maze_interior.gd keeps its own _gen around.
 var verdantwood_maze_data: Dictionary = {}
+# Same reasoning - lets verify_wild_monsters.gd read back the actual
+# generated placements (World.scatter_wild_monsters()'s own return value)
+# after the scene loads, since the loop that spawns them doesn't otherwise
+# keep it anywhere.
+var wild_monster_data: Array = []
 
 const ZONE_KEYS := {
 	World.Zone.FROSTPEAK: "frostpeak",
@@ -132,12 +138,35 @@ func _ready() -> void:
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE
 		_spawn_prop(scene, entry.pos)
 
+	# Static farmable overworld monsters (see wild_monster.gd) - one visible
+	# sprite per placement, tagged to a specific species. Interacting rolls a
+	# real fight (still 1-3 enemies, same weighting the now-disabled random
+	# encounters use) with that species guaranteed present. Scattered BEFORE
+	# scatter_biome_lakes()/scatter_biome_obstacles() (not after) so its own
+	# placement stays fully self-contained/deterministic - see
+	# World.scatter_wild_monsters()'s header comment for why that dependency
+	# direction matters (lakes/obstacles paint tiles non-deterministically;
+	# monster scatter can't run after anything that does that). Lakes and
+	# obstacles are told about these positions instead, so neither can land
+	# on top of a monster.
+	wild_monster_data = World.scatter_wild_monsters(tilemap)
+	for entry in wild_monster_data:
+		var monster: StaticBody2D = WILD_MONSTER_SCENE.instantiate()
+		monster.enemy_id = entry.enemy_id
+		monster.zone = entry.zone
+		monster.placement_key = entry.placement_key
+		ysort.add_child(monster)
+		monster.position = _tile_center(entry.pos)
+	var monster_occupied := {}
+	for entry in wild_monster_data:
+		monster_occupied[entry.pos] = true
+
 	# Lakes paint before obstacles scatter - a scattered prop's ground_source
 	# check (tilemap.get_cell_source_id(pos) != ground_source) automatically
 	# excludes any tile a lake already claimed, the same way mountain/river
 	# tiles are already excluded for free, but only if the lake painted
 	# first. Getting this backwards would let a tree land on top of water.
-	World.scatter_biome_lakes(tilemap)
+	World.scatter_biome_lakes(tilemap, monster_occupied)
 	var obstacle_scenes := {
 		"MightyOak": MIGHTY_OAK_SCENE,
 		"IceBoulder": ICE_BOULDER_SCENE,
@@ -152,7 +181,8 @@ func _ready() -> void:
 		"BadlandsFireGeyser": BADLANDS_FIRE_GEYSER_SCENE,
 		"BadlandsTumbleweed": BADLANDS_TUMBLEWEED_SCENE,
 	}
-	for entry in World.scatter_biome_obstacles(tilemap):
+	var obstacle_entries: Array = World.scatter_biome_obstacles(tilemap, monster_occupied)
+	for entry in obstacle_entries:
 		_spawn_prop(obstacle_scenes[entry.scene], entry.pos)
 
 	# Verdantwood overland maze's guardian + blocker - instanced directly
@@ -271,11 +301,16 @@ func _ready() -> void:
 	# instead. Also needed at every future teleport (portals, fast travel).
 	cam.reset_smoothing()
 
-# TEMP: overworld random encounters disabled for playtesting the Verdantwood
-# maze (too many fights on the walk out there to test quickly) - flip back
-# to true when done. Doesn't touch check_random_encounter()/Combat itself,
-# just this call site - verify_biome_revamp.gd's/verify_village_gates.gd's
-# own random-encounter checks will fail while this is false, expected.
+# Random overworld encounters replaced by static, visible, farmable wild
+# monsters (see wild_monster.gd/World.scatter_wild_monsters()) - random
+# encounters felt sudden/jarring in the open world. The mechanism itself
+# stays in the codebase untouched (Combat.check_random_encounter() still
+# works exactly as before, still used by every dungeon/biome interior via
+# maze_interior.gd, completely unaffected by this flag) - only this one
+# overworld call site is gated off. verify_biome_revamp.gd's own dormant
+# "Encounter fired once inside Frostpeak Ridge" check is expected to stay
+# false while this is off; new wild-monster coverage lives in
+# verify_wild_monsters.gd instead.
 const OVERWORLD_ENCOUNTERS_ENABLED := false
 
 # The biome revamp's random encounters - the open overworld had none at all

@@ -27,6 +27,7 @@ var active_submenu := "" # "" | "magic" | "item"
 var player_status: Dictionary = {} # status_id -> {"turns_left": N}
 var selecting_target := "" # "" | "attack" | "spell:<spell_id>"
 var current_boss_id := "" # set for the duration of a boss fight, "" otherwise
+var current_wild_monster_key := "" # set for the duration of a wild-monster fight (see start_wild_encounter()), "" otherwise
 
 var _steps_since_encounter := ENCOUNTER_COOLDOWN_STEPS
 
@@ -110,8 +111,27 @@ func start_combat(enemy_ids) -> void:
 	selecting_target = ""
 	player_status = {}
 	current_boss_id = ""
+	current_wild_monster_key = ""
 	battle_log = ["%s %s!" % [_join_names(names), "appears" if names.size() == 1 else "appear"]]
 	changed.emit()
+
+# A static overworld wild monster (wild_monster.gd) was interacted with - the
+# player already knows which SPECIES they're walking up to (that's the whole
+# point of "farm specific monster types"), but not how many. Reuses
+# _pick_encounter_group()'s exact size weighting (60/30/10 solo/duo/trio) so
+# there's still a real "oh, there's three of them" surprise, just with slot 0
+# forced to the anchor species so it's always guaranteed to be part of the
+# fight. Delegates to the existing start_combat() for everything else, then
+# stamps current_wild_monster_key afterward (start_combat() itself resets it
+# to "" as part of its normal per-fight state reset, same as current_boss_id -
+# setting it after the call, not before, avoids that reset clobbering it).
+func start_wild_encounter(anchor_enemy_id: String, zone: int, placement_key: String) -> void:
+	if in_combat:
+		return
+	var group: Array = _pick_encounter_group(zone)
+	group[0] = anchor_enemy_id
+	start_combat(group)
+	current_wild_monster_key = placement_key
 
 # Fixed boss fight: the player already deliberately walked up and pressed E
 # (boss.gd), so unlike a random encounter there's no need to build any
@@ -127,6 +147,7 @@ func start_boss_fight(boss_id: String) -> void:
 	selecting_target = ""
 	player_status = {}
 	current_boss_id = boss_id
+	current_wild_monster_key = ""
 	battle_log = ["%s blocks your path!" % def.name]
 	changed.emit()
 
@@ -370,6 +391,7 @@ func player_run() -> void:
 	selecting_target = ""
 	player_status = {}
 	current_boss_id = "" # fleeing a boss leaves it undefeated, re-challengeable
+	current_wild_monster_key = "" # same - fleeing a wild monster leaves it re-challengeable
 	changed.emit()
 	ended.emit(false)
 
@@ -400,6 +422,9 @@ func _defeat_enemy(index: int) -> void:
 		if current_boss_id != "":
 			GameState.boss_defeated[current_boss_id] = true
 			current_boss_id = ""
+		if current_wild_monster_key != "":
+			GameState.wild_monsters_defeated[current_wild_monster_key] = true
+			current_wild_monster_key = ""
 		changed.emit()
 		ended.emit(true)
 	else:
@@ -447,6 +472,7 @@ func _defeat() -> void:
 	selecting_target = ""
 	player_status = {}
 	current_boss_id = "" # losing to a boss leaves it undefeated, re-challengeable
+	current_wild_monster_key = "" # same - losing to a wild monster leaves it re-challengeable
 	changed.emit()
 	ended.emit(false)
 	get_tree().change_scene_to_file("res://scenes/House.tscn")

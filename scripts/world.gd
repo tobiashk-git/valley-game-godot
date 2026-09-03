@@ -405,8 +405,15 @@ func _far_enough_from_river(pos: Vector2i, zone: int) -> bool:
 # wrong when they visibly fuse, soft/irregular canopy silhouettes don't.
 const OBSTACLE_CATEGORY_BUFFER := 1
 
-func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
+func scatter_biome_obstacles(tilemap: TileMapLayer, extra_occupied: Dictionary = {}) -> Array:
 	var occupied := {}
+	# Reserves wild-monster placements (World.scatter_wild_monsters(), called
+	# BEFORE this so monster positions can stay deterministic - see that
+	# function's own header comment for why the dependency has to run this
+	# direction and not the other way around) so a scattered obstacle can't
+	# land on top of one.
+	for pos in extra_occupied:
+		occupied[pos] = true
 	var elevated_buffer := {}
 	var flush_buffer := {}
 	_reserve_entrance_clearance(occupied, VERDANTWOOD_INTERIOR_ENTRANCE, 3)
@@ -464,6 +471,98 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	result.append_array(_scatter(tilemap, 20, "BadlandsFireGeyser", occupied, Zone.BADLANDS, SRC_BADLANDS, bounds, false, elevated_buffer, flush_buffer))
 	# Third Badlands obstacle for variety - a dry tumbleweed bush.
 	result.append_array(_scatter(tilemap, 22, "BadlandsTumbleweed", occupied, Zone.BADLANDS, SRC_BADLANDS, bounds, false, elevated_buffer, flush_buffer))
+	return result
+
+func _ground_source_for_zone(zone: int) -> int:
+	match zone:
+		Zone.FROSTPEAK: return SRC_FROSTPEAK
+		Zone.VERDANTWOOD: return SRC_VERDANTWOOD
+		Zone.BADLANDS: return SRC_BADLANDS
+		Zone.GLOOMFEN: return SRC_GLOOMFEN
+	return SRC_GRASS # Zone.VALLEY - never actually reached, every Enemies.ENEMIES zones entry is an outer biome
+
+# Static, visible, farmable overworld monsters - one placement per instance,
+# tagged with a specific species (see wild_monster.gd) so the player can walk
+# up to a known kind and "farm" it, rather than the probabilistic step-
+# triggered encounters this replaces for the open world (see
+# OVERWORLD_ENCOUNTERS_ENABLED in overworld.gd/overworld2.gd - that system
+# stays in the codebase, just permanently off here). Reuses _scatter()
+# unmodified per species - `_scatter()`'s scene_name param is just an opaque
+# tag it returns unchanged, so passing the enemy id through it and building a
+# richer {"pos","enemy_id","zone","placement_key"} dict on the way out is
+# harmless and doesn't risk any of _scatter()'s other 12+ obstacle call sites.
+#
+# Must run BEFORE scatter_biome_obstacles() (pass this function's own return
+# value into that one's `extra_occupied` param) rather than the other way
+# around - obstacle positions are NOT seeded (see the determinism note
+# below), so if monster placement depended on them for its own `occupied`
+# reservations, the RNG consumption pattern (and therefore every placement
+# after the first differing rejection) would silently diverge run to run,
+# defeating the whole point of the seed bracketing. Confirmed directly: an
+# earlier version of this function took obstacle positions as an input and
+# its own "deterministic across a reload" verify check failed immediately.
+# Flipping the dependency (obstacles avoid monsters, not monsters avoid
+# obstacles) keeps monster placement's own RNG usage fully self-contained.
+const WILD_MONSTER_SCATTER_SEED := 918273645 # arbitrary fixed constant - see determinism note below
+const WILD_MONSTER_COUNT_PER_SPECIES := 8
+
+func scatter_wild_monsters(tilemap: TileMapLayer) -> Array:
+	var occupied := {}
+	_reserve_entrance_clearance(occupied, VERDANTWOOD_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.VERDANTWOOD])
+	_reserve_entrance_clearance(occupied, FROSTPEAK_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.FROSTPEAK])
+	_reserve_entrance_clearance(occupied, GLOOMFEN_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.GLOOMFEN])
+	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS, 3)
+	_reserve_entrance_clearance(occupied, BADLANDS_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.BADLANDS])
+	_reserve_entrance_clearance(occupied, PROSPECTOR_CAMP_POS, 3)
+	_reserve_verdantwood_maze_clearance(occupied)
+	var bounds := Rect2i(WORLD_CENTER_X - OBSTACLE_SCATTER_REACH, WORLD_CENTER_Y - OBSTACLE_SCATTER_REACH, OBSTACLE_SCATTER_REACH * 2, OBSTACLE_SCATTER_REACH * 2)
+
+	# _scatter() (and everything else in this codebase) draws from Godot's
+	# global unseeded RNG, so obstacle/prop positions already silently
+	# reshuffle on every Overworld.tscn reload (every house visit, every
+	# dungeon return) - invisible for decorative trees, but fatal for "beat
+	# it once, gone for the session": a defeated placement's tracked tile
+	# position wouldn't reliably correspond to the same monster next time.
+	# Bracketing with a fixed seed makes wild-monster placement genuinely
+	# static (same spot every time, matching "static for now") without
+	# touching _scatter() itself or affecting anything else's randomness -
+	# GDScript is single-threaded and nothing else runs in this synchronous
+	# window, so randomize() right after fully restores true randomness for
+	# the rest of the session.
+	#
+	# The seed alone isn't sufficient, though: _scatter()'s rejection-
+	# sampling loop also reads tilemap.get_cell_source_id(pos) (the
+	# ground_source check), so this call must run BEFORE anything that
+	# non-deterministically paints tiles onto the ground it's scattering
+	# over - originally this ran after scatter_biome_lakes(), and since
+	# lakes are plain unseeded RNG, a lake's footprint differing by even one
+	# tile between two reloads shifted which candidates got accepted/
+	# rejected from that point on, silently breaking determinism despite an
+	# identical seed and an identical starting `occupied`. This call is now
+	# ordered before scatter_biome_lakes()/scatter_biome_obstacles() in
+	# overworld.gd's _ready(), and both of those take this function's
+	# result as an extra_occupied input instead, so nothing upstream of
+	# this call paints tiles non-deterministically.
+	seed(WILD_MONSTER_SCATTER_SEED)
+	var result: Array = []
+	for species_id in Enemies.ENEMIES:
+		var zones: Array = Enemies.ENEMIES[species_id].zones
+		if zones.is_empty():
+			continue # dungeon-only entry - not placed on the overworld
+		var zone: int = zones[0]
+		var placed: Array = _scatter(tilemap, WILD_MONSTER_COUNT_PER_SPECIES, species_id, occupied, zone, _ground_source_for_zone(zone), bounds)
+		for entry in placed:
+			result.append({
+				"pos": entry.pos,
+				"enemy_id": species_id,
+				"zone": zone,
+				"placement_key": "%d_%d" % [entry.pos.x, entry.pos.y],
+			})
+	randomize()
 	return result
 
 # Phase 1 "overland dungeon" prototype (now expanded - see below): a
@@ -734,8 +833,15 @@ const LAKE_EDGE_KEEP_CHANCE := 0.7  # boundary tiles are randomly dropped to
 # edge at this tile resolution (radius 2-4 is only a handful of tiles wide),
 # which reads as artificial no matter how the circles are jittered
 
-func scatter_biome_lakes(tilemap: TileMapLayer) -> void:
+func scatter_biome_lakes(tilemap: TileMapLayer, extra_occupied: Dictionary = {}) -> void:
 	var occupied := {}
+	# Reserves wild-monster placements (World.scatter_wild_monsters(), called
+	# BEFORE this so monster positions can stay deterministic - see that
+	# function's own header comment) so a lake can't paint over a monster AND
+	# so a lake's own non-deterministic footprint can't shift the ground-
+	# source tile a monster scatter call would have seen at that position.
+	for pos in extra_occupied:
+		occupied[pos] = true
 	_reserve_entrance_clearance(occupied, GLOOMFEN_INTERIOR_ENTRANCE, 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.GLOOMFEN])
 	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS, 3)

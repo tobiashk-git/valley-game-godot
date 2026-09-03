@@ -14,6 +14,16 @@ var next_spawn_position: Vector2 = NO_OVERRIDE
 # save/load system exists yet, so this only persists until the game quits).
 var boss_defeated: Dictionary = {"dungeon_boss": false, "castle_boss": false, "final_boss": false, "frostpeak_boss": false, "verdantwood_boss": false, "badlands_boss": false, "gloomfen_boss": false, "golden_plains_boss": false, "verdantwood_maze_guardian_1": false}
 
+# Static farmable overworld monsters (see wild_monster.gd/World.scatter_wild_
+# monsters()) - a separate dict from boss_defeated so real bosses and
+# farmable wildlife stay conceptually distinct. Keyed by "<tile_x>_<tile_y>"
+# (the placement's world tile position, deterministic across reloads - see
+# scatter_wild_monsters()'s seed bracketing) rather than an enemy id, since
+# many placements share the same species per biome. Empty until populated by
+# World.scatter_wild_monsters() at world-gen time - unlike boss_defeated,
+# there's no fixed list of ids known ahead of time.
+var wild_monsters_defeated: Dictionary = {}
+
 # Set once by Quests.mark_npc_met() when the meet_villagers tutorial quest
 # completes. overworld.gd checks this every time it (re)builds the map, since
 # the player is always inside a house interior (never the Overworld itself)
