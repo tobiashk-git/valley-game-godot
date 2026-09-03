@@ -104,6 +104,9 @@ func _initialize() -> void:
 	# Second Gloomfen obstacle for variety - a dense fern/reed cluster, same
 	# "second, smaller obstacle" role FallenLog/TangledBush play in Verdantwood.
 	_build_sprite_prop("SwampFerns", "res://assets/swamp_ferns.png", 733.0, 841.0, 0.0955)
+	# Third Gloomfen obstacle - a mushroom cluster, same "third obstacle for
+	# variety" role IcePool/TangledBush play in Frostpeak/Verdantwood.
+	_build_sprite_prop("SwampMushrooms", "res://assets/swamp_mushrooms.png", 385.0, 343.0, 0.1558)
 
 	print("=== Props setup complete ===")
 	quit()

@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/swamp_mushrooms.png" id="1_7ljx8"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s64b0"]
+size = Vector2(28, 28)
+
+[node name="SwampMushrooms" type="StaticBody2D" unique_id=610296504]
+z_index = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=28758108]
+scale = Vector2(0.1558, 0.1558)
+texture = ExtResource("1_7ljx8")
+offset = Vector2(0, -10.7197)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2058779453]
+shape = SubResource("RectangleShape2D_s64b0")

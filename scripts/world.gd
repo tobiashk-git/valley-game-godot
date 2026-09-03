@@ -449,6 +449,9 @@ func scatter_biome_obstacles(tilemap: TileMapLayer) -> Array:
 	# Second Gloomfen obstacle for variety - a dense fern/reed cluster, same
 	# "second, smaller obstacle" role FallenLog/TangledBush play in Verdantwood.
 	result.append_array(_scatter(tilemap, 20, "SwampFerns", occupied, Zone.GLOOMFEN, SRC_GLOOMFEN, bounds, false, elevated_buffer, flush_buffer))
+	# Third Gloomfen obstacle - a mushroom cluster, same "third obstacle for
+	# variety" role IcePool/TangledBush play in Frostpeak/Verdantwood.
+	result.append_array(_scatter(tilemap, 22, "SwampMushrooms", occupied, Zone.GLOOMFEN, SRC_GLOOMFEN, bounds, false, elevated_buffer, flush_buffer))
 	return result
 
 # Gloomfen's counterpart to scatter_biome_obstacles() above - unlike every
