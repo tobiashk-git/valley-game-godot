@@ -7,6 +7,21 @@ func _walk(player: CharacterBody2D, direction: String, frames: int) -> void:
 	Input.action_release(direction)
 	await process_frame
 
+# scatter_trees_and_rocks()/scatter_biome_obstacles() have no fixed seed, so
+# a Tree/Rock can occasionally land just outside the village fence, right on
+# this fixed straight-line approach to the south gate (the village square
+# itself is protected via _is_in_village(), but the tile immediately south
+# of the gate isn't) - same "fix belongs in the test" reasoning as
+# verify_frostpeak_interior.gd's _clear_point()/_clear_corridor(), just
+# applied here for the first time now that this exact path has been hit.
+func _clear_point(overworld: Node2D, player: CharacterBody2D, pos: Vector2, radius: float) -> void:
+	var ysort: Node2D = overworld.get_node("YSort")
+	for child in ysort.get_children():
+		if child != player and child is Node2D and child.position.distance_to(pos) < radius:
+			child.queue_free()
+	await process_frame
+	await process_frame
+
 func _initialize() -> void:
 	var world: Node = root.get_node("World")
 	var game_state: Node = root.get_node("GameState")
@@ -161,6 +176,8 @@ func _initialize() -> void:
 	cam2.reset_smoothing()
 	for i in range(3):
 		await process_frame
+	var gate_world: Vector2 = Vector2(south_gate.x * 32 + 16, south_gate.y * 32 + 16)
+	await _clear_point(overworld2, player2, gate_world, 100.0)
 	await _walk(player2, "move_down", 60)
 	print("South gate now walkable after reload: ", player2.position.y > (south_gate.y + 1) * 32.0)
 	root.get_texture().get_image().save_png("res://verify_gates_open.png")
