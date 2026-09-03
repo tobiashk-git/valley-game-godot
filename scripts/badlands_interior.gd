@@ -44,10 +44,19 @@ func _place_hazards() -> void:
 
 	# A handful of individual vent tiles, not a filled room - naturally
 	# sparse (unlike Verdantwood's root room, no checkerboard needed here).
+	# Row is clamped so the fixed 2-tile GEYSER_PUSH always lands on this
+	# room's own floor: rooms roll ROOM_MIN..ROOM_MAX (3-5) tall, and a
+	# 3-tall room only has room for the push if the vent sits on its very
+	# top floor row - one row lower (the old hardcoded +1) shoved the player
+	# past the bottom wall on those rolls, and move_and_slide()'s collision
+	# depenetration then nudged them back out over the next tick or two,
+	# intermittently failing verify_badlands_interior.gd's "no second push"
+	# check (a real position change, just not a second eruption).
 	var geyser_room = _gen.room_chain[1]
+	var geyser_row: int = geyser_room.y + mini(1, geyser_room.h - 3)
 	var geyser_spots := [
-		Vector2i(geyser_room.x + 1, geyser_room.y + 1),
-		Vector2i(geyser_room.x + geyser_room.w - 2, geyser_room.y + 1),
+		Vector2i(geyser_room.x + 1, geyser_row),
+		Vector2i(geyser_room.x + geyser_room.w - 2, geyser_row),
 	]
 	for pos in geyser_spots:
 		if pos.x < geyser_room.x + geyser_room.w and pos.y < geyser_room.y + geyser_room.h:
