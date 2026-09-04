@@ -26,7 +26,8 @@ func _initialize() -> void:
 	current_scene = overworld
 	await process_frame
 	await process_frame
-	print("HUD shows World 1: ", hud.world_label.text == "World 1")
+	# The HUD's "World N" indicator became a location/biome label.
+	print("HUD shows the village biome: ", hud.location_label.text == "Golden Plains")
 
 	var player: CharacterBody2D = overworld.get_node("YSort/Player")
 	var cam: Camera2D = player.get_node("Camera2D")
@@ -119,11 +120,18 @@ func _initialize() -> void:
 	for i in range(3):
 		await process_frame
 	await _walk(fbplayer, "move_down", 90)
-	Input.action_press("interact")
-	await process_frame
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
+	# Retry the press like a real player would - a single frame-perfect
+	# press here flaked ~1 run in 3 on identical code (same lesson as the
+	# interior/seam scripts' interact retries).
+	var exit_tries := 0
+	while current_scene.name == "FinalBoss" and exit_tries < 5:
+		Input.action_press("interact")
+		await process_frame
+		await process_frame
+		Input.action_release("interact")
+		await process_frame
+		await process_frame
+		exit_tries += 1
 	print("Left the final boss maze via the real portal: ", current_scene.name == "Overworld")
 
 	# --- Altar again: boss dead, crystal in hand - opens the portal. ---
@@ -156,7 +164,7 @@ func _initialize() -> void:
 	await process_frame
 	print("Traveled to World 2: ", current_scene.name == "Overworld2")
 	await process_frame
-	print("HUD shows World 2: ", hud.world_label.text == "World 2")
+	print("HUD shows a biome on World 2: ", hud.location_label.text in world.ZONE_NAMES.values(), " -> '", hud.location_label.text, "'")
 	root.get_texture().get_image().save_png("res://verify_world2.png")
 
 	# --- World 2 boundary works too. ---

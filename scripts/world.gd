@@ -108,6 +108,15 @@ const SRC_FOREST_WALL := 14 # solid - thick treeline walls of the Verdantwood ov
 
 enum Zone { VALLEY, FROSTPEAK, VERDANTWOOD, BADLANDS, GLOOMFEN }
 
+# Player-facing biome names (the HUD's location label reads these).
+const ZONE_NAMES := {
+	Zone.VALLEY: "Golden Plains",
+	Zone.FROSTPEAK: "Frostpeak Ridge",
+	Zone.VERDANTWOOD: "Verdantwood Forest",
+	Zone.BADLANDS: "Emberfall Badlands",
+	Zone.GLOOMFEN: "Gloomfen Marsh",
+}
+
 # One ford position per outer biome, at the midpoint of that biome's edge of
 # the river ring (see _paint_river_ring()) - var, not const, since it's
 # built from WORLD_CENTER_X/Y + VALLEY_RADIUS rather than being literal

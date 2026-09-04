@@ -2,59 +2,59 @@
 
 [ext_resource type="Script" path="res://scripts/battle_panel.gd" id="1_mm58h"]
 
-[node name="BattlePanel" type="CanvasLayer" unique_id=27895334]
+[node name="BattlePanel" type="CanvasLayer" unique_id=1443574535]
 script = ExtResource("1_mm58h")
 
-[node name="Panel" type="Panel" parent="." unique_id=136657136]
+[node name="Panel" type="Panel" parent="." unique_id=910213859]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -240.0
-offset_top = -160.0
+offset_top = -152.0
 offset_right = 240.0
-offset_bottom = 240.0
+offset_bottom = 248.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1902652168]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1798996640]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=316690997]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=365454957]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="EnemiesRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1034505294]
+[node name="EnemiesRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=147668327]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="EnemySlot0" type="VBoxContainer" parent="Panel/Margin/VBox/EnemiesRow" unique_id=608069236]
+[node name="EnemySlot0" type="VBoxContainer" parent="Panel/Margin/VBox/EnemiesRow" unique_id=1742038133]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
 theme_override_constants/separation = 4
 
-[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0" unique_id=687738124]
+[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0" unique_id=1265673329]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 3
 stretch_mode = 5
 
-[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0" unique_id=1521814430]
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0" unique_id=10467583]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 
-[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0" unique_id=1401486293]
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0" unique_id=152191200]
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"HPBar"
 show_percentage = false
 
-[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0/HPBar" unique_id=468221872]
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0/HPBar" unique_id=851374263]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -62,32 +62,32 @@ theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="EnemySlot1" type="VBoxContainer" parent="Panel/Margin/VBox/EnemiesRow" unique_id=592096126]
+[node name="EnemySlot1" type="VBoxContainer" parent="Panel/Margin/VBox/EnemiesRow" unique_id=1969961062]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
 theme_override_constants/separation = 4
 
-[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1" unique_id=1275802369]
+[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1" unique_id=238649583]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 3
 stretch_mode = 5
 
-[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1" unique_id=1837048799]
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1" unique_id=1263283557]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 
-[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1" unique_id=1934794632]
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1" unique_id=1725338594]
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"HPBar"
 show_percentage = false
 
-[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1/HPBar" unique_id=1807968430]
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1/HPBar" unique_id=1830918245]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -95,32 +95,32 @@ theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="EnemySlot2" type="VBoxContainer" parent="Panel/Margin/VBox/EnemiesRow" unique_id=529688662]
+[node name="EnemySlot2" type="VBoxContainer" parent="Panel/Margin/VBox/EnemiesRow" unique_id=554434344]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
 theme_override_constants/separation = 4
 
-[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2" unique_id=1500542099]
+[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2" unique_id=2070103885]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 3
 stretch_mode = 5
 
-[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2" unique_id=323833551]
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2" unique_id=736154826]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 
-[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2" unique_id=1325680188]
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2" unique_id=1037241777]
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"HPBar"
 show_percentage = false
 
-[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2/HPBar" unique_id=161454354]
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2/HPBar" unique_id=2076431347]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -128,47 +128,47 @@ theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LogPanel" type="PanelContainer" parent="Panel/Margin/VBox" unique_id=69723150]
+[node name="LogPanel" type="PanelContainer" parent="Panel/Margin/VBox" unique_id=617708607]
 custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="LogLabel" type="Label" parent="Panel/Margin/VBox/LogPanel" unique_id=1468912956]
+[node name="LogLabel" type="Label" parent="Panel/Margin/VBox/LogPanel" unique_id=555433116]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 vertical_alignment = 2
 autowrap_mode = 2
 
-[node name="Commands" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1155531171]
+[node name="Commands" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1431305652]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="AttackBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=1358265531]
+[node name="AttackBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=1317133138]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Attack"
 
-[node name="MagicBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=1000712447]
+[node name="MagicBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=475525839]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Magic"
 
-[node name="ItemBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=260333101]
+[node name="ItemBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=255038112]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Item"
 
-[node name="DefendBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=1390768072]
+[node name="DefendBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=87223575]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Defend"
 
-[node name="RunBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=114837452]
+[node name="RunBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=648224431]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Run"
 
-[node name="Submenu" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1602459299]
+[node name="Submenu" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1246760748]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 4

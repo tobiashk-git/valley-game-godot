@@ -69,11 +69,12 @@ func _build_battle_panel() -> void:
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	# Was centred (y offset -200 -> y=100..500 in the 800x600 base viewport);
-	# pushed down 40px so the top-left HUD column (counters + HP/MP bars +
-	# effects line, ends at y=136 - see setup_hud_inventory.gd) stays fully
+	# pushed down 48px so the top-left HUD column (counters + a biome name
+	# that can wrap to two lines + HP/MP bars + effects line, ends at y=143
+	# at its tallest - see setup_hud_inventory.gd/hud.gd) stays fully
 	# uncovered mid-fight. On a phone (keep_width, much taller viewport) the
 	# panel is far lower still, so only the desktop layout was ever tight.
-	panel.position = Vector2(-240, -160)
+	panel.position = Vector2(-240, -152)
 	panel.size = Vector2(480, 400)
 	layer.add_child(panel)
 	panel.owner = layer

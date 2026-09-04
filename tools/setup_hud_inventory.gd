@@ -21,14 +21,17 @@ func _build_hud() -> void:
 	# unit maps to fewer physical on-screen pixels than the same 800 units
 	# would on a standard-DPI desktop - everything at a fixed size in game
 	# units ends up physically smaller the higher the screen's DPI.
-	# Taller again (was 440x56) for the HP/MP bars + effects line stacked
-	# underneath the counters as a left-hand column - kept ABOVE y=140 on
-	# purpose: BattlePanel's 480x400 panel sits at y=140..540 in the 800x600
-	# base viewport (pushed down from the centred y=100 specifically to make
-	# room for this column) and draws above this layer (later autoload, same
-	# CanvasLayer.layer), so the column stays fully visible mid-fight only as
-	# long as this panel ends above it. See setup_battle_panel.gd.
-	panel.size = Vector2(440, 124)
+	# Narrower than the original 440 (user feedback: too much empty space)
+	# - just wide enough for the three counters plus a biome name that wraps
+	# onto a second line. Height here is only a starting value: hud.gd
+	# re-fits it to the content every frame. Whatever it works out to has to
+	# stay ABOVE y=148: BattlePanel's 480x400 panel sits at y=148..548 in the
+	# 800x600 base viewport (pushed down from the centred y=100 specifically
+	# to make room for this column) and draws above this layer (later
+	# autoload, same CanvasLayer.layer), so the column stays fully visible
+	# mid-fight only as long as this panel ends above it - verified by
+	# tools/verify_hud_bars.gd with the longest biome name.
+	panel.size = Vector2(320, 120)
 	layer.add_child(panel)
 	panel.owner = layer
 
@@ -42,13 +45,13 @@ func _build_hud() -> void:
 
 	var vbox := VBoxContainer.new()
 	vbox.name = "VBox"
-	vbox.add_theme_constant_override("separation", 6)
+	vbox.add_theme_constant_override("separation", 4)
 	margin.add_child(vbox)
 	vbox.owner = layer
 
 	var hbox := HBoxContainer.new()
 	hbox.name = "HBox"
-	hbox.add_theme_constant_override("separation", 16)
+	hbox.add_theme_constant_override("separation", 10)
 	vbox.add_child(hbox)
 	hbox.owner = layer
 
@@ -62,34 +65,45 @@ func _build_hud() -> void:
 		icon.custom_minimum_size = Vector2(28, 28) # was 18x18
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		# Centred against the location label, which can be two lines tall.
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		hbox.add_child(icon)
 		icon.owner = layer
 
 		var label := Label.new()
 		label.name = label_name
-		label.add_theme_font_size_override("font_size", 20) # was 14
+		label.add_theme_font_size_override("font_size", 18) # was 14, then 20
+		label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		hbox.add_child(label)
 		label.owner = layer
 
-	var world_label := Label.new()
-	world_label.name = "WorldLabel"
-	world_label.theme_type_variation = &"DimLabel"
-	world_label.add_theme_font_size_override("font_size", 20) # was 14
-	hbox.add_child(world_label)
-	world_label.owner = layer
+	# Current location (replaced the old "World N" indicator, per user
+	# feedback): the biome under the player on the overworld, a fixed name
+	# inside interiors - set by hud.gd. Takes whatever width the counters
+	# leave and word-wraps, so "Emberfall Badlands" becomes two lines rather
+	# than forcing the panel wider.
+	var location_label := Label.new()
+	location_label.name = "LocationLabel"
+	location_label.theme_type_variation = &"DimLabel"
+	location_label.add_theme_font_size_override("font_size", 16)
+	location_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	location_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	location_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hbox.add_child(location_label)
+	location_label.owner = layer
 
-	# HP bar over MP bar, left-aligned (SHRINK_BEGIN, fixed width) so they
-	# read as a column running down the left side under the counters, plus
-	# an effects line beneath (active statuses, e.g. "Poison (3)") - all
-	# always visible, so the battle screen no longer needs its own copies
-	# (see setup_battle_panel.gd). Same HPBar/MPBar theme variations +
+	# HP bar over MP bar, spanning the (now narrow) panel so they read as a
+	# column running down the left side under the counters, plus an effects
+	# line beneath (active statuses, e.g. "Poison (3)") - all always
+	# visible, so the battle screen no longer needs its own copies (see
+	# setup_battle_panel.gd). Same HPBar/MPBar theme variations +
 	# centred-label-in-bar shape the Character panel and enemy slots use.
 	for entry in [["HP", &"HPBar"], ["MP", &"MPBar"]]:
 		var prefix: String = entry[0]
 		var bar := ProgressBar.new()
 		bar.name = prefix + "Bar"
-		bar.custom_minimum_size = Vector2(300, 20)
-		bar.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		bar.custom_minimum_size = Vector2(0, 18)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bar.show_percentage = false
 		bar.theme_type_variation = entry[1]
 		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -111,7 +125,7 @@ func _build_hud() -> void:
 	var status_label := Label.new()
 	status_label.name = "StatusLabel"
 	status_label.theme_type_variation = &"DimLabel"
-	status_label.add_theme_font_size_override("font_size", 14)
+	status_label.add_theme_font_size_override("font_size", 13)
 	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(status_label)
 	status_label.owner = layer
