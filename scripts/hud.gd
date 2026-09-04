@@ -44,6 +44,7 @@ const SCENE_LOCATIONS := {
 }
 
 var _last_location := ""
+var _last_hp := -1
 
 # Panel width at 800 wide; on a phone (Layout.is_narrow()) it shrinks to
 # leave room for the toolbar's single Menu button (68px + 12px edge + 12px
@@ -92,6 +93,11 @@ func _refresh() -> void:
 
 func _refresh_stats() -> void:
 	var stats: Dictionary = Character.stats
+	# Mid-fight HP changes float up over the bar as numbers (the battle
+	# screen does the same over the enemy hit).
+	if Combat.in_combat and _last_hp >= 0 and stats.hp != _last_hp:
+		_spawn_popup(stats.hp - _last_hp)
+	_last_hp = stats.hp if Combat.in_combat else -1
 	hp_bar.max_value = stats.max_hp
 	hp_bar.value = stats.hp
 	hp_label.text = "HP %d / %d" % [stats.hp, stats.max_hp]
@@ -110,6 +116,24 @@ func _refresh_stats() -> void:
 	else:
 		status_label.text = ", ".join(effects)
 		status_label.theme_type_variation = &""
+
+func _spawn_popup(delta: int) -> void:
+	var label := Label.new()
+	label.name = "HpPopup"
+	label.text = ("+%d" if delta > 0 else "%d") % delta
+	label.add_theme_font_size_override("font_size", 22)
+	label.add_theme_color_override("font_color", Color(0.55, 0.95, 0.5) if delta > 0 else Color(1.0, 0.35, 0.3))
+	label.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.02))
+	label.add_theme_constant_override("outline_size", 6)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.z_index = 10
+	var rect: Rect2 = hp_bar.get_global_rect()
+	label.global_position = Vector2(rect.end.x + 8.0, rect.position.y - 6.0)
+	add_child(label)
+	var tween := create_tween()
+	tween.tween_property(label, "position:y", label.position.y - 36.0, 0.9).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.9).set_delay(0.3)
+	tween.tween_callback(label.queue_free)
 
 func location_name() -> String:
 	var current: Node = get_tree().current_scene

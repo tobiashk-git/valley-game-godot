@@ -1,8 +1,13 @@
 extends SceneTree
-# Builds BattlePanel.tscn — full-screen battle UI (Combat Phase 1-4: Attack/
-# Magic/Item/Defend/Run, up to 3 targetable enemy slots). Panel background/
-# title/bar styling come from the shared res://resources/ui_theme.tres
-# (project default theme) - see tools/setup_theme.gd. Run via:
+# Builds BattlePanel.tscn — the battle screen on the character sheet's kit
+# (UI redesign, combat pass): an enemy STAGE (framed strip, big sprites with
+# name + HP bar, a "Choose a target" hint), a battle LOG (dimmed history,
+# newest line bright), a row of styled COMMANDS (Attack gold) and a SUBMENU
+# of kit-style rows (Magic / Item + Back). Node paths kept from the old
+# panel where scripts and verify scripts rely on them:
+# Panel/Margin/VBox/{EnemiesRow, LogPanel/LogLabel, Commands, Submenu}.
+# Styling from res://resources/ui_theme.tres (tools/setup_theme.gd);
+# battle_panel.gd lays out wide vs phone and drives everything. Run via:
 # godot --headless --script res://tools/setup_battle_panel.gd
 
 const MAX_ENEMY_SLOTS := 3
@@ -10,7 +15,7 @@ const MAX_ENEMY_SLOTS := 3
 func _bar_with_label(name_prefix: String, variation: StringName) -> ProgressBar:
 	var bar := ProgressBar.new()
 	bar.name = name_prefix + "Bar"
-	bar.custom_minimum_size = Vector2(0, 22)
+	bar.custom_minimum_size = Vector2(120, 16)
 	bar.show_percentage = false
 	bar.theme_type_variation = variation
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -19,40 +24,51 @@ func _bar_with_label(name_prefix: String, variation: StringName) -> ProgressBar:
 	label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_font_size_override("font_size", 12)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bar.add_child(label)
 	return bar
 
-# A clickable per-enemy slot: sprite + name + HP bar. Children are set to
-# MOUSE_FILTER_IGNORE so clicks pass through to the slot's own gui_input
-# (connected in battle_panel.gd), which calls Combat.select_target(index).
-func _build_enemy_slot(index: int) -> VBoxContainer:
-	var slot := VBoxContainer.new()
+# A tappable enemy slot: a PanelContainer (so it can wear a gold frame when
+# targetable) holding sprite + name + HP bar. Children ignore the mouse so a
+# tap reaches the slot's own gui_input (Combat.select_target).
+func _build_enemy_slot(index: int) -> PanelContainer:
+	var slot := PanelContainer.new()
 	slot.name = "EnemySlot%d" % index
 	slot.mouse_filter = Control.MOUSE_FILTER_STOP
 	slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	slot.add_theme_constant_override("separation", 4)
+	var empty := StyleBoxEmpty.new()
+	slot.add_theme_stylebox_override("panel", empty)
+
+	var box := VBoxContainer.new()
+	box.name = "Box"
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_theme_constant_override("separation", 4)
+	box.alignment = BoxContainer.ALIGNMENT_END
+	slot.add_child(box)
 
 	var sprite := TextureRect.new()
 	sprite.name = "Sprite"
-	sprite.custom_minimum_size = Vector2(48, 48)
-	sprite.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	sprite.custom_minimum_size = Vector2(96, 96)
+	sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	slot.add_child(sprite)
+	box.add_child(sprite)
 
 	var name_label := Label.new()
 	name_label.name = "NameLabel"
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.theme_type_variation = &"PanelTitle"
+	name_label.add_theme_font_size_override("font_size", 14)
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	slot.add_child(name_label)
+	box.add_child(name_label)
 
-	var hp_bar := _bar_with_label("HP", &"HPBar")
-	hp_bar.custom_minimum_size = Vector2(0, 16)
-	slot.add_child(hp_bar)
-
+	var bar_box := CenterContainer.new()
+	bar_box.name = "BarBox"
+	bar_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar_box.add_child(_bar_with_label("HP", &"HPBar"))
+	box.add_child(bar_box)
 	return slot
 
 func _own(node: Node, layer: Node) -> void:
@@ -68,79 +84,95 @@ func _build_battle_panel() -> void:
 	var panel := Panel.new()
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	# Was centred (y offset -200 -> y=100..500 in the 800x600 base viewport);
-	# pushed down 48px so the top-left HUD column (counters + a biome name
-	# that can wrap to two lines + HP/MP bars + effects line, ends at y=143
-	# at its tallest - see setup_hud_inventory.gd/hud.gd) stays fully
-	# uncovered mid-fight. On a phone (keep_width, much taller viewport) the
-	# panel is far lower still, so only the desktop layout was ever tight.
-	panel.position = Vector2(-240, -152)
-	panel.size = Vector2(480, 400)
+	# 560x420, starting at y=148 in the 800x600 base viewport so the HUD's
+	# HP/MP column (ends y<=143) stays uncovered; battle_panel.gd sets the
+	# offsets for both layouts at runtime.
+	panel.position = Vector2(-280, -152)
+	panel.size = Vector2(560, 420)
 	layer.add_child(panel)
-	panel.owner = layer
 
 	var margin := MarginContainer.new()
 	margin.name = "Margin"
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "top", "right", "bottom"]:
+		margin.add_theme_constant_override("margin_%s" % side, 12)
 	panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
 	vbox.name = "VBox"
-	vbox.add_theme_constant_override("separation", 10)
+	vbox.add_theme_constant_override("separation", 8)
 	margin.add_child(vbox)
 
-	# Up to 3 enemy slots, side by side - shown/hidden and made targetable
-	# by battle_panel.gd based on Combat.current_enemies/selecting_target.
+	# --- Stage: framed strip with the enemies and the targeting hint. ---
+	var stage := PanelContainer.new()
+	stage.name = "Stage"
+	stage.theme_type_variation = &"DetailPanel"
+	stage.custom_minimum_size = Vector2(0, 176)
+	vbox.add_child(stage)
+	var stage_box := VBoxContainer.new()
+	stage_box.name = "StageBox"
+	stage_box.add_theme_constant_override("separation", 2)
+	stage.add_child(stage_box)
+	var hint := Label.new()
+	hint.name = "TargetHint"
+	hint.text = "Choose a target"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.theme_type_variation = &"PanelTitle"
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.custom_minimum_size = Vector2(0, 20)
+	hint.modulate.a = 0.0 # keeps its row so the stage never jumps
+	stage_box.add_child(hint)
 	var enemies_row := HBoxContainer.new()
 	enemies_row.name = "EnemiesRow"
-	enemies_row.add_theme_constant_override("separation", 10)
-	vbox.add_child(enemies_row)
-
+	enemies_row.add_theme_constant_override("separation", 8)
+	enemies_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	stage_box.add_child(enemies_row)
 	for i in range(MAX_ENEMY_SLOTS):
 		enemies_row.add_child(_build_enemy_slot(i))
 
-	# No player row any more: the player's HP/MP bars and the active-status
-	# badges (poison/paralysis/sleep/confusion/silence) used to sit here
-	# between the enemies and the log, but now live in the always-visible
-	# HUD (top-left column, see setup_hud_inventory.gd/hud.gd) which stays
-	# uncovered while this panel is up - duplicating them here was redundant
-	# (user feedback).
-
-	# Battle log.
+	# --- Battle log. ---
 	var log_panel := PanelContainer.new()
 	log_panel.name = "LogPanel"
-	log_panel.custom_minimum_size = Vector2(0, 110)
+	log_panel.theme_type_variation = &"DetailPanel"
+	log_panel.custom_minimum_size = Vector2(0, 96)
 	log_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(log_panel)
-
-	var log_label := Label.new()
+	var log_margin := MarginContainer.new()
+	log_margin.name = "LogMargin"
+	for side in ["left", "top", "right", "bottom"]:
+		log_margin.add_theme_constant_override("margin_%s" % side, 8)
+	log_panel.add_child(log_margin)
+	var log_label := RichTextLabel.new()
 	log_label.name = "LogLabel"
-	log_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	log_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	log_label.add_theme_font_size_override("font_size", 14)
-	log_panel.add_child(log_label)
+	log_label.bbcode_enabled = true
+	log_label.scroll_active = false
+	log_label.scroll_following = true
+	log_label.add_theme_font_size_override("normal_font_size", 14)
+	log_margin.add_child(log_label)
 
-	# Commands.
+	# --- Commands. ---
 	var commands := HBoxContainer.new()
 	commands.name = "Commands"
 	commands.add_theme_constant_override("separation", 8)
 	vbox.add_child(commands)
-
-	for entry in [["AttackBtn", "Attack"], ["MagicBtn", "Magic"], ["ItemBtn", "Item"], ["DefendBtn", "Defend"], ["RunBtn", "Run"]]:
+	for entry in [["AttackBtn", "Attack", &"PrimaryButton"], ["MagicBtn", "Magic", &"SecondaryButton"], ["ItemBtn", "Item", &"SecondaryButton"], ["DefendBtn", "Defend", &"SecondaryButton"], ["RunBtn", "Run", &"SecondaryButton"]]:
 		var btn := Button.new()
 		btn.name = entry[0]
 		btn.text = entry[1]
+		btn.theme_type_variation = entry[2]
+		btn.custom_minimum_size = Vector2(0, 48)
+		btn.add_theme_font_size_override("font_size", 16)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		commands.add_child(btn)
 
-	# Submenu (Magic/Item row list + Back), built dynamically by
-	# battle_panel.gd - hidden and empty at build time.
+	# --- Submenu (Magic/Item rows + Back), filled by battle_panel.gd. ---
 	var submenu := VBoxContainer.new()
 	submenu.name = "Submenu"
-	submenu.add_theme_constant_override("separation", 4)
+	submenu.add_theme_constant_override("separation", 6)
 	submenu.visible = false
 	vbox.add_child(submenu)
 
+	panel.owner = layer
 	_own(panel, layer)
 
 	var packed := PackedScene.new()

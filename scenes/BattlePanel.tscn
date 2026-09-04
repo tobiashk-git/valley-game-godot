@@ -2,173 +2,259 @@
 
 [ext_resource type="Script" path="res://scripts/battle_panel.gd" id="1_mm58h"]
 
-[node name="BattlePanel" type="CanvasLayer" unique_id=1443574535]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mm58h"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ed2fr"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6fjnw"]
+
+[node name="BattlePanel" type="CanvasLayer" unique_id=673265510]
 script = ExtResource("1_mm58h")
 
-[node name="Panel" type="Panel" parent="." unique_id=910213859]
+[node name="Panel" type="Panel" parent="." unique_id=512008997]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
+offset_left = -280.0
 offset_top = -152.0
-offset_right = 240.0
-offset_bottom = 248.0
+offset_right = 280.0
+offset_bottom = 268.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1798996640]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=2145742571]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=365454957]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="EnemiesRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=147668327]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="EnemySlot0" type="VBoxContainer" parent="Panel/Margin/VBox/EnemiesRow" unique_id=1742038133]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 0
-theme_override_constants/separation = 4
-
-[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0" unique_id=1265673329]
-custom_minimum_size = Vector2(48, 48)
-layout_mode = 2
-mouse_filter = 2
-expand_mode = 3
-stretch_mode = 5
-
-[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0" unique_id=10467583]
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-horizontal_alignment = 1
-
-[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0" unique_id=152191200]
-custom_minimum_size = Vector2(0, 16)
-layout_mode = 2
-mouse_filter = 2
-theme_type_variation = &"HPBar"
-show_percentage = false
-
-[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot0/HPBar" unique_id=851374263]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-theme_override_font_sizes/font_size = 13
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="EnemySlot1" type="VBoxContainer" parent="Panel/Margin/VBox/EnemiesRow" unique_id=1969961062]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 0
-theme_override_constants/separation = 4
-
-[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1" unique_id=238649583]
-custom_minimum_size = Vector2(48, 48)
-layout_mode = 2
-mouse_filter = 2
-expand_mode = 3
-stretch_mode = 5
-
-[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1" unique_id=1263283557]
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-horizontal_alignment = 1
-
-[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1" unique_id=1725338594]
-custom_minimum_size = Vector2(0, 16)
-layout_mode = 2
-mouse_filter = 2
-theme_type_variation = &"HPBar"
-show_percentage = false
-
-[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot1/HPBar" unique_id=1830918245]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-theme_override_font_sizes/font_size = 13
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="EnemySlot2" type="VBoxContainer" parent="Panel/Margin/VBox/EnemiesRow" unique_id=554434344]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 0
-theme_override_constants/separation = 4
-
-[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2" unique_id=2070103885]
-custom_minimum_size = Vector2(48, 48)
-layout_mode = 2
-mouse_filter = 2
-expand_mode = 3
-stretch_mode = 5
-
-[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2" unique_id=736154826]
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-horizontal_alignment = 1
-
-[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2" unique_id=1037241777]
-custom_minimum_size = Vector2(0, 16)
-layout_mode = 2
-mouse_filter = 2
-theme_type_variation = &"HPBar"
-show_percentage = false
-
-[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/EnemiesRow/EnemySlot2/HPBar" unique_id=2076431347]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-theme_override_font_sizes/font_size = 13
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="LogPanel" type="PanelContainer" parent="Panel/Margin/VBox" unique_id=617708607]
-custom_minimum_size = Vector2(0, 110)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="LogLabel" type="Label" parent="Panel/Margin/VBox/LogPanel" unique_id=555433116]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-vertical_alignment = 2
-autowrap_mode = 2
-
-[node name="Commands" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1431305652]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1794751648]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="AttackBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=1317133138]
+[node name="Stage" type="PanelContainer" parent="Panel/Margin/VBox" unique_id=1342990186]
+custom_minimum_size = Vector2(0, 176)
+layout_mode = 2
+theme_type_variation = &"DetailPanel"
+
+[node name="StageBox" type="VBoxContainer" parent="Panel/Margin/VBox/Stage" unique_id=526765282]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TargetHint" type="Label" parent="Panel/Margin/VBox/Stage/StageBox" unique_id=712267488]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 14
+text = "Choose a target"
+horizontal_alignment = 1
+
+[node name="EnemiesRow" type="HBoxContainer" parent="Panel/Margin/VBox/Stage/StageBox" unique_id=1883571246]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="EnemySlot0" type="PanelContainer" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow" unique_id=831175336]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mm58h")
+
+[node name="Box" type="VBoxContainer" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot0" unique_id=1297224261]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot0/Box" unique_id=66635297]
+texture_filter = 1
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot0/Box" unique_id=201967062]
+layout_mode = 2
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="BarBox" type="CenterContainer" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot0/Box" unique_id=230893642]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot0/Box/BarBox" unique_id=851577124]
+custom_minimum_size = Vector2(120, 16)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"HPBar"
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot0/Box/BarBox/HPBar" unique_id=412241944]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnemySlot1" type="PanelContainer" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow" unique_id=2008995930]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ed2fr")
+
+[node name="Box" type="VBoxContainer" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot1" unique_id=548040765]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot1/Box" unique_id=1135670437]
+texture_filter = 1
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot1/Box" unique_id=1477598502]
+layout_mode = 2
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="BarBox" type="CenterContainer" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot1/Box" unique_id=633286709]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot1/Box/BarBox" unique_id=347004005]
+custom_minimum_size = Vector2(120, 16)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"HPBar"
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot1/Box/BarBox/HPBar" unique_id=1900671695]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnemySlot2" type="PanelContainer" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow" unique_id=1016443031]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_6fjnw")
+
+[node name="Box" type="VBoxContainer" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot2" unique_id=168870905]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="Sprite" type="TextureRect" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot2/Box" unique_id=95117529]
+texture_filter = 1
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot2/Box" unique_id=266792365]
+layout_mode = 2
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="BarBox" type="CenterContainer" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot2/Box" unique_id=741751825]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot2/Box/BarBox" unique_id=145828808]
+custom_minimum_size = Vector2(120, 16)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"HPBar"
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/Stage/StageBox/EnemiesRow/EnemySlot2/Box/BarBox/HPBar" unique_id=880962483]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LogPanel" type="PanelContainer" parent="Panel/Margin/VBox" unique_id=242114957]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"DetailPanel"
+
+[node name="LogMargin" type="MarginContainer" parent="Panel/Margin/VBox/LogPanel" unique_id=988908947]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="LogLabel" type="RichTextLabel" parent="Panel/Margin/VBox/LogPanel/LogMargin" unique_id=646376280]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+scroll_active = false
+scroll_following = true
+
+[node name="Commands" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=762190484]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AttackBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=1905145133]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PrimaryButton"
+theme_override_font_sizes/font_size = 16
 text = "Attack"
 
-[node name="MagicBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=475525839]
+[node name="MagicBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=1546645025]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 16
 text = "Magic"
 
-[node name="ItemBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=255038112]
+[node name="ItemBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=976060672]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 16
 text = "Item"
 
-[node name="DefendBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=87223575]
+[node name="DefendBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=1593472035]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 16
 text = "Defend"
 
-[node name="RunBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=648224431]
+[node name="RunBtn" type="Button" parent="Panel/Margin/VBox/Commands" unique_id=69343316]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 16
 text = "Run"
 
-[node name="Submenu" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1246760748]
+[node name="Submenu" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=2056057605]
 visible = false
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 6

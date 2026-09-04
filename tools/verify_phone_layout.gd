@@ -203,5 +203,5 @@ func _initialize() -> void:
 	print("Tracker back beside the HUD (y=64): ", tracker.vbox.offset_top == 64.0 and tracker.vbox.offset_left == -268.0)
 	bar_rect = _rect(quick_bar.hbox)
 	print("Quick bar back at the bottom edge: ", 600.0 - bar_rect.end.y <= 24.0)
-	print("Battle panel back to 480 wide: ", battle.panel.offset_left == -240.0 and battle.panel.offset_right == 240.0)
+	print("Battle panel back to 560 wide: ", battle.panel.offset_left == -280.0 and battle.panel.offset_right == 280.0)
 	quit()
