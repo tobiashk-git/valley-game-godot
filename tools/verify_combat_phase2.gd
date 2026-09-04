@@ -48,6 +48,11 @@ func _initialize() -> void:
 	combat.open_item_menu()
 	await process_frame
 	print("Item submenu row count (2 potions + Back): ", submenu.get_child_count())
+	# The skeleton can paralyse on its counter-attack; a failed act roll here
+	# would skip the potion turn and its 5-damage hit kills a 5-HP player
+	# (_defeat() resets HP and keeps the potion - looked like a broken item
+	# path). Same isolation verify_combat_phase5.gd uses.
+	combat.player_status.clear()
 	character.stats.hp = 5
 	var potions_before: int = inventory.get_count("healing_potion")
 	combat.use_item("healing_potion")

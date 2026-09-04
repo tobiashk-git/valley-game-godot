@@ -16,6 +16,31 @@ func _panel_style() -> StyleBoxFlat:
 	style.set_content_margin_all(12)
 	return style
 
+const GOLD := Color(0.7, 0.55, 0.2, 1.0)
+
+func _box(bg: Color, border: Color, width: int, radius: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg
+	style.border_color = border
+	style.set_border_width_all(width)
+	style.set_corner_radius_all(radius)
+	return style
+
+# A Button type variation with the same look in every state (hover a touch
+# lighter, pressed a touch darker, disabled faded) so nothing falls back to
+# Godot's default grey.
+func _button_variation(theme: Theme, name: String, bg: Color, border: Color, width: int, radius: int, font_color: Color) -> void:
+	theme.set_type_variation(name, "Button")
+	theme.set_stylebox("normal", name, _box(bg, border, width, radius))
+	theme.set_stylebox("hover", name, _box(bg.lightened(0.12), border, width, radius))
+	theme.set_stylebox("pressed", name, _box(bg.darkened(0.15), border, width, radius))
+	theme.set_stylebox("disabled", name, _box(Color(bg.r, bg.g, bg.b, bg.a * 0.5), Color(border.r, border.g, border.b, border.a * 0.5), width, radius))
+	theme.set_stylebox("focus", name, StyleBoxEmpty.new())
+	theme.set_color("font_color", name, font_color)
+	theme.set_color("font_hover_color", name, font_color)
+	theme.set_color("font_pressed_color", name, font_color)
+	theme.set_color("font_disabled_color", name, Color(font_color.r, font_color.g, font_color.b, 0.5))
+
 func _bar_style(color: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = color
@@ -47,6 +72,20 @@ func _initialize() -> void:
 	theme.set_type_variation("MPBar", "ProgressBar")
 	theme.set_stylebox("fill", "MPBar", _bar_style(Color(0.15, 0.35, 0.75, 1.0)))
 	theme.set_stylebox("background", "MPBar", _bar_style(Color(0.05, 0.1, 0.2, 1.0)))
+
+	# --- Character-sheet kit (UI redesign Phase 1) - the slot / tab / detail
+	# pane language every redesigned screen shares. Buttons need all four
+	# states or Godot's default grey shows through on hover/press. ---
+	_button_variation(theme, "SlotButton", Color(0.16, 0.14, 0.11, 0.95), GOLD, 1, 5, Color(1, 1, 1))
+	_button_variation(theme, "SlotButtonSelected", Color(0.32, 0.26, 0.14, 1.0), Color(1.0, 0.85, 0.4), 3, 5, Color(1, 1, 1))
+	_button_variation(theme, "TabButton", Color(0.2, 0.17, 0.12, 0.95), GOLD, 1, 6, Color(1, 1, 1))
+	_button_variation(theme, "TabButtonActive", Color(0.7, 0.55, 0.2, 0.95), Color(0.9, 0.75, 0.35), 2, 6, Color(0.1, 0.08, 0.04))
+	_button_variation(theme, "PrimaryButton", Color(0.7, 0.55, 0.2, 0.95), Color(0.9, 0.75, 0.35), 2, 6, Color(0.1, 0.08, 0.04))
+	_button_variation(theme, "SecondaryButton", Color(0.2, 0.17, 0.12, 0.95), GOLD, 1, 6, Color(1, 1, 1))
+	theme.set_type_variation("DetailPanel", "Panel")
+	var detail := _box(Color(0.1, 0.09, 0.07, 0.9), GOLD, 1, 8)
+	detail.set_content_margin_all(0)
+	theme.set_stylebox("panel", "DetailPanel", detail)
 
 	var err := ResourceSaver.save(theme, "res://resources/ui_theme.tres")
 	print("ui_theme.tres saved: ", err)

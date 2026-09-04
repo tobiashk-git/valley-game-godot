@@ -57,6 +57,6 @@ func toggle_open() -> void:
 	else:
 		open()
 
-func _process(_delta: float) -> void:
-	if not Combat.in_combat and Input.is_action_just_pressed("toggle_character"):
-		toggle_open()
+# The C key now opens the Character tab of the CharacterSheet window (UI
+# redesign Phase 1); this panel stays autoloaded but nothing opens it any
+# more. Removed entirely in a later phase.

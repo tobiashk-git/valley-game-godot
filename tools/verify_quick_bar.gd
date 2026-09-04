@@ -16,7 +16,7 @@ func _initialize() -> void:
 	var character: Node = root.get_node("Character")
 	var inventory: Node = root.get_node("Inventory")
 	var items: Node = root.get_node("Items")
-	var inventory_panel: Node = root.get_node("InventoryPanel")
+	var sheet: Node = root.get_node("CharacterSheet")
 
 	var overworld: Node2D = load("res://scenes/Overworld.tscn").instantiate()
 	root.add_child(overworld)
@@ -111,11 +111,11 @@ func _initialize() -> void:
 	print("Bar back after the fight: ", quick_bar.visible)
 
 	# --- Hidden while a full-screen panel is open. ---
-	inventory_panel.open()
+	sheet.open("inventory")
 	await process_frame
-	print("Bar hidden while the Inventory panel is open: ", inventory_panel.is_open() and not quick_bar.visible)
-	inventory_panel.close()
+	print("Bar hidden while the character sheet is open: ", sheet.is_open() and not quick_bar.visible)
+	sheet.close()
 	await process_frame
-	print("Bar back once the panel closes: ", not inventory_panel.is_open() and quick_bar.visible)
+	print("Bar back once the sheet closes: ", not sheet.is_open() and quick_bar.visible)
 
 	quit()

@@ -45,6 +45,7 @@ PanelButtons="*res://scenes/PanelButtons.tscn"
 QuestTracker="*res://scenes/QuestTracker.tscn"
 TouchControls="*res://scenes/TouchControls.tscn"
 QuickBar="*res://scenes/QuickBar.tscn"
+CharacterSheet="*res://scenes/CharacterSheet.tscn"
 
 [display]
 

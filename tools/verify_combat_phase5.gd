@@ -12,8 +12,7 @@ func _initialize() -> void:
 	var combat: Node = root.get_node("Combat")
 	var inventory: Node = root.get_node("Inventory")
 	var crafting: Node = root.get_node("Crafting")
-	var inventory_panel: Node = root.get_node("InventoryPanel")
-	var list: VBoxContainer = inventory_panel.get_node("Panel/Margin/VBox/List")
+	var sheet: Node = root.get_node("CharacterSheet")
 
 	# --- Craft both new gear items. ---
 	inventory.add_item("wood", 20)
@@ -24,18 +23,18 @@ func _initialize() -> void:
 	print("Leather armor in backpack: ", inventory.get_count("leather_armor"))
 	print("Charm in backpack: ", inventory.get_count("charm_of_warding"))
 
-	# --- Equip via the actual InventoryPanel UI (not the direct API) to
-	# prove the click-to-equip wiring, not just Character.equip() itself. ---
+	# --- Equip via the actual CharacterSheet UI (not the direct API) to
+	# prove the tap-slot-then-Equip wiring, not just Character.equip(). ---
 	Input.action_press("toggle_inventory")
 	await process_frame
 	Input.action_release("toggle_inventory")
 	await process_frame
-	var armor_btn: Button = null
-	for child in list.get_children():
-		if child is Button and child.text.contains("Leather Armor"):
-			armor_btn = child
-	print("Found Leather Armor row in InventoryPanel: ", armor_btn != null)
+	var armor_btn: Button = sheet.grid.get_node_or_null("LeatherArmorSlot")
+	print("Found Leather Armor slot in the CharacterSheet grid: ", armor_btn != null)
 	armor_btn.pressed.emit()
+	await process_frame
+	print("Detail pane offers Equip for gear: ", sheet.primary_action.visible and sheet.primary_action.text == "Equip")
+	sheet.primary_action.pressed.emit()
 	await process_frame
 	print("Armor equipped after UI click: ", character.equipment.armor == "leather_armor")
 	print("Backpack count after equip (should be 0, moved to slot): ", inventory.get_count("leather_armor"))

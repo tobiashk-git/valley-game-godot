@@ -11,29 +11,31 @@ extends Node
 # res://assets/icons/ - see tools/setup_item_icons.gd), which work
 # identically on every platform; get_item_name() is now plain text only.
 
+# "desc": one line of flavour + function for the character sheet's detail
+# pane (UI redesign Phase 1). Keep them short - the pane wraps at ~220px.
 const ITEMS := {
-	"wood": {"name": "Wood", "icon": "🪵", "value": 1},
-	"stone": {"name": "Stone", "icon": "🪨", "value": 1},
-	"gold": {"name": "Gold", "icon": "💰"},
-	"wooden_pickaxe": {"name": "Wooden Pickaxe", "icon": "⛏️", "slot": "weapon", "attack": 2, "value": 15},
-	"leather_armor": {"name": "Leather Armor", "icon": "🧥", "slot": "armor", "defense": 3, "value": 20},
-	"charm_of_warding": {"name": "Charm of Warding", "icon": "💍", "slot": "accessory", "bonus": {"status_resistance": 0.5}, "value": 25},
-	"healing_potion": {"name": "Healing Potion", "icon": "🧪", "effect": {"kind": "heal", "amount": 15}, "value": 12},
-	"mana_potion": {"name": "Mana Potion", "icon": "🔮", "effect": {"kind": "restore_mp", "amount": 8}, "value": 12},
-	"antidote": {"name": "Antidote", "icon": "🌿", "effect": {"kind": "cure", "status": "poison"}, "value": 10},
+	"wood": {"name": "Wood", "icon": "🪵", "value": 1, "desc": "Split valley timber. The basis of most things worth crafting."},
+	"stone": {"name": "Stone", "icon": "🪨", "value": 1, "desc": "Rough grey fieldstone, chipped from the outcrops around the village."},
+	"gold": {"name": "Gold", "icon": "💰", "desc": "Coin of the realm. The Trader takes nothing else."},
+	"wooden_pickaxe": {"name": "Wooden Pickaxe", "icon": "⛏️", "slot": "weapon", "attack": 2, "value": 15, "desc": "Crude but hefty. Better than bare fists, and handy for prying at rock."},
+	"leather_armor": {"name": "Leather Armor", "icon": "🧥", "slot": "armor", "defense": 3, "value": 20, "desc": "Stiff boiled hide over a padded jerkin. Turns a claw or two."},
+	"charm_of_warding": {"name": "Charm of Warding", "icon": "💍", "slot": "accessory", "bonus": {"status_resistance": 0.5}, "value": 25, "desc": "A ring of braided copper and bone. Poison and curses bite less often."},
+	"healing_potion": {"name": "Healing Potion", "icon": "🧪", "effect": {"kind": "heal", "amount": 15}, "value": 12, "desc": "A bitter red draught brewed from valley herbs. Restores 15 HP."},
+	"mana_potion": {"name": "Mana Potion", "icon": "🔮", "effect": {"kind": "restore_mp", "amount": 8}, "value": 12, "desc": "Cold blue and faintly humming. Restores 8 MP."},
+	"antidote": {"name": "Antidote", "icon": "🌿", "effect": {"kind": "cure", "status": "poison"}, "value": 10, "desc": "Crushed marsh-leaf in spirit. Cures poison."},
 	# Boss-exclusive - no recipe in crafting.gd, only obtainable as a drop.
 	# Sellable for a nice payout (like the plan's boss-drop pricing), but
 	# never appears in Shop.SHOP_STOCK to buy.
-	"bone_greatsword": {"name": "Bone Greatsword", "icon": "🗡️", "slot": "weapon", "attack": 6, "value": 100},
-	"royal_plate": {"name": "Royal Plate", "icon": "🛡️", "slot": "armor", "defense": 8, "value": 130},
+	"bone_greatsword": {"name": "Bone Greatsword", "icon": "🗡️", "slot": "weapon", "attack": 6, "value": 100, "desc": "Hewn from the Bone Lord's own femur. Unnervingly light for its size."},
+	"royal_plate": {"name": "Royal Plate", "icon": "🛡️", "slot": "armor", "defense": 8, "value": 130, "desc": "The Royal Wraith's ceremonial plate, still faintly cold to the touch."},
 	# Quest item for the altar/world-advance loop - deliberately no "value"
 	# (not sellable), no "slot"/"effect" (not equippable or usable).
-	"magic_crystal": {"name": "Magic Crystal", "icon": "💎"},
+	"magic_crystal": {"name": "Magic Crystal", "icon": "💎", "desc": "It hums against your palm. The village altar wants these."},
 	# First resource drop from the overworld's static farmable wild monsters
 	# (see wild_monster.gd) - a placeholder single resource type for now, more
 	# variety and crafting uses planned later. Sellable at the same basic-
 	# material tier as wood/stone.
-	"monster_fur": {"name": "Monster Fur", "icon": "🧶", "value": 4},
+	"monster_fur": {"name": "Monster Fur", "icon": "🧶", "value": 4, "desc": "Coarse pelt from the wilds beyond the river. Someone will want this."},
 }
 
 func is_usable(item_id: String) -> bool:
