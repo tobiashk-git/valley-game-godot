@@ -60,6 +60,15 @@ func _add_slot(item_id: String) -> void:
 	btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	btn.tooltip_text = Items.get_item_name(item_id)
 	btn.pressed.connect(use_item.bind(item_id))
+	# Light parchment slots with the theme's gold border - Godot's default
+	# dark-grey Button vanished against grass/dirt on the phone (user
+	# feedback). Empty slots keep a muted version of the same look so the
+	# row still reads as one unit.
+	btn.add_theme_stylebox_override("normal", _slot_style(Color(0.9, 0.84, 0.68, 0.94)))
+	btn.add_theme_stylebox_override("hover", _slot_style(Color(0.97, 0.92, 0.78, 0.97)))
+	btn.add_theme_stylebox_override("pressed", _slot_style(Color(0.76, 0.68, 0.5, 0.97)))
+	btn.add_theme_stylebox_override("disabled", _slot_style(Color(0.62, 0.58, 0.5, 0.6), Color(0.5, 0.42, 0.25, 0.8)))
+	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	hbox.add_child(btn)
 
 	var count := Label.new()
@@ -69,9 +78,18 @@ func _add_slot(item_id: String) -> void:
 	count.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	count.position = Vector2(-18, -18)
 	count.add_theme_font_size_override("font_size", 12)
+	count.add_theme_color_override("font_color", Color(0.12, 0.09, 0.05)) # dark on the light slot
 	count.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	btn.add_child(count)
 	_slots[item_id] = {"button": btn, "count": count}
+
+func _slot_style(bg: Color, border: Color = Color(0.7, 0.55, 0.2, 1.0)) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg
+	style.border_color = border # matches the theme's panel border gold
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(6)
+	return style
 
 func _refresh() -> void:
 	for item_id in item_ids:

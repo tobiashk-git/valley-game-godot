@@ -38,6 +38,12 @@ func _initialize() -> void:
 	var heal_count: Label = quick_bar._slots["healing_potion"].count
 	print("Healing potion slot shown with a count of 0 and disabled when none owned: ", inventory.get_count("healing_potion") == 0 and heal_slot.visible and heal_slot.disabled and heal_count.text == "0")
 	print("Slot shows the item's icon: ", heal_slot.icon != null and heal_slot.icon.resource_path == "res://assets/icons/healing_potion.png")
+	# Light slots (user feedback: the default dark-grey Button vanished
+	# against the ground) - the owned look must be clearly light, the empty
+	# look muted but still lighter than Godot's default (~0.2 luminance).
+	var normal_bg: Color = heal_slot.get_theme_stylebox("normal").bg_color
+	var disabled_bg: Color = heal_slot.get_theme_stylebox("disabled").bg_color
+	print("Slots are light so they stand out (normal luminance ", snappedf(normal_bg.get_luminance(), 0.01), " > 0.7; empty ", snappedf(disabled_bg.get_luminance(), 0.01), " > 0.4): ", normal_bg.get_luminance() > 0.7 and disabled_bg.get_luminance() > 0.4 and disabled_bg.get_luminance() < normal_bg.get_luminance())
 
 	# --- Placement: bottom-centre, above the bottom edge, clear of the
 	# touch joystick (x<130) and interact button (x>680) zones. ---
