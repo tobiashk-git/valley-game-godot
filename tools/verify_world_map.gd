@@ -1,4 +1,13 @@
 extends SceneTree
+# World Map verification (UI redesign Phase 3b: the rendered map). Run via:
+# godot --script res://tools/verify_world_map.gd (NOT --headless).
+#
+# The map is drawn from the world builder (river ring, mountains, village,
+# biome colours; an opened ford shows), discovered places get markers and
+# list rows, the you-are-here dot follows the player on the Overworld and
+# stands on the entrance while inside a place, entering the Dungeon through
+# its real portal discovers it, Fast Travel works from the Overworld and
+# from inside a house, and the phone layout stacks the pane under the map.
 
 func _walk(direction: String, frames: int) -> void:
 	Input.action_press(direction)
@@ -7,43 +16,77 @@ func _walk(direction: String, frames: int) -> void:
 	Input.action_release(direction)
 	await process_frame
 
+func _press(action: String) -> void:
+	Input.action_press(action)
+	await process_frame
+	await process_frame
+	Input.action_release(action)
+	await process_frame
+
+# Image pixels are 8-bit, so compare with a tolerance, not is_equal_approx.
+func _close(a: Color, b: Color) -> bool:
+	return absf(a.r - b.r) < 0.01 and absf(a.g - b.g) < 0.01 and absf(a.b - b.b) < 0.01
+
+func _marker_names(panel: Node) -> Array:
+	var out: Array = []
+	for child in panel.markers.get_children():
+		if child.visible and child is Button:
+			out.append(child.name)
+	return out
+
 func _initialize() -> void:
 	var world: Node = root.get_node("World")
 	var game_state: Node = root.get_node("GameState")
 	var world_map: Node = root.get_node("WorldMap")
-	var world_map_panel: Node = root.get_node("WorldMapPanel")
+	var panel: Node = root.get_node("WorldMapPanel")
+	var combat: Node = root.get_node("Combat")
+	var layout: Node = root.get_node("Layout")
 
-	# --- Fresh Overworld: dungeon not yet discovered, map lists house+village only. ---
-	var overworld_scene: PackedScene = load("res://scenes/Overworld.tscn")
-	var overworld: Node2D = overworld_scene.instantiate()
+	var overworld: Node2D = load("res://scenes/Overworld.tscn").instantiate()
 	root.add_child(overworld)
 	current_scene = overworld
 	await process_frame
 	await process_frame
-
 	print("Dungeon undiscovered at boot: ", not game_state.discovered_pois.dungeon)
 
-	Input.action_press("toggle_map")
-	await process_frame
-	Input.action_release("toggle_map")
-	await process_frame
-	var list: VBoxContainer = world_map_panel.get_node("Panel/Margin/VBox/List")
-	var row_names: Array = []
-	for row in list.get_children():
-		if row is HBoxContainer:
-			row_names.append((row.get_child(0) as Label).text)
-	print("Map lists House: ", "Your House" in row_names)
-	print("Map lists Village: ", "Village" in row_names)
-	print("Map does NOT list Dungeon yet: ", not ("Dungeon" in row_names))
-	print("Status line while on Overworld: ", world_map_panel.status_label.text)
-	root.get_texture().get_image().save_png("res://verify_map_before_dungeon.png")
-	Input.action_press("toggle_map")
-	await process_frame
-	Input.action_release("toggle_map")
-	await process_frame
+	# --- The rendered map itself. ---
+	var tex: Texture2D = world_map.render_map(panel.MAP_REGION)
+	var img: Image = tex.get_image()
+	var c := Vector2i(50, 50) # the altar, at the centre of the crop
+	print("Map is one pixel per tile of the 100x100 crop: ", img.get_width() == 100 and img.get_height() == 100)
+	print("Altar, fence, river ring and mountains take their palette colours: ", _close(img.get_pixel(c.x, c.y), world_map.MAP_COLOURS[world.SRC_ALTAR]) and _close(img.get_pixel(c.x - 8, c.y - 3), world_map.MAP_COLOURS[world.SRC_FENCE]) and _close(img.get_pixel(c.x, c.y - 22), world_map.MAP_COLOURS[world.SRC_RIVER]) and (_close(img.get_pixel(c.x + 40, c.y - 40), world_map.MAP_COLOURS[world.SRC_MOUNTAIN]) or _close(img.get_pixel(c.x + 40, c.y - 40), world_map.MAP_COLOURS[world.SRC_MOUNTAIN].darkened(0.07))))
+	var north: Color = img.get_pixel(c.x, c.y - 40)
+	var east: Color = img.get_pixel(c.x + 45, c.y + 3)
+	print("Frostpeak north, Verdantwood east (biome wedges coloured): ", _close(north, world_map.MAP_COLOURS[world.SRC_FROSTPEAK]) or _close(north, world_map.MAP_COLOURS[world.SRC_FROSTPEAK].darkened(0.07)), " / ", _close(east, world_map.MAP_COLOURS[world.SRC_VERDANTWOOD]) or _close(east, world_map.MAP_COLOURS[world.SRC_VERDANTWOOD].darkened(0.07)))
+	game_state.biome_paths_open.frostpeak = true
+	var img2: Image = world_map.render_map(panel.MAP_REGION).get_image()
+	print("An opened ford shows on the map: ", _close(img2.get_pixel(c.x, c.y - 22), world_map.MAP_COLOURS[world.SRC_FORD]))
+	game_state.biome_paths_open.frostpeak = false
 
-	# --- Walk to the dungeon entrance's adjacent tile and press E: real portal path. ---
+	# --- Open with M: markers for house + village only, you-are-here dot. ---
+	await _press("toggle_map")
+	print("M opens the map window (kit window, no old list): ", panel.is_open() and panel.has_node("Window/MapFrame/MapRect") and not panel.has_node("Panel"))
+	print("Map texture drawn at 4px per tile: ", panel.map_rect.texture != null and panel.map_rect.size == Vector2(400, 400) and panel.map_scale == 4.0)
+	var names: Array = _marker_names(panel)
+	print("Markers for the known places only (house, village): ", names.has("HouseMarker") and names.has("VillageMarker") and not names.has("DungeonMarker") and names.size() == 2)
+	print("Subtitle counts known places: ", panel.status_label.text == "You are in the Valley  -  2 of 9 places known")
 	var player: CharacterBody2D = overworld.get_node("YSort/Player")
+	var here: Vector2i = Vector2i(floori(player.position.x / 32.0), floori(player.position.y / 32.0))
+	var dot: Control = panel.markers.get_node("HereMarker")
+	print("You-are-here dot sits on the player's tile: ", dot != null and (dot.position + Vector2(8, 8)).is_equal_approx(panel._map_pos(here)))
+	var village_marker: Button = panel.markers.get_node("VillageMarker")
+	print("Village marker sits on the village spawn tile: ", (village_marker.position + Vector2(14, 14)).is_equal_approx(panel._map_pos(world_map.poi_tile("village"))))
+	print("Starts on the village (where the player stands), Fast Travel disabled there: ", panel.selected_poi == "village" and panel.poi_name.text == "Village" and panel.poi_where.text == "Village, Golden Plains" and panel.poi_status.text == "You are here." and panel.travel_btn.disabled)
+	panel.markers.get_node("HouseMarker").pressed.emit()
+	await process_frame
+	print("Tapping the house marker selects it: ", panel.selected_poi == "house" and panel.poi_name.text == "Your House" and panel.poi_desc.text.begins_with("Home.") and not panel.travel_btn.disabled and panel.places_list.get_node("HouseRow").theme_type_variation == &"TabButtonActive")
+	root.get_texture().get_image().save_png("res://verify_map_before_dungeon.png")
+	print("Saved verify_map_before_dungeon.png")
+	await _press("toggle_map")
+	print("M again closes: ", not panel.is_open())
+
+	# --- Walk to the dungeon entrance and enter through the real portal. ---
+	combat._steps_since_encounter = -100000 # no random encounter mid-walk
 	var approach: Vector2i = world.DUNGEON_ENTRANCE + Vector2i(0, 2)
 	player.position = Vector2(approach.x * 32 + 16, approach.y * 32 + 16)
 	var cam: Camera2D = player.get_node("Camera2D")
@@ -51,78 +94,59 @@ func _initialize() -> void:
 	for i in range(3):
 		await process_frame
 	await _walk("move_up", 40)
-	# Portals are E-press, never walk-through (matching every interactable's
-	# convention in this project) - the walk above just gets us adjacent.
-	Input.action_press("interact")
-	await process_frame
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
+	await _press("interact")
 	print("Entered the Dungeon via the real portal: ", current_scene.name == "Dungeon")
 	print("Dungeon marked discovered after entering: ", game_state.discovered_pois.dungeon)
 
-	# --- Walk to the dungeon's door and back out. ---
-	var dungeon_player: CharacterBody2D = current_scene.get_node("YSort/Player")
-	# The player spawns right next to the door already (door_y - 1); one
-	# step down onto the door tile puts them in range, then E triggers it.
-	for i in range(3):
-		await process_frame
-	await _walk("move_down", 20)
-	Input.action_press("interact")
-	await process_frame
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
-	print("Left the Dungeon via the real portal: ", current_scene.name == "Overworld")
-	var back_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Landed just outside the dungeon entrance: ", back_tile == world.DUNGEON_ENTRANCE + Vector2i(0, 1))
-
-	# --- Map now lists Dungeon too. ---
-	Input.action_press("toggle_map")
-	await process_frame
-	Input.action_release("toggle_map")
-	await process_frame
-	row_names = []
-	for row in list.get_children():
-		if row is HBoxContainer:
-			row_names.append((row.get_child(0) as Label).text)
-	print("Map now lists Dungeon: ", "Dungeon" in row_names)
+	# --- Inside the Dungeon the dot stands on its entrance, and the map
+	# starts on the Dungeon. ---
+	combat._steps_since_encounter = -100000
+	await _press("toggle_map")
+	print("Inside the Dungeon: dot on the dungeon entrance, Dungeon selected: ", panel.is_open() and world_map.here_tile() == world_map.poi_tile("dungeon") and panel.selected_poi == "dungeon" and _marker_names(panel).has("DungeonMarker"))
+	print("Subtitle now 3 of 9: ", panel.status_label.text == "You are in the Dungeon  -  3 of 9 places known")
 	root.get_texture().get_image().save_png("res://verify_map_after_dungeon.png")
+	print("Saved verify_map_after_dungeon.png")
 
-	# --- Fast travel to House from the Overworld itself. ---
-	var house_row: HBoxContainer = null
-	for row in list.get_children():
-		if row is HBoxContainer and (row.get_child(0) as Label).text == "Your House":
-			house_row = row
-	var house_btn: Button = house_row.get_child(1)
-	house_btn.pressed.emit()
+	# --- Fast travel to the House from inside the Dungeon. ---
+	panel.places_list.get_node("HouseRow").pressed.emit()
+	await process_frame
+	panel.travel_btn.pressed.emit()
 	await process_frame
 	await process_frame
-	print("Fast travel landed on Overworld: ", current_scene.name == "Overworld")
+	print("Fast travel closes the map and lands on the Overworld: ", not panel.is_open() and current_scene.name == "Overworld")
 	var house_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Fast travel landed at the House entrance: ", house_tile == world.HOUSE_ENTRANCE + Vector2i(0, 1))
+	print("Landed at the House entrance: ", house_tile == world.HOUSE_ENTRANCE + Vector2i(0, 1))
 
 	# --- Fast travel from inside an interior (Elder House) to the Village. ---
-	var elder_scene: PackedScene = load("res://scenes/ElderHouse.tscn")
-	change_scene_to_packed(elder_scene)
+	change_scene_to_packed(load("res://scenes/ElderHouse.tscn"))
 	await process_frame
 	await process_frame
 	print("Now inside the Elder's House: ", current_scene.name == "ElderHouse")
-	Input.action_press("toggle_map")
+	await _press("toggle_map")
+	print("Map from a house: dot on the village, subtitle names the house: ", world_map.here_tile() == world_map.poi_tile("village") and panel.status_label.text.begins_with("You are in the Elder's House"))
+	panel.markers.get_node("VillageMarker").pressed.emit()
 	await process_frame
-	Input.action_release("toggle_map")
-	await process_frame
-	print("Status line while inside a house: ", world_map_panel.status_label.text)
-	var village_row: HBoxContainer = null
-	for row in list.get_children():
-		if row is HBoxContainer and (row.get_child(0) as Label).text == "Village":
-			village_row = row
-	var village_btn: Button = village_row.get_child(1)
-	village_btn.pressed.emit()
+	panel.travel_btn.pressed.emit()
 	await process_frame
 	await process_frame
 	print("Fast travel from an interior lands on Overworld: ", current_scene.name == "Overworld")
 	var village_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
 	print("Landed at the village spawn point: ", village_tile == world.VILLAGE_GATES.south + Vector2i(0, -2))
 
+	# --- Phone layout: map at an integer scale centred, pane below it. ---
+	root.size = Vector2i(400, 860)
+	for i in range(6):
+		await process_frame
+	panel.open()
+	await process_frame
+	await process_frame
+	var frame_rect: Rect2 = panel.map_frame.get_global_rect()
+	var pane_rect: Rect2 = panel.detail_pane.get_global_rect()
+	print("Phone: map at 3px per tile, centred, pane below inside the window: ", layout.width == 400 and panel.narrow and panel.map_scale == 3.0 and panel.map_rect.size == Vector2(300, 300) and absf(frame_rect.get_center().x - 200.0) < 2.0 and pane_rect.position.y >= frame_rect.end.y and pane_rect.end.y <= panel.window.get_global_rect().end.y)
+	root.get_texture().get_image().save_png("res://verify_map_phone.png")
+	print("Saved verify_map_phone.png")
+	panel.close()
+	root.size = Vector2i(800, 600)
+	for i in range(4):
+		await process_frame
 	quit()

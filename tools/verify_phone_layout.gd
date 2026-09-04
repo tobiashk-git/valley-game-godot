@@ -142,6 +142,12 @@ func _initialize() -> void:
 	root.get_texture().get_image().save_png("res://verify_phone_shop.png")
 	print("Saved verify_phone_shop.png")
 	shop_panel.close()
+	var map_panel: CanvasLayer = root.get_node("WorldMapPanel")
+	map_panel.open()
+	await process_frame
+	var mp_rect: Rect2 = _rect(map_panel.window)
+	print("World Map window (kit) fills the phone width, map above its pane: ", map_panel.narrow and mp_rect.size.x == 400.0 - 24.0 and map_panel.detail_pane.position.y >= map_panel.map_frame.position.y + map_panel.map_frame.size.y)
+	map_panel.close()
 
 	# --- Back to desktop. ---
 	root.size = Vector2i(800, 600)

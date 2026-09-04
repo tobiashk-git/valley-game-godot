@@ -48,7 +48,7 @@ func _initialize() -> void:
 
 	panel_buttons.map_btn.pressed.emit()
 	await process_frame
-	print("World Map opens via toolbar click: ", world_map_panel.get_node("Panel").visible)
+	print("World Map opens via toolbar click: ", world_map_panel.is_open())
 	panel_buttons.map_btn.pressed.emit()
 	await process_frame
 

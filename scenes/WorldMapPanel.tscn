@@ -2,43 +2,160 @@
 
 [ext_resource type="Script" path="res://scripts/world_map_panel.gd" id="1_2r4ht"]
 
-[node name="WorldMapPanel" type="CanvasLayer" unique_id=2033379676]
+[node name="WorldMapPanel" type="CanvasLayer" unique_id=168143671]
 script = ExtResource("1_2r4ht")
 
-[node name="Panel" type="Panel" parent="." unique_id=122824638]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -360.0
-offset_top = -240.0
-offset_right = 360.0
-offset_bottom = 260.0
-
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1266568250]
-layout_mode = 0
+[node name="Dim" type="ColorRect" parent="." unique_id=1724421224]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+color = Color(0, 0, 0, 0.45)
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1199379875]
-layout_mode = 2
-theme_override_constants/separation = 8
+[node name="Window" type="Panel" parent="." unique_id=1516446117]
+offset_left = 40.0
+offset_top = 56.0
+offset_right = 760.0
+offset_bottom = 586.0
 
-[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=348747828]
-layout_mode = 2
+[node name="TitleLabel" type="Label" parent="Window" unique_id=762334118]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 12.0
+offset_right = 20.0
+offset_bottom = 12.0
 theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 20
 text = "World Map"
 
-[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox" unique_id=509603084]
-layout_mode = 2
+[node name="SubtitleLabel" type="Label" parent="Window" unique_id=1389689898]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 18.0
+offset_right = 660.0
+offset_bottom = 41.0
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 13
+horizontal_alignment = 2
 
-[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=1941159071]
+[node name="CloseBtn" type="Button" parent="Window" unique_id=492068404]
+layout_mode = 0
+offset_left = 676.0
+offset_top = 10.0
+offset_right = 708.0
+offset_bottom = 42.0
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 15
+text = "X"
+
+[node name="MapFrame" type="Panel" parent="Window" unique_id=2139788667]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 52.0
+offset_right = 428.0
+offset_bottom = 460.0
+theme_type_variation = &"DetailPanel"
+
+[node name="MapRect" type="TextureRect" parent="Window/MapFrame" unique_id=1205808499]
+texture_filter = 1
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 404.0
+offset_bottom = 404.0
+mouse_filter = 2
+expand_mode = 1
+
+[node name="Markers" type="Control" parent="Window/MapFrame" unique_id=1203604703]
+anchors_preset = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 404.0
+offset_bottom = 404.0
+mouse_filter = 1
+
+[node name="DetailPane" type="Panel" parent="Window" unique_id=123004017]
+layout_mode = 0
+offset_left = 452.0
+offset_top = 52.0
+offset_right = 700.0
+offset_bottom = 460.0
+theme_type_variation = &"DetailPanel"
+
+[node name="PoiName" type="Label" parent="Window/DetailPane" unique_id=521570305]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 236.0
+offset_bottom = 54.0
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 17
+autowrap_mode = 2
+
+[node name="PoiWhere" type="Label" parent="Window/DetailPane" unique_id=288166993]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 56.0
+offset_right = 12.0
+offset_bottom = 56.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12
+
+[node name="PoiDesc" type="Label" parent="Window/DetailPane" unique_id=381209693]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 76.0
+offset_right = 236.0
+offset_bottom = 138.0
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+
+[node name="PoiStatus" type="Label" parent="Window/DetailPane" unique_id=1744135105]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 140.0
+offset_right = 12.0
+offset_bottom = 140.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12
+
+[node name="TravelBtn" type="Button" parent="Window/DetailPane" unique_id=447893091]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 164.0
+offset_right = 236.0
+offset_bottom = 204.0
+theme_type_variation = &"PrimaryButton"
+theme_override_font_sizes/font_size = 15
+text = "Fast Travel"
+
+[node name="PlacesTitle" type="Label" parent="Window/DetailPane" unique_id=686098000]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 216.0
+offset_right = 12.0
+offset_bottom = 216.0
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 13
+text = "Known places"
+
+[node name="PlacesScroll" type="ScrollContainer" parent="Window/DetailPane" unique_id=2112704895]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 238.0
+offset_right = 236.0
+offset_bottom = 396.0
+horizontal_scroll_mode = 0
+
+[node name="PlacesList" type="VBoxContainer" parent="Window/DetailPane/PlacesScroll" unique_id=1305110868]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
+
+[node name="HintLabel" type="Label" parent="Window" unique_id=2701085]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 470.0
+offset_right = 20.0
+offset_bottom = 470.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12
+text = "Tap a marker or a name to see the place. Fast Travel lands you at its entrance."
