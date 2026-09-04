@@ -253,7 +253,7 @@ func _initialize() -> void:
 	sheet.open("crafting")
 	await process_frame
 	await process_frame
-	print("Crafting grid drops to 4 columns too: ", sheet.craft_grid.columns == 4, " (", sheet.craft_grid.columns, " scroll=", sheet.craft_scroll.size, ")")
+	print("Crafting sections drop to 4 columns too: ", sheet.craft_columns == 4, " (", sheet.craft_columns, " scroll=", sheet.craft_scroll.size, ")")
 	print("Crafting pane below its grid on the phone, inside the window: ", sheet.craft_pane.position.y >= sheet.craft_scroll.position.y + sheet.craft_scroll.size.y and sheet.craft_pane.get_global_rect().end.y <= sheet.window.get_global_rect().end.y and sheet.craft_action.get_global_rect().end.y <= sheet.craft_pane.get_global_rect().end.y)
 	root.get_texture().get_image().save_png("res://verify_sheet_phone_crafting.png")
 	print("Saved verify_sheet_phone_crafting.png")

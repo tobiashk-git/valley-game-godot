@@ -348,12 +348,14 @@ func _build() -> void:
 	craft_scroll.size = Vector2(424, 284)
 	craft_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	crf.add_child(craft_scroll)
-	var craft_grid := GridContainer.new()
-	craft_grid.name = "CraftGrid"
-	craft_grid.columns = 6
-	craft_grid.add_theme_constant_override("h_separation", 6)
-	craft_grid.add_theme_constant_override("v_separation", 6)
-	craft_scroll.add_child(craft_grid)
+	# Sections (a title + a grid each, built at runtime by character_sheet.gd's
+	# _craft_section()): Craft mode groups recipes as Potions & Food /
+	# Equipment / Materials, Enhance mode groups gear by slot (user request:
+	# "some kind of logical grouping").
+	var craft_groups := VBoxContainer.new()
+	craft_groups.name = "CraftGroups"
+	craft_groups.add_theme_constant_override("separation", 8)
+	craft_scroll.add_child(craft_groups)
 	var craft_pane := Panel.new()
 	craft_pane.name = "CraftPane"
 	craft_pane.position = Vector2(452, 0)

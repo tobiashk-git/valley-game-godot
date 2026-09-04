@@ -80,7 +80,7 @@ const FLASH_SECONDS := 1.4
 @onready var enhance_mode_btn: Button = $Window/CraftingView/Modes/EnhanceMode
 @onready var craft_count_label: Label = $Window/CraftingView/CraftCountLabel
 @onready var craft_scroll: ScrollContainer = $Window/CraftingView/CraftScroll
-@onready var craft_grid: GridContainer = $Window/CraftingView/CraftScroll/CraftGrid
+@onready var craft_groups: VBoxContainer = $Window/CraftingView/CraftScroll/CraftGroups
 @onready var craft_pane: Panel = $Window/CraftingView/CraftPane
 @onready var craft_icon: TextureRect = $Window/CraftingView/CraftPane/CraftIcon
 @onready var craft_name: Label = $Window/CraftingView/CraftPane/CraftName
@@ -127,6 +127,11 @@ var _flash_tween: Tween = null
 # Layout state (see _apply_layout()).
 var narrow := false
 var grid_columns := 6
+var craft_columns := 6
+# Craft mode sections, in display order, by what the recipe makes.
+const CRAFT_GROUPS := ["Potions & Food", "Equipment", "Materials"]
+# Enhance mode sections: one per equipment slot (Character.SLOTS order).
+const SLOT_GROUP_NAMES := {"weapon": "Weapons", "armor": "Armour", "accessory": "Accessories"}
 
 func _ready() -> void:
 	window.visible = false
@@ -386,7 +391,8 @@ func _layout_crafting(pos: Vector2, size: Vector2) -> void:
 	var pane_h: float
 	# Columns before the scroll size - see _layout_inventory().
 	if not narrow:
-		craft_grid.columns = 6
+		craft_columns = 6
+		_apply_craft_columns()
 		craft_count_label.position = Vector2(300, 8)
 		_place(craft_scroll, Vector2(20, 36), Vector2(424, 284))
 		pw = 248.0
@@ -395,9 +401,11 @@ func _layout_crafting(pos: Vector2, size: Vector2) -> void:
 		craft_hint.visible = true
 	else:
 		var iw: float = size.x
-		craft_grid.columns = _columns_for(iw - 40.0)
+		craft_columns = _columns_for(iw - 40.0)
+		_apply_craft_columns()
 		craft_count_label.position = Vector2(iw - 160.0, 8)
-		var grid_h: float = 2 * SLOT_SIZE + 6.0
+		# Three rows' worth: two sections with a title each fit without a scroll.
+		var grid_h: float = 3 * SLOT_SIZE + 12.0
 		_place(craft_scroll, Vector2(20, 36), Vector2(iw - 40.0, grid_h))
 		pw = iw - 40.0
 		pane_h = maxf(240.0, size.y - 36.0 - grid_h - 8.0 - 4.0)
@@ -776,10 +784,57 @@ func _set_craft_mode(mode: String) -> void:
 	_clear_flash()
 	_refresh()
 
+func _apply_craft_columns() -> void:
+	for section in craft_groups.get_children():
+		if section is GridContainer:
+			section.columns = craft_columns
+
+# A titled section in the crafting grid area: a small gold title and a
+# grid of slots under it. Returns the grid to add slots to.
+func _craft_section(title: String) -> GridContainer:
+	var l := Label.new()
+	l.name = title.to_pascal_case().replace("&", "And") + "Title"
+	l.text = title
+	l.theme_type_variation = &"PanelTitle"
+	l.add_theme_font_size_override("font_size", 13)
+	craft_groups.add_child(l)
+	var g := GridContainer.new()
+	g.name = title.to_pascal_case().replace("&", "And") + "Grid"
+	g.columns = craft_columns
+	g.add_theme_constant_override("h_separation", 6)
+	g.add_theme_constant_override("v_separation", 6)
+	craft_groups.add_child(g)
+	return g
+
+# Which Craft-mode section an item belongs in.
+func _craft_group_of(item_id: String) -> String:
+	if Items.is_usable(item_id):
+		return CRAFT_GROUPS[0]
+	if Items.is_equippable(item_id):
+		return CRAFT_GROUPS[1]
+	return CRAFT_GROUPS[2]
+
+# Every slot button across the sections (order: section by section).
+func craft_slots() -> Array:
+	var out: Array = []
+	for section in craft_groups.get_children():
+		if section is GridContainer and section.visible:
+			for child in section.get_children():
+				if child is Button and child.visible:
+					out.append(child)
+	return out
+
+# A slot by node name, e.g. "RecipeHealingPotionSlot" / "EnhanceLeatherArmorSlot2".
+func craft_slot(node_name: String) -> Button:
+	for btn in craft_slots():
+		if btn.name == node_name:
+			return btn
+	return null
+
 func _refresh_crafting() -> void:
 	craft_mode_btn.theme_type_variation = &"TabButtonActive" if craft_mode == "craft" else &"TabButton"
 	enhance_mode_btn.theme_type_variation = &"TabButtonActive" if craft_mode == "enhance" else &"TabButton"
-	_clear(craft_grid)
+	_clear(craft_groups)
 	_clear(craft_rows)
 	craft_action.visible = false
 	craft_rows_scroll.visible = flash_kind == ""
@@ -802,18 +857,30 @@ func _refresh_craft_mode() -> void:
 	if selected_recipe == "" or not Crafting.RECIPES.has(selected_recipe):
 		selected_recipe = Crafting.RECIPES.keys()[0]
 	var craftable := 0
+	# Recipes bucketed by what they make, sections in CRAFT_GROUPS order
+	# (a section only appears once something is in it).
+	var groups: Dictionary = {}
 	for recipe_id in Crafting.RECIPES:
-		var recipe: Dictionary = Crafting.RECIPES[recipe_id]
-		var can: bool = Crafting.can_craft(recipe_id)
-		if can:
-			craftable += 1
-		var btn: Button = _make_slot(recipe.result, 1, recipe_id == selected_recipe, {}, false)
-		btn.name = "Recipe" + recipe_id.to_pascal_case() + "Slot"
-		btn.pressed.connect(_select_recipe.bind(recipe_id))
-		_blueprint(btn)
-		if not can:
-			btn.modulate.a = 0.55
-		craft_grid.add_child(btn)
+		var group: String = _craft_group_of(Crafting.RECIPES[recipe_id].result)
+		if not groups.has(group):
+			groups[group] = []
+		groups[group].append(recipe_id)
+	for group in CRAFT_GROUPS:
+		if not groups.has(group):
+			continue
+		var section: GridContainer = _craft_section(group)
+		for recipe_id in groups[group]:
+			var recipe: Dictionary = Crafting.RECIPES[recipe_id]
+			var can: bool = Crafting.can_craft(recipe_id)
+			if can:
+				craftable += 1
+			var btn: Button = _make_slot(recipe.result, 1, recipe_id == selected_recipe, {}, false)
+			btn.name = "Recipe" + recipe_id.to_pascal_case() + "Slot"
+			btn.pressed.connect(_select_recipe.bind(recipe_id))
+			_blueprint(btn)
+			if not can:
+				btn.modulate.a = 0.55
+			section.add_child(btn)
 	craft_count_label.text = "%d of %d craftable" % [craftable, Crafting.RECIPES.size()]
 	craft_hint.text = "Blueprints: tap one to see what it needs. Dimmed ones are missing ingredients."
 
@@ -867,22 +934,29 @@ func _refresh_enhance_mode() -> void:
 		enhance_uid = entries[0][0].uid if not entries.is_empty() else 0
 		enhance_worn_slot = entries[0][1] if not entries.is_empty() else ""
 	var seen: Dictionary = {}
-	for entry in entries:
-		var inst: Dictionary = entry[0]
-		seen[inst.base] = seen.get(inst.base, 0) + 1
-		var btn: Button = _make_slot(inst.base, 1, inst.uid == enhance_uid, inst, false)
-		btn.name = "Enhance%sSlot%s" % [inst.base.to_pascal_case(), "" if seen[inst.base] == 1 else str(seen[inst.base])]
-		btn.pressed.connect(_select_enhance_target.bind(inst.uid, entry[1]))
-		if entry[1] != "":
-			var worn_badge := Label.new()
-			worn_badge.name = "Worn"
-			worn_badge.text = "worn"
-			worn_badge.position = Vector2(4, SLOT_SIZE - 18)
-			worn_badge.add_theme_font_size_override("font_size", 10)
-			worn_badge.theme_type_variation = &"DimLabel"
-			worn_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			btn.add_child(worn_badge)
-		craft_grid.add_child(btn)
+	# One section per equipment slot that has any gear (Weapons / Armour /
+	# Accessories), in Character.SLOTS order.
+	for slot_id in Character.SLOTS:
+		var in_slot: Array = entries.filter(func(e): return Items.ITEMS[e[0].base].get("slot", "") == slot_id)
+		if in_slot.is_empty():
+			continue
+		var section: GridContainer = _craft_section(SLOT_GROUP_NAMES.get(slot_id, Character.SLOTS[slot_id].label))
+		for entry in in_slot:
+			var inst: Dictionary = entry[0]
+			seen[inst.base] = seen.get(inst.base, 0) + 1
+			var btn: Button = _make_slot(inst.base, 1, inst.uid == enhance_uid, inst, false)
+			btn.name = "Enhance%sSlot%s" % [inst.base.to_pascal_case(), "" if seen[inst.base] == 1 else str(seen[inst.base])]
+			btn.pressed.connect(_select_enhance_target.bind(inst.uid, entry[1]))
+			if entry[1] != "":
+				var worn_badge := Label.new()
+				worn_badge.name = "Worn"
+				worn_badge.text = "worn"
+				worn_badge.position = Vector2(4, SLOT_SIZE - 18)
+				worn_badge.add_theme_font_size_override("font_size", 10)
+				worn_badge.theme_type_variation = &"DimLabel"
+				worn_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				btn.add_child(worn_badge)
+			section.add_child(btn)
 	craft_count_label.text = "%d piece%s of gear" % [entries.size(), "" if entries.size() == 1 else "s"] if not entries.is_empty() else "No gear to enhance"
 	craft_hint.text = "Tap a piece of gear. Enhancing again replaces its current enhancement."
 	if flash_kind == "":

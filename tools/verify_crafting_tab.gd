@@ -44,10 +44,20 @@ func _initialize() -> void:
 	await _press("toggle_crafting")
 	print("R opens the sheet on the Crafting tab in Craft mode: ", sheet.is_open() and sheet.current_tab == "crafting" and sheet.craft_mode == "craft")
 	print("Standalone Crafting panel is gone: ", not root.has_node("CraftingPanel"))
-	print("One recipe slot per recipe: ", sheet.craft_grid.get_child_count() == crafting.RECIPES.size())
+	print("One recipe slot per recipe: ", sheet.craft_slots().size() == crafting.RECIPES.size())
+	# --- Grouping (user request): recipes sit under Potions & Food / Equipment
+	# section titles, potion slots in the first, gear in the second. ---
+	var titles: Array = []
+	for child in sheet.craft_groups.get_children():
+		if child is Label and child.visible:
+			titles.append(child.text)
+	var potion_section: Node = sheet.craft_slot("RecipeHealingPotionSlot").get_parent()
+	var armor_section: Node = sheet.craft_slot("RecipeLeatherArmorSlot").get_parent()
+	print("Craft mode grouped into Potions & Food then Equipment: ", titles == ["Potions & Food", "Equipment"] and potion_section.name == "PotionsAndFoodGrid" and armor_section.name == "EquipmentGrid" and potion_section != armor_section)
+	print("All three potions in the first section, all three gear recipes in the second: ", potion_section.get_child_count() == 3 and armor_section.get_child_count() == 3)
 
 	# --- Craft a potion: checklist red -> green, button disabled -> enabled. ---
-	sheet.craft_grid.get_node("RecipeHealingPotionSlot").pressed.emit()
+	sheet.craft_slot("RecipeHealingPotionSlot").pressed.emit()
 	await process_frame
 	print("Selecting a recipe shows its checklist: ", sheet.craft_name.text == "Healing Potion" and _rows_have(sheet.craft_rows, "wood") == "0 / 2" and _rows_have(sheet.craft_rows, "stone") == "0 / 1")
 	print("Craft disabled without ingredients: ", sheet.craft_action.visible and sheet.craft_action.disabled)
@@ -71,12 +81,12 @@ func _initialize() -> void:
 	print("Saved verify_craft_flash.png")
 	await create_timer(sheet.FLASH_SECONDS + 0.3).timeout
 	print("Feedback clears itself after a moment: ", sheet.flash_kind == "" and sheet.craft_action.text == "Craft" and sheet.craft_rows_scroll.visible and not sheet.flash_label.visible)
-	print("Recipe slots and the pane icon are drawn as blueprints (blue tint): ", sheet.craft_grid.get_node("RecipeHealingPotionSlot").get_theme_color("icon_normal_color") == sheet.BLUEPRINT_TINT and sheet.craft_icon.modulate == sheet.BLUEPRINT_TINT)
+	print("Recipe slots and the pane icon are drawn as blueprints (blue tint): ", sheet.craft_slot("RecipeHealingPotionSlot").get_theme_color("icon_normal_color") == sheet.BLUEPRINT_TINT and sheet.craft_icon.modulate == sheet.BLUEPRINT_TINT)
 
 	# --- Craft gear -> an instance. ---
 	inventory.add_item("wood", 4)
 	inventory.add_item("stone", 4)
-	sheet.craft_grid.get_node("RecipeLeatherArmorSlot").pressed.emit()
+	sheet.craft_slot("RecipeLeatherArmorSlot").pressed.emit()
 	await process_frame
 	sheet.craft_action.pressed.emit()
 	await process_frame
@@ -86,7 +96,8 @@ func _initialize() -> void:
 	# --- Enhance mode: carried armour, Fur-lined needs 3 fur. ---
 	sheet.enhance_mode_btn.pressed.emit()
 	await process_frame
-	print("Enhance mode lists the carried armour and picks it: ", sheet.craft_mode == "enhance" and sheet.craft_grid.get_node_or_null("EnhanceLeatherArmorSlot") != null and sheet.enhance_uid == armor_uid)
+	print("Enhance mode lists the carried armour and picks it: ", sheet.craft_mode == "enhance" and sheet.craft_slot("EnhanceLeatherArmorSlot") != null and sheet.enhance_uid == armor_uid)
+	print("Enhance mode grouped by slot (Armour section holds the armour): ", sheet.craft_slot("EnhanceLeatherArmorSlot").get_parent().name == "ArmourGrid")
 	print("Fur-lined offered with its checklist, disabled without fur: ", sheet.selected_enhancement == "fur_lined" and _rows_have(sheet.craft_rows, "monster_fur") == "0 / 3" and sheet.craft_action.disabled and sheet.craft_desc.text == "No enhancement yet.")
 	inventory.add_item("monster_fur", 3)
 	await process_frame
@@ -112,7 +123,8 @@ func _initialize() -> void:
 	character.equip("weapon", pick_uid)
 	inventory.add_item("ember_core", 1)
 	await process_frame
-	var worn_slot: Button = sheet.craft_grid.get_node_or_null("EnhanceWoodenPickaxeSlot")
+	var worn_slot: Button = sheet.craft_slot("EnhanceWoodenPickaxeSlot")
+	print("Worn pickaxe listed under Weapons, armour under Armour (two sections): ", worn_slot != null and worn_slot.get_parent().name == "WeaponsGrid" and sheet.craft_groups.get_node_or_null("WeaponsTitle") != null and sheet.craft_groups.get_node_or_null("ArmourTitle") != null)
 	print("Worn gear is listed (badged) in Enhance mode: ", worn_slot != null and worn_slot.has_node("Worn"))
 	worn_slot.pressed.emit()
 	await process_frame
