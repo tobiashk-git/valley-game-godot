@@ -2,22 +2,22 @@
 
 [ext_resource type="Script" path="res://scripts/character_sheet.gd" id="1_l2qe4"]
 
-[node name="CharacterSheet" type="CanvasLayer" unique_id=1657707896]
+[node name="CharacterSheet" type="CanvasLayer" unique_id=421390487]
 script = ExtResource("1_l2qe4")
 
-[node name="Dim" type="ColorRect" parent="." unique_id=1050169190]
+[node name="Dim" type="ColorRect" parent="." unique_id=1061970921]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0, 0, 0, 0.45)
 
-[node name="Window" type="Panel" parent="." unique_id=1883456661]
+[node name="Window" type="Panel" parent="." unique_id=1445321705]
 offset_left = 40.0
 offset_top = 56.0
 offset_right = 760.0
 offset_bottom = 586.0
 
-[node name="Tabs" type="HBoxContainer" parent="Window" unique_id=1392538858]
+[node name="Tabs" type="HBoxContainer" parent="Window" unique_id=1244604609]
 layout_mode = 0
 offset_left = 12.0
 offset_top = 10.0
@@ -25,42 +25,42 @@ offset_right = 12.0
 offset_bottom = 10.0
 theme_override_constants/separation = 6
 
-[node name="InventoryTab" type="Button" parent="Window/Tabs" unique_id=1830827011]
+[node name="InventoryTab" type="Button" parent="Window/Tabs" unique_id=1172291327]
 custom_minimum_size = Vector2(118, 32)
 layout_mode = 2
 theme_type_variation = &"TabButton"
 theme_override_font_sizes/font_size = 14
 text = "Inventory"
 
-[node name="CharacterTab" type="Button" parent="Window/Tabs" unique_id=476536800]
+[node name="CharacterTab" type="Button" parent="Window/Tabs" unique_id=333050473]
 custom_minimum_size = Vector2(118, 32)
 layout_mode = 2
 theme_type_variation = &"TabButton"
 theme_override_font_sizes/font_size = 14
 text = "Character"
 
-[node name="CraftingTab" type="Button" parent="Window/Tabs" unique_id=1705519361]
+[node name="CraftingTab" type="Button" parent="Window/Tabs" unique_id=1837939141]
 custom_minimum_size = Vector2(118, 32)
 layout_mode = 2
 theme_type_variation = &"TabButton"
 theme_override_font_sizes/font_size = 14
 text = "Crafting"
 
-[node name="JournalTab" type="Button" parent="Window/Tabs" unique_id=1050287213]
+[node name="JournalTab" type="Button" parent="Window/Tabs" unique_id=561408725]
 custom_minimum_size = Vector2(118, 32)
 layout_mode = 2
 theme_type_variation = &"TabButton"
 theme_override_font_sizes/font_size = 14
 text = "Journal"
 
-[node name="MapTab" type="Button" parent="Window/Tabs" unique_id=1979181963]
+[node name="MapTab" type="Button" parent="Window/Tabs" unique_id=121804319]
 custom_minimum_size = Vector2(118, 32)
 layout_mode = 2
 theme_type_variation = &"TabButton"
 theme_override_font_sizes/font_size = 14
 text = "Map"
 
-[node name="CloseBtn" type="Button" parent="Window" unique_id=1250081307]
+[node name="CloseBtn" type="Button" parent="Window" unique_id=848427609]
 layout_mode = 0
 offset_left = 676.0
 offset_top = 10.0
@@ -70,20 +70,20 @@ theme_type_variation = &"SecondaryButton"
 theme_override_font_sizes/font_size = 15
 text = "X"
 
-[node name="Header" type="Control" parent="Window" unique_id=714655437]
+[node name="Header" type="Control" parent="Window" unique_id=1055979566]
 anchors_preset = 0
 offset_top = 54.0
 offset_right = 720.0
 offset_bottom = 146.0
 
-[node name="PortraitFrame" type="Panel" parent="Window/Header" unique_id=1759845640]
+[node name="PortraitFrame" type="Panel" parent="Window/Header" unique_id=779896156]
 layout_mode = 0
 offset_left = 20.0
 offset_right = 100.0
 offset_bottom = 80.0
 theme_type_variation = &"DetailPanel"
 
-[node name="Portrait" type="TextureRect" parent="Window/Header/PortraitFrame" unique_id=36736679]
+[node name="Portrait" type="TextureRect" parent="Window/Header/PortraitFrame" unique_id=1219625553]
 texture_filter = 1
 layout_mode = 0
 offset_left = 4.0
@@ -93,7 +93,7 @@ offset_bottom = 76.0
 expand_mode = 1
 stretch_mode = 5
 
-[node name="NameLabel" type="Label" parent="Window/Header" unique_id=879372331]
+[node name="NameLabel" type="Label" parent="Window/Header" unique_id=1575237353]
 layout_mode = 0
 offset_left = 112.0
 offset_top = -2.0
@@ -103,7 +103,7 @@ theme_type_variation = &"PanelTitle"
 theme_override_font_sizes/font_size = 20
 text = "Oliver"
 
-[node name="LocationLabel" type="Label" parent="Window/Header" unique_id=949540299]
+[node name="LocationLabel" type="Label" parent="Window/Header" unique_id=1368362662]
 layout_mode = 0
 offset_left = 112.0
 offset_top = 22.0
@@ -112,7 +112,7 @@ offset_bottom = 22.0
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 12
 
-[node name="HPBar" type="ProgressBar" parent="Window/Header" unique_id=534634730]
+[node name="HPBar" type="ProgressBar" parent="Window/Header" unique_id=1781262422]
 layout_mode = 0
 offset_left = 112.0
 offset_top = 42.0
@@ -122,7 +122,7 @@ mouse_filter = 2
 theme_type_variation = &"HPBar"
 show_percentage = false
 
-[node name="HPLabel" type="Label" parent="Window/Header/HPBar" unique_id=1850833867]
+[node name="HPLabel" type="Label" parent="Window/Header/HPBar" unique_id=2106942412]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -130,7 +130,7 @@ theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="MPBar" type="ProgressBar" parent="Window/Header" unique_id=1021269789]
+[node name="MPBar" type="ProgressBar" parent="Window/Header" unique_id=28048254]
 layout_mode = 0
 offset_left = 112.0
 offset_top = 62.0
@@ -140,7 +140,7 @@ mouse_filter = 2
 theme_type_variation = &"MPBar"
 show_percentage = false
 
-[node name="MPLabel" type="Label" parent="Window/Header/MPBar" unique_id=619077544]
+[node name="MPLabel" type="Label" parent="Window/Header/MPBar" unique_id=1808546927]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -148,7 +148,7 @@ theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="StatsLabel" type="Label" parent="Window/Header" unique_id=533097782]
+[node name="StatsLabel" type="Label" parent="Window/Header" unique_id=1640316449]
 layout_mode = 0
 offset_left = 350.0
 offset_top = 45.0
@@ -156,7 +156,7 @@ offset_right = 350.0
 offset_bottom = 45.0
 theme_override_font_sizes/font_size = 14
 
-[node name="BonusLabel" type="Label" parent="Window/Header" unique_id=689188585]
+[node name="BonusLabel" type="Label" parent="Window/Header" unique_id=1826376655]
 layout_mode = 0
 offset_left = 350.0
 offset_top = 64.0
@@ -165,7 +165,7 @@ offset_bottom = 64.0
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 12
 
-[node name="WeaponSlot" type="Button" parent="Window/Header" unique_id=577940123]
+[node name="WeaponSlot" type="Button" parent="Window/Header" unique_id=1425920868]
 layout_mode = 0
 offset_left = 520.0
 offset_right = 576.0
@@ -174,7 +174,7 @@ theme_type_variation = &"SlotButton"
 icon_alignment = 1
 expand_icon = true
 
-[node name="WeaponSlotLabel" type="Label" parent="Window/Header" unique_id=753908166]
+[node name="WeaponSlotLabel" type="Label" parent="Window/Header" unique_id=251723983]
 layout_mode = 0
 offset_left = 520.0
 offset_top = 60.0
@@ -185,7 +185,7 @@ theme_override_font_sizes/font_size = 11
 text = "Weapon"
 horizontal_alignment = 1
 
-[node name="ArmorSlot" type="Button" parent="Window/Header" unique_id=1931361834]
+[node name="ArmorSlot" type="Button" parent="Window/Header" unique_id=1926035641]
 layout_mode = 0
 offset_left = 584.0
 offset_right = 640.0
@@ -194,7 +194,7 @@ theme_type_variation = &"SlotButton"
 icon_alignment = 1
 expand_icon = true
 
-[node name="ArmorSlotLabel" type="Label" parent="Window/Header" unique_id=1448266896]
+[node name="ArmorSlotLabel" type="Label" parent="Window/Header" unique_id=1828422408]
 layout_mode = 0
 offset_left = 584.0
 offset_top = 60.0
@@ -205,7 +205,7 @@ theme_override_font_sizes/font_size = 11
 text = "Armor"
 horizontal_alignment = 1
 
-[node name="AccessorySlot" type="Button" parent="Window/Header" unique_id=78720316]
+[node name="AccessorySlot" type="Button" parent="Window/Header" unique_id=2101141546]
 layout_mode = 0
 offset_left = 648.0
 offset_right = 704.0
@@ -214,7 +214,7 @@ theme_type_variation = &"SlotButton"
 icon_alignment = 1
 expand_icon = true
 
-[node name="AccessorySlotLabel" type="Label" parent="Window/Header" unique_id=817345073]
+[node name="AccessorySlotLabel" type="Label" parent="Window/Header" unique_id=885432792]
 layout_mode = 0
 offset_left = 648.0
 offset_top = 60.0
@@ -225,7 +225,7 @@ theme_override_font_sizes/font_size = 11
 text = "Accessory"
 horizontal_alignment = 1
 
-[node name="Separator" type="ColorRect" parent="Window" unique_id=642496782]
+[node name="Separator" type="ColorRect" parent="Window" unique_id=646030345]
 layout_mode = 0
 offset_left = 20.0
 offset_top = 150.0
@@ -233,13 +233,13 @@ offset_right = 700.0
 offset_bottom = 151.0
 color = Color(0.7, 0.55, 0.2, 0.5)
 
-[node name="InventoryView" type="Control" parent="Window" unique_id=672222727]
+[node name="InventoryView" type="Control" parent="Window" unique_id=259038376]
 anchors_preset = 0
 offset_top = 158.0
 offset_right = 720.0
 offset_bottom = 518.0
 
-[node name="BackpackTitle" type="Label" parent="Window/InventoryView" unique_id=897007024]
+[node name="BackpackTitle" type="Label" parent="Window/InventoryView" unique_id=355116534]
 layout_mode = 0
 offset_left = 20.0
 offset_right = 20.0
@@ -247,7 +247,7 @@ theme_type_variation = &"PanelTitle"
 theme_override_font_sizes/font_size = 14
 text = "Backpack"
 
-[node name="CountLabel" type="Label" parent="Window/InventoryView" unique_id=411966659]
+[node name="CountLabel" type="Label" parent="Window/InventoryView" unique_id=1727967597]
 layout_mode = 0
 offset_left = 300.0
 offset_top = 3.0
@@ -257,7 +257,7 @@ theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 11
 horizontal_alignment = 2
 
-[node name="GridScroll" type="ScrollContainer" parent="Window/InventoryView" unique_id=779656122]
+[node name="GridScroll" type="ScrollContainer" parent="Window/InventoryView" unique_id=652130533]
 layout_mode = 0
 offset_left = 20.0
 offset_top = 24.0
@@ -265,20 +265,20 @@ offset_right = 444.0
 offset_bottom = 320.0
 horizontal_scroll_mode = 0
 
-[node name="Grid" type="GridContainer" parent="Window/InventoryView/GridScroll" unique_id=453383601]
+[node name="Grid" type="GridContainer" parent="Window/InventoryView/GridScroll" unique_id=1423313373]
 layout_mode = 2
 theme_override_constants/h_separation = 6
 theme_override_constants/v_separation = 6
 columns = 6
 
-[node name="DetailPane" type="Panel" parent="Window/InventoryView" unique_id=794510320]
+[node name="DetailPane" type="Panel" parent="Window/InventoryView" unique_id=1202125267]
 layout_mode = 0
 offset_left = 452.0
 offset_right = 700.0
 offset_bottom = 320.0
 theme_type_variation = &"DetailPanel"
 
-[node name="DetailIcon" type="TextureRect" parent="Window/InventoryView/DetailPane" unique_id=1522184158]
+[node name="DetailIcon" type="TextureRect" parent="Window/InventoryView/DetailPane" unique_id=1491506565]
 layout_mode = 0
 offset_left = 12.0
 offset_top = 12.0
@@ -287,7 +287,7 @@ offset_bottom = 60.0
 expand_mode = 1
 stretch_mode = 5
 
-[node name="DetailName" type="Label" parent="Window/InventoryView/DetailPane" unique_id=2112393523]
+[node name="DetailName" type="Label" parent="Window/InventoryView/DetailPane" unique_id=1141538782]
 layout_mode = 0
 offset_left = 68.0
 offset_top = 10.0
@@ -296,7 +296,7 @@ offset_bottom = 10.0
 theme_type_variation = &"PanelTitle"
 theme_override_font_sizes/font_size = 17
 
-[node name="DetailType" type="Label" parent="Window/InventoryView/DetailPane" unique_id=392020906]
+[node name="DetailType" type="Label" parent="Window/InventoryView/DetailPane" unique_id=1274976618]
 layout_mode = 0
 offset_left = 68.0
 offset_top = 34.0
@@ -306,7 +306,7 @@ theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 2
 
-[node name="DetailDesc" type="Label" parent="Window/InventoryView/DetailPane" unique_id=869989520]
+[node name="DetailDesc" type="Label" parent="Window/InventoryView/DetailPane" unique_id=1312444819]
 layout_mode = 0
 offset_left = 12.0
 offset_top = 72.0
@@ -315,7 +315,7 @@ offset_bottom = 168.0
 theme_override_font_sizes/font_size = 13
 autowrap_mode = 2
 
-[node name="DetailValue" type="Label" parent="Window/InventoryView/DetailPane" unique_id=923272018]
+[node name="DetailValue" type="Label" parent="Window/InventoryView/DetailPane" unique_id=2134996150]
 layout_mode = 0
 offset_left = 12.0
 offset_top = 174.0
@@ -324,7 +324,7 @@ offset_bottom = 174.0
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 12
 
-[node name="Actions" type="VBoxContainer" parent="Window/InventoryView/DetailPane" unique_id=625085390]
+[node name="Actions" type="VBoxContainer" parent="Window/InventoryView/DetailPane" unique_id=1109064942]
 layout_mode = 0
 offset_left = 12.0
 offset_top = 220.0
@@ -332,21 +332,21 @@ offset_right = 236.0
 offset_bottom = 308.0
 theme_override_constants/separation = 8
 
-[node name="PrimaryAction" type="Button" parent="Window/InventoryView/DetailPane/Actions" unique_id=546427008]
+[node name="PrimaryAction" type="Button" parent="Window/InventoryView/DetailPane/Actions" unique_id=1725163597]
 visible = false
 custom_minimum_size = Vector2(224, 40)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
 theme_override_font_sizes/font_size = 15
 
-[node name="SecondaryAction" type="Button" parent="Window/InventoryView/DetailPane/Actions" unique_id=12395137]
+[node name="SecondaryAction" type="Button" parent="Window/InventoryView/DetailPane/Actions" unique_id=141217892]
 visible = false
 custom_minimum_size = Vector2(224, 40)
 layout_mode = 2
 theme_type_variation = &"SecondaryButton"
 theme_override_font_sizes/font_size = 15
 
-[node name="HintLabel" type="Label" parent="Window/InventoryView" unique_id=563134238]
+[node name="HintLabel" type="Label" parent="Window/InventoryView" unique_id=391015390]
 layout_mode = 0
 offset_left = 20.0
 offset_top = 330.0
@@ -356,35 +356,35 @@ theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 12
 text = "Tap an item to see it. Gear shows Equip; potions show Use."
 
-[node name="CharacterView" type="Control" parent="Window" unique_id=1723737339]
+[node name="CharacterView" type="Control" parent="Window" unique_id=1158339780]
 visible = false
 anchors_preset = 0
 offset_top = 158.0
 offset_right = 720.0
 offset_bottom = 518.0
 
-[node name="StatsList" type="VBoxContainer" parent="Window/CharacterView" unique_id=70571015]
+[node name="StatsList" type="VBoxContainer" parent="Window/CharacterView" unique_id=1733273920]
 layout_mode = 0
 offset_left = 20.0
 offset_right = 220.0
 offset_bottom = 340.0
 theme_override_constants/separation = 4
 
-[node name="Divider1" type="ColorRect" parent="Window/CharacterView" unique_id=1715422810]
+[node name="Divider1" type="ColorRect" parent="Window/CharacterView" unique_id=654757962]
 layout_mode = 0
 offset_left = 236.0
 offset_right = 237.0
 offset_bottom = 342.0
 color = Color(0.7, 0.55, 0.2, 0.35)
 
-[node name="Divider2" type="ColorRect" parent="Window/CharacterView" unique_id=849685099]
+[node name="Divider2" type="ColorRect" parent="Window/CharacterView" unique_id=1382650708]
 layout_mode = 0
 offset_left = 582.0
 offset_right = 583.0
 offset_bottom = 342.0
 color = Color(0.7, 0.55, 0.2, 0.35)
 
-[node name="EquipmentTitle" type="Label" parent="Window/CharacterView" unique_id=771635782]
+[node name="EquipmentTitle" type="Label" parent="Window/CharacterView" unique_id=994556417]
 layout_mode = 0
 offset_left = 250.0
 offset_right = 550.0
@@ -394,7 +394,7 @@ theme_override_font_sizes/font_size = 14
 text = "Equipment"
 horizontal_alignment = 1
 
-[node name="Figure" type="TextureRect" parent="Window/CharacterView" unique_id=558084156]
+[node name="Figure" type="TextureRect" parent="Window/CharacterView" unique_id=854157160]
 texture_filter = 1
 layout_mode = 0
 offset_left = 300.0
@@ -404,7 +404,7 @@ offset_bottom = 252.0
 expand_mode = 1
 stretch_mode = 5
 
-[node name="FigureShadow" type="ColorRect" parent="Window/CharacterView" unique_id=789979724]
+[node name="FigureShadow" type="ColorRect" parent="Window/CharacterView" unique_id=1090462165]
 layout_mode = 0
 offset_left = 352.0
 offset_top = 248.0
@@ -412,22 +412,12 @@ offset_right = 452.0
 offset_bottom = 256.0
 color = Color(0, 0, 0, 0.35)
 
-[node name="WeaponLine" type="Line2D" parent="Window/CharacterView" unique_id=574233377]
+[node name="WeaponLine" type="Line2D" parent="Window/CharacterView" unique_id=1115854299]
 points = PackedVector2Array(316, 152, 348, 150)
 width = 2.0
 default_color = Color(0.7, 0.55, 0.2, 0.45)
 
-[node name="ArmorLine" type="Line2D" parent="Window/CharacterView" unique_id=1863881138]
-points = PackedVector2Array(500, 140, 452, 142)
-width = 2.0
-default_color = Color(0.7, 0.55, 0.2, 0.45)
-
-[node name="AccessoryLine" type="Line2D" parent="Window/CharacterView" unique_id=1215764221]
-points = PackedVector2Array(500, 50, 420, 84)
-width = 2.0
-default_color = Color(0.7, 0.55, 0.2, 0.45)
-
-[node name="DollWeaponSlot" type="Button" parent="Window/CharacterView" unique_id=606221769]
+[node name="DollWeaponSlot" type="Button" parent="Window/CharacterView" unique_id=1457538779]
 layout_mode = 0
 offset_left = 250.0
 offset_top = 120.0
@@ -437,7 +427,7 @@ theme_type_variation = &"SlotButton"
 icon_alignment = 1
 expand_icon = true
 
-[node name="DollWeaponSlotLabel" type="Label" parent="Window/CharacterView" unique_id=545438530]
+[node name="DollWeaponSlotLabel" type="Label" parent="Window/CharacterView" unique_id=657900577]
 layout_mode = 0
 offset_left = 250.0
 offset_top = 186.0
@@ -448,7 +438,12 @@ theme_override_font_sizes/font_size = 11
 text = "Weapon"
 horizontal_alignment = 1
 
-[node name="DollArmorSlot" type="Button" parent="Window/CharacterView" unique_id=441401116]
+[node name="ArmorLine" type="Line2D" parent="Window/CharacterView" unique_id=1745603329]
+points = PackedVector2Array(500, 140, 452, 142)
+width = 2.0
+default_color = Color(0.7, 0.55, 0.2, 0.45)
+
+[node name="DollArmorSlot" type="Button" parent="Window/CharacterView" unique_id=1195790678]
 layout_mode = 0
 offset_left = 504.0
 offset_top = 108.0
@@ -458,7 +453,7 @@ theme_type_variation = &"SlotButton"
 icon_alignment = 1
 expand_icon = true
 
-[node name="DollArmorSlotLabel" type="Label" parent="Window/CharacterView" unique_id=2002091721]
+[node name="DollArmorSlotLabel" type="Label" parent="Window/CharacterView" unique_id=145238018]
 layout_mode = 0
 offset_left = 504.0
 offset_top = 174.0
@@ -469,7 +464,12 @@ theme_override_font_sizes/font_size = 11
 text = "Armor"
 horizontal_alignment = 1
 
-[node name="DollAccessorySlot" type="Button" parent="Window/CharacterView" unique_id=1941517467]
+[node name="AccessoryLine" type="Line2D" parent="Window/CharacterView" unique_id=1019457048]
+points = PackedVector2Array(500, 46, 420, 84)
+width = 2.0
+default_color = Color(0.7, 0.55, 0.2, 0.45)
+
+[node name="DollAccessorySlot" type="Button" parent="Window/CharacterView" unique_id=70977009]
 layout_mode = 0
 offset_left = 504.0
 offset_top = 14.0
@@ -479,7 +479,7 @@ theme_type_variation = &"SlotButton"
 icon_alignment = 1
 expand_icon = true
 
-[node name="DollAccessorySlotLabel" type="Label" parent="Window/CharacterView" unique_id=274692723]
+[node name="DollAccessorySlotLabel" type="Label" parent="Window/CharacterView" unique_id=1598169389]
 layout_mode = 0
 offset_left = 504.0
 offset_top = 80.0
@@ -490,7 +490,7 @@ theme_override_font_sizes/font_size = 11
 text = "Accessory"
 horizontal_alignment = 1
 
-[node name="DollHint" type="Label" parent="Window/CharacterView" unique_id=1971691477]
+[node name="DollHint" type="Label" parent="Window/CharacterView" unique_id=267641097]
 layout_mode = 0
 offset_left = 250.0
 offset_top = 262.0
@@ -501,14 +501,14 @@ theme_override_font_sizes/font_size = 12
 text = "Tap a slot to see what fits"
 horizontal_alignment = 1
 
-[node name="SlotPane" type="Panel" parent="Window/CharacterView" unique_id=731518265]
+[node name="SlotPane" type="Panel" parent="Window/CharacterView" unique_id=476325710]
 layout_mode = 0
 offset_left = 594.0
 offset_right = 700.0
 offset_bottom = 342.0
 theme_type_variation = &"DetailPanel"
 
-[node name="SlotPaneTitle" type="Label" parent="Window/CharacterView/SlotPane" unique_id=1743737290]
+[node name="SlotPaneTitle" type="Label" parent="Window/CharacterView/SlotPane" unique_id=1528719660]
 layout_mode = 0
 offset_top = 6.0
 offset_right = 106.0
@@ -517,7 +517,7 @@ theme_type_variation = &"PanelTitle"
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 
-[node name="SlotScroll" type="ScrollContainer" parent="Window/CharacterView/SlotPane" unique_id=569776993]
+[node name="SlotScroll" type="ScrollContainer" parent="Window/CharacterView/SlotPane" unique_id=1855857428]
 layout_mode = 0
 offset_left = 6.0
 offset_top = 30.0
@@ -525,6 +525,6 @@ offset_right = 100.0
 offset_bottom = 336.0
 horizontal_scroll_mode = 0
 
-[node name="SlotList" type="VBoxContainer" parent="Window/CharacterView/SlotPane/SlotScroll" unique_id=300741087]
+[node name="SlotList" type="VBoxContainer" parent="Window/CharacterView/SlotPane/SlotScroll" unique_id=1576002126]
 layout_mode = 2
 theme_override_constants/separation = 4

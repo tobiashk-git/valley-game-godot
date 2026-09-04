@@ -118,17 +118,21 @@ func _build() -> void:
 	_label(header, "StatsLabel", "", Vector2(350, 45), 14)
 	_label(header, "BonusLabel", "", Vector2(350, 64), 12, &"DimLabel")
 
-	var x := 520.0
-	for entry in [["WeaponSlot", "Weapon"], ["ArmorSlot", "Armor"], ["AccessorySlot", "Accessory"]]:
+	# One header slot per Character.SLOTS entry, right-aligned to x=712 so a
+	# new slot grows the row leftwards (six fit before it meets the bars).
+	var slots: Dictionary = root.get_node("Character").SLOTS
+	var x := 712.0 - slots.size() * 64.0
+	for slot_id in slots:
+		var node_name: String = slot_id.to_pascal_case() + "Slot"
 		var slot := Button.new()
-		slot.name = entry[0]
+		slot.name = node_name
 		slot.position = Vector2(x, 0)
 		slot.size = Vector2(56, 56)
 		slot.theme_type_variation = &"SlotButton"
 		slot.expand_icon = true
 		slot.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		header.add_child(slot)
-		var l := _label(header, entry[0] + "Label", entry[1], Vector2(x, 60), 11, &"DimLabel")
+		var l := _label(header, node_name + "Label", slots[slot_id].label, Vector2(x, 60), 11, &"DimLabel")
 		l.size = Vector2(56, 14)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		x += 64
@@ -246,27 +250,31 @@ func _build() -> void:
 	shadow.size = Vector2(100, 8)
 	shadow.color = Color(0, 0, 0, 0.35)
 	chr.add_child(shadow)
-	# Slot -> figure connector lines, then the slots themselves + labels.
-	for entry in [["WeaponLine", Vector2(316, 152), Vector2(348, 150)], ["ArmorLine", Vector2(500, 140), Vector2(452, 142)], ["AccessoryLine", Vector2(500, 50), Vector2(420, 84)]]:
+	# One doll slot (+ label + connector line to the figure) per
+	# Character.SLOTS entry, at the table's `doll` position; the line leaves
+	# the slot's inner edge (right edge for the left column, left edge for
+	# the right column) and ends at the table's `line_to`. Both columns keep
+	# the same 14px gap from their divider (236 | 250..314 ... 504..568 | 582).
+	for slot_id in slots:
+		var def: Dictionary = slots[slot_id]
+		var pos: Vector2 = def.doll
+		var pascal: String = slot_id.to_pascal_case()
 		var line := Line2D.new()
-		line.name = entry[0]
-		line.points = PackedVector2Array([entry[1], entry[2]])
+		line.name = pascal + "Line"
+		var from: Vector2 = pos + (Vector2(66, 32) if pos.x < 400.0 else Vector2(-4, 32))
+		line.points = PackedVector2Array([from, def.line_to])
 		line.width = 2.0
 		line.default_color = Color(0.7, 0.55, 0.2, 0.45)
 		chr.add_child(line)
-	# Accessory sits high (neck), armour low (torso) with room for the
-	# accessory's label between them. Both columns keep the same 14px gap
-	# from their divider (236 | 250..314 ... 504..568 | 582).
-	for entry in [["DollWeaponSlot", "Weapon", Vector2(250, 120)], ["DollArmorSlot", "Armor", Vector2(504, 108)], ["DollAccessorySlot", "Accessory", Vector2(504, 14)]]:
 		var slot := Button.new()
-		slot.name = entry[0]
-		slot.position = entry[2]
+		slot.name = "Doll" + pascal + "Slot"
+		slot.position = pos
 		slot.size = Vector2(64, 64)
 		slot.theme_type_variation = &"SlotButton"
 		slot.expand_icon = true
 		slot.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		chr.add_child(slot)
-		var l := _label(chr, entry[0] + "Label", entry[1], entry[2] + Vector2(0, 66), 11, &"DimLabel")
+		var l := _label(chr, "Doll" + pascal + "SlotLabel", def.label, pos + Vector2(0, 66), 11, &"DimLabel")
 		l.size = Vector2(64, 14)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var hint := _label(chr, "DollHint", "Tap a slot to see what fits", Vector2(250, 262), 12, &"DimLabel")

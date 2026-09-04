@@ -151,26 +151,17 @@ func start_boss_fight(boss_id: String) -> void:
 	battle_log = ["%s blocks your path!" % def.name]
 	changed.emit()
 
+# Gear contributions come from Character.SLOTS (the one slot table) - attack
+# and defence are summed over every slot that feeds them, bonuses take the
+# best value - so a new slot type needs no change here.
 func _weapon_attack_bonus() -> int:
-	var weapon_id: String = Character.equipment.weapon
-	if weapon_id == "":
-		return 0
-	return Items.ITEMS.get(weapon_id, {}).get("attack", 0)
+	return Character.gear_total("attack")
 
 func _player_defense_bonus() -> int:
-	var armor_id: String = Character.equipment.armor
-	if armor_id == "":
-		return 0
-	return Items.ITEMS.get(armor_id, {}).get("defense", 0)
+	return Character.gear_total("defense")
 
-# Generic accessory-bonus reader (parallel to _weapon_attack_bonus): reads
-# the equipped accessory's `bonus` dict by key. Generic-by-field rather than
-# a single hardcoded stat, so future accessories plug in with no code change.
 func _accessory_bonus(field: String) -> float:
-	var accessory_id: String = Character.equipment.accessory
-	if accessory_id == "":
-		return 0.0
-	return Items.ITEMS.get(accessory_id, {}).get("bonus", {}).get(field, 0.0)
+	return Character.gear_bonus(field)
 
 func _physical_damage(power: int, defense: int) -> int:
 	var base: float = power - defense

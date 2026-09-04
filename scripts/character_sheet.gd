@@ -14,7 +14,8 @@ extends CanvasLayer
 # contents and stats list are built here at runtime.
 
 const SLOT_SIZE := 64
-const EQUIP_SLOTS := ["weapon", "armor", "accessory"]
+# Equipment slots come from Character.SLOTS (the one slot table); the
+# header/doll slot nodes are named <PascalCaseSlotId>Slot by the builder.
 const TAB_BUTTONS := {"inventory": "InventoryTab", "character": "CharacterTab", "crafting": "CraftingTab", "journal": "JournalTab", "map": "MapTab"}
 # Tabs that (for now) close this window and open the old standalone panel.
 const EXTERNAL_TABS := {"crafting": "CraftingPanel", "journal": "QuestPanel", "map": "WorldMapPanel"}
@@ -52,8 +53,9 @@ const EXTERNAL_TABS := {"crafting": "CraftingPanel", "journal": "QuestPanel", "m
 const PORTRAIT_ILLUSTRATION := "res://assets/oliver_portrait.png"
 
 var current_tab := "inventory"
-# Which fitting slot the paper doll's right-hand pane is showing.
-var doll_slot := "weapon"
+# Which fitting slot the paper doll's right-hand pane is showing (first
+# slot in the table by default).
+var doll_slot := ""
 var selected_item := ""
 # Equipment slot the selection came from ("" = backpack). Lets the pane
 # offer Unequip for a worn item and Equip for a carried one.
@@ -74,17 +76,27 @@ func _ready() -> void:
 		figure.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	else:
 		figure.texture = atlas
-	for slot in EQUIP_SLOTS:
-		$Window/CharacterView.get_node("Doll%sSlot" % slot.capitalize()).pressed.connect(_on_doll_slot.bind(slot))
+	doll_slot = Character.SLOTS.keys()[0]
+	for slot in Character.SLOTS:
+		_doll_slot_button(slot).pressed.connect(_on_doll_slot.bind(slot))
 	for tab in TAB_BUTTONS:
 		tabs.get_node(TAB_BUTTONS[tab]).pressed.connect(_on_tab_pressed.bind(tab))
 	close_btn.pressed.connect(close)
-	for slot in EQUIP_SLOTS:
-		$Window/Header.get_node(slot.capitalize() + "Slot").pressed.connect(select_equipped.bind(slot))
+	for slot in Character.SLOTS:
+		_header_slot_button(slot).pressed.connect(select_equipped.bind(slot))
 	primary_action.pressed.connect(_on_primary_action)
 	# Later autoloads (Inventory is earlier; Character/Combat aren't) - see
 	# hud.gd for the same deferral.
 	_connect_signals.call_deferred()
+
+func _header_slot_button(slot: String) -> Button:
+	return $Window/Header.get_node(slot.to_pascal_case() + "Slot")
+
+func _header_slot_label(slot: String) -> Label:
+	return $Window/Header.get_node(slot.to_pascal_case() + "SlotLabel")
+
+func _doll_slot_button(slot: String) -> Button:
+	return $Window/CharacterView.get_node("Doll%sSlot" % slot.to_pascal_case())
 
 func _connect_signals() -> void:
 	Inventory.changed.connect(_refresh)
@@ -143,9 +155,9 @@ func _refresh() -> void:
 	character_view.visible = current_tab == "character"
 	# The paper doll shows the equipment itself, so the header's three slot
 	# buttons would be duplicates on that tab.
-	for slot in EQUIP_SLOTS:
-		$Window/Header.get_node(slot.capitalize() + "Slot").visible = current_tab != "character"
-		$Window/Header.get_node(slot.capitalize() + "SlotLabel").visible = current_tab != "character"
+	for slot in Character.SLOTS:
+		_header_slot_button(slot).visible = current_tab != "character"
+		_header_slot_label(slot).visible = current_tab != "character"
 	_refresh_header()
 	if current_tab == "inventory":
 		_refresh_grid()
@@ -163,21 +175,15 @@ func _refresh_header() -> void:
 	mp_bar.max_value = stats.max_mp
 	mp_bar.value = stats.mp
 	mp_label.text = "MP %d / %d" % [stats.mp, stats.max_mp]
-	stats_label.text = "STR %d   AGI %d   DEF %d" % [stats.strength, stats.agility, _gear_stat("armor", "defense")]
-	var weapon: String = Character.equipment.weapon
-	bonus_label.text = "ATK +%d (%s)" % [_gear_stat("weapon", "attack"), Items.get_item_name(weapon)] if weapon != "" else "No weapon equipped"
-	for slot in EQUIP_SLOTS:
-		var btn: Button = $Window/Header.get_node(slot.capitalize() + "Slot")
+	stats_label.text = "STR %d   AGI %d   DEF %d" % [stats.strength, stats.agility, Character.gear_total("defense")]
+	var attack_names: Array = Character.gear_names("attack")
+	bonus_label.text = "ATK +%d (%s)" % [Character.gear_total("attack"), ", ".join(attack_names)] if not attack_names.is_empty() else "No weapon equipped"
+	for slot in Character.SLOTS:
+		var btn: Button = _header_slot_button(slot)
 		var item_id: String = Character.equipment[slot]
 		btn.icon = Items.get_item_icon(item_id) if item_id != "" else null
-		btn.tooltip_text = Items.get_item_name(item_id) if item_id != "" else "No %s equipped" % slot
+		btn.tooltip_text = Items.get_item_name(item_id) if item_id != "" else "No %s equipped" % Character.SLOTS[slot].label.to_lower()
 		btn.theme_type_variation = &"SlotButtonSelected" if selected_slot == slot and item_id != "" and selected_item == item_id else &"SlotButton"
-
-func _gear_stat(slot: String, key: String) -> int:
-	var item_id: String = Character.equipment[slot]
-	if item_id == "":
-		return 0
-	return int(Items.ITEMS[item_id].get(key, 0))
 
 func _refresh_grid() -> void:
 	# Hide + queue_free (not remove_child): a refresh can run from inside a
@@ -235,10 +241,11 @@ func _refresh_detail() -> void:
 	detail_name.position.x = 68.0 if selected_item != "" else 12.0
 	detail_type.position.x = detail_name.position.x
 	if selected_item == "":
+		var slot_word: String = Character.SLOTS[selected_slot].label.to_lower() if selected_slot != "" else ""
 		detail_icon.texture = null
-		detail_name.text = "No %s equipped" % selected_slot if selected_slot != "" else "Select an item"
+		detail_name.text = "No %s equipped" % slot_word if selected_slot != "" else "Select an item"
 		detail_type.text = ""
-		detail_desc.text = "Tap a %s in the backpack and choose Equip." % selected_slot if selected_slot != "" else ""
+		detail_desc.text = "Tap a %s in the backpack and choose Equip." % slot_word if selected_slot != "" else ""
 		detail_value.text = ""
 		return
 	var def: Dictionary = Items.ITEMS[selected_item]
@@ -247,7 +254,7 @@ func _refresh_detail() -> void:
 	detail_name.text = def.name
 	if Items.is_equippable(selected_item):
 		var stat_text: String = Items.describe_stats(selected_item)
-		detail_type.text = "%s  -  %s%s" % [def.slot.capitalize(), stat_text, "  -  equipped" if selected_slot != "" else ""]
+		detail_type.text = "%s  -  %s%s" % [Character.SLOTS[def.slot].label, stat_text, "  -  equipped" if selected_slot != "" else ""]
 	elif Items.is_usable(selected_item):
 		detail_type.text = "Consumable  -  you have %d" % owned
 	elif selected_item == "magic_crystal":
@@ -309,11 +316,9 @@ func _refresh_character() -> void:
 	_stats_title("Core stats")
 	_stat_row("Health", "%d / %d" % [stats.hp, stats.max_hp])
 	_stat_row("Mana", "%d / %d" % [stats.mp, stats.max_mp])
-	_stat_row("Attack", "+%d" % _gear_stat("weapon", "attack"))
-	_stat_row("Defense", str(_gear_stat("armor", "defense")))
-	var accessory: String = Character.equipment.accessory
-	var resist: float = Items.ITEMS[accessory].get("bonus", {}).get("status_resistance", 0.0) if accessory != "" else 0.0
-	_stat_row("Status resist", "%d%%" % int(round(resist * 100.0)))
+	_stat_row("Attack", "+%d" % Character.gear_total("attack"))
+	_stat_row("Defense", str(Character.gear_total("defense")))
+	_stat_row("Status resist", "%d%%" % int(round(Character.gear_bonus("status_resistance") * 100.0)))
 	_stats_title("Active effects")
 	if Combat.player_status.is_empty():
 		_stats_line("None", true)
@@ -322,15 +327,15 @@ func _refresh_character() -> void:
 			_stat_row(Statuses.STATUSES[status_id].name, "%d turns" % Combat.player_status[status_id].turns_left)
 
 	# --- Centre: the doll's slots ---
-	for slot in EQUIP_SLOTS:
-		var btn: Button = $Window/CharacterView.get_node("Doll%sSlot" % slot.capitalize())
+	for slot in Character.SLOTS:
+		var btn: Button = _doll_slot_button(slot)
 		var item_id: String = Character.equipment[slot]
 		btn.icon = Items.get_item_icon(item_id) if item_id != "" else null
-		btn.tooltip_text = Items.get_item_name(item_id) if item_id != "" else "No %s equipped" % slot
+		btn.tooltip_text = Items.get_item_name(item_id) if item_id != "" else "No %s equipped" % Character.SLOTS[slot].label.to_lower()
 		btn.theme_type_variation = &"SlotButtonSelected" if slot == doll_slot else &"SlotButton"
 
 	# --- Right: what's worn in the tapped slot, and what carried gear fits ---
-	slot_pane_title.text = doll_slot.capitalize()
+	slot_pane_title.text = Character.SLOTS[doll_slot].label
 	_clear(slot_list)
 	_pane_label("Worn", true)
 	var worn: String = Character.equipment[doll_slot]

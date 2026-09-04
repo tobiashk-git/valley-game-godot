@@ -51,6 +51,22 @@ func _initialize() -> void:
 	print("Header location line shows the biome: ", sheet.location_label.text.ends_with("Golden Plains"))
 	print("Header stats line: ", sheet.stats_label.text == "STR %d   AGI %d   DEF 0" % [stats.strength, stats.agility])
 	print("Empty equipment slots have no icon: ", sheet.get_node("Window/Header/WeaponSlot").icon == null and sheet.get_node("Window/Header/ArmorSlot").icon == null)
+	# --- Character.SLOTS drives everything: one header slot + one doll slot
+	# (with label and connector line) per table entry, the equipment dict has
+	# exactly those keys, and combat's totals come from the same table. ---
+	var table_driven := true
+	for slot_id in character.SLOTS:
+		var pascal: String = slot_id.to_pascal_case()
+		var header_ok: bool = sheet.has_node("Window/Header/%sSlot" % pascal) and sheet.get_node("Window/Header/%sSlotLabel" % pascal).text == character.SLOTS[slot_id].label
+		var doll_ok: bool = sheet.has_node("Window/CharacterView/Doll%sSlot" % pascal) and sheet.has_node("Window/CharacterView/%sLine" % pascal) and sheet.get_node("Window/CharacterView/Doll%sSlotLabel" % pascal).text == character.SLOTS[slot_id].label
+		if not (header_ok and doll_ok and character.equipment.has(slot_id)):
+			table_driven = false
+	var header_slot_count := 0
+	for child in sheet.get_node("Window/Header").get_children():
+		if child is Button:
+			header_slot_count += 1
+	print("Character.SLOTS drives the header row, the doll and the equipment dict (", character.SLOTS.size(), " slots): ", table_driven and header_slot_count == character.SLOTS.size() and character.equipment.size() == character.SLOTS.size())
+	print("Gear totals sum by stat across the slot table (nothing worn -> 0/0/0%): ", character.gear_total("attack") == 0 and character.gear_total("defense") == 0 and character.gear_bonus("status_resistance") == 0.0)
 
 	# --- Grid. ---
 	var carried := 0
@@ -97,6 +113,7 @@ func _initialize() -> void:
 	sheet.primary_action.pressed.emit()
 	await process_frame
 	print("Armor equips and DEF updates in the header: ", character.equipment.armor == "leather_armor" and sheet.stats_label.text.ends_with("DEF 3"))
+	print("Combat reads the same totals (attack +2, defence 3): ", combat._weapon_attack_bonus() == 2 and combat._player_defense_bonus() == 3 and character.gear_names("attack") == ["Wooden Pickaxe"])
 	root.get_texture().get_image().save_png("res://verify_sheet_equipped.png")
 	print("Saved verify_sheet_equipped.png")
 	sheet.get_node("Window/Header/WeaponSlot").pressed.emit()
