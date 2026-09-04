@@ -100,6 +100,8 @@ func _add_submenu_row(text: String, disabled: bool, on_pick: Callable, icon: Tex
 	var btn := Button.new()
 	btn.text = text
 	btn.icon = icon
+	# Icons are 64px art now; keep the submenu rows at their old height.
+	btn.add_theme_constant_override("icon_max_width", 24)
 	btn.disabled = disabled
 	btn.pressed.connect(on_pick)
 	submenu.add_child(btn)

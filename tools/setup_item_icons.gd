@@ -1,9 +1,8 @@
 extends SceneTree
-# Generates a small icon PNG per item/spell under res://assets/icons/,
-# replacing the emoji that couldn't render on Web export. Simple geometric
-# shapes, not full pixel art - a placeholder pass (same spirit as the touch
-# controls' circle textures) rather than the LPC sprite pipeline's polish;
-# real icon art is a separate later effort if wanted.
+# Generates a PLACEHOLDER icon PNG per item/spell under res://assets/icons/
+# for any id that has no art yet (simple geometric shapes). The shipped
+# icons are real keyed pixel art from Leonardo - this never overwrites them
+# (see _save()).
 #
 # Saved as real files (not in-memory ImageTexture like touch_controls.gd's
 # icons) because these need to be load()-able by resource path from BBCode
@@ -67,11 +66,20 @@ func _bottle(color: Color) -> Image:
 	_fill_circle(img, 9, 10, 1.3, Color(1, 1, 1, 0.5)) # highlight
 	return img
 
+# Placeholder only: NEVER overwrites an existing icon. Since the Leonardo
+# icon pass (2026-09-04) every item/spell has real keyed pixel art in
+# res://assets/icons/ (64x64, see the project memory for the prompt and the
+# keying pipeline); this generator only fills in a shape for a NEW item id
+# that has no art yet, so re-running it is always safe.
 func _save(img: Image, name: String) -> void:
 	var dir := DirAccess.open("res://assets")
 	if not dir.dir_exists("icons"):
 		dir.make_dir("icons")
-	img.save_png("res://assets/icons/%s.png" % name)
+	var path := "res://assets/icons/%s.png" % name
+	if FileAccess.file_exists(path):
+		print("  kept existing art: ", name)
+		return
+	img.save_png(path)
 
 func _build_items() -> void:
 	# wood: log cross-section
