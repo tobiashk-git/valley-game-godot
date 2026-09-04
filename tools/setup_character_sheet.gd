@@ -247,7 +247,7 @@ func _build() -> void:
 	shadow.color = Color(0, 0, 0, 0.35)
 	chr.add_child(shadow)
 	# Slot -> figure connector lines, then the slots themselves + labels.
-	for entry in [["WeaponLine", Vector2(300, 152), Vector2(340, 150)], ["ArmorLine", Vector2(500, 140), Vector2(452, 142)], ["AccessoryLine", Vector2(500, 50), Vector2(420, 84)]]:
+	for entry in [["WeaponLine", Vector2(316, 152), Vector2(348, 150)], ["ArmorLine", Vector2(500, 140), Vector2(452, 142)], ["AccessoryLine", Vector2(500, 50), Vector2(420, 84)]]:
 		var line := Line2D.new()
 		line.name = entry[0]
 		line.points = PackedVector2Array([entry[1], entry[2]])
@@ -255,8 +255,9 @@ func _build() -> void:
 		line.default_color = Color(0.7, 0.55, 0.2, 0.45)
 		chr.add_child(line)
 	# Accessory sits high (neck), armour low (torso) with room for the
-	# accessory's label between them.
-	for entry in [["DollWeaponSlot", "Weapon", Vector2(238, 120)], ["DollArmorSlot", "Armor", Vector2(504, 108)], ["DollAccessorySlot", "Accessory", Vector2(504, 14)]]:
+	# accessory's label between them. Both columns keep the same 14px gap
+	# from their divider (236 | 250..314 ... 504..568 | 582).
+	for entry in [["DollWeaponSlot", "Weapon", Vector2(250, 120)], ["DollArmorSlot", "Armor", Vector2(504, 108)], ["DollAccessorySlot", "Accessory", Vector2(504, 14)]]:
 		var slot := Button.new()
 		slot.name = entry[0]
 		slot.position = entry[2]
