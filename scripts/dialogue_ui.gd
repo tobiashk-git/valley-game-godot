@@ -7,6 +7,7 @@ extends CanvasLayer
 # picking no action), so it's never a dead end.
 
 @onready var panel: Panel = $Panel
+@onready var margin: MarginContainer = $Panel/Margin
 @onready var name_label: Label = $Panel/Margin/VBox/NameLabel
 @onready var text_label: RichTextLabel = $Panel/Margin/VBox/TextLabel
 @onready var hint_label: Label = $Panel/Margin/VBox/HintLabel
@@ -34,9 +35,19 @@ func show_dialogue(npc_name: String, text: String, actions: Array = []) -> void:
 		child.queue_free()
 	hint_label.visible = actions.is_empty()
 	actions_row.visible = not actions.is_empty()
-	for action in actions:
+	# Big, clearly-styled choices in opposite corners (user feedback: the
+	# old default buttons were small and side by side): the first choice
+	# (Accept / Turn In) is the gold primary at the left edge, the other
+	# (Not now / Not yet) a secondary at the right edge - each takes half
+	# the row and aligns within its half.
+	for i in range(actions.size()):
+		var action: Dictionary = actions[i]
 		var btn := Button.new()
 		btn.text = action.label
+		btn.custom_minimum_size = Vector2(150, 44)
+		btn.add_theme_font_size_override("font_size", 17)
+		btn.theme_type_variation = &"PrimaryButton" if i == 0 else &"SecondaryButton"
+		btn.size_flags_horizontal = (Control.SIZE_EXPAND | Control.SIZE_SHRINK_BEGIN) if i == 0 else (Control.SIZE_EXPAND | Control.SIZE_SHRINK_END)
 		btn.pressed.connect(_on_action_pressed.bind(action.callback))
 		actions_row.add_child(btn)
 
@@ -49,7 +60,15 @@ func hide_dialogue() -> void:
 	panel.visible = false
 
 func _process(_delta: float) -> void:
-	if panel.visible and Input.is_action_just_pressed("interact"):
+	if not panel.visible:
+		return
+	# Fit the box to its text every frame (the wrapped text height is only
+	# known after layout) - a long quest offer on a narrow phone box used to
+	# run out of the bottom of the fixed-height panel.
+	var wanted: float = margin.get_combined_minimum_size().y + 16.0
+	if absf(panel.size.y - wanted) > 0.5:
+		panel.offset_bottom = panel.offset_top + wanted
+	if Input.is_action_just_pressed("interact"):
 		if _ignore_close_this_frame:
 			_ignore_close_this_frame = false
 		else:

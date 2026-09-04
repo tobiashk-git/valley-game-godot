@@ -54,6 +54,12 @@ func _initialize() -> void:
 	print("Offer text shown: ", dialogue_ui.text_label.text.begins_with("Traveler!"))
 	var actions: Array = dialogue_ui.actions_row.get_children()
 	print("Offer has 2 buttons: ", actions.size() == 2)
+	var row_rect: Rect2 = dialogue_ui.actions_row.get_global_rect()
+	var accept_rect: Rect2 = (actions[0] as Button).get_global_rect()
+	var decline_rect: Rect2 = (actions[1] as Button).get_global_rect()
+	print("Accept is the big gold button at the left edge, Not now the secondary at the right edge: ", (actions[0] as Button).theme_type_variation == &"PrimaryButton" and (actions[1] as Button).theme_type_variation == &"SecondaryButton" and accept_rect.size.y >= 44.0 and absf(accept_rect.position.x - row_rect.position.x) < 1.0 and absf(decline_rect.end.x - row_rect.end.x) < 1.0 and decline_rect.position.x - accept_rect.end.x > 40.0)
+	var panel_rect: Rect2 = dialogue_ui.panel.get_global_rect()
+	print("Dialogue box fits its text and buttons: ", dialogue_ui.text_label.get_global_rect().end.y <= panel_rect.end.y and decline_rect.end.y <= panel_rect.end.y - 4.0)
 	print("Quest not yet accepted: ", not quests.quest_state.has("gather_wood"))
 	root.get_texture().get_image().save_png("res://verify_quest_offer.png")
 

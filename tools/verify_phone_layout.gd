@@ -177,6 +177,21 @@ func _initialize() -> void:
 	await process_frame
 	print("Short phone, Journal: pane inside the window: ", sheet.journal_view.detail_pane.get_global_rect().end.y <= win_bottom)
 	sheet.close()
+	# The tutorial offer (the longest dialogue) on the short phone box: the
+	# box grows to hold the text and the two choices, and the choices sit in
+	# opposite corners.
+	var q: Node = root.get_node("Quests")
+	q.quest_state.erase("meet_villagers")
+	q.talk_to_giver("meet_villagers")
+	await process_frame
+	await process_frame
+	var dlg: Rect2 = dialogue.panel.get_global_rect()
+	var choice_a: Button = dialogue.actions_row.get_child(0)
+	var choice_b: Button = dialogue.actions_row.get_child(1)
+	print("Short phone, quest offer: box holds all the text and both choices, Accept left / Not now right: ", dialogue.text_label.get_global_rect().end.y <= dlg.end.y and choice_b.get_global_rect().end.y <= dlg.end.y and choice_a.get_global_rect().position.x < choice_b.get_global_rect().position.x - 60.0 and dlg.end.y <= 660.0, " text_end=", dialogue.text_label.get_global_rect().end.y, " box_end=", dlg.end.y)
+	root.get_texture().get_image().save_png("res://verify_phone_short_offer.png")
+	print("Saved verify_phone_short_offer.png")
+	dialogue.hide_dialogue()
 
 	# --- Back to desktop. ---
 	root.size = Vector2i(800, 600)

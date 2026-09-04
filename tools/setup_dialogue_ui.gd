@@ -33,8 +33,8 @@ func _initialize() -> void:
 	var margin := MarginContainer.new()
 	margin.name = "Margin"
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 8)
-	margin.add_theme_constant_override("margin_top", 8)
+	for side in ["left", "top", "right", "bottom"]:
+		margin.add_theme_constant_override("margin_%s" % side, 12)
 	panel.add_child(margin)
 	margin.owner = layer
 
@@ -74,7 +74,8 @@ func _initialize() -> void:
 	# empty and hidden for a plain greeting (HintLabel shows instead).
 	var actions_row := HBoxContainer.new()
 	actions_row.name = "ActionsRow"
-	actions_row.add_theme_constant_override("separation", 8)
+	actions_row.add_theme_constant_override("separation", 12)
+	actions_row.custom_minimum_size = Vector2(0, 52)
 	actions_row.visible = false
 	vbox.add_child(actions_row)
 	actions_row.owner = layer
