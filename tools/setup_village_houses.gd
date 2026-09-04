@@ -71,17 +71,18 @@ func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: St
 func _initialize() -> void:
 	print("=== Village houses setup starting ===")
 
+	# The Elder himself stands OUTSIDE on the village square now (see
+	# overworld.gd) so the tutorial quest is collected in person; his house
+	# is just his house.
 	_build(
-		"ElderHouse", true, "res://assets/elder.png", "Village Elder",
-		"", # superseded by npc_quest_id - Quests.gd's dialogue.offer is the elder's first line now
+		"ElderHouse", false, "", "",
+		"",
 		[
 			{"kind": "Bed", "x": 2, "y": 4},
 			{"kind": "Bookshelf", "x": 6, "y": 2},
 		],
 		[Vector2i(0, 3), Vector2i(0, 4)],
-		World.ELDER_HOUSE_ENTRANCE,
-		"gather_wood", false, "village_elder",
-		"Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler."
+		World.ELDER_HOUSE_ENTRANCE
 	)
 
 	_build(
@@ -94,7 +95,7 @@ func _initialize() -> void:
 		],
 		[Vector2i(8, 1), Vector2i(8, 2)],
 		World.TRADER_HOUSE_ENTRANCE,
-		"", true, "village_trader",
+		"open_ancient_barrow", true, "village_trader", # quest first, shop once it's done (npc.gd)
 		"Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell."
 	)
 

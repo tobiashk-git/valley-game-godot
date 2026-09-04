@@ -40,8 +40,19 @@ func _initialize() -> void:
 	print("Spawn tile: ", spawn_tile)
 	print("Spawn is inside VILLAGE_BOUNDS: ", spawn_tile.x >= world.VILLAGE_BOUNDS.x0 and spawn_tile.x <= world.VILLAGE_BOUNDS.x1 and spawn_tile.y >= world.VILLAGE_BOUNDS.y0 and spawn_tile.y <= world.VILLAGE_BOUNDS.y1)
 
-	print("meet_villagers pre-accepted at boot: ", quests.quest_state.get("meet_villagers", "") == "accepted")
-	print("Journal progress at boot: ", quests.objective_progress_text("meet_villagers"))
+	print("Nothing accepted or tracked at boot (the Elder hands out the tutorial): ", not quests.quest_state.has("meet_villagers") and quests.tracked_quests.is_empty())
+	var dialogue_ui: Node = root.get_node("DialogueUI")
+
+	# --- The Elder stands outside his house with a "!" over his head. ---
+	var elder: Node = null
+	for child in overworld.get_node("YSort").get_children():
+		if child.get("npc_id") == "village_elder":
+			elder = child
+	var elder_tile := Vector2i(int(elder.position.x / 32), int(elder.position.y / 32))
+	print("Elder NPC stands on the village square at World.ELDER_POS, outside his house: ", elder != null and elder_tile == world.ELDER_POS and elder_tile != world.ELDER_HOUSE_ENTRANCE and world.ELDER_POS.x >= world.VILLAGE_BOUNDS.x0 and world.ELDER_POS.x <= world.VILLAGE_BOUNDS.x1)
+	var marker: Label = elder.get_node("QuestMarker")
+	print("Elder shows a gold '!' (quest available) above his sprite: ", marker.visible and marker.text == "!" and elder.marker_kind() == "!" and marker.position.y < elder.get_node("Sprite2D").get_rect().position.y)
+	print("Elder's house has no NPC inside any more: ", not load("res://scenes/ElderHouse.tscn").instantiate().has_npc)
 
 	# --- Gates start closed: walking at the south gate should be blocked. ---
 	var south_gate: Vector2i = world.VILLAGE_GATES.south
@@ -50,67 +61,52 @@ func _initialize() -> void:
 	cam.reset_smoothing()
 	for i in range(3):
 		await process_frame
-	var y_before_closed: float = player.position.y
 	await _walk(player, "move_down", 40)
 	print("South gate blocks movement while closed: ", player.position.y < (south_gate.y + 1) * 32.0)
 	root.get_texture().get_image().save_png("res://verify_gates_closed.png")
 
-	# Fully remove this scene before loading the next - change_scene_to_file()
-	# does this automatically in the real game, but manually add_child'ing
-	# multiple top-level scenes side by side (as this script does, to jump
-	# straight to each NPC without walking the whole route) leaves the old
-	# scene's own Player/NPC nodes alive and still processing otherwise,
-	# which double-handles the next scene's "interact" press.
-	root.remove_child(overworld)
-	overworld.queue_free()
-	await process_frame
-
-	# --- Elder: first talk shows intro, not the quest offer. ---
-	var elder_scene: PackedScene = load("res://scenes/ElderHouse.tscn")
-	var elder_house: Node2D = elder_scene.instantiate()
-	root.add_child(elder_house)
-	current_scene = elder_house
-	await process_frame
-	await process_frame
-
-	var dialogue_ui: Node = root.get_node("DialogueUI")
-	var elder_player: CharacterBody2D = elder_house.get_node("YSort/Player")
-	var elder_ysort: Node2D = elder_house.get_node("YSort")
-	var elder: Node = null
-	for child in elder_ysort.get_children():
-		if child.name.begins_with("NPC"):
-			elder = child
-	elder_player.position = elder.position + Vector2(0, 20)
+	# --- Elder: first talk is the intro, second the tutorial quest offer. ---
+	player.position = elder.position + Vector2(0, 20)
+	cam.reset_smoothing()
 	for i in range(3):
 		await process_frame
+	root.get_texture().get_image().save_png("res://verify_gates_elder_marker.png")
 	Input.action_press("interact")
 	await process_frame
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
 	print("First Elder talk shows intro (not quest offer): ", dialogue_ui.text_label.text.begins_with("Ah, a new face"))
-	print("npcs_met.village_elder true: ", quests.npcs_met.get("village_elder", false))
-	print("Journal after 1 NPC: ", quests.objective_progress_text("meet_villagers"))
-	print("Gates still closed after only 1 NPC: ", not game_state.village_gates_open)
+	print("npcs_met.village_elder true, tutorial still not accepted, marker still '!': ", quests.npcs_met.get("village_elder", false) and not quests.quest_state.has("meet_villagers") and marker.visible)
+	print("Gates still closed: ", not game_state.village_gates_open)
 	Input.action_press("interact")
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-
-	# --- Second Elder talk: normal quest offer now, not the intro again. ---
 	Input.action_press("interact")
 	await process_frame
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-	print("Second Elder talk shows quest offer (regression check): ", dialogue_ui.text_label.text.begins_with("Traveler!"))
-	# close via "Not now"
-	var actions: Array = dialogue_ui.actions_row.get_children()
-	actions[1].pressed.emit()
+	print("Second Elder talk offers Meet the Village: ", dialogue_ui.text_label.text.begins_with("Welcome to the valley") and dialogue_ui.actions_row.get_child_count() == 2)
+	(dialogue_ui.actions_row.get_child(0) as Button).pressed.emit() # Accept
+	await process_frame
+	print("Accepted and tracked; not completed yet (Trader not met): ", quests.quest_state.get("meet_villagers", "") == "accepted" and quests.tracked_quests == ["meet_villagers"] and not game_state.village_gates_open)
+	print("Marker gone while the quest is in progress: ", not marker.visible and elder.marker_kind() == "")
+	print("Journal progress: ", quests.objective_progress_text("meet_villagers"))
+	Input.action_press("interact")
+	await process_frame
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	print("Talking again while in progress reminds you of the Trader: ", dialogue_ui.text_label.text.begins_with("The Trader's in the south-west house"))
+	Input.action_press("interact")
+	await process_frame
+	Input.action_release("interact")
 	await process_frame
 
-	root.remove_child(elder_house)
-	elder_house.queue_free()
+	root.remove_child(overworld)
+	overworld.queue_free()
 	await process_frame
 
 	# --- Trader: first talk shows intro + gates-opened line, completes meet_villagers. ---
@@ -127,6 +123,7 @@ func _initialize() -> void:
 	for child in trader_ysort.get_children():
 		if child.name.begins_with("NPC"):
 			trader = child
+	print("Trader shows a '!' too (the barrow quest is on offer): ", trader.get_node("QuestMarker").visible and trader.marker_kind() == "!")
 	trader_player.position = trader.position + Vector2(0, 20)
 	for i in range(3):
 		await process_frame
@@ -145,11 +142,8 @@ func _initialize() -> void:
 	Input.action_release("interact")
 	await process_frame
 
-	# --- Second Trader talk: the Trader now also has a quest (Phase 6a's
-	# open_ancient_barrow), and npc.gd gives an active quest priority over the
-	# shop so it's actually reachable - shows the quest offer here, not the
-	# shop (shop-still-works-once-the-quest-completes is covered by
-	# verify_golden_plains_interior.gd instead). ---
+	# --- Second Trader talk: the barrow quest offer (an active quest beats
+	# the shop, see npc.gd). ---
 	var shop_panel: Node = root.get_node("ShopPanel")
 	Input.action_press("interact")
 	await process_frame
@@ -157,10 +151,25 @@ func _initialize() -> void:
 	Input.action_release("interact")
 	await process_frame
 	print("Second Trader talk shows the barrow quest offer (not the shop): ", dialogue_ui.text_label.text.begins_with("There's an old barrow") and not shop_panel.is_open())
+	(dialogue_ui.actions_row.get_child(0) as Button).pressed.emit() # Accept the barrow quest
+	await process_frame
+	root.get_node("Inventory").add_item("stone", 6)
+	await process_frame
+	print("Trader's marker turns to '?' once the barrow quest is ready to turn in: ", trader.get_node("QuestMarker").text == "?" and trader.get_node("QuestMarker").visible)
+	root.get_texture().get_image().save_png("res://verify_gates_trader_ready.png")
 
 	root.remove_child(trader_house)
 	trader_house.queue_free()
 	await process_frame
+
+	# --- Met-the-Trader-first path: accepting the tutorial completes it on
+	# the spot and opens the gates. ---
+	quests.quest_state.erase("meet_villagers")
+	game_state.village_gates_open = false
+	quests._accept_quest("meet_villagers")
+	await process_frame
+	print("Accepting after already meeting the Trader completes it at once and opens the gates: ", quests.quest_state.get("meet_villagers", "") == "completed" and game_state.village_gates_open and dialogue_ui.is_open() and dialogue_ui.text_label.text.begins_with("You've already met the Trader"))
+	dialogue_ui.hide_dialogue()
 
 	# --- Fresh Overworld reload: gates should paint open from the start. ---
 	var overworld2_scene: PackedScene = load("res://scenes/Overworld.tscn")
@@ -181,5 +190,10 @@ func _initialize() -> void:
 	await _walk(player2, "move_down", 60)
 	print("South gate now walkable after reload: ", player2.position.y > (south_gate.y + 1) * 32.0)
 	root.get_texture().get_image().save_png("res://verify_gates_open.png")
+	var elder2: Node = null
+	for child in overworld2.get_node("YSort").get_children():
+		if child.get("npc_id") == "village_elder":
+			elder2 = child
+	print("After the tutorial the Elder offers the wood quest next ('!' is back): ", elder2 != null and elder2.active_quest() == "gather_wood" and elder2.get_node("QuestMarker").visible and elder2.get_node("QuestMarker").text == "!")
 
 	quit()

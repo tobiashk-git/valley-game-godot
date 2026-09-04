@@ -1,8 +1,11 @@
 extends SceneTree
 
 func _initialize() -> void:
-	var elder_scene: PackedScene = load("res://scenes/ElderHouse.tscn")
-	var elder_house: Node2D = elder_scene.instantiate()
+	# The Elder stands on the village square (Overworld) now, not in his
+	# house, and hands out the tutorial before the wood quest - complete the
+	# tutorial by state here (verify_village_gates.gd covers it properly) so
+	# this script tests the wood quest as before.
+	var elder_house: Node2D = load("res://scenes/Overworld.tscn").instantiate()
 	root.add_child(elder_house)
 	current_scene = elder_house
 	await process_frame
@@ -13,15 +16,18 @@ func _initialize() -> void:
 	var dialogue_ui: Node = root.get_node("DialogueUI")
 	var quest_panel: Node = root.get_node("QuestPanel")
 	var player: CharacterBody2D = elder_house.get_node("YSort/Player")
+	quests.quest_state["meet_villagers"] = "completed"
+	quests.changed.emit()
 
 	var ysort: Node2D = elder_house.get_node("YSort")
 	var elder: Node = null
 	for child in ysort.get_children():
-		if child.name.begins_with("NPC"):
+		if child.get("npc_id") == "village_elder":
 			elder = child
-	print("Elder NPC found: ", elder != null)
+	print("Elder NPC found on the village square: ", elder != null and elder.active_quest() == "gather_wood")
 
 	player.position = elder.position + Vector2(0, 20)
+	player.get_node("Camera2D").reset_smoothing()
 	for i in range(3):
 		await process_frame
 

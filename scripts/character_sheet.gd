@@ -255,7 +255,10 @@ func _apply_layout() -> void:
 	# Header grows downwards: bars beside the portrait, stats + bonus lines
 	# under them, then the equipment slot row - which the Hero tab hides (the
 	# doll shows the slots), so that tab's header stops above it.
-	var header_h: float = 206.0 if current_tab != "character" else 126.0
+	# The equipment slot row only on the Inventory tab: the Hero tab shows
+	# the doll instead, and Crafting needs the height - a phone browser's
+	# toolbars leave ~660 units, not the screen's full 844.
+	var header_h: float = 206.0 if current_tab == "inventory" else 126.0
 	if map_tab:
 		header_h = -12.0 # no header: views start right under the tab strip
 	header.position = Vector2(0, 54)
@@ -404,11 +407,14 @@ func _layout_crafting(pos: Vector2, size: Vector2) -> void:
 		craft_columns = _columns_for(iw - 40.0)
 		_apply_craft_columns()
 		craft_count_label.position = Vector2(iw - 160.0, 8)
-		# Three rows' worth: two sections with a title each fit without a scroll.
-		var grid_h: float = 3 * SLOT_SIZE + 12.0
+		# The pane needs ~228px (name / type / desc / two checklist rows / the
+		# button); the grid gets whatever is left above it, capped at three
+		# rows (two titled sections) and never less than one row - it scrolls.
+		const PANE_MIN := 228.0
+		var grid_h: float = clampf(size.y - 36.0 - 8.0 - 4.0 - PANE_MIN, SLOT_SIZE + 6.0, 3 * SLOT_SIZE + 12.0)
 		_place(craft_scroll, Vector2(20, 36), Vector2(iw - 40.0, grid_h))
 		pw = iw - 40.0
-		pane_h = maxf(240.0, size.y - 36.0 - grid_h - 8.0 - 4.0)
+		pane_h = maxf(PANE_MIN, size.y - 36.0 - grid_h - 8.0 - 4.0)
 		_place(craft_pane, Vector2(20, 36.0 + grid_h + 8.0), Vector2(pw, pane_h))
 		craft_hint.visible = false
 	_place(craft_name, Vector2(68, 8), Vector2(pw - 78.0, 42))
@@ -486,9 +492,10 @@ func _refresh() -> void:
 	journal_view.visible = current_tab == "journal"
 	# The paper doll shows the equipment itself, so the header's three slot
 	# buttons would be duplicates on that tab.
+	var slots_shown: bool = current_tab == "inventory" or (current_tab == "crafting" and not narrow)
 	for slot in Character.SLOTS:
-		_header_slot_button(slot).visible = current_tab != "character"
-		_header_slot_label(slot).visible = current_tab != "character"
+		_header_slot_button(slot).visible = slots_shown
+		_header_slot_label(slot).visible = slots_shown
 	_refresh_header()
 	if current_tab == "inventory":
 		_refresh_grid()

@@ -46,6 +46,11 @@ const FINAL_BOSS_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y + 19)
 # as VILLAGE_HOUSE_POSITIONS in game.js.
 const ELDER_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y - 3)
 const TRADER_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y + 3)
+# The Village Elder stands outside his house, two tiles towards the square
+# and one below the door (clear of the house's solid footprint and of the
+# doorstep the player needs to enter), so the tutorial quest has to be
+# collected from him in person - see overworld.gd.
+const ELDER_POS := Vector2i(ELDER_HOUSE_ENTRANCE.x - 2, ELDER_HOUSE_ENTRANCE.y + 1)
 const EMPTY_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y + 3)
 
 # Unlike DUNGEON/CASTLE/HOUSE/FINAL_BOSS_ENTRANCE above (all kept inside

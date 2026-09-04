@@ -70,7 +70,10 @@ func _initialize() -> void:
 	# and the tracker, which both start at y=152.
 	print("Longest biome name fits on one line and the HUD still ends above the dialogue/tracker top (y=152): ", hud.location_label.text == "Emberfall Badlands" and hud.location_label.get_line_count() == 1 and hud_rect.end.y <= 152.0, " (ends y=", hud_rect.end.y, ")")
 
-	# Quest tracker below the HUD, inside the width.
+	# Quest tracker below the HUD, inside the width (nothing is tracked at
+	# boot since the Elder hands out the tutorial - accept it first).
+	root.get_node("Quests")._accept_quest("meet_villagers")
+	await process_frame
 	var tracker_rect: Rect2 = _rect(tracker.vbox)
 	print("Quest tracker drops below the HUD and stays inside the width: ", tracker_rect.position.y >= hud_rect.end.y and tracker_rect.end.x <= 400.0 - 12.0 + 0.5 and tracker_rect.position.x >= 12.0 and tracker.visible)
 
@@ -148,6 +151,31 @@ func _initialize() -> void:
 	await process_frame
 	var mv: Control = sheet.map_view
 	print("Map tab on the phone: header hidden, map above its pane, inside the window: ", sheet.narrow and not sheet.header.visible and mv.visible and mv.detail_pane.position.y >= mv.map_frame.position.y + mv.map_frame.size.y and mv.detail_pane.get_global_rect().end.y <= sheet.window.get_global_rect().end.y)
+	sheet.close()
+
+	# --- Short phone viewport (Safari's toolbars leave ~660 units on an
+	# iPhone): every tab's lower pane, and its action button, stays inside
+	# the window. ---
+	root.size = Vector2i(400, 660)
+	for i in range(6):
+		await process_frame
+	var win_bottom: float
+	sheet.open("crafting")
+	await process_frame
+	win_bottom = sheet.window.get_global_rect().end.y
+	print("Short phone, Crafting: header without the slot row, pane and Craft button inside the window: ", layout.size().y == 660.0 and not sheet.get_node("Window/Header/WeaponSlot").visible and sheet.craft_pane.get_global_rect().end.y <= win_bottom and sheet.craft_action.get_global_rect().end.y <= win_bottom and sheet.craft_scroll.size.y >= 70.0, " pane_end=", sheet.craft_pane.get_global_rect().end.y, " win_end=", win_bottom)
+	root.get_texture().get_image().save_png("res://verify_phone_short_crafting.png")
+	print("Saved verify_phone_short_crafting.png")
+	sheet.open("inventory")
+	await process_frame
+	print("Short phone, Inventory: detail pane and its button inside the window: ", sheet.detail_pane.get_global_rect().end.y <= win_bottom and sheet.grid_scroll.size.y >= 64.0)
+	sheet.open("map")
+	await process_frame
+	var mv2: Control = sheet.map_view
+	print("Short phone, Map: map steps down to 2px/tile so the pane fits: ", mv2.map_scale == 2.0 and mv2.detail_pane.get_global_rect().end.y <= win_bottom and mv2.travel_btn.get_global_rect().end.y <= win_bottom)
+	sheet.open("journal")
+	await process_frame
+	print("Short phone, Journal: pane inside the window: ", sheet.journal_view.detail_pane.get_global_rect().end.y <= win_bottom)
 	sheet.close()
 
 	# --- Back to desktop. ---

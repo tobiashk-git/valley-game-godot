@@ -239,6 +239,19 @@ func _ready() -> void:
 	if GameState.world_progress.golden_plains_revealed:
 		reveal_golden_plains_entrance()
 
+	# The Village Elder, outside his house on the square (moved out of
+	# ElderHouse.tscn so the player has to come to him for the tutorial
+	# quest). Two quests in order: Meet the Village, then A Village in Need.
+	var elder: StaticBody2D = NPC_SCENE.instantiate()
+	elder.position = _tile_center(World.ELDER_POS)
+	elder.sprite_path = "res://assets/elder.png"
+	elder.npc_name = "Village Elder"
+	var elder_chain: Array[String] = ["meet_villagers", "gather_wood"] # typed: the export is Array[String]
+	elder.quest_ids = elder_chain
+	elder.npc_id = "village_elder"
+	elder.intro_text = "Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler."
+	ysort.add_child(elder)
+
 	# The Verdantwood ford-crossing quest giver - unlike the Frostpeak
 	# Ranger (housed in EmptyHouse.tscn, Phase 2's only empty village slot),
 	# this one stands directly in the valley near the ford itself, a few

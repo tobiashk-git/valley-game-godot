@@ -24,11 +24,13 @@ func _initialize() -> void:
 	var quest_panel: Node = root.get_node("QuestPanel")
 	var tracker: Node = root.get_node("QuestTracker")
 
-	print("meet_villagers auto-tracked from boot: ", quests.tracked_quests == ["meet_villagers"])
+	print("Nothing tracked at boot (the tutorial is handed out by the Elder now): ", quests.tracked_quests.is_empty() and not quests.quest_state.has("meet_villagers"))
 
 	# --- Accepting a quest auto-tracks it (if there's room). Call the real
 	# method (not a direct quest_state write) so the auto-track logic under
 	# test actually runs, same as the dialogue's Accept button would. ---
+	quests._accept_quest("meet_villagers")
+	print("Accepting the tutorial tracks it: ", quests.tracked_quests == ["meet_villagers"])
 	quests._accept_quest("gather_wood")
 	print("Accepting auto-tracks it: ", quests.tracked_quests == ["meet_villagers", "gather_wood"])
 

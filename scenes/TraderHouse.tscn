@@ -9,13 +9,13 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_drvtq"]
 size = Vector2(28, 28)
 
-[node name="TraderHouse" type="Node2D" unique_id=893134980]
+[node name="TraderHouse" type="Node2D" unique_id=1257594277]
 script = ExtResource("1_ue5p7")
 has_npc = true
 npc_sprite_path = "res://assets/trader.png"
 npc_name_text = "Village Trader"
-npc_is_shop = true
 npc_quest_id = "open_ancient_barrow"
+npc_is_shop = true
 npc_id_text = "village_trader"
 npc_intro = "Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell."
 furniture_layout = Array[Dictionary]([{
@@ -34,22 +34,23 @@ furniture_layout = Array[Dictionary]([{
 window_tiles = Array[Vector2i]([Vector2i(8, 1), Vector2i(8, 2)])
 overworld_return_tile = Vector2i(95, 103)
 
-[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=2066908954]
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=1107751505]
 tile_set = ExtResource("2_uiopm")
 
-[node name="YSort" type="Node2D" parent="." unique_id=2047424857]
+[node name="YSort" type="Node2D" parent="." unique_id=1317690594]
 y_sort_enabled = true
 
 [node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("3_aj5dr")]
+z_index = 1
 script = ExtResource("4_bhepg")
 
-[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1181960225]
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=2096042978]
 zoom = Vector2(2, 2)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
-[node name="OutPortal" type="Area2D" parent="." unique_id=1711795494]
+[node name="OutPortal" type="Area2D" parent="." unique_id=860074276]
 script = ExtResource("5_ib6ny")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=629863520]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=975770169]
 shape = SubResource("RectangleShape2D_drvtq")

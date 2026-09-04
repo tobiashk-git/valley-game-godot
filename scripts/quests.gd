@@ -21,9 +21,23 @@ const QUEST_DEFS := {
 			"completed": "Thanks again for your help, traveler.",
 		},
 	},
+	# The fence/gates tutorial. Offered by the Village Elder, who stands
+	# OUTSIDE his house on the village square (user request: the player has
+	# to go to him to receive it) - accepting it counts as meeting him, so
+	# the objective is the one other villager. Completes silently the moment
+	# the Trader's intro plays (see mark_npc_met()), or on the spot if the
+	# player met the Trader first (see _accept_quest()). No reward entry:
+	# the gates opening IS the reward.
 	"meet_villagers": {
+		"giver_name": "Village Elder",
 		"name": "Meet the Village",
-		"objective": {"type": "talk_to_npcs", "npc_ids": ["village_elder", "village_trader"]},
+		"objective": {"type": "talk_to_npcs", "npc_ids": ["village_trader"], "goal": "Introduce yourself to the Village Trader in the south-west house."},
+		"dialogue": {
+			"offer": "Welcome to the valley, traveler! Before you go wandering, meet the rest of us - the Trader keeps the house in the south-west corner. Once you've said hello, I'll have the gates opened for you.",
+			"in_progress": "The Trader's in the south-west house - go and say hello, and the gates are yours.",
+			"ready": "You've met everyone worth meeting. The gates are open - the valley's yours to explore.",
+			"completed": "The gates are open - the valley's yours to explore. Mind the river fords, though.",
+		},
 	},
 	"cross_frostpeak": {
 		"giver_name": "Frostpeak Ranger",
@@ -96,10 +110,9 @@ const QUEST_DEFS := {
 }
 
 # quest_id -> "accepted" | "completed" (absent = not yet offered).
-# meet_villagers starts pre-accepted so the Journal shows live progress from
-# the very first frame - fitting for a tutorial the player has no choice
-# but to complete anyway.
-var quest_state: Dictionary = {"meet_villagers": "accepted"}
+# Nothing is pre-accepted: even the tutorial (meet_villagers) is handed out
+# by the Elder in person, so the first thing to do is go and find him.
+var quest_state: Dictionary = {}
 
 # npc_id -> true once that NPC's one-time intro has played (see npc.gd).
 var npcs_met: Dictionary = {}
@@ -113,7 +126,7 @@ var npcs_met: Dictionary = {}
 # quest can't be tracked at all - it's untracked the moment it completes,
 # same as leaving the Journal's Active section.
 const MAX_TRACKED := 2
-var tracked_quests: Array[String] = ["meet_villagers"] # pre-accepted from boot, see quest_state below
+var tracked_quests: Array[String] = []
 
 func is_tracked(quest_id: String) -> bool:
 	return tracked_quests.has(quest_id)
@@ -197,6 +210,13 @@ func _accept_quest(quest_id: String) -> void:
 	# same as a manual Track click at the cap.
 	if tracked_quests.size() < MAX_TRACKED:
 		tracked_quests.append(quest_id)
+	# The tutorial has no turn-in step: if the player already met the Trader
+	# before finding the Elder, it's done the moment it's accepted - and the
+	# Elder says so (the Accept button's own box has just closed).
+	if quest_id == "meet_villagers" and objective_met(quest_id):
+		_mark_completed(quest_id)
+		GameState.village_gates_open = true
+		get_node("/root/DialogueUI").show_dialogue(QUEST_DEFS[quest_id].giver_name, "You've already met the Trader? Splendid. The village gates are open - the valley's yours to explore.")
 	changed.emit()
 
 func _mark_completed(quest_id: String) -> void:
@@ -209,9 +229,9 @@ func _complete_quest(quest_id: String) -> void:
 	if objective.has("items"):
 		for entry in objective.items:
 			Inventory.remove_item(entry.item_id, entry.amount)
-	else:
+	elif objective.has("item_id"):
 		Inventory.remove_item(objective.item_id, objective.amount)
-	var reward: Dictionary = def.reward
+	var reward: Dictionary = def.get("reward", {})
 	if reward.has("gold"):
 		Inventory.add_item("gold", reward.gold)
 	if reward.has("item_id"):
@@ -237,7 +257,9 @@ func _complete_quest(quest_id: String) -> void:
 func mark_npc_met(npc_id: String) -> bool:
 	npcs_met[npc_id] = true
 	changed.emit()
-	if quest_state.get("meet_villagers", "") == "completed":
+	# Only an ACCEPTED tutorial completes here - meeting the Trader before
+	# the Elder just counts towards it (see _accept_quest()).
+	if quest_state.get("meet_villagers", "") != "accepted":
 		return false
 	if not objective_met("meet_villagers"):
 		return false

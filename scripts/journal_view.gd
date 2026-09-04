@@ -89,6 +89,8 @@ func status_text(quest_id: String) -> String:
 func goal_text(quest_id: String) -> String:
 	var def: Dictionary = Quests.QUEST_DEFS[quest_id]
 	var objective: Dictionary = def.objective
+	if objective.has("goal"):
+		return objective.goal
 	var giver: String = def.get("giver_name", "")
 	var to_giver: String = " and bring it to the %s" % giver if giver != "" else ""
 	if objective.type == "gather":

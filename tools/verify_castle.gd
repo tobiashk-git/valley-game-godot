@@ -112,14 +112,17 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("toggle_map")
 	await process_frame
-	var list: VBoxContainer = world_map_panel.get_node("Panel/Margin/VBox/List")
-	var castle_row: HBoxContainer = null
-	for row in list.get_children():
-		if row is HBoxContainer and (row.get_child(0) as Label).text == "Castle":
+	# The map is the character sheet's Map tab now: a row per known place
+	# in its "Known places" list, then Fast Travel in the pane.
+	var map_view: Control = root.get_node("CharacterSheet").map_view
+	var castle_row: Button = null
+	for row in map_view.places_list.get_children():
+		if row is Button and row.visible and row.text.strip_edges() == "Castle":
 			castle_row = row
 	print("World Map lists Castle: ", castle_row != null)
-	var castle_btn: Button = castle_row.get_child(1)
-	castle_btn.pressed.emit()
+	castle_row.pressed.emit()
+	await process_frame
+	map_view.travel_btn.pressed.emit()
 	await process_frame
 	await process_frame
 	print("Fast travel to Castle lands on Overworld: ", current_scene.name == "Overworld")

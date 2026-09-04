@@ -85,8 +85,13 @@ func apply_layout(narrow: bool, view_size: Vector2) -> void:
 		var iw: float = view_size.x
 		_place(subtitle_label, Vector2(20, 0), Vector2(iw - 40.0, 36))
 		subtitle_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-		# Integer scale keeps the one-pixel-per-tile map crisp under NEAREST.
+		# Integer scale keeps the one-pixel-per-tile map crisp under NEAREST;
+		# on a short viewport (a phone browser's toolbars) drop a step so the
+		# pane below still has its 200px.
 		map_scale = maxf(1.0, floorf((iw - 48.0) / MAP_REGION.size.x))
+		var room: float = view_size.y - 40.0 - 24.0 - 200.0
+		while map_scale > 1.0 and map_scale * MAP_REGION.size.x > room:
+			map_scale -= 1.0
 		var map_px: float = map_scale * MAP_REGION.size.x
 		_place(map_frame, Vector2(floorf((iw - map_px - 8.0) / 2.0), 40), Vector2(map_px + 8.0, map_px + 8.0))
 		var pane_y: float = 40.0 + map_px + 8.0 + 8.0

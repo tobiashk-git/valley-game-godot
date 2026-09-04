@@ -42,8 +42,16 @@ func _test_house(scene_path: String, door_tile: Vector2i, label: String) -> void
 	# change_scene_to_file() (inside portal.gd) already freed the house
 	# instance automatically; just clean up the Overworld it left us on
 	# before the next house loads.
-	root.remove_child(current_scene)
-	current_scene.queue_free()
+	# The scene change is deferred - give it a frame or two, then clean up
+	# whatever is current (null if it's still mid-swap).
+	await process_frame
+	await process_frame
+	# (remove_child() of the current scene clears current_scene itself, so
+	# hold a reference first.)
+	var old_scene: Node = current_scene
+	if old_scene != null:
+		root.remove_child(old_scene)
+		old_scene.queue_free()
 	await process_frame
 
 func _initialize() -> void:
