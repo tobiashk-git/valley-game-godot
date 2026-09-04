@@ -43,8 +43,17 @@ const EXTERNAL_TABS := {"crafting": "CraftingPanel", "journal": "QuestPanel", "m
 @onready var primary_action: Button = $Window/InventoryView/DetailPane/Actions/PrimaryAction
 @onready var secondary_action: Button = $Window/InventoryView/DetailPane/Actions/SecondaryAction
 @onready var stats_list: VBoxContainer = $Window/CharacterView/StatsList
+@onready var figure: TextureRect = $Window/CharacterView/Figure
+@onready var slot_pane_title: Label = $Window/CharacterView/SlotPane/SlotPaneTitle
+@onready var slot_list: VBoxContainer = $Window/CharacterView/SlotPane/SlotScroll/SlotList
+
+# Optional keyed full-body illustration for the paper doll (Leonardo
+# track); the player sprite's idle frame at 3x stands in until it exists.
+const PORTRAIT_ILLUSTRATION := "res://assets/oliver_portrait.png"
 
 var current_tab := "inventory"
+# Which fitting slot the paper doll's right-hand pane is showing.
+var doll_slot := "weapon"
 var selected_item := ""
 # Equipment slot the selection came from ("" = backpack). Lets the pane
 # offer Unequip for a worn item and Equip for a carried one.
@@ -58,6 +67,9 @@ func _ready() -> void:
 	atlas.atlas = load("res://assets/player_base.png")
 	atlas.region = Rect2(0, 128, 64, 64) # Player.tscn's down_idle frame
 	portrait.texture = atlas
+	figure.texture = load(PORTRAIT_ILLUSTRATION) if ResourceLoader.exists(PORTRAIT_ILLUSTRATION) else atlas
+	for slot in EQUIP_SLOTS:
+		$Window/CharacterView.get_node("Doll%sSlot" % slot.capitalize()).pressed.connect(_on_doll_slot.bind(slot))
 	for tab in TAB_BUTTONS:
 		tabs.get_node(TAB_BUTTONS[tab]).pressed.connect(_on_tab_pressed.bind(tab))
 	close_btn.pressed.connect(close)
@@ -123,6 +135,11 @@ func _refresh() -> void:
 		tabs.get_node(TAB_BUTTONS[tab]).theme_type_variation = &"TabButtonActive" if tab == current_tab else &"TabButton"
 	inventory_view.visible = current_tab == "inventory"
 	character_view.visible = current_tab == "character"
+	# The paper doll shows the equipment itself, so the header's three slot
+	# buttons would be duplicates on that tab.
+	for slot in EQUIP_SLOTS:
+		$Window/Header.get_node(slot.capitalize() + "Slot").visible = current_tab != "character"
+		$Window/Header.get_node(slot.capitalize() + "SlotLabel").visible = current_tab != "character"
 	_refresh_header()
 	if current_tab == "inventory":
 		_refresh_grid()
@@ -272,30 +289,65 @@ func _on_primary_action() -> void:
 			Character.unequip(selected_slot)
 			select_item(item_id, "")
 
+func _on_doll_slot(slot: String) -> void:
+	doll_slot = slot
+	_refresh()
+
 func _refresh_character() -> void:
-	for child in stats_list.get_children():
-		child.visible = false
-		child.queue_free()
+	# --- Left: stats column ---
+	_clear(stats_list)
 	var stats: Dictionary = Character.stats
-	_stats_title("Stats")
-	_stats_line("Health  %d / %d" % [stats.hp, stats.max_hp])
-	_stats_line("Mana  %d / %d" % [stats.mp, stats.max_mp])
-	_stats_line("Strength  %d" % stats.strength)
-	_stats_line("Agility  %d" % stats.agility)
-	_stats_title("Equipment")
-	for slot in EQUIP_SLOTS:
-		var item_id: String = Character.equipment[slot]
-		if item_id == "":
-			_stats_line("%s  -  none" % slot.capitalize(), true)
-		else:
-			var stat_text: String = Items.describe_stats(item_id)
-			_stats_line("%s  -  %s%s" % [slot.capitalize(), Items.get_item_name(item_id), "  (%s)" % stat_text if stat_text != "" else ""])
+	_stats_title("Attributes")
+	_stat_row("Strength", str(stats.strength))
+	_stat_row("Agility", str(stats.agility))
+	_stats_title("Core stats")
+	_stat_row("Health", "%d / %d" % [stats.hp, stats.max_hp])
+	_stat_row("Mana", "%d / %d" % [stats.mp, stats.max_mp])
+	_stat_row("Attack", "+%d" % _gear_stat("weapon", "attack"))
+	_stat_row("Defense", str(_gear_stat("armor", "defense")))
+	var accessory: String = Character.equipment.accessory
+	var resist: float = Items.ITEMS[accessory].get("bonus", {}).get("status_resistance", 0.0) if accessory != "" else 0.0
+	_stat_row("Status resist", "%d%%" % int(round(resist * 100.0)))
 	_stats_title("Active effects")
 	if Combat.player_status.is_empty():
 		_stats_line("None", true)
 	else:
 		for status_id in Combat.player_status.keys():
-			_stats_line("%s  (%d turns left)" % [Statuses.STATUSES[status_id].name, Combat.player_status[status_id].turns_left])
+			_stat_row(Statuses.STATUSES[status_id].name, "%d turns" % Combat.player_status[status_id].turns_left)
+
+	# --- Centre: the doll's slots ---
+	for slot in EQUIP_SLOTS:
+		var btn: Button = $Window/CharacterView.get_node("Doll%sSlot" % slot.capitalize())
+		var item_id: String = Character.equipment[slot]
+		btn.icon = Items.get_item_icon(item_id) if item_id != "" else null
+		btn.tooltip_text = Items.get_item_name(item_id) if item_id != "" else "No %s equipped" % slot
+		btn.theme_type_variation = &"SlotButtonSelected" if slot == doll_slot else &"SlotButton"
+
+	# --- Right: what's worn in the tapped slot, and what carried gear fits ---
+	slot_pane_title.text = doll_slot.capitalize()
+	_clear(slot_list)
+	_pane_label("Worn", true)
+	var worn: String = Character.equipment[doll_slot]
+	if worn == "":
+		_pane_label("- none -", true)
+	else:
+		_pane_item(worn, "Unequip", Callable(Character, "unequip").bind(doll_slot), &"SecondaryButton")
+	_pane_label("Carried", true)
+	var any_fit := false
+	for item_id in Inventory.backpack.keys():
+		if Inventory.backpack[item_id] > 0 and Items.is_equippable(item_id) and Items.ITEMS[item_id].slot == doll_slot:
+			any_fit = true
+			_pane_item(item_id, "Equip", Callable(Character, "equip").bind(doll_slot, item_id), &"PrimaryButton")
+	if not any_fit:
+		_pane_label("- nothing fits -", true)
+
+func _clear(container: Node) -> void:
+	var dying := 0
+	for child in container.get_children():
+		child.name = "Dying%d" % dying
+		dying += 1
+		child.visible = false
+		child.queue_free()
 
 func _stats_title(text: String) -> void:
 	var l := Label.new()
@@ -307,10 +359,70 @@ func _stats_title(text: String) -> void:
 func _stats_line(text: String, dim: bool = false) -> void:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 14)
+	l.add_theme_font_size_override("font_size", 13)
 	if dim:
 		l.theme_type_variation = &"DimLabel"
 	stats_list.add_child(l)
+
+# "Name ......... value" - two labels in a row, value right-aligned.
+func _stat_row(name: String, value: String) -> void:
+	var row := HBoxContainer.new()
+	var n := Label.new()
+	n.text = name
+	n.add_theme_font_size_override("font_size", 13)
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(n)
+	var v := Label.new()
+	v.text = value
+	v.add_theme_font_size_override("font_size", 13)
+	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	row.add_child(v)
+	stats_list.add_child(row)
+
+func _pane_label(text: String, dim: bool) -> void:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 11)
+	l.custom_minimum_size = Vector2(94, 0)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if dim:
+		l.theme_type_variation = &"DimLabel"
+	slot_list.add_child(l)
+
+# Icon + "name / stat" + one action button, stacked compactly so a worn
+# item plus one carried alternative fit the 94px-wide pane without
+# scrolling (a clipped Equip button read as broken).
+func _pane_item(item_id: String, action_text: String, action: Callable, variation: StringName) -> void:
+	var icon_box := CenterContainer.new()
+	icon_box.custom_minimum_size = Vector2(94, 48)
+	var icon_panel := Panel.new()
+	icon_panel.custom_minimum_size = Vector2(48, 48)
+	icon_panel.theme_type_variation = &"DetailPanel"
+	var icon := TextureRect.new()
+	icon.texture = Items.get_item_icon(item_id)
+	icon.position = Vector2(6, 6)
+	icon.size = Vector2(36, 36)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_panel.add_child(icon)
+	icon_box.add_child(icon_panel)
+	slot_list.add_child(icon_box)
+	var name_label := Label.new()
+	var stat_text: String = Items.describe_stats(item_id)
+	name_label.text = Items.get_item_name(item_id) + ("\n" + stat_text if stat_text != "" else "")
+	name_label.add_theme_font_size_override("font_size", 11)
+	name_label.custom_minimum_size = Vector2(94, 0)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	slot_list.add_child(name_label)
+	var btn := Button.new()
+	btn.text = action_text
+	btn.custom_minimum_size = Vector2(90, 32)
+	btn.theme_type_variation = variation
+	btn.add_theme_font_size_override("font_size", 13)
+	btn.set_meta("item_id", item_id)
+	btn.pressed.connect(action)
+	slot_list.add_child(btn)
 
 # --- input ---
 

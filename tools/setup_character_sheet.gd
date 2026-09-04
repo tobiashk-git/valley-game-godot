@@ -201,7 +201,10 @@ func _build() -> void:
 		actions.add_child(b)
 	_label(inv, "HintLabel", "Tap an item to see it. Gear shows Equip; potions show Use.", Vector2(20, 330), 12, &"DimLabel")
 
-	# --- Character view ---
+	# --- Character view: paper doll. Stats column | Oliver with the three
+	# fitting slots around him (weapon by the hand, armour at the torso,
+	# accessory at the neck) | the tapped slot's worn item + carried
+	# alternatives. Modelled on the user's two reference screens. ---
 	var chr := Control.new()
 	chr.name = "CharacterView"
 	chr.position = Vector2(0, 158)
@@ -211,9 +214,80 @@ func _build() -> void:
 	var stats := VBoxContainer.new()
 	stats.name = "StatsList"
 	stats.position = Vector2(20, 0)
-	stats.size = Vector2(680, 340)
-	stats.add_theme_constant_override("separation", 6)
+	stats.size = Vector2(200, 340)
+	stats.add_theme_constant_override("separation", 4)
 	chr.add_child(stats)
+	for entry in [["Divider1", 236.0], ["Divider2", 582.0]]:
+		var div := ColorRect.new()
+		div.name = entry[0]
+		div.position = Vector2(entry[1], 0)
+		div.size = Vector2(1, 342)
+		div.color = Color(0.7, 0.55, 0.2, 0.35)
+		chr.add_child(div)
+	var eq_title := _label(chr, "EquipmentTitle", "Equipment", Vector2(250, 0), 14, &"PanelTitle")
+	eq_title.size = Vector2(300, 20)
+	eq_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# The figure: character_sheet.gd fills it with assets/oliver_portrait.png
+	# if that exists (a keyed illustration, Leonardo track), else the player
+	# sprite's idle frame at 3x.
+	var figure := TextureRect.new()
+	figure.name = "Figure"
+	figure.position = Vector2(306, 40)
+	figure.size = Vector2(192, 192)
+	figure.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	figure.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	figure.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	chr.add_child(figure)
+	var shadow := ColorRect.new()
+	shadow.name = "FigureShadow"
+	shadow.position = Vector2(330, 226)
+	shadow.size = Vector2(144, 10)
+	shadow.color = Color(0, 0, 0, 0.35)
+	chr.add_child(shadow)
+	# Slot -> figure connector lines, then the slots themselves + labels.
+	for entry in [["WeaponLine", Vector2(300, 152), Vector2(340, 150)], ["ArmorLine", Vector2(500, 140), Vector2(452, 142)], ["AccessoryLine", Vector2(500, 50), Vector2(420, 84)]]:
+		var line := Line2D.new()
+		line.name = entry[0]
+		line.points = PackedVector2Array([entry[1], entry[2]])
+		line.width = 2.0
+		line.default_color = Color(0.7, 0.55, 0.2, 0.45)
+		chr.add_child(line)
+	# Accessory sits high (neck), armour low (torso) with room for the
+	# accessory's label between them.
+	for entry in [["DollWeaponSlot", "Weapon", Vector2(238, 120)], ["DollArmorSlot", "Armor", Vector2(504, 108)], ["DollAccessorySlot", "Accessory", Vector2(504, 14)]]:
+		var slot := Button.new()
+		slot.name = entry[0]
+		slot.position = entry[2]
+		slot.size = Vector2(64, 64)
+		slot.theme_type_variation = &"SlotButton"
+		slot.expand_icon = true
+		slot.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		chr.add_child(slot)
+		var l := _label(chr, entry[0] + "Label", entry[1], entry[2] + Vector2(0, 66), 11, &"DimLabel")
+		l.size = Vector2(64, 14)
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var hint := _label(chr, "DollHint", "Tap a slot to see what fits", Vector2(250, 250), 12, &"DimLabel")
+	hint.size = Vector2(300, 20)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var slot_pane := Panel.new()
+	slot_pane.name = "SlotPane"
+	slot_pane.position = Vector2(594, 0)
+	slot_pane.size = Vector2(106, 342)
+	slot_pane.theme_type_variation = &"DetailPanel"
+	chr.add_child(slot_pane)
+	var pane_title := _label(slot_pane, "SlotPaneTitle", "", Vector2(0, 6), 14, &"PanelTitle")
+	pane_title.size = Vector2(106, 20)
+	pane_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var slot_scroll := ScrollContainer.new()
+	slot_scroll.name = "SlotScroll"
+	slot_scroll.position = Vector2(6, 30)
+	slot_scroll.size = Vector2(94, 306)
+	slot_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	slot_pane.add_child(slot_scroll)
+	var slot_list := VBoxContainer.new()
+	slot_list.name = "SlotList"
+	slot_list.add_theme_constant_override("separation", 4)
+	slot_scroll.add_child(slot_list)
 
 	_own(layer, layer)
 	var packed := PackedScene.new()

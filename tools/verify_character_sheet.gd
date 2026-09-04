@@ -33,7 +33,7 @@ func _initialize() -> void:
 	current_scene = overworld
 	await process_frame
 	await process_frame
-	for entry in [["wood", 14], ["stone", 9], ["monster_fur", 5], ["healing_potion", 2], ["mana_potion", 1], ["wooden_pickaxe", 1], ["leather_armor", 1]]:
+	for entry in [["wood", 14], ["stone", 9], ["monster_fur", 5], ["healing_potion", 2], ["mana_potion", 1], ["wooden_pickaxe", 1], ["leather_armor", 1], ["bone_greatsword", 1]]:
 		inventory.add_item(entry[0], entry[1])
 	await process_frame
 
@@ -109,16 +109,59 @@ func _initialize() -> void:
 	await process_frame
 	print("Tapping an empty slot explains itself: ", sheet.detail_name.text == "No accessory equipped" and not sheet.primary_action.visible)
 
-	# --- Tabs. ---
+	# --- Character tab: the paper doll. (Armour is worn, weapon is not.) ---
 	await _press("toggle_character")
 	print("C while open switches to the Character tab: ", sheet.is_open() and sheet.current_tab == "character" and sheet.character_view.visible and not sheet.inventory_view.visible)
+	print("Header equipment slots hidden on this tab (the doll shows them): ", not sheet.get_node("Window/Header/WeaponSlot").visible and not sheet.get_node("Window/Header/ArmorSlotLabel").visible)
 	var lines: Array = []
 	for child in sheet.stats_list.get_children():
-		if child.visible:
+		if not child.visible:
+			continue
+		if child is Label:
 			lines.append(child.text)
-	print("Character tab lists stats, equipment and effects: ", lines.has("Stats") and lines.has("Equipment") and lines.has("Active effects") and lines.has("Armor  -  Leather Armor  (Defense +3)") and lines.has("None"))
+		else:
+			lines.append(child.get_child(0).text + "=" + child.get_child(1).text)
+	print("Stats column lists attributes, core stats and effects: ", lines.has("Attributes") and lines.has("Core stats") and lines.has("Active effects") and lines.has("Strength=%d" % stats.strength) and lines.has("Defense=3") and lines.has("Attack=+0") and lines.has("None"))
+	print("Figure shown (sprite fallback or illustration): ", sheet.figure.texture != null)
+	var doll_weapon: Button = sheet.get_node("Window/CharacterView/DollWeaponSlot")
+	var doll_armor: Button = sheet.get_node("Window/CharacterView/DollArmorSlot")
+	print("Doll slots mirror the equipment (armour icon, empty weapon): ", doll_armor.icon != null and doll_weapon.icon == null)
+	# Tap the armour slot -> pane shows it worn with Unequip.
+	doll_armor.pressed.emit()
+	await process_frame
+	var unequip_btn: Button = null
+	var equip_btns: Array = []
+	for child in sheet.slot_list.get_children():
+		if child is Button and child.visible:
+			if child.text == "Unequip":
+				unequip_btn = child
+			elif child.text == "Equip":
+				equip_btns.append(child)
+	print("Tapping the armour slot shows it worn: ", sheet.slot_pane_title.text == "Armor" and doll_armor.theme_type_variation == &"SlotButtonSelected" and unequip_btn != null and unequip_btn.get_meta("item_id") == "leather_armor" and equip_btns.is_empty())
 	root.get_texture().get_image().save_png("res://verify_sheet_character.png")
 	print("Saved verify_sheet_character.png")
+	unequip_btn.pressed.emit()
+	await process_frame
+	print("Unequip from the doll pane works: ", character.equipment.armor == "" and inventory.get_count("leather_armor") == 1 and doll_armor.icon == null)
+	# Tap the weapon slot -> both carried weapons offered; equip the greatsword.
+	doll_weapon.pressed.emit()
+	await process_frame
+	var greatsword_equip: Button = null
+	var carried_offered: Array = []
+	for child in sheet.slot_list.get_children():
+		if child is Button and child.visible and child.text == "Equip":
+			carried_offered.append(child.get_meta("item_id"))
+			if child.get_meta("item_id") == "bone_greatsword":
+				greatsword_equip = child
+	print("Weapon slot pane lists every carried weapon with Equip: ", sheet.slot_pane_title.text == "Weapon" and carried_offered.has("wooden_pickaxe") and carried_offered.has("bone_greatsword") and carried_offered.size() == 2)
+	greatsword_equip.pressed.emit()
+	await process_frame
+	print("Equip from the doll pane works and the doll updates: ", character.equipment.weapon == "bone_greatsword" and doll_weapon.icon != null and inventory.get_count("bone_greatsword") == 0 and sheet.bonus_label.text == "ATK +6 (Bone Greatsword)")
+	root.get_texture().get_image().save_png("res://verify_sheet_doll_equipped.png")
+	print("Saved verify_sheet_doll_equipped.png")
+	await _press("toggle_inventory")
+	print("Back on the Inventory tab the header slots return: ", sheet.current_tab == "inventory" and sheet.get_node("Window/Header/WeaponSlot").visible and sheet.get_node("Window/Header/WeaponSlot").icon != null)
+	await _press("toggle_character")
 	await _press("toggle_character")
 	print("C on the Character tab closes the sheet: ", not sheet.is_open())
 	print("Quick bar back once closed: ", quick_bar.visible)
