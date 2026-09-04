@@ -135,8 +135,12 @@ func _initialize() -> void:
 	quest_panel.close()
 	shop_panel.open()
 	await process_frame
-	var sp_rect: Rect2 = _rect(shop_panel.panel)
-	print("Shop (380 wide) fits without scaling: ", shop_panel.panel.scale == Vector2.ONE and sp_rect.end.x <= 400.0)
+	var sp_rect: Rect2 = _rect(shop_panel.window)
+	print("Shop window (kit) fills the phone width, grid above its pane: ", shop_panel.narrow and sp_rect.position.x == 12.0 and sp_rect.size.x == 400.0 - 24.0 and shop_panel.detail_pane.position.y >= shop_panel.grid_scroll.position.y + shop_panel.grid_scroll.size.y and shop_panel.grid.columns == 4)
+	shop_panel.grid.get_node("HealingPotionSlot").pressed.emit()
+	await process_frame
+	root.get_texture().get_image().save_png("res://verify_phone_shop.png")
+	print("Saved verify_phone_shop.png")
 	shop_panel.close()
 
 	# --- Back to desktop. ---

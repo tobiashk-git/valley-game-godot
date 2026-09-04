@@ -26,10 +26,22 @@ func buy_item(item_id: String) -> bool:
 	changed.emit()
 	return true
 
-func sell_item(item_id: String) -> bool:
-	if Inventory.get_count(item_id) <= 0:
+# By base id: for gear this sells a plain (unenhanced) copy first - see
+# Inventory.remove_item(). `amount` for the shop window's "Sell all".
+func sell_item(item_id: String, amount: int = 1) -> bool:
+	if amount <= 0 or Inventory.get_count(item_id) < amount:
 		return false
-	Inventory.remove_item(item_id, 1)
-	Inventory.add_item("gold", sell_price(item_id))
+	Inventory.remove_item(item_id, amount)
+	Inventory.add_item("gold", sell_price(item_id) * amount)
+	changed.emit()
+	return true
+
+# A specific carried gear instance (the shop window lists gear per piece).
+# Enhanced pieces fetch the same base price.
+func sell_gear(uid: int) -> bool:
+	var inst: Dictionary = Inventory.take_gear(uid)
+	if inst.is_empty():
+		return false
+	Inventory.add_item("gold", sell_price(inst.base))
 	changed.emit()
 	return true

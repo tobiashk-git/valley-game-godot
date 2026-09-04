@@ -2,53 +2,179 @@
 
 [ext_resource type="Script" path="res://scripts/storage_panel.gd" id="1_0wa10"]
 
-[node name="StoragePanel" type="CanvasLayer" unique_id=737025009]
+[node name="StoragePanel" type="CanvasLayer" unique_id=1367586424]
 script = ExtResource("1_0wa10")
 
-[node name="Panel" type="Panel" parent="." unique_id=86663472]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -140.0
-offset_right = 200.0
-offset_bottom = 140.0
-
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=37168364]
-layout_mode = 0
+[node name="Dim" type="ColorRect" parent="." unique_id=932940853]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.45)
 
-[node name="HBox" type="HBoxContainer" parent="Panel/Margin" unique_id=1565906843]
-layout_mode = 2
-theme_override_constants/separation = 20
+[node name="Window" type="Panel" parent="." unique_id=2051920203]
+offset_left = 40.0
+offset_top = 56.0
+offset_right = 760.0
+offset_bottom = 586.0
 
-[node name="ChestColumn" type="VBoxContainer" parent="Panel/Margin/HBox" unique_id=1389390417]
-custom_minimum_size = Vector2(180, 0)
-layout_mode = 2
-
-[node name="ChestTitle" type="Label" parent="Panel/Margin/HBox/ChestColumn" unique_id=1897492814]
-layout_mode = 2
+[node name="TitleLabel" type="Label" parent="Window" unique_id=1577338159]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 12.0
+offset_right = 20.0
+offset_bottom = 12.0
 theme_type_variation = &"PanelTitle"
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
+text = "Storage Chest"
+
+[node name="SubtitleLabel" type="Label" parent="Window" unique_id=658687174]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 18.0
+offset_right = 660.0
+offset_bottom = 41.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 2
+
+[node name="CloseBtn" type="Button" parent="Window" unique_id=1875727134]
+layout_mode = 0
+offset_left = 676.0
+offset_top = 10.0
+offset_right = 708.0
+offset_bottom = 42.0
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 15
+text = "X"
+
+[node name="Tabs" type="HBoxContainer" parent="Window" unique_id=948192420]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 52.0
+offset_right = 20.0
+offset_bottom = 52.0
+theme_override_constants/separation = 6
+
+[node name="TabA" type="Button" parent="Window/Tabs" unique_id=961959352]
+custom_minimum_size = Vector2(118, 32)
+layout_mode = 2
+theme_type_variation = &"TabButton"
+theme_override_font_sizes/font_size = 14
 text = "Chest"
 
-[node name="ChestList" type="VBoxContainer" parent="Panel/Margin/HBox/ChestColumn" unique_id=1933073835]
+[node name="TabB" type="Button" parent="Window/Tabs" unique_id=306494279]
+custom_minimum_size = Vector2(118, 32)
 layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="BackpackColumn" type="VBoxContainer" parent="Panel/Margin/HBox" unique_id=1401399666]
-custom_minimum_size = Vector2(180, 0)
-layout_mode = 2
-
-[node name="BackpackTitle" type="Label" parent="Panel/Margin/HBox/BackpackColumn" unique_id=2038406846]
-layout_mode = 2
-theme_type_variation = &"PanelTitle"
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"TabButton"
+theme_override_font_sizes/font_size = 14
 text = "Backpack"
 
-[node name="BackpackList" type="VBoxContainer" parent="Panel/Margin/HBox/BackpackColumn" unique_id=1692557887]
+[node name="CountLabel" type="Label" parent="Window" unique_id=1917792437]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 60.0
+offset_right = 444.0
+offset_bottom = 83.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 2
+
+[node name="GridScroll" type="ScrollContainer" parent="Window" unique_id=2019087126]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 96.0
+offset_right = 444.0
+offset_bottom = 490.0
+horizontal_scroll_mode = 0
+
+[node name="Grid" type="GridContainer" parent="Window/GridScroll" unique_id=453272040]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 6
+
+[node name="DetailPane" type="Panel" parent="Window" unique_id=1520732865]
+layout_mode = 0
+offset_left = 452.0
+offset_top = 96.0
+offset_right = 700.0
+offset_bottom = 490.0
+theme_type_variation = &"DetailPanel"
+
+[node name="DetailIcon" type="TextureRect" parent="Window/DetailPane" unique_id=1141975390]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 60.0
+offset_bottom = 60.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DetailName" type="Label" parent="Window/DetailPane" unique_id=1287903737]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 10.0
+offset_right = 68.0
+offset_bottom = 10.0
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 17
+
+[node name="DetailType" type="Label" parent="Window/DetailPane" unique_id=1253793132]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 34.0
+offset_right = 238.0
+offset_bottom = 66.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="DetailDesc" type="Label" parent="Window/DetailPane" unique_id=2131908641]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 72.0
+offset_right = 236.0
+offset_bottom = 152.0
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+
+[node name="DetailValue" type="Label" parent="Window/DetailPane" unique_id=1909998522]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 158.0
+offset_right = 236.0
+offset_bottom = 198.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="Actions" type="VBoxContainer" parent="Window/DetailPane" unique_id=1150474293]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 206.0
+offset_right = 236.0
+offset_bottom = 294.0
+theme_override_constants/separation = 8
+
+[node name="PrimaryAction" type="Button" parent="Window/DetailPane/Actions" unique_id=2059875741]
+visible = false
+custom_minimum_size = Vector2(224, 40)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+theme_override_font_sizes/font_size = 15
+
+[node name="SecondaryAction" type="Button" parent="Window/DetailPane/Actions" unique_id=84352652]
+visible = false
+custom_minimum_size = Vector2(224, 40)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 15
+
+[node name="HintLabel" type="Label" parent="Window" unique_id=1474089798]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 500.0
+offset_right = 20.0
+offset_bottom = 500.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12

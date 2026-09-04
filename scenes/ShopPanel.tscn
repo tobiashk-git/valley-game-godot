@@ -2,51 +2,179 @@
 
 [ext_resource type="Script" path="res://scripts/shop_panel.gd" id="1_0i4jb"]
 
-[node name="ShopPanel" type="CanvasLayer" unique_id=227444146]
+[node name="ShopPanel" type="CanvasLayer" unique_id=2001421263]
 script = ExtResource("1_0i4jb")
 
-[node name="Panel" type="Panel" parent="." unique_id=1766770005]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -190.0
-offset_top = -150.0
-offset_right = 190.0
-offset_bottom = 150.0
-
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1927631722]
-layout_mode = 0
+[node name="Dim" type="ColorRect" parent="." unique_id=1618959684]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.45)
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1858275971]
-layout_mode = 2
-theme_override_constants/separation = 8
+[node name="Window" type="Panel" parent="." unique_id=1500080123]
+offset_left = 40.0
+offset_top = 56.0
+offset_right = 760.0
+offset_bottom = 586.0
 
-[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=135178890]
-layout_mode = 2
+[node name="TitleLabel" type="Label" parent="Window" unique_id=1350104859]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 12.0
+offset_right = 20.0
+offset_bottom = 12.0
 theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 20
 text = "Village Trader"
 
-[node name="GoldLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1497600919]
-layout_mode = 2
+[node name="SubtitleLabel" type="Label" parent="Window" unique_id=1851649161]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 18.0
+offset_right = 660.0
+offset_bottom = 41.0
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 13
+horizontal_alignment = 2
 
-[node name="Tabs" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1527824649]
-layout_mode = 2
-theme_override_constants/separation = 8
+[node name="CloseBtn" type="Button" parent="Window" unique_id=905047569]
+layout_mode = 0
+offset_left = 676.0
+offset_top = 10.0
+offset_right = 708.0
+offset_bottom = 42.0
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 15
+text = "X"
 
-[node name="BuyTabBtn" type="Button" parent="Panel/Margin/VBox/Tabs" unique_id=1970755352]
+[node name="Tabs" type="HBoxContainer" parent="Window" unique_id=2142383490]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 52.0
+offset_right = 20.0
+offset_bottom = 52.0
+theme_override_constants/separation = 6
+
+[node name="TabA" type="Button" parent="Window/Tabs" unique_id=1464837893]
+custom_minimum_size = Vector2(118, 32)
 layout_mode = 2
+theme_type_variation = &"TabButton"
+theme_override_font_sizes/font_size = 14
 text = "Buy"
 
-[node name="SellTabBtn" type="Button" parent="Panel/Margin/VBox/Tabs" unique_id=1869915351]
+[node name="TabB" type="Button" parent="Window/Tabs" unique_id=811260895]
+custom_minimum_size = Vector2(118, 32)
 layout_mode = 2
+theme_type_variation = &"TabButton"
+theme_override_font_sizes/font_size = 14
 text = "Sell"
 
-[node name="List" type="VBoxContainer" parent="Panel/Margin/VBox" unique_id=122420444]
+[node name="CountLabel" type="Label" parent="Window" unique_id=1672121863]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 60.0
+offset_right = 444.0
+offset_bottom = 83.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 2
+
+[node name="GridScroll" type="ScrollContainer" parent="Window" unique_id=2002791639]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 96.0
+offset_right = 444.0
+offset_bottom = 490.0
+horizontal_scroll_mode = 0
+
+[node name="Grid" type="GridContainer" parent="Window/GridScroll" unique_id=1319931856]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 6
+
+[node name="DetailPane" type="Panel" parent="Window" unique_id=1514749314]
+layout_mode = 0
+offset_left = 452.0
+offset_top = 96.0
+offset_right = 700.0
+offset_bottom = 490.0
+theme_type_variation = &"DetailPanel"
+
+[node name="DetailIcon" type="TextureRect" parent="Window/DetailPane" unique_id=296693017]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 60.0
+offset_bottom = 60.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DetailName" type="Label" parent="Window/DetailPane" unique_id=862665935]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 10.0
+offset_right = 68.0
+offset_bottom = 10.0
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 17
+
+[node name="DetailType" type="Label" parent="Window/DetailPane" unique_id=1388254253]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 34.0
+offset_right = 238.0
+offset_bottom = 66.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="DetailDesc" type="Label" parent="Window/DetailPane" unique_id=480006961]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 72.0
+offset_right = 236.0
+offset_bottom = 152.0
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+
+[node name="DetailValue" type="Label" parent="Window/DetailPane" unique_id=506094479]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 158.0
+offset_right = 236.0
+offset_bottom = 198.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="Actions" type="VBoxContainer" parent="Window/DetailPane" unique_id=67423340]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 206.0
+offset_right = 236.0
+offset_bottom = 294.0
+theme_override_constants/separation = 8
+
+[node name="PrimaryAction" type="Button" parent="Window/DetailPane/Actions" unique_id=159329526]
+visible = false
+custom_minimum_size = Vector2(224, 40)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+theme_override_font_sizes/font_size = 15
+
+[node name="SecondaryAction" type="Button" parent="Window/DetailPane/Actions" unique_id=2130815395]
+visible = false
+custom_minimum_size = Vector2(224, 40)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 15
+
+[node name="HintLabel" type="Label" parent="Window" unique_id=862985241]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 500.0
+offset_right = 20.0
+offset_bottom = 500.0
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12

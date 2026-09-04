@@ -520,38 +520,9 @@ func _refresh_grid() -> void:
 # connect_select=false for callers that wire their own pressed handler
 # (the Crafting tab's recipe / enhance-target grids).
 func _make_slot(item_id: String, count: int, selected: bool, inst: Dictionary, connect_select: bool = true) -> Button:
-	var btn := Button.new()
-	btn.name = item_id.to_pascal_case() + "Slot"
-	btn.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
-	btn.theme_type_variation = &"SlotButtonSelected" if selected else &"SlotButton"
-	btn.icon = Items.get_item_icon(item_id)
-	btn.expand_icon = true
-	btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	btn.tooltip_text = Items.instance_name(inst) if not inst.is_empty() else Items.get_item_name(item_id)
-	if connect_select:
-		btn.pressed.connect(select_item.bind(item_id, "", inst.uid if not inst.is_empty() else 0))
-	if not inst.is_empty() and not inst.mods.is_empty():
-		# Enhanced gear gets a small gold star so it stands out in the grid.
-		var star := Label.new()
-		star.name = "Enhanced"
-		star.text = "*"
-		star.position = Vector2(4, -2)
-		star.add_theme_font_size_override("font_size", 18)
-		star.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
-		star.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		btn.add_child(star)
-	if count > 1:
-		var badge := Label.new()
-		badge.name = "Count"
-		badge.text = str(count)
-		badge.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-		badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-		badge.grow_vertical = Control.GROW_DIRECTION_BEGIN
-		badge.position = Vector2(-22, -20)
-		badge.add_theme_font_size_override("font_size", 12)
-		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		btn.add_child(badge)
-	return btn
+	# The slot itself is the kit's shared one (kit_window.gd), also used by
+	# the shop and chest windows: icon, count badge, gold * on enhanced gear.
+	return KitWindow.make_slot(item_id, count, selected, inst, connect_select, "", select_item.bind(item_id, "", inst.uid if not inst.is_empty() else 0))
 
 func _refresh_detail() -> void:
 	primary_action.visible = false

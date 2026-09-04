@@ -14,7 +14,7 @@ extends CanvasLayer
 # doesn't touch Quests.tracked_quests or anything else.
 
 const PANEL_AUTOLOADS: Array[String] = [
-	"CharacterSheet", "QuestPanel", "WorldMapPanel",
+	"CharacterSheet", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel",
 ]
 
 @onready var vbox: VBoxContainer = $VBox
