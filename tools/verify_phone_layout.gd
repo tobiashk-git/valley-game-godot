@@ -26,7 +26,7 @@ func _initialize() -> void:
 	var combat: Node = root.get_node("Combat")
 	var dialogue: CanvasLayer = root.get_node("DialogueUI")
 	var sheet: CanvasLayer = root.get_node("CharacterSheet")
-	var quest_panel: CanvasLayer = root.get_node("QuestPanel")
+	var quest_panel: Node = root.get_node("QuestPanel")
 	var shop_panel: CanvasLayer = root.get_node("ShopPanel")
 	var inventory: Node = root.get_node("Inventory")
 	var world: Node = root.get_node("World")
@@ -130,8 +130,10 @@ func _initialize() -> void:
 	# Legacy panels scaled to fit.
 	quest_panel.open()
 	await process_frame
-	var qp_rect: Rect2 = _rect(quest_panel.panel)
-	print("Journal (720 wide) scaled down to fit the phone width: ", quest_panel.panel.scale.x < 1.0 and qp_rect.size.x <= 400.0 - 16.0 + 0.5 and qp_rect.position.x >= 0.0)
+	var jv: Control = sheet.journal_view
+	print("Journal tab on the phone: header hidden, list above its pane, inside the window: ", quest_panel.is_open() and sheet.narrow and not sheet.header.visible and jv.visible and jv.detail_pane.position.y >= jv.list_scroll.position.y + jv.list_scroll.size.y and jv.detail_pane.get_global_rect().end.y <= sheet.window.get_global_rect().end.y)
+	root.get_texture().get_image().save_png("res://verify_phone_journal.png")
+	print("Saved verify_phone_journal.png")
 	quest_panel.close()
 	shop_panel.open()
 	await process_frame
@@ -159,5 +161,4 @@ func _initialize() -> void:
 	bar_rect = _rect(quick_bar.hbox)
 	print("Quick bar back at the bottom edge: ", 600.0 - bar_rect.end.y <= 24.0)
 	print("Battle panel back to 480 wide: ", battle.panel.offset_left == -240.0 and battle.panel.offset_right == 240.0)
-	print("Journal back at full scale: ", quest_panel.panel.scale == Vector2.ONE)
 	quit()

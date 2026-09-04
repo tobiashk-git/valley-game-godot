@@ -25,10 +25,13 @@ const SLOT_SIZE := 64
 const TAB_BUTTONS := {"inventory": "InventoryTab", "character": "CharacterTab", "crafting": "CraftingTab", "journal": "JournalTab", "map": "MapTab"}
 # [wide label, narrow label] - the five full names don't fit a phone-width strip.
 const TAB_LABELS := {"inventory": ["Inventory", "Items"], "character": ["Character", "Hero"], "crafting": ["Crafting", "Craft"], "journal": ["Journal", "Quests"], "map": ["Map", "Map"]}
-# Tabs that (for now) close this window and open the old standalone panel.
-# (Map used to be one; it's a real tab since Phase 3b - the standalone
-# window lost the tab strip, "can't switch back to inventory".)
-const EXTERNAL_TABS := {"journal": "QuestPanel"}
+# Every tab is a real tab now. (Journal and Map used to close this window
+# and open standalone panels - the strip vanished, "can't switch back to
+# inventory" - so they moved in as views; QuestPanel/WorldMapPanel are
+# aliases.)
+const EXTERNAL_TABS := {}
+# Tabs that hide the header (their content needs the height).
+const HEADERLESS_TABS := ["map", "journal"]
 
 # Crafting feedback (user feedback: "on crafting an item it's not obvious
 # that something has happened"). Recipes are drawn as blueprints - icons
@@ -72,6 +75,7 @@ const FLASH_SECONDS := 1.4
 @onready var stats_list: VBoxContainer = $Window/CharacterScroll/CharacterView/StatsList
 @onready var crafting_view: Control = $Window/CraftingView
 @onready var map_view: Control = $Window/MapView
+@onready var journal_view: Control = $Window/JournalView
 @onready var craft_mode_btn: Button = $Window/CraftingView/Modes/CraftMode
 @onready var enhance_mode_btn: Button = $Window/CraftingView/Modes/EnhanceMode
 @onready var craft_count_label: Label = $Window/CraftingView/CraftCountLabel
@@ -179,6 +183,7 @@ func _doll_slot_button(slot: String) -> Button:
 	return character_view.get_node("Doll%sSlot" % slot.to_pascal_case())
 
 func _connect_signals() -> void:
+	Quests.changed.connect(_refresh)
 	Inventory.changed.connect(_refresh)
 	Character.changed.connect(_refresh)
 	Combat.changed.connect(_refresh)
@@ -197,7 +202,7 @@ func _apply_layout() -> void:
 	var slots: Dictionary = Character.SLOTS
 	# The Map tab hides the header (the 408px map frame needs the height);
 	# the views then start right under the tab strip.
-	var map_tab: bool = current_tab == "map"
+	var map_tab: bool = current_tab in HEADERLESS_TABS
 	header.visible = not map_tab
 	separator.visible = not map_tab
 	if not narrow:
@@ -226,6 +231,8 @@ func _apply_layout() -> void:
 		_layout_crafting(Vector2(0, 158), Vector2(720, 360))
 		_place(map_view, Vector2(0, 66), Vector2(720, 452))
 		map_view.apply_layout(false, map_view.size)
+		_place(journal_view, Vector2(0, 66), Vector2(720, 452))
+		journal_view.apply_layout(false, journal_view.size)
 		return
 
 	var iw: float = Layout.width - 24.0
@@ -265,6 +272,8 @@ func _apply_layout() -> void:
 	_layout_crafting(view_pos, view_size)
 	_place(map_view, view_pos, view_size)
 	map_view.apply_layout(true, view_size)
+	_place(journal_view, view_pos, view_size)
+	journal_view.apply_layout(true, view_size)
 
 func _place(c: Control, pos: Vector2, size: Vector2) -> void:
 	c.position = pos
@@ -466,6 +475,7 @@ func _refresh() -> void:
 	character_scroll.visible = current_tab == "character"
 	crafting_view.visible = current_tab == "crafting"
 	map_view.visible = current_tab == "map"
+	journal_view.visible = current_tab == "journal"
 	# The paper doll shows the equipment itself, so the header's three slot
 	# buttons would be duplicates on that tab.
 	for slot in Character.SLOTS:
@@ -481,6 +491,8 @@ func _refresh() -> void:
 		_refresh_crafting()
 	elif current_tab == "map":
 		map_view.refresh()
+	elif current_tab == "journal":
+		journal_view.refresh()
 
 func _refresh_header() -> void:
 	var stats: Dictionary = Character.stats
@@ -1012,5 +1024,7 @@ func _process(_delta: float) -> void:
 		toggle("crafting")
 	elif Input.is_action_just_pressed("toggle_map"):
 		toggle("map")
+	elif Input.is_action_just_pressed("toggle_quests"):
+		toggle("journal")
 	elif is_open() and Input.is_action_just_pressed("ui_cancel"):
 		close()

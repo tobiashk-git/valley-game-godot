@@ -42,7 +42,7 @@ func _initialize() -> void:
 
 	panel_buttons.quest_btn.pressed.emit()
 	await process_frame
-	print("Journal opens via toolbar click: ", quest_panel.get_node("Panel").visible)
+	print("Journal opens via toolbar click (sheet, Journal tab): ", quest_panel.is_open() and sheet.is_open() and sheet.current_tab == "journal")
 	panel_buttons.quest_btn.pressed.emit()
 	await process_frame
 
@@ -57,7 +57,7 @@ func _initialize() -> void:
 	await process_frame
 	panel_buttons.inventory_btn.pressed.emit()
 	await process_frame
-	print("Switching to Inventory closes the Journal: ", sheet.is_open() and not quest_panel.get_node("Panel").visible)
+	print("Switching to Inventory leaves the Journal tab: ", sheet.is_open() and sheet.current_tab == "inventory" and not quest_panel.is_open())
 
 	# --- The other sheet tabs' buttons switch tabs rather than closing. ---
 	panel_buttons.character_btn.pressed.emit()

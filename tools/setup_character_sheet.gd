@@ -467,6 +467,59 @@ func _build() -> void:
 	places_scroll.add_child(places)
 	_label(mapv, "HintLabel", "Tap a marker or a name to see the place. Fast Travel lands you at its entrance.", Vector2(20, 436), 12, &"DimLabel")
 
+	# --- Journal view (UI redesign Phase 3c; the old QuestPanel moved in).
+	# Logic in scripts/journal_view.gd: quest rows under Active / Completed
+	# headers on the left, the selected quest's giver / goal / progress /
+	# reward / Track button on the right. Header hidden on this tab too. ---
+	var jrn := Control.new()
+	jrn.name = "JournalView"
+	jrn.set_script(load("res://scripts/journal_view.gd"))
+	jrn.position = Vector2(0, 66)
+	jrn.size = Vector2(720, 452)
+	jrn.visible = false
+	window.add_child(jrn)
+	var list_scroll := ScrollContainer.new()
+	list_scroll.name = "ListScroll"
+	list_scroll.position = Vector2(20, 0)
+	list_scroll.size = Vector2(424, 430)
+	list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	jrn.add_child(list_scroll)
+	var quest_list := VBoxContainer.new()
+	quest_list.name = "QuestList"
+	quest_list.add_theme_constant_override("separation", 4)
+	list_scroll.add_child(quest_list)
+	var jpane := Panel.new()
+	jpane.name = "DetailPane"
+	jpane.position = Vector2(452, 0)
+	jpane.size = Vector2(248, 430)
+	jpane.theme_type_variation = &"DetailPanel"
+	jrn.add_child(jpane)
+	var qname := _label(jpane, "QuestName", "", Vector2(12, 10), 17, &"PanelTitle")
+	qname.size = Vector2(224, 44)
+	qname.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_label(jpane, "QuestGiver", "", Vector2(12, 56), 12, &"DimLabel")
+	for entry in [["QuestGoal", Vector2(12, 76), Vector2(224, 60), 13], ["QuestProgress", Vector2(12, 140), Vector2(224, 40), 13]]:
+		var rtl := RichTextLabel.new()
+		rtl.name = entry[0]
+		rtl.bbcode_enabled = true
+		rtl.scroll_active = false
+		rtl.position = entry[1]
+		rtl.size = entry[2]
+		rtl.add_theme_font_size_override("normal_font_size", entry[3])
+		jpane.add_child(rtl)
+	var qreward := _label(jpane, "QuestReward", "", Vector2(12, 184), 12, &"DimLabel")
+	qreward.size = Vector2(224, 36)
+	qreward.autowrap_mode = TextServer.AUTOWRAP_WORD
+	var track := Button.new()
+	track.name = "TrackBtn"
+	track.text = "Track on screen"
+	track.position = Vector2(12, 228)
+	track.size = Vector2(224, 40)
+	track.theme_type_variation = &"PrimaryButton"
+	track.add_theme_font_size_override("font_size", 15)
+	jpane.add_child(track)
+	_label(jrn, "HintLabel", "Tap a quest to see it. Tracked quests show at the top right of the screen (up to 2).", Vector2(20, 436), 12, &"DimLabel")
+
 	_own(layer, layer)
 	var packed := PackedScene.new()
 	packed.pack(layer)

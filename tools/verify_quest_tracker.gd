@@ -6,14 +6,9 @@ extends SceneTree
 # godot --script res://tools/verify_quest_tracker.gd (NOT --headless - this
 # takes real screenshots via get_texture()).
 
-func _find_row(list: VBoxContainer, name_prefix: String) -> HBoxContainer:
-	for row in list.get_children():
-		if not row is HBoxContainer: # skip "Active"/"Completed" section headers
-			continue
-		var label: RichTextLabel = row.get_child(0)
-		if label.text.begins_with(name_prefix):
-			return row
-	return null
+# Journal rows are <PascalQuestId>Row buttons in the sheet's Journal tab.
+func _find_row(list: VBoxContainer, quest_id: String) -> Button:
+	return list.get_node_or_null(quest_id.to_pascal_case() + "Row")
 
 func _initialize() -> void:
 	var overworld_scene: PackedScene = load("res://scenes/Overworld.tscn")
@@ -41,28 +36,37 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("toggle_quests")
 	await process_frame
-	var list: VBoxContainer = quest_panel.get_node("Panel/Margin/VBox/List")
+	var journal: Control = root.get_node("CharacterSheet").journal_view
+	var list: VBoxContainer = journal.quest_list
 
-	var wood_row := _find_row(list, "A Village in Need")
-	var villagers_row := _find_row(list, "Meet the Village")
+	var wood_row := _find_row(list, "gather_wood")
+	var villagers_row := _find_row(list, "meet_villagers")
 	print("Found both rows: ", wood_row != null and villagers_row != null)
-	print("Both rows already read 'Tracking' (auto-tracked): ", (wood_row.get_child(1) as Button).text == "Tracking" and (villagers_row.get_child(1) as Button).text == "Tracking")
+	print("Both rows already marked tracked (auto-tracked): ", wood_row.get_node("Name").text.ends_with("(tracked)") and villagers_row.get_node("Name").text.ends_with("(tracked)"))
 
 	# --- A 3rd track request at the cap is refused (both slots already
 	# used by auto-tracking, not manual clicks this time). ---
 	quests.toggle_track("some_other_quest")
 	print("3rd quest refused at the cap: ", quests.tracked_quests.size() == 2 and not quests.tracked_quests.has("some_other_quest"))
 
-	# --- Manual untrack via the Journal's Tracking button still works. ---
-	(villagers_row.get_child(1) as Button).pressed.emit()
+	# --- Manual untrack via the Journal pane's Untrack button still works. ---
+	villagers_row.pressed.emit()
+	await process_frame
+	print("Selecting the tracked quest offers Untrack: ", journal.selected_quest == "meet_villagers" and journal.track_btn.visible and journal.track_btn.text == "Untrack")
+	journal.track_btn.pressed.emit()
 	await process_frame
 	print("Manual untrack works: ", quests.tracked_quests == ["gather_wood"])
-	list = quest_panel.get_node("Panel/Margin/VBox/List")
-	villagers_row = _find_row(list, "Meet the Village")
-	print("Untracked row now reads 'Track': ", (villagers_row.get_child(1) as Button).text == "Track")
-	(villagers_row.get_child(1) as Button).pressed.emit() # re-track for the rest of this test
+	villagers_row = _find_row(list, "meet_villagers")
+	print("Untracked quest now offers Track: ", journal.track_btn.text == "Track on screen" and not villagers_row.get_node("Name").text.ends_with("(tracked)"))
+	journal.track_btn.pressed.emit() # re-track for the rest of this test
 	await process_frame
 	print("Manual re-track works: ", quests.tracked_quests == ["gather_wood", "meet_villagers"])
+	wood_row = _find_row(list, "gather_wood")
+	wood_row.pressed.emit()
+	await process_frame
+	print("Pane shows the selected quest's giver, goal, progress and reward: ", journal.quest_name.text == "A Village in Need" and journal.quest_giver.text == "From the Village Elder" and journal.quest_goal.text.begins_with("Gather 5") and journal.quest_progress.text.begins_with("Progress: 0/5") and journal.quest_reward.text == "Reward: 20 gold, 1 Healing Potion")
+	root.get_texture().get_image().save_png("res://verify_quest_journal.png")
+	print("Saved verify_quest_journal.png")
 
 	# --- Tracker hidden while the Journal itself is open. ---
 	await process_frame

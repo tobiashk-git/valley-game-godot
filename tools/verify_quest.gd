@@ -76,20 +76,12 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("toggle_quests")
 	await process_frame
-	var journal_list: VBoxContainer = quest_panel.get_node("Panel/Margin/VBox/List")
-	# meet_villagers (the fence/gates tutorial quest) is pre-accepted from
-	# boot too, so it shares the Journal now - find the gather_wood row by
-	# name rather than assuming an index. The list also has "Active"/
-	# "Completed" section header Labels mixed in (no children), so skip
-	# anything that isn't a row before digging into child 0 for the text.
-	var wood_quest_label: RichTextLabel = null
-	for row in journal_list.get_children():
-		if not row is HBoxContainer:
-			continue
-		var label: RichTextLabel = row.get_child(0)
-		if label.text.begins_with("A Village in Need"):
-			wood_quest_label = label
-	print("Journal row: ", wood_quest_label.text)
+	# The Journal is the sheet's Journal tab now: one row per quest, named
+	# <PascalQuestId>Row, with a Name label and a Status line.
+	var journal: Control = root.get_node("CharacterSheet").journal_view
+	var wood_row: Button = journal.quest_list.get_node("GatherWoodRow")
+	print("Journal row: ", wood_row.get_node("Name").text, " - ", wood_row.get_node("Status").text)
+	print("Journal opened on the tab with the row's live progress: ", quest_panel.is_open() and wood_row.get_node("Status").text.begins_with("0/5"))
 	Input.action_press("toggle_quests")
 	await process_frame
 	Input.action_release("toggle_quests")
@@ -151,16 +143,15 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("toggle_quests")
 	await process_frame
-	var wood_quest_row: HBoxContainer = null
-	for row in journal_list.get_children():
-		if not row is HBoxContainer:
-			continue
-		var label: RichTextLabel = row.get_child(0)
-		if label.text.begins_with("A Village in Need"):
-			wood_quest_row = row
-			wood_quest_label = label
-	print("Journal shows it under Completed (bare name, no suffix): ", wood_quest_label.text == "A Village in Need")
-	print("Completed row has no Track button: ", wood_quest_row.get_child_count() == 1)
+	var done_row: Button = journal.quest_list.get_node("GatherWoodRow")
+	var completed_header_index := -1
+	for child in journal.quest_list.get_children():
+		if child is Label and child.text.begins_with("Completed"):
+			completed_header_index = child.get_index()
+	print("Journal shows it under Completed (status 'Completed', not tracked): ", done_row.get_node("Status").text == "Completed" and completed_header_index >= 0 and done_row.get_index() > completed_header_index and not done_row.get_node("Name").text.ends_with("(tracked)"))
+	done_row.pressed.emit()
+	await process_frame
+	print("Completed quest has no Track button in the pane: ", journal.selected_quest == "gather_wood" and not journal.track_btn.visible and journal.quest_progress.text.contains("Completed"))
 	print("Completing untracked it: ", not quests.tracked_quests.has("gather_wood"))
 	root.get_texture().get_image().save_png("res://verify_quest_journal_done.png")
 
