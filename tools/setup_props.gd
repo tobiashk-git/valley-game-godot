@@ -73,7 +73,11 @@ func _initialize() -> void:
 
 	_build_sprite_prop("Tree", "res://assets/tree.png", 94.0, 80.0, 0.6)
 	_build_sprite_prop("Rock", "res://assets/rock.png", 32.0, 32.0, 1.0, Rect2(0, 0, 32, 32))
-	_build_sprite_prop("HouseEntrance", "res://assets/house.png", 69.0, 123.0, 0.75)
+	# house.png is now an AI-generated (Leonardo, "Lucid Origin") front-view
+	# cottage, keyed/cropped/downscaled to exactly 123px tall so this call's
+	# baked scale+offset kept working as a pure PNG swap (was the 69x123 LPC
+	# crop). Wider than before (117px) - the sprite is centred so that's free.
+	_build_sprite_prop("HouseEntrance", "res://assets/house.png", 117.0, 123.0, 0.75)
 	_build_drawn_prop("DungeonEntrance", "res://scripts/dungeon_entrance.gd")
 	_build_drawn_prop("CastleEntrance", "res://scripts/castle_entrance.gd")
 	# Phase 7b - real cropped-sprite entrance props (LPC Cavern & Ruin Tiles /
