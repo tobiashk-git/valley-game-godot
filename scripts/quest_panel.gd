@@ -14,6 +14,15 @@ func _ready() -> void:
 	panel.visible = false
 	Quests.changed.connect(_refresh)
 	Inventory.changed.connect(_refresh) # gather-objective progress depends on the backpack
+	Layout.changed.connect(_fit_width)
+	_fit_width()
+
+# Interim phone fit until this panel joins the character sheet (UI redesign
+# Phase 3): the 720-wide layout is scaled down about its centre to the
+# screen width, so it's usable rather than re-laid-out.
+func _fit_width() -> void:
+	panel.pivot_offset = panel.size / 2.0
+	panel.scale = Vector2.ONE * minf(1.0, (Layout.width - 16.0) / panel.size.x)
 
 func _status_text(quest_id: String) -> String:
 	if Quests.objective_met(quest_id):

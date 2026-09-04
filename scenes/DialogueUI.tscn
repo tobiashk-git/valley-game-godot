@@ -2,46 +2,46 @@
 
 [ext_resource type="Script" path="res://scripts/dialogue_ui.gd" id="1_0qyo7"]
 
-[node name="DialogueUI" type="CanvasLayer" unique_id=201730557]
+[node name="DialogueUI" type="CanvasLayer" unique_id=648099470]
 script = ExtResource("1_0qyo7")
 
-[node name="Panel" type="Panel" parent="." unique_id=16967842]
+[node name="Panel" type="Panel" parent="." unique_id=1384332116]
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 40.0
-offset_top = 60.0
+offset_top = 152.0
 offset_right = -40.0
-offset_bottom = 280.0
+offset_bottom = 372.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1271642398]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=2052623799]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=2115859781]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1005933040]
 layout_mode = 2
 
-[node name="NameLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1426957595]
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1499461007]
 layout_mode = 2
 theme_type_variation = &"PanelTitle"
 theme_override_font_sizes/font_size = 24
 
-[node name="TextLabel" type="RichTextLabel" parent="Panel/Margin/VBox" unique_id=167587965]
+[node name="TextLabel" type="RichTextLabel" parent="Panel/Margin/VBox" unique_id=1102268273]
 layout_mode = 2
 theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="HintLabel" type="Label" parent="Panel/Margin/VBox" unique_id=298216390]
+[node name="HintLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1406817749]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 15
 text = "Press E to close"
 
-[node name="ActionsRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=252094207]
+[node name="ActionsRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=588209699]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 8

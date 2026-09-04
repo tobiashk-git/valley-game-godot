@@ -16,10 +16,15 @@ func _initialize() -> void:
 	# expanded viewport (window/stretch/aspect="keep_width"), and read as
 	# "too low on the screen" even on desktop. 60px top margin clears the
 	# always-visible PanelButtons toolbar row (y 12-52), matching every
-	# other top-anchored overlay (QuestTracker, the 5 big panels).
+	# other top-anchored overlay (QuestTracker, the 5 big panels). Then moved
+	# down again to 152: the HUD grew its HP/MP/effects column and now ends
+	# at y<=143 (tools/verify_hud_bars.gd), and being an earlier autoload it
+	# drew over this box's name and first line of text ("the quest text box
+	# is partially hidden by the health bar box" - user, phone/iPad test).
+	# Same clearance the battle panel uses (setup_battle_panel.gd).
 	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	panel.offset_top = 60
-	panel.offset_bottom = 280
+	panel.offset_top = 152
+	panel.offset_bottom = 372
 	panel.offset_left = 40
 	panel.offset_right = -40
 	layer.add_child(panel)

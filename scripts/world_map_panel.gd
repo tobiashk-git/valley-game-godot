@@ -10,6 +10,14 @@ extends CanvasLayer
 
 func _ready() -> void:
 	panel.visible = false
+	Layout.changed.connect(_fit_width)
+	_fit_width()
+
+# Interim phone fit until the real map panel (UI redesign Phase 3): scaled
+# down about its centre to the screen width - see quest_panel.gd.
+func _fit_width() -> void:
+	panel.pivot_offset = panel.size / 2.0
+	panel.scale = Vector2.ONE * minf(1.0, (Layout.width - 16.0) / panel.size.x)
 
 func _refresh() -> void:
 	status_label.text = "You are in %s" % WorldMap.current_location_name()

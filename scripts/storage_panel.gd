@@ -18,6 +18,15 @@ func _ready() -> void:
 	# close-press is seen by them as "still open" this frame and they don't
 	# immediately reopen what this same press just closed.
 	process_priority = 10
+	Layout.changed.connect(_fit_width)
+	_fit_width()
+
+# Interim phone fit until storage joins the character sheet's kit (UI
+# redesign Phase 3): scaled about its centre to the screen width - see
+# quest_panel.gd.
+func _fit_width() -> void:
+	panel.pivot_offset = panel.size / 2.0
+	panel.scale = Vector2.ONE * minf(1.0, (Layout.width - 16.0) / panel.size.x)
 
 func is_open() -> bool:
 	return panel.visible

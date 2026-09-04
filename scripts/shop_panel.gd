@@ -21,6 +21,15 @@ func _ready() -> void:
 	Shop.changed.connect(_refresh)
 	buy_tab_btn.pressed.connect(_set_tab.bind("buy"))
 	sell_tab_btn.pressed.connect(_set_tab.bind("sell"))
+	Layout.changed.connect(_fit_width)
+	_fit_width()
+
+# Interim phone fit until the shop joins the character sheet's kit (UI
+# redesign Phase 3): scaled about its centre to the screen width - see
+# quest_panel.gd.
+func _fit_width() -> void:
+	panel.pivot_offset = panel.size / 2.0
+	panel.scale = Vector2.ONE * minf(1.0, (Layout.width - 16.0) / panel.size.x)
 
 func is_open() -> bool:
 	return panel.visible

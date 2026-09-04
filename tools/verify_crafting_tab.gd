@@ -61,6 +61,17 @@ func _initialize() -> void:
 	await process_frame
 	print("Crafting consumes the ingredients and makes the potion: ", inventory.get_count("healing_potion") == 1 and inventory.get_count("wood") == 0 and inventory.get_count("stone") == 0)
 	print("Craft disabled again after spending the ingredients: ", sheet.craft_action.disabled)
+	# --- Feedback (user: "not obvious that something has happened"): the
+	# button reads Crafted!, the checklist gives way to a line naming the
+	# item and the new count, the pane says how many you carry, and it all
+	# clears itself after a moment. Recipes are drawn as blueprints. ---
+	print("Craft feedback shows: Crafted! + what you now have: ", sheet.flash_kind == "craft" and sheet.craft_action.text == "Crafted!" and sheet.flash_label.visible and sheet.flash_label.text.contains("Crafted Healing Potion") and sheet.flash_label.text.contains("you now have 1") and not sheet.craft_rows_scroll.visible)
+	print("Pane counts the result in the backpack: ", sheet.craft_type.text == "Consumable  -  you have 1")
+	root.get_texture().get_image().save_png("res://verify_craft_flash.png")
+	print("Saved verify_craft_flash.png")
+	await create_timer(sheet.FLASH_SECONDS + 0.3).timeout
+	print("Feedback clears itself after a moment: ", sheet.flash_kind == "" and sheet.craft_action.text == "Craft" and sheet.craft_rows_scroll.visible and not sheet.flash_label.visible)
+	print("Recipe slots and the pane icon are drawn as blueprints (blue tint): ", sheet.craft_grid.get_node("RecipeHealingPotionSlot").get_theme_color("icon_normal_color") == sheet.BLUEPRINT_TINT and sheet.craft_icon.modulate == sheet.BLUEPRINT_TINT)
 
 	# --- Craft gear -> an instance. ---
 	inventory.add_item("wood", 4)
@@ -87,6 +98,7 @@ func _initialize() -> void:
 	var armor: Dictionary = inventory.find_gear(armor_uid)
 	print("Enhancing adds the mod and spends the fur: ", armor.mods.size() == 1 and armor.mods[0].label == "Fur-lined" and inventory.get_count("monster_fur") == 0)
 	print("Enhanced name and stats: ", items.instance_name(armor) == "Fur-lined Leather Armor" and items.instance_stat(armor, "defense") == 4 and items.describe_instance(armor) == "Defense +3, Fur-lined +1")
+	print("Enhance feedback shows: Enhanced! + the new name: ", sheet.flash_kind == "enhance" and sheet.craft_action.text == "Enhanced!" and sheet.flash_label.text.contains("Leather Armor is now Fur-lined Leather Armor"))
 	print("Pane now shows the current enhancement and 'Replaces': ", sheet.craft_desc.text == "Current: Fur-lined" and sheet.craft_name.text == "Fur-lined Leather Armor")
 
 	# --- Equip it: totals include the mod, combat reads them. ---

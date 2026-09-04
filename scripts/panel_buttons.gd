@@ -19,6 +19,11 @@ const PANEL_AUTOLOADS: Array[String] = [
 @onready var crafting_btn: Button = $HBox/CraftingBtn
 @onready var quest_btn: Button = $HBox/QuestBtn
 @onready var map_btn: Button = $HBox/MapBtn
+@onready var hbox: HBoxContainer = $HBox
+# Phone-width screens (Layout.is_narrow()) show this single button instead
+# of the five-letter row, which wouldn't fit beside the HUD; it opens the
+# character sheet, whose tab strip reaches all five screens.
+@onready var menu_btn: Button = $MenuBtn
 
 func _ready() -> void:
 	inventory_btn.pressed.connect(_on_sheet_pressed.bind("inventory"))
@@ -26,6 +31,26 @@ func _ready() -> void:
 	crafting_btn.pressed.connect(_on_sheet_pressed.bind("crafting"))
 	quest_btn.pressed.connect(_on_pressed.bind("QuestPanel"))
 	map_btn.pressed.connect(_on_pressed.bind("WorldMapPanel"))
+	menu_btn.pressed.connect(_on_menu_pressed)
+	Layout.changed.connect(_apply_layout)
+	_apply_layout()
+
+func _apply_layout() -> void:
+	hbox.visible = not Layout.is_narrow()
+	menu_btn.visible = Layout.is_narrow()
+
+# Menu: anything open -> close it all; nothing open -> the sheet on its
+# last tab.
+func _on_menu_pressed() -> void:
+	if Combat.in_combat:
+		return
+	var any_open := false
+	for autoload_name in PANEL_AUTOLOADS:
+		if get_node("/root/%s" % autoload_name).is_open():
+			any_open = true
+	_close_all()
+	if not any_open:
+		get_node("/root/CharacterSheet").open()
 
 func _close_all() -> void:
 	for autoload_name in PANEL_AUTOLOADS:

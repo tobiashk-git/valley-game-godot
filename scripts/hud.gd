@@ -12,6 +12,8 @@ extends CanvasLayer
 
 @onready var panel: Panel = $Panel
 @onready var margin: MarginContainer = $Panel/Margin
+@onready var vbox: VBoxContainer = $Panel/Margin/VBox
+@onready var hbox: HBoxContainer = $Panel/Margin/VBox/HBox
 @onready var wood_label: Label = $Panel/Margin/VBox/HBox/WoodLabel
 @onready var stone_label: Label = $Panel/Margin/VBox/HBox/StoneLabel
 @onready var gold_label: Label = $Panel/Margin/VBox/HBox/GoldLabel
@@ -43,13 +45,34 @@ const SCENE_LOCATIONS := {
 
 var _last_location := ""
 
+# Panel width at 800 wide; on a phone (Layout.is_narrow()) it shrinks to
+# leave room for the toolbar's single Menu button (68px + 12px edge + 12px
+# gap) on the same row, and the location label moves onto its own line
+# under the counters (beside them it would have ~50px and split
+# "Verdantwood" mid-word).
+const WIDE_WIDTH := 320.0
+const NARROW_RESERVE := 92.0
+
 func _ready() -> void:
 	Inventory.changed.connect(_refresh)
 	_refresh()
+	Layout.changed.connect(_apply_layout)
+	_apply_layout()
 	# HUD is an earlier autoload than Character/Combat (see project.godot),
 	# so they don't exist yet during this _ready() - deferring to the end of
 	# the frame lands after every autoload has been added.
 	_connect_stats.call_deferred()
+
+func _apply_layout() -> void:
+	if Layout.is_narrow():
+		panel.size.x = minf(WIDE_WIDTH, Layout.width - 24.0 - NARROW_RESERVE)
+		if location_label.get_parent() != vbox:
+			location_label.reparent(vbox, false)
+			vbox.move_child(location_label, 1)
+	else:
+		panel.size.x = WIDE_WIDTH
+		if location_label.get_parent() != hbox:
+			location_label.reparent(hbox, false)
 
 func _connect_stats() -> void:
 	Character.changed.connect(_refresh_stats)

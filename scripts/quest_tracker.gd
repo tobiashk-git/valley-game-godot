@@ -26,6 +26,24 @@ func _ready() -> void:
 	Quests.changed.connect(_refresh)
 	Inventory.changed.connect(_refresh) # gather-objective progress depends on the backpack
 	_refresh()
+	Layout.changed.connect(_apply_layout)
+	_apply_layout()
+
+# Right-aligned strip: beside the HUD at 800 wide (the builder's y=64,
+# under the toolbar); on a phone the HUD spans most of the width, so the
+# strip drops below it (the HUD ends by y=143, see hud.gd) instead.
+func _apply_layout() -> void:
+	if Layout.is_narrow():
+		var w: float = minf(256.0, Layout.width - 24.0)
+		vbox.offset_left = -(w + 12.0)
+		vbox.offset_right = -12.0
+		vbox.offset_top = 152.0
+		vbox.offset_bottom = 152.0 + 400.0
+	else:
+		vbox.offset_left = -268.0
+		vbox.offset_right = -12.0
+		vbox.offset_top = 64.0
+		vbox.offset_bottom = 588.0
 
 func _status_text(quest_id: String) -> String:
 	var state: String = Quests.quest_state[quest_id]

@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/panel_buttons.gd" id="1_m36ys"]
 
-[node name="PanelButtons" type="CanvasLayer" unique_id=964813604]
+[node name="PanelButtons" type="CanvasLayer" unique_id=491867161]
 script = ExtResource("1_m36ys")
 
-[node name="HBox" type="HBoxContainer" parent="." unique_id=282641392]
+[node name="HBox" type="HBoxContainer" parent="." unique_id=935627013]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -15,32 +15,44 @@ offset_right = -252.0
 offset_bottom = 12.0
 theme_override_constants/separation = 8
 
-[node name="InventoryBtn" type="Button" parent="HBox" unique_id=1091512419]
+[node name="InventoryBtn" type="Button" parent="HBox" unique_id=278210614]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "I"
 
-[node name="CharacterBtn" type="Button" parent="HBox" unique_id=621093164]
+[node name="CharacterBtn" type="Button" parent="HBox" unique_id=221866833]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "C"
 
-[node name="CraftingBtn" type="Button" parent="HBox" unique_id=324322772]
+[node name="CraftingBtn" type="Button" parent="HBox" unique_id=1174547281]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "R"
 
-[node name="QuestBtn" type="Button" parent="HBox" unique_id=975774036]
+[node name="QuestBtn" type="Button" parent="HBox" unique_id=1527092748]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Q"
 
-[node name="MapBtn" type="Button" parent="HBox" unique_id=1787626274]
+[node name="MapBtn" type="Button" parent="HBox" unique_id=1872504542]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "M"
+
+[node name="MenuBtn" type="Button" parent="." unique_id=1601375234]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -80.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 56.0
+theme_override_font_sizes/font_size = 16
+text = "Menu"

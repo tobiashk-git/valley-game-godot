@@ -213,12 +213,21 @@ func _build() -> void:
 	# fitting slots around him (weapon by the hand, armour at the torso,
 	# accessory at the neck) | the tapped slot's worn item + carried
 	# alternatives. Modelled on the user's two reference screens. ---
+	# Wrapped in a ScrollContainer: on a phone-width screen (Layout.is_narrow())
+	# character_sheet.gd stacks the doll, the slot pane and the stats column
+	# vertically and lets the view scroll; at 800 wide the view fits and the
+	# scroll never engages. Paths are Window/CharacterScroll/CharacterView/...
+	var chr_scroll := ScrollContainer.new()
+	chr_scroll.name = "CharacterScroll"
+	chr_scroll.position = Vector2(0, 158)
+	chr_scroll.size = Vector2(720, 360)
+	chr_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	chr_scroll.visible = false
+	window.add_child(chr_scroll)
 	var chr := Control.new()
 	chr.name = "CharacterView"
-	chr.position = Vector2(0, 158)
-	chr.size = Vector2(720, 360)
-	chr.visible = false
-	window.add_child(chr)
+	chr.custom_minimum_size = Vector2(720, 360)
+	chr_scroll.add_child(chr)
 	var stats := VBoxContainer.new()
 	stats.name = "StatsList"
 	stats.position = Vector2(20, 0)
@@ -299,7 +308,10 @@ func _build() -> void:
 	slot_scroll.size = Vector2(94, 306)
 	slot_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	slot_pane.add_child(slot_scroll)
-	var slot_list := VBoxContainer.new()
+	# A plain BoxContainer (a VBoxContainer refuses to change orientation):
+	# vertical here, flipped sideways by character_sheet.gd on a phone.
+	var slot_list := BoxContainer.new()
+	slot_list.vertical = true
 	slot_list.name = "SlotList"
 	slot_list.add_theme_constant_override("separation", 4)
 	slot_scroll.add_child(slot_list)

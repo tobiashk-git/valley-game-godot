@@ -12,6 +12,10 @@ extends CanvasLayer
 
 const SLOT_SIZE := 48
 const BOTTOM_MARGIN := 20.0
+# On a phone (Layout.is_narrow()) the joystick (x 30..130) and interact
+# button (right 120px) leave no clear band between them at the bottom, so
+# the row lifts above both (their zones end 130px up).
+const NARROW_BOTTOM_MARGIN := 150.0
 # Panels whose open state hides the bar - each has an is_open().
 const OVERLAY_AUTOLOADS := ["CharacterSheet", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel"]
 
@@ -35,12 +39,19 @@ func _ready() -> void:
 	# screen. The setup_*.gd builders only get away with setting `position`
 	# on anchored controls because their parent has no size yet when they
 	# run, so it degenerates to the same thing as setting offsets.
-	hbox.reset_size()
-	_place_bottom_centre(hbox, hbox.size, BOTTOM_MARGIN)
-	_place_bottom_centre(feedback_label, feedback_label.size, BOTTOM_MARGIN + hbox.size.y + 6.0)
+	_apply_layout()
 	feedback_label.modulate.a = 0.0
 	Inventory.changed.connect(_refresh)
 	_refresh()
+	Layout.changed.connect(_apply_layout)
+
+func _bottom_margin() -> float:
+	return NARROW_BOTTOM_MARGIN if Layout.is_narrow() else BOTTOM_MARGIN
+
+func _apply_layout() -> void:
+	hbox.reset_size()
+	_place_bottom_centre(hbox, hbox.size, _bottom_margin())
+	_place_bottom_centre(feedback_label, feedback_label.size, _bottom_margin() + hbox.size.y + 6.0)
 
 # For a control anchored PRESET_CENTER_BOTTOM: offsets are relative to that
 # anchor point, so this centres it horizontally and lifts it `bottom` px
@@ -113,7 +124,7 @@ func use_item(item_id: String) -> void:
 func _show_feedback(text: String) -> void:
 	feedback_label.text = text
 	feedback_label.reset_size()
-	_place_bottom_centre(feedback_label, feedback_label.size, BOTTOM_MARGIN + hbox.size.y + 6.0)
+	_place_bottom_centre(feedback_label, feedback_label.size, _bottom_margin() + hbox.size.y + 6.0)
 	if _feedback_tween != null:
 		_feedback_tween.kill()
 	feedback_label.modulate.a = 1.0

@@ -40,6 +40,18 @@ func _ready() -> void:
 	if touch_available:
 		_position_interact_button()
 		get_viewport().size_changed.connect(_position_interact_button)
+	Layout.changed.connect(_on_layout_changed)
+
+# The zoom above was tuned with the logical viewport 800 units wide. Now
+# that a phone's logical width follows its screen (Layout: ~390 units on an
+# iPhone), the same zoom would show half as much world - scale it by the
+# width ratio so the field of view stays exactly what it was tuned to; only
+# the UI changes size.
+func _zoom() -> Vector2:
+	return MOBILE_ZOOM * (float(Layout.width) / float(Layout.WIDE_WIDTH))
+
+func _on_layout_changed() -> void:
+	_zoomed_camera = null # re-zoom the current camera for the new width
 
 # Every scene builds its own Camera2D in its own _ready() (Overworld, House,
 # Dungeon, etc.) - rather than touching every one of those scripts, just
@@ -49,7 +61,7 @@ func _process(_delta: float) -> void:
 	var cam := get_viewport().get_camera_2d()
 	if cam != null and cam != _zoomed_camera:
 		_zoomed_camera = cam
-		cam.zoom = MOBILE_ZOOM
+		cam.zoom = _zoom()
 
 # TouchScreenButton is a Node2D, not a Control - it has no anchor preset to
 # lean on like the joystick's BOTTOM_LEFT-anchored base, so its bottom-right

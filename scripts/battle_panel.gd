@@ -34,11 +34,26 @@ func _ready() -> void:
 
 	Combat.changed.connect(_refresh)
 	Character.changed.connect(_refresh)
+	Layout.changed.connect(_apply_layout)
+	_apply_layout()
 	attack_btn.pressed.connect(Combat.player_attack)
 	magic_btn.pressed.connect(Combat.open_magic_menu)
 	item_btn.pressed.connect(Combat.open_item_menu)
 	defend_btn.pressed.connect(Combat.player_defend)
 	run_btn.pressed.connect(Combat.player_run)
+
+# Centre-anchored 480x400 at 800 wide (builder); on a phone it spans the
+# width minus a 12px margin, and the five command buttons drop to a smaller
+# font so "Defend" still fits its fifth of the row.
+func _apply_layout() -> void:
+	var narrow: bool = Layout.is_narrow()
+	var w: float = Layout.width - 24.0 if narrow else 480.0
+	panel.offset_left = -w / 2.0
+	panel.offset_right = w / 2.0
+	panel.offset_top = -152.0
+	panel.offset_bottom = 248.0
+	for btn in [attack_btn, magic_btn, item_btn, defend_btn, run_btn]:
+		btn.add_theme_font_size_override("font_size", 13 if narrow else 16)
 
 func _on_slot_gui_input(event: InputEvent, index: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:

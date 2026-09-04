@@ -55,7 +55,7 @@ func _initialize() -> void:
 	for slot_id in character.SLOTS:
 		var pascal: String = slot_id.to_pascal_case()
 		var header_ok: bool = sheet.has_node("Window/Header/%sSlot" % pascal) and sheet.get_node("Window/Header/%sSlotLabel" % pascal).text == character.SLOTS[slot_id].label
-		var doll_ok: bool = sheet.has_node("Window/CharacterView/Doll%sSlot" % pascal) and sheet.has_node("Window/CharacterView/%sLine" % pascal) and sheet.get_node("Window/CharacterView/Doll%sSlotLabel" % pascal).text == character.SLOTS[slot_id].label
+		var doll_ok: bool = sheet.has_node("Window/CharacterScroll/CharacterView/Doll%sSlot" % pascal) and sheet.has_node("Window/CharacterScroll/CharacterView/%sLine" % pascal) and sheet.get_node("Window/CharacterScroll/CharacterView/Doll%sSlotLabel" % pascal).text == character.SLOTS[slot_id].label
 		if not (header_ok and doll_ok and character.equipment.has(slot_id)):
 			table_driven = false
 	var header_slot_count := 0
@@ -139,16 +139,18 @@ func _initialize() -> void:
 	print("Stats column lists attributes, core stats and effects: ", lines.has("Attributes") and lines.has("Core stats") and lines.has("Active effects") and lines.has("Strength=%d" % stats.strength) and lines.has("Defense=3") and lines.has("Attack=+0") and lines.has("None"))
 	print("Figure shown (sprite fallback or illustration): ", sheet.figure.texture != null)
 	print("Figure uses the keyed Oliver illustration: ", sheet.figure.texture.resource_path == sheet.PORTRAIT_ILLUSTRATION and sheet.figure.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR)
-	var doll_weapon: Button = sheet.get_node("Window/CharacterView/DollWeaponSlot")
-	var doll_armor: Button = sheet.get_node("Window/CharacterView/DollArmorSlot")
+	var doll_weapon: Button = sheet.get_node("Window/CharacterScroll/CharacterView/DollWeaponSlot")
+	var doll_armor: Button = sheet.get_node("Window/CharacterScroll/CharacterView/DollArmorSlot")
 	print("Doll slots mirror the equipment (armour icon, empty weapon): ", doll_armor.icon != null and doll_weapon.icon == null)
 	# Tap the armour slot -> pane shows it worn with Unequip.
 	doll_armor.pressed.emit()
 	await process_frame
 	var unequip_btn: Button = null
 	var equip_btns: Array = []
-	for child in sheet.slot_list.get_children():
-		if child is Button and child.visible:
+	# Items are 94px cards (icon / name / button) so they can flow sideways
+	# on a phone - search the cards, not just the list's direct children.
+	for child in sheet.slot_list.find_children("*", "Button", true, false):
+		if child.visible:
 			if child.text == "Unequip":
 				unequip_btn = child
 			elif child.text == "Equip":
@@ -164,8 +166,8 @@ func _initialize() -> void:
 	await process_frame
 	var greatsword_equip: Button = null
 	var carried_offered: Array = []
-	for child in sheet.slot_list.get_children():
-		if child is Button and child.visible and child.text == "Equip":
+	for child in sheet.slot_list.find_children("*", "Button", true, false):
+		if child.visible and child.text == "Equip":
 			carried_offered.append(child.get_meta("item_id"))
 			if child.get_meta("item_id") == "bone_greatsword":
 				greatsword_equip = child
@@ -215,7 +217,10 @@ func _initialize() -> void:
 		combat.player_run()
 		await physics_frame
 
-	# --- Phone-shaped viewport (keep_width: 800 logical wide, much taller). ---
+	# --- Phone-shaped viewport: Layout follows the window width (400 CSS px
+	# -> 400 logical units, was a fixed 800), and the sheet switches to its
+	# stacked narrow layout. ---
+	var layout: Node = root.get_node("Layout")
 	root.size = Vector2i(400, 860)
 	for i in range(4):
 		await process_frame
@@ -223,8 +228,43 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	var vis: Rect2 = root.get_visible_rect()
-	print("Phone viewport: visible rect ", vis.size, " - window still fully inside: ", sheet.window.position.y + sheet.window.size.y <= vis.size.y and sheet.window.position.x + sheet.window.size.x <= vis.size.x)
+	print("Phone viewport: logical width follows the screen (", vis.size, "): ", layout.width == 400 and layout.is_narrow() and vis.size == Vector2(400, 860) and sheet.narrow)
+	print("Window fills the phone width and stays inside: ", sheet.window.position.x == 12.0 and sheet.window.size.x == 376.0 and sheet.window.position.y + sheet.window.size.y <= vis.size.y)
+	var tabs_end: float = sheet.tabs.get_global_rect().end.x
+	print("Short tab names fit the strip beside the X (", sheet.tabs.get_node("InventoryTab").text, "...): ", sheet.tabs.get_node("InventoryTab").text == "Items" and sheet.tabs.get_node("JournalTab").text == "Quests" and tabs_end <= sheet.close_btn.global_position.x)
+	var slot_rect: Rect2 = sheet.get_node("Window/Header/WeaponSlot").get_global_rect()
+	print("Header slot row sits under the bars (64px slots, inside the window): ", slot_rect.position.y > sheet.mp_bar.get_global_rect().end.y and slot_rect.size == Vector2(64, 64) and sheet.get_node("Window/Header/AccessorySlot").get_global_rect().end.x <= sheet.window.get_global_rect().end.x)
+	var grid_rect: Rect2 = sheet.grid_scroll.get_global_rect()
+	var pane_rect: Rect2 = sheet.detail_pane.get_global_rect()
+	print("Grid drops to 4 columns (64px slots in 336px) and the detail pane sits below it, full width: ", sheet.grid.columns == 4 and pane_rect.position.y >= grid_rect.end.y and pane_rect.size.x == grid_rect.size.x and pane_rect.end.y <= sheet.window.get_global_rect().end.y, " cols=", sheet.grid.columns, " grid=", grid_rect, " pane=", pane_rect, " window=", sheet.window.get_global_rect())
+	print("Slots still 64px on the phone: ", sheet.grid.get_node("HealingPotionSlot").size.x >= 64.0)
 	root.get_texture().get_image().save_png("res://verify_sheet_phone.png")
 	print("Saved verify_sheet_phone.png")
+	sheet.open("character")
+	await process_frame
+	await process_frame
+	var doll_w: Button = sheet.get_node("Window/CharacterScroll/CharacterView/DollWeaponSlot")
+	var doll_a: Button = sheet.get_node("Window/CharacterScroll/CharacterView/DollArmorSlot")
+	var fig_rect: Rect2 = sheet.figure.get_global_rect()
+	print("Doll re-centred on the phone (weapon left of the figure, armour right, all inside): ", doll_w.get_global_rect().position.x < fig_rect.position.x and doll_a.get_global_rect().position.x >= fig_rect.end.x - 1.0 and doll_w.get_global_rect().position.x >= 12.0 and doll_a.get_global_rect().end.x <= 388.0)
+	print("Slot cards flow sideways under the doll and the stats stack below (view scrolls): ", not sheet.slot_list.vertical and sheet.slot_pane.position.y >= 284.0 and sheet.stats_list.position.y > sheet.slot_pane.position.y and sheet.character_view.custom_minimum_size.y > sheet.character_scroll.size.y)
+	root.get_texture().get_image().save_png("res://verify_sheet_phone_character.png")
+	print("Saved verify_sheet_phone_character.png")
+	sheet.open("crafting")
+	await process_frame
+	await process_frame
+	print("Crafting grid drops to 4 columns too: ", sheet.craft_grid.columns == 4, " (", sheet.craft_grid.columns, " scroll=", sheet.craft_scroll.size, ")")
+	print("Crafting pane below its grid on the phone, inside the window: ", sheet.craft_pane.position.y >= sheet.craft_scroll.position.y + sheet.craft_scroll.size.y and sheet.craft_pane.get_global_rect().end.y <= sheet.window.get_global_rect().end.y and sheet.craft_action.get_global_rect().end.y <= sheet.craft_pane.get_global_rect().end.y)
+	root.get_texture().get_image().save_png("res://verify_sheet_phone_crafting.png")
+	print("Saved verify_sheet_phone_crafting.png")
+	sheet.close()
+
+	# --- Back to desktop: the wide layout is restored exactly. ---
+	root.size = Vector2i(800, 600)
+	for i in range(4):
+		await process_frame
+	sheet.open("inventory")
+	await process_frame
+	print("Back at 800 wide: wide layout restored (720px window at x=40, 6 columns, full tab names): ", layout.width == 800 and not sheet.narrow and sheet.window.position == Vector2(40, 56) and sheet.window.size == Vector2(720, 530) and sheet.grid.columns == 6 and sheet.tabs.get_node("InventoryTab").text == "Inventory")
 	sheet.close()
 	quit()
