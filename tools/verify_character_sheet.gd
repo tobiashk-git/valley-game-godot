@@ -123,6 +123,7 @@ func _initialize() -> void:
 			lines.append(child.get_child(0).text + "=" + child.get_child(1).text)
 	print("Stats column lists attributes, core stats and effects: ", lines.has("Attributes") and lines.has("Core stats") and lines.has("Active effects") and lines.has("Strength=%d" % stats.strength) and lines.has("Defense=3") and lines.has("Attack=+0") and lines.has("None"))
 	print("Figure shown (sprite fallback or illustration): ", sheet.figure.texture != null)
+	print("Figure uses the keyed Oliver illustration: ", sheet.figure.texture.resource_path == sheet.PORTRAIT_ILLUSTRATION and sheet.figure.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR)
 	var doll_weapon: Button = sheet.get_node("Window/CharacterView/DollWeaponSlot")
 	var doll_armor: Button = sheet.get_node("Window/CharacterView/DollArmorSlot")
 	print("Doll slots mirror the equipment (armour icon, empty weapon): ", doll_armor.icon != null and doll_weapon.icon == null)

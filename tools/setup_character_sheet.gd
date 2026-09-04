@@ -230,18 +230,20 @@ func _build() -> void:
 	# The figure: character_sheet.gd fills it with assets/oliver_portrait.png
 	# if that exists (a keyed illustration, Leonardo track), else the player
 	# sprite's idle frame at 3x.
+	# Tall box between the two slot columns: a full-body illustration is
+	# roughly 1:3, so height is what buys it size.
 	var figure := TextureRect.new()
 	figure.name = "Figure"
-	figure.position = Vector2(306, 40)
-	figure.size = Vector2(192, 192)
+	figure.position = Vector2(300, 22)
+	figure.size = Vector2(204, 230)
 	figure.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	figure.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	figure.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	chr.add_child(figure)
 	var shadow := ColorRect.new()
 	shadow.name = "FigureShadow"
-	shadow.position = Vector2(330, 226)
-	shadow.size = Vector2(144, 10)
+	shadow.position = Vector2(352, 248)
+	shadow.size = Vector2(100, 8)
 	shadow.color = Color(0, 0, 0, 0.35)
 	chr.add_child(shadow)
 	# Slot -> figure connector lines, then the slots themselves + labels.
@@ -266,7 +268,7 @@ func _build() -> void:
 		var l := _label(chr, entry[0] + "Label", entry[1], entry[2] + Vector2(0, 66), 11, &"DimLabel")
 		l.size = Vector2(64, 14)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var hint := _label(chr, "DollHint", "Tap a slot to see what fits", Vector2(250, 250), 12, &"DimLabel")
+	var hint := _label(chr, "DollHint", "Tap a slot to see what fits", Vector2(250, 262), 12, &"DimLabel")
 	hint.size = Vector2(300, 20)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var slot_pane := Panel.new()

@@ -67,7 +67,13 @@ func _ready() -> void:
 	atlas.atlas = load("res://assets/player_base.png")
 	atlas.region = Rect2(0, 128, 64, 64) # Player.tscn's down_idle frame
 	portrait.texture = atlas
-	figure.texture = load(PORTRAIT_ILLUSTRATION) if ResourceLoader.exists(PORTRAIT_ILLUSTRATION) else atlas
+	if ResourceLoader.exists(PORTRAIT_ILLUSTRATION):
+		figure.texture = load(PORTRAIT_ILLUSTRATION)
+		# The illustration is stored at 2x its drawn height - smooth it down
+		# (the scene's NEAREST filter is for the pixel-sprite fallback).
+		figure.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	else:
+		figure.texture = atlas
 	for slot in EQUIP_SLOTS:
 		$Window/CharacterView.get_node("Doll%sSlot" % slot.capitalize()).pressed.connect(_on_doll_slot.bind(slot))
 	for tab in TAB_BUTTONS:
