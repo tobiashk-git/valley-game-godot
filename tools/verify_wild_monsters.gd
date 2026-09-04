@@ -106,6 +106,11 @@ func _initialize() -> void:
 	var def: Dictionary = Enemies.ENEMIES[sample.enemy_id]
 	print("Sprite texture matches its species: ", monster.sprite.texture.resource_path == def.sprite)
 	print("Alive tint matches its species: ", monster.sprite.modulate.is_equal_approx(def.get("tint", Color(1, 1, 1, 1))))
+	print("Sprite drawn at half the boss scale (0.8): ", monster.sprite.scale.is_equal_approx(Vector2(0.8, 0.8)))
+	var sample_visual_size: Vector2 = monster.sprite.texture.get_size() * monster.sprite.scale
+	var sample_visual_center: Vector2 = monster.sprite.offset * monster.sprite.scale
+	var sample_feet_y: float = sample_visual_center.y + sample_visual_size.y / 2.0
+	print("Sprite's feet sit on its tile (bottom edge ", sample_feet_y, "px below the body): ", absf(sample_feet_y - monster.FEET_DROP) < 0.5)
 
 	var sample_world: Vector2 = Vector2(sample.pos.x * 32 + 16, sample.pos.y * 32 + 16)
 	player.position = sample_world + Vector2(0, 48)
@@ -117,9 +122,11 @@ func _initialize() -> void:
 	print("Wild monster blocks movement (player stopped short of it): ", player.position.y > sample_world.y + 8.0)
 
 	# --- 5. Interacting starts a fight that includes the guaranteed species.
-	# InteractArea is 48x48 (half-width 24) - 20px keeps the player inside it
-	# without needing to be outside the 28x28 blocking collider too (that
-	# only matters for the movement-blocking test above). ---
+	# The InteractArea is sized around the visible sprite at runtime (see
+	# wild_monster.gd) and always reaches at least 24px below the body, so
+	# 20px keeps the player inside it without needing to be outside the 28x28
+	# blocking collider too (that only matters for the movement-blocking test
+	# above). Every-side approach coverage is section 7 below. ---
 	player.position = sample_world + Vector2(0, 20)
 	cam.reset_smoothing()
 	for i in range(3):
@@ -179,6 +186,87 @@ func _initialize() -> void:
 	Input.action_release("interact")
 	await process_frame
 	print("Re-approaching a defeated placement does not start a fight: ", not combat.in_combat)
+
+	# --- 7. A real player stops the moment their own sprite visually touches
+	# the monster's sprite, from whichever side they came, and presses E right
+	# there. The InteractArea is sized at runtime around the VISIBLE sprite
+	# (not the small blocking collider at its feet) precisely so that press
+	# lands from every side. Regression for the original playtest bug: at 1.6x
+	# with the scene's baked 48x48 area only a south approach ever worked.
+	# One not-yet-defeated placement per distinct sprite file, since the 5
+	# files are all different sizes. ---
+	var tilemap: TileMapLayer = overworld.tilemap
+	var covered_sprites := {}
+	for entry in placements:
+		var sprite_path: String = Enemies.ENEMIES[entry.enemy_id].sprite
+		if covered_sprites.has(sprite_path) or game_state.wild_monsters_defeated.get(entry.placement_key, false):
+			continue
+		var target: Node = null
+		for child in ysort.get_children():
+			if child.scene_file_path == "res://scenes/props/WildMonster.tscn" and child.placement_key == entry.placement_key:
+				target = child
+		if target == null:
+			continue
+		var visual_size: Vector2 = target.sprite.texture.get_size() * target.sprite.scale
+		var visual_center: Vector2 = target.position + target.sprite.offset * target.sprite.scale
+		var body_pos: Vector2 = target.position
+		# 13 = player half-width (10) + 3px "stopped just short of touching".
+		# South is the one side where the blocking collider stops the player
+		# first (at 24px), before their sprite reaches the monster's feet.
+		var approaches := {
+			"east": Vector2(visual_center.x + visual_size.x / 2.0 + 13.0, body_pos.y),
+			"west": Vector2(visual_center.x - visual_size.x / 2.0 - 13.0, body_pos.y),
+			"north": Vector2(body_pos.x, visual_center.y - visual_size.y / 2.0 - 13.0),
+			"south": Vector2(body_pos.x, maxf(visual_center.y + visual_size.y / 2.0 + 13.0, body_pos.y + 24.0)),
+		}
+		# Only use a placement whose 4 approach spots are plain ground for its
+		# zone - scatter only checks the monster's OWN tile, so one can
+		# legitimately sit right beside a mountain/river/lake tile, and a real
+		# player simply can't come from that side (a teleport there lands in
+		# a solid tile and gets shoved elsewhere). Painted tiles can't be
+		# cleared the way props can, so skip to the next placement instead.
+		var ground_source: int = world._ground_source_for_zone(entry.zone)
+		var open_all_round := true
+		for dir in approaches:
+			if tilemap.get_cell_source_id(tilemap.local_to_map(approaches[dir])) != ground_source:
+				open_all_round = false
+		if not open_all_round:
+			continue
+		covered_sprites[sprite_path] = true
+		# Scattered props (and any neighbouring monster) near the target are
+		# cleared so a teleport can't land inside a boulder's collider or a
+		# neighbour's own interact area - same _clear_point() pattern the
+		# interior/seam verify scripts use. queue_free() is deferred, so wait.
+		for child in ysort.get_children():
+			if child == target or child == player:
+				continue
+			if child is Node2D and child.position.distance_to(body_pos) < 110.0:
+				child.queue_free()
+		await process_frame
+		await process_frame
+		var all_sides := true
+		var failed_sides: Array = []
+		for dir in approaches:
+			player.position = approaches[dir]
+			cam.reset_smoothing()
+			for i in range(4):
+				await physics_frame
+			await _clear_combat(combat)
+			var tries := 0
+			while not combat.in_combat and tries < 5:
+				Input.action_press("interact")
+				await process_frame
+				await process_frame
+				Input.action_release("interact")
+				await process_frame
+				tries += 1
+			# Must be THIS monster's fight - a neighbouring placement's area
+			# can overlap the approach spot, and that would mask a failure.
+			if not (combat.in_combat and combat.current_wild_monster_key == entry.placement_key):
+				all_sides = false
+				failed_sides.append(dir)
+			await _clear_combat(combat)
+		print("Interact lands from all 4 sides when stopping at the visible sprite edge [", entry.enemy_id, ", ", sprite_path.get_file(), "]: ", all_sides, "" if all_sides else " (failed: %s)" % [failed_sides])
 
 	cam.reset_smoothing()
 	for i in range(3):
