@@ -142,12 +142,11 @@ func _initialize() -> void:
 	root.get_texture().get_image().save_png("res://verify_phone_shop.png")
 	print("Saved verify_phone_shop.png")
 	shop_panel.close()
-	var map_panel: CanvasLayer = root.get_node("WorldMapPanel")
-	map_panel.open()
+	sheet.open("map")
 	await process_frame
-	var mp_rect: Rect2 = _rect(map_panel.window)
-	print("World Map window (kit) fills the phone width, map above its pane: ", map_panel.narrow and mp_rect.size.x == 400.0 - 24.0 and map_panel.detail_pane.position.y >= map_panel.map_frame.position.y + map_panel.map_frame.size.y)
-	map_panel.close()
+	var mv: Control = sheet.map_view
+	print("Map tab on the phone: header hidden, map above its pane, inside the window: ", sheet.narrow and not sheet.header.visible and mv.visible and mv.detail_pane.position.y >= mv.map_frame.position.y + mv.map_frame.size.y and mv.detail_pane.get_global_rect().end.y <= sheet.window.get_global_rect().end.y)
+	sheet.close()
 
 	# --- Back to desktop. ---
 	root.size = Vector2i(800, 600)

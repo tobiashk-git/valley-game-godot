@@ -397,6 +397,76 @@ func _build() -> void:
 	craft_pane.add_child(craft_action)
 	_label(crf, "CraftHint", "", Vector2(20, 330), 12, &"DimLabel")
 
+	# --- Map view (UI redesign Phase 3b; moved in from a standalone window
+	# so the tab strip stays available). Logic in scripts/map_view.gd: a
+	# framed rendered map (TextureRect + Markers layer) and a detail pane
+	# (name / where / description / status / Fast Travel / known places).
+	# The sheet hides its header on this tab, so the view starts at y=66. ---
+	var mapv := Control.new()
+	mapv.name = "MapView"
+	mapv.set_script(load("res://scripts/map_view.gd"))
+	mapv.position = Vector2(0, 66)
+	mapv.size = Vector2(720, 452)
+	mapv.visible = false
+	window.add_child(mapv)
+	var map_subtitle := _label(mapv, "SubtitleLabel", "", Vector2(20, 0), 13, &"DimLabel")
+	map_subtitle.size = Vector2(680, 18)
+	var map_frame := Panel.new()
+	map_frame.name = "MapFrame"
+	map_frame.position = Vector2(20, 22)
+	map_frame.size = Vector2(408, 408)
+	map_frame.theme_type_variation = &"DetailPanel"
+	mapv.add_child(map_frame)
+	var map_rect := TextureRect.new()
+	map_rect.name = "MapRect"
+	map_rect.position = Vector2(4, 4)
+	map_rect.size = Vector2(400, 400)
+	map_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	map_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	map_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	map_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	map_frame.add_child(map_rect)
+	var map_markers := Control.new()
+	map_markers.name = "Markers"
+	map_markers.position = Vector2(4, 4)
+	map_markers.size = Vector2(400, 400)
+	map_markers.mouse_filter = Control.MOUSE_FILTER_PASS
+	map_frame.add_child(map_markers)
+	var map_pane := Panel.new()
+	map_pane.name = "DetailPane"
+	map_pane.position = Vector2(452, 22)
+	map_pane.size = Vector2(248, 408)
+	map_pane.theme_type_variation = &"DetailPanel"
+	mapv.add_child(map_pane)
+	var poi_name := _label(map_pane, "PoiName", "", Vector2(12, 10), 17, &"PanelTitle")
+	poi_name.size = Vector2(224, 44)
+	poi_name.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_label(map_pane, "PoiWhere", "", Vector2(12, 56), 12, &"DimLabel")
+	var poi_desc := _label(map_pane, "PoiDesc", "", Vector2(12, 76), 13)
+	poi_desc.size = Vector2(224, 62)
+	poi_desc.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_label(map_pane, "PoiStatus", "", Vector2(12, 140), 12, &"DimLabel")
+	var travel := Button.new()
+	travel.name = "TravelBtn"
+	travel.text = "Fast Travel"
+	travel.position = Vector2(12, 164)
+	travel.size = Vector2(224, 40)
+	travel.theme_type_variation = &"PrimaryButton"
+	travel.add_theme_font_size_override("font_size", 15)
+	map_pane.add_child(travel)
+	_label(map_pane, "PlacesTitle", "Known places", Vector2(12, 216), 13, &"PanelTitle")
+	var places_scroll := ScrollContainer.new()
+	places_scroll.name = "PlacesScroll"
+	places_scroll.position = Vector2(12, 238)
+	places_scroll.size = Vector2(224, 158)
+	places_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	map_pane.add_child(places_scroll)
+	var places := VBoxContainer.new()
+	places.name = "PlacesList"
+	places.add_theme_constant_override("separation", 4)
+	places_scroll.add_child(places)
+	_label(mapv, "HintLabel", "Tap a marker or a name to see the place. Fast Travel lands you at its entrance.", Vector2(20, 436), 12, &"DimLabel")
+
 	_own(layer, layer)
 	var packed := PackedScene.new()
 	packed.pack(layer)

@@ -6,9 +6,9 @@ extends CanvasLayer
 # confirmed via its style.css), but a clickable toolbar is worth having on
 # desktop too.
 #
-# Inventory, Character and Crafting are TABS of the CharacterSheet window (UI
-# redesign Phases 1-2) rather than separate popups; Journal/Map are still
-# their own panels until later phases.
+# Inventory, Character, Crafting and Map are TABS of the CharacterSheet
+# window (UI redesign Phases 1-3b) rather than separate popups; Journal is
+# still its own panel until its phase.
 
 const PANEL_AUTOLOADS: Array[String] = [
 	"CharacterSheet", "QuestPanel", "WorldMapPanel",
@@ -30,7 +30,7 @@ func _ready() -> void:
 	character_btn.pressed.connect(_on_sheet_pressed.bind("character"))
 	crafting_btn.pressed.connect(_on_sheet_pressed.bind("crafting"))
 	quest_btn.pressed.connect(_on_pressed.bind("QuestPanel"))
-	map_btn.pressed.connect(_on_pressed.bind("WorldMapPanel"))
+	map_btn.pressed.connect(_on_sheet_pressed.bind("map"))
 	menu_btn.pressed.connect(_on_menu_pressed)
 	Layout.changed.connect(_apply_layout)
 	_apply_layout()

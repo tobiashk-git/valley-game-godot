@@ -26,7 +26,9 @@ const TAB_BUTTONS := {"inventory": "InventoryTab", "character": "CharacterTab", 
 # [wide label, narrow label] - the five full names don't fit a phone-width strip.
 const TAB_LABELS := {"inventory": ["Inventory", "Items"], "character": ["Character", "Hero"], "crafting": ["Crafting", "Craft"], "journal": ["Journal", "Quests"], "map": ["Map", "Map"]}
 # Tabs that (for now) close this window and open the old standalone panel.
-const EXTERNAL_TABS := {"journal": "QuestPanel", "map": "WorldMapPanel"}
+# (Map used to be one; it's a real tab since Phase 3b - the standalone
+# window lost the tab strip, "can't switch back to inventory".)
+const EXTERNAL_TABS := {"journal": "QuestPanel"}
 
 # Crafting feedback (user feedback: "on crafting an item it's not obvious
 # that something has happened"). Recipes are drawn as blueprints - icons
@@ -69,6 +71,7 @@ const FLASH_SECONDS := 1.4
 @onready var inventory_hint: Label = $Window/InventoryView/HintLabel
 @onready var stats_list: VBoxContainer = $Window/CharacterScroll/CharacterView/StatsList
 @onready var crafting_view: Control = $Window/CraftingView
+@onready var map_view: Control = $Window/MapView
 @onready var craft_mode_btn: Button = $Window/CraftingView/Modes/CraftMode
 @onready var enhance_mode_btn: Button = $Window/CraftingView/Modes/EnhanceMode
 @onready var craft_count_label: Label = $Window/CraftingView/CraftCountLabel
@@ -192,6 +195,11 @@ func _on_layout_changed() -> void:
 func _apply_layout() -> void:
 	narrow = Layout.is_narrow()
 	var slots: Dictionary = Character.SLOTS
+	# The Map tab hides the header (the 408px map frame needs the height);
+	# the views then start right under the tab strip.
+	var map_tab: bool = current_tab == "map"
+	header.visible = not map_tab
+	separator.visible = not map_tab
 	if not narrow:
 		window.position = Vector2(40, 56)
 		window.size = Vector2(720, 530)
@@ -216,6 +224,8 @@ func _apply_layout() -> void:
 		_layout_inventory(Vector2(0, 158), Vector2(720, 360))
 		_layout_character(Vector2(0, 158), Vector2(720, 360))
 		_layout_crafting(Vector2(0, 158), Vector2(720, 360))
+		_place(map_view, Vector2(0, 66), Vector2(720, 452))
+		map_view.apply_layout(false, map_view.size)
 		return
 
 	var iw: float = Layout.width - 24.0
@@ -234,6 +244,8 @@ func _apply_layout() -> void:
 	# under them, then the equipment slot row - which the Hero tab hides (the
 	# doll shows the slots), so that tab's header stops above it.
 	var header_h: float = 206.0 if current_tab != "character" else 126.0
+	if map_tab:
+		header_h = -12.0 # no header: views start right under the tab strip
 	header.position = Vector2(0, 54)
 	header.size = Vector2(iw, header_h)
 	_place(hp_bar, Vector2(112, 42), Vector2(iw - 132.0, 16))
@@ -251,6 +263,8 @@ func _apply_layout() -> void:
 	_layout_inventory(view_pos, view_size)
 	_layout_character(view_pos, view_size)
 	_layout_crafting(view_pos, view_size)
+	_place(map_view, view_pos, view_size)
+	map_view.apply_layout(true, view_size)
 
 func _place(c: Control, pos: Vector2, size: Vector2) -> void:
 	c.position = pos
@@ -400,8 +414,9 @@ func open(tab: String = "") -> void:
 	if tab != "":
 		current_tab = tab
 	_clear_flash()
-	if narrow:
-		_apply_layout() # the phone header height depends on the tab
+	_apply_layout() # the header (phone height; hidden on Map) depends on the tab
+	if current_tab == "map":
+		map_view.select_default()
 	window.visible = true
 	$Dim.visible = true
 	_refresh()
@@ -450,6 +465,7 @@ func _refresh() -> void:
 	inventory_view.visible = current_tab == "inventory"
 	character_scroll.visible = current_tab == "character"
 	crafting_view.visible = current_tab == "crafting"
+	map_view.visible = current_tab == "map"
 	# The paper doll shows the equipment itself, so the header's three slot
 	# buttons would be duplicates on that tab.
 	for slot in Character.SLOTS:
@@ -463,6 +479,8 @@ func _refresh() -> void:
 		_refresh_character()
 	elif current_tab == "crafting":
 		_refresh_crafting()
+	elif current_tab == "map":
+		map_view.refresh()
 
 func _refresh_header() -> void:
 	var stats: Dictionary = Character.stats
@@ -992,5 +1010,7 @@ func _process(_delta: float) -> void:
 		toggle("character")
 	elif Input.is_action_just_pressed("toggle_crafting"):
 		toggle("crafting")
+	elif Input.is_action_just_pressed("toggle_map"):
+		toggle("map")
 	elif is_open() and Input.is_action_just_pressed("ui_cancel"):
 		close()

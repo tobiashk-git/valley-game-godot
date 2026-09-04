@@ -48,7 +48,7 @@ func _initialize() -> void:
 
 	panel_buttons.map_btn.pressed.emit()
 	await process_frame
-	print("World Map opens via toolbar click: ", world_map_panel.is_open())
+	print("World Map opens via toolbar click (sheet, Map tab): ", world_map_panel.is_open() and sheet.is_open() and sheet.current_tab == "map")
 	panel_buttons.map_btn.pressed.emit()
 	await process_frame
 

@@ -38,7 +38,8 @@ func _initialize() -> void:
 	var world: Node = root.get_node("World")
 	var game_state: Node = root.get_node("GameState")
 	var world_map: Node = root.get_node("WorldMap")
-	var panel: Node = root.get_node("WorldMapPanel")
+	var sheet: Node = root.get_node("CharacterSheet")
+	var alias: Node = root.get_node("WorldMapPanel")
 	var combat: Node = root.get_node("Combat")
 	var layout: Node = root.get_node("Layout")
 
@@ -47,6 +48,9 @@ func _initialize() -> void:
 	current_scene = overworld
 	await process_frame
 	await process_frame
+	# The Map tab's view (the old WorldMapPanel window is now an alias). Read
+	# after the first frames: autoload @onready fields aren't set before.
+	var panel: Node = sheet.map_view
 	print("Dungeon undiscovered at boot: ", not game_state.discovered_pois.dungeon)
 
 	# --- The rendered map itself. ---
@@ -65,11 +69,20 @@ func _initialize() -> void:
 
 	# --- Open with M: markers for house + village only, you-are-here dot. ---
 	await _press("toggle_map")
-	print("M opens the map window (kit window, no old list): ", panel.is_open() and panel.has_node("Window/MapFrame/MapRect") and not panel.has_node("Panel"))
+	print("M opens the sheet on its Map tab (the alias autoload agrees): ", sheet.is_open() and sheet.current_tab == "map" and panel.visible and alias.is_open())
+	print("Header hidden on the Map tab so the map gets the height; tab strip still there: ", not sheet.header.visible and sheet.tabs.visible and sheet.tabs.get_node("InventoryTab").visible)
 	print("Map texture drawn at 4px per tile: ", panel.map_rect.texture != null and panel.map_rect.size == Vector2(400, 400) and panel.map_scale == 4.0)
 	var names: Array = _marker_names(panel)
 	print("Markers for the known places only (house, village): ", names.has("HouseMarker") and names.has("VillageMarker") and not names.has("DungeonMarker") and names.size() == 2)
-	print("Subtitle counts known places: ", panel.status_label.text == "You are in the Valley  -  2 of 9 places known")
+	print("Subtitle counts known places: ", panel.subtitle_label.text == "You are in the Valley  -  2 of 9 places known")
+	# The bug that moved the map in here: from the Map tab you can switch
+	# straight to Inventory (and back) without losing the tab strip.
+	sheet.tabs.get_node("InventoryTab").pressed.emit()
+	await process_frame
+	print("Items tab from the Map tab switches (header back): ", sheet.is_open() and sheet.current_tab == "inventory" and sheet.header.visible and not panel.visible)
+	sheet.tabs.get_node("MapTab").pressed.emit()
+	await process_frame
+	print("...and Map tab returns to the map: ", sheet.current_tab == "map" and panel.visible and not sheet.header.visible)
 	var player: CharacterBody2D = overworld.get_node("YSort/Player")
 	var here: Vector2i = Vector2i(floori(player.position.x / 32.0), floori(player.position.y / 32.0))
 	var dot: Control = panel.markers.get_node("HereMarker")
@@ -83,7 +96,7 @@ func _initialize() -> void:
 	root.get_texture().get_image().save_png("res://verify_map_before_dungeon.png")
 	print("Saved verify_map_before_dungeon.png")
 	await _press("toggle_map")
-	print("M again closes: ", not panel.is_open())
+	print("M again closes: ", not sheet.is_open() and not alias.is_open())
 
 	# --- Walk to the dungeon entrance and enter through the real portal. ---
 	combat._steps_since_encounter = -100000 # no random encounter mid-walk
@@ -102,8 +115,8 @@ func _initialize() -> void:
 	# starts on the Dungeon. ---
 	combat._steps_since_encounter = -100000
 	await _press("toggle_map")
-	print("Inside the Dungeon: dot on the dungeon entrance, Dungeon selected: ", panel.is_open() and world_map.here_tile() == world_map.poi_tile("dungeon") and panel.selected_poi == "dungeon" and _marker_names(panel).has("DungeonMarker"))
-	print("Subtitle now 3 of 9: ", panel.status_label.text == "You are in the Dungeon  -  3 of 9 places known")
+	print("Inside the Dungeon: dot on the dungeon entrance, Dungeon selected: ", alias.is_open() and world_map.here_tile() == world_map.poi_tile("dungeon") and panel.selected_poi == "dungeon" and _marker_names(panel).has("DungeonMarker"))
+	print("Subtitle now 3 of 9: ", panel.subtitle_label.text == "You are in the Dungeon  -  3 of 9 places known")
 	root.get_texture().get_image().save_png("res://verify_map_after_dungeon.png")
 	print("Saved verify_map_after_dungeon.png")
 
@@ -113,7 +126,7 @@ func _initialize() -> void:
 	panel.travel_btn.pressed.emit()
 	await process_frame
 	await process_frame
-	print("Fast travel closes the map and lands on the Overworld: ", not panel.is_open() and current_scene.name == "Overworld")
+	print("Fast travel closes the sheet and lands on the Overworld: ", not sheet.is_open() and current_scene.name == "Overworld")
 	var house_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
 	print("Landed at the House entrance: ", house_tile == world.HOUSE_ENTRANCE + Vector2i(0, 1))
 
@@ -123,7 +136,7 @@ func _initialize() -> void:
 	await process_frame
 	print("Now inside the Elder's House: ", current_scene.name == "ElderHouse")
 	await _press("toggle_map")
-	print("Map from a house: dot on the village, subtitle names the house: ", world_map.here_tile() == world_map.poi_tile("village") and panel.status_label.text.begins_with("You are in the Elder's House"))
+	print("Map from a house: dot on the village, subtitle names the house: ", world_map.here_tile() == world_map.poi_tile("village") and panel.subtitle_label.text.begins_with("You are in the Elder's House"))
 	panel.markers.get_node("VillageMarker").pressed.emit()
 	await process_frame
 	panel.travel_btn.pressed.emit()
@@ -137,15 +150,15 @@ func _initialize() -> void:
 	root.size = Vector2i(400, 860)
 	for i in range(6):
 		await process_frame
-	panel.open()
+	sheet.open("map")
 	await process_frame
 	await process_frame
 	var frame_rect: Rect2 = panel.map_frame.get_global_rect()
 	var pane_rect: Rect2 = panel.detail_pane.get_global_rect()
-	print("Phone: map at 3px per tile, centred, pane below inside the window: ", layout.width == 400 and panel.narrow and panel.map_scale == 3.0 and panel.map_rect.size == Vector2(300, 300) and absf(frame_rect.get_center().x - 200.0) < 2.0 and pane_rect.position.y >= frame_rect.end.y and pane_rect.end.y <= panel.window.get_global_rect().end.y)
+	print("Phone: map at 3px per tile, centred, pane below inside the window: ", layout.width == 400 and sheet.narrow and panel.map_scale == 3.0 and panel.map_rect.size == Vector2(300, 300) and absf(frame_rect.get_center().x - 200.0) < 2.0 and pane_rect.position.y >= frame_rect.end.y and pane_rect.end.y <= sheet.window.get_global_rect().end.y)
 	root.get_texture().get_image().save_png("res://verify_map_phone.png")
 	print("Saved verify_map_phone.png")
-	panel.close()
+	sheet.close()
 	root.size = Vector2i(800, 600)
 	for i in range(4):
 		await process_frame
