@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/quick_bar.gd" id="1_emcfu"]
+
+[node name="QuickBar" type="CanvasLayer" unique_id=727970460]
+script = ExtResource("1_emcfu")
+
+[node name="HBox" type="HBoxContainer" parent="." unique_id=2091806068]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+theme_override_constants/separation = 8
+
+[node name="FeedbackLabel" type="Label" parent="." unique_id=1971940360]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 14

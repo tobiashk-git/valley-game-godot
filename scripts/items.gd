@@ -39,6 +39,33 @@ const ITEMS := {
 func is_usable(item_id: String) -> bool:
 	return ITEMS.has(item_id) and ITEMS[item_id].has("effect")
 
+# Applies a usable item's effect to the player WITHOUT touching the
+# inventory - the caller decides whether the item is consumed (Combat always
+# spends it, the turn is used either way; the out-of-combat QuickBar only
+# spends it when something actually happened). Shared so a potion heals the
+# same amount and prints the same line whether tapped mid-fight or in the
+# field. Returns {"message": String, "applied": bool}.
+func apply_effect(item_id: String) -> Dictionary:
+	var def: Dictionary = ITEMS.get(item_id, {})
+	var effect: Dictionary = def.get("effect", {})
+	if effect.is_empty():
+		return {"message": "", "applied": false}
+	if effect.kind == "heal":
+		var healed: int = min(effect.amount, Character.stats.max_hp - Character.stats.hp)
+		Character.stats.hp += healed
+		return {"message": "Oliver uses %s and recovers %d HP!" % [def.name, healed], "applied": healed > 0}
+	if effect.kind == "restore_mp":
+		var restored: int = min(effect.amount, Character.stats.max_mp - Character.stats.mp)
+		Character.stats.mp += restored
+		return {"message": "Oliver uses %s and recovers %d MP!" % [def.name, restored], "applied": restored > 0}
+	if effect.kind == "cure":
+		if Combat.player_status.has(effect.status):
+			var status_name: String = Statuses.STATUSES[effect.status].name
+			Combat.player_status.erase(effect.status)
+			return {"message": "Oliver uses %s and cures %s!" % [def.name, status_name], "applied": true}
+		return {"message": "Oliver uses %s, but wasn't affected." % def.name, "applied": false}
+	return {"message": "", "applied": false}
+
 func is_equippable(item_id: String) -> bool:
 	return ITEMS.has(item_id) and ITEMS[item_id].has("slot")
 

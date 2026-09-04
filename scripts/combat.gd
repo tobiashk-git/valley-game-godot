@@ -352,22 +352,10 @@ func use_item(item_id: String) -> void:
 		return
 	player_defending = false
 	Inventory.remove_item(item_id, 1)
-
-	if effect.kind == "heal":
-		var healed: int = min(effect.amount, Character.stats.max_hp - Character.stats.hp)
-		Character.stats.hp += healed
-		_log("Oliver uses %s and recovers %d HP!" % [def.name, healed])
-	elif effect.kind == "restore_mp":
-		var restored: int = min(effect.amount, Character.stats.max_mp - Character.stats.mp)
-		Character.stats.mp += restored
-		_log("Oliver uses %s and recovers %d MP!" % [def.name, restored])
-	elif effect.kind == "cure":
-		if player_status.has(effect.status):
-			var status_name: String = Statuses.STATUSES[effect.status].name
-			player_status.erase(effect.status)
-			_log("Oliver uses %s and cures %s!" % [def.name, status_name])
-		else:
-			_log("Oliver uses %s, but wasn't affected." % def.name)
+	# Effect maths lives in Items.apply_effect() (shared with the
+	# out-of-combat QuickBar); in combat the item is always spent since the
+	# turn is used either way.
+	_log(Items.apply_effect(item_id).message)
 	Character.changed.emit()
 	_enemy_turn()
 
