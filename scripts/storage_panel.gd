@@ -32,10 +32,13 @@ func close() -> void:
 	panel.visible = false
 	_current_storage_id = ""
 
-func _build_column(list: VBoxContainer, items: Dictionary, on_pick: Callable) -> void:
+# Stackables as "Name xN" rows moved one at a time by id; gear as one row
+# per INSTANCE (its enhanced name) moved by uid, so an enhanced piece goes
+# into and out of the chest intact.
+func _build_column(list: VBoxContainer, items: Dictionary, gear_list: Array, on_pick: Callable, on_pick_gear: Callable) -> void:
 	for child in list.get_children():
 		child.queue_free()
-	if items.is_empty():
+	if items.is_empty() and gear_list.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "(empty)"
 		empty_label.theme_type_variation = &"DimLabel"
@@ -47,12 +50,18 @@ func _build_column(list: VBoxContainer, items: Dictionary, on_pick: Callable) ->
 		btn.icon = Items.get_item_icon(item_id)
 		btn.pressed.connect(on_pick.bind(item_id))
 		list.add_child(btn)
+	for inst in gear_list:
+		var btn := Button.new()
+		btn.text = Items.instance_name(inst)
+		btn.icon = Items.get_item_icon(inst.base)
+		btn.pressed.connect(on_pick_gear.bind(inst.uid))
+		list.add_child(btn)
 
 func _refresh() -> void:
 	if not panel.visible:
 		return
-	_build_column(chest_list, Storage.get_storage(_current_storage_id), _on_withdraw)
-	_build_column(backpack_list, Inventory.backpack, _on_deposit)
+	_build_column(chest_list, Storage.get_storage(_current_storage_id), Storage.get_gear(_current_storage_id), _on_withdraw, _on_withdraw_gear)
+	_build_column(backpack_list, Inventory.backpack, Inventory.gear, _on_deposit, _on_deposit_gear)
 
 func _on_withdraw(item_id: String) -> void:
 	if Storage.remove_item(_current_storage_id, item_id, 1):
@@ -61,6 +70,16 @@ func _on_withdraw(item_id: String) -> void:
 func _on_deposit(item_id: String) -> void:
 	if Inventory.remove_item(item_id, 1):
 		Storage.add_item(_current_storage_id, item_id, 1)
+
+func _on_withdraw_gear(uid: int) -> void:
+	var inst: Dictionary = Storage.take_gear(_current_storage_id, uid)
+	if not inst.is_empty():
+		Inventory.add_gear_instance(inst)
+
+func _on_deposit_gear(uid: int) -> void:
+	var inst: Dictionary = Inventory.take_gear(uid)
+	if not inst.is_empty():
+		Storage.add_gear(_current_storage_id, inst)
 
 func _process(_delta: float) -> void:
 	if not panel.visible:

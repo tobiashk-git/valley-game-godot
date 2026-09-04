@@ -36,14 +36,14 @@ func _initialize() -> void:
 	print("Detail pane offers Equip for gear: ", sheet.primary_action.visible and sheet.primary_action.text == "Equip")
 	sheet.primary_action.pressed.emit()
 	await process_frame
-	print("Armor equipped after UI click: ", character.equipment.armor == "leather_armor")
+	print("Armor equipped after UI click: ", character.equipped_id("armor") == "leather_armor")
 	print("Backpack count after equip (should be 0, moved to slot): ", inventory.get_count("leather_armor"))
 	root.get_texture().get_image().save_png("res://verify_p5_inventory_equipped.png")
 
 	# Equip the charm directly (already proved the UI path above).
 	character.equip("accessory", "charm_of_warding")
 	await process_frame
-	print("Charm equipped: ", character.equipment.accessory == "charm_of_warding")
+	print("Charm equipped: ", character.equipped_id("accessory") == "charm_of_warding")
 	root.get_texture().get_image().save_png("res://verify_p5_character_panel.png")
 
 	# --- Defense: average damage taken should drop once armor is equipped. ---
@@ -106,6 +106,6 @@ func _initialize() -> void:
 	character.unequip("accessory")
 	print("Armor back in backpack after unequip: ", inventory.get_count("leather_armor") == 1)
 	print("Charm back in backpack after unequip: ", inventory.get_count("charm_of_warding") == 1)
-	print("Equipment slots empty after unequip: ", character.equipment.armor == "" and character.equipment.accessory == "")
+	print("Equipment slots empty after unequip: ", character.equipped_id("armor") == "" and character.equipped_id("accessory") == "")
 
 	quit()

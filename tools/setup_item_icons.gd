@@ -154,6 +154,17 @@ func _build_items() -> void:
 	_draw_line(fur, 18, 9, 18, 15, Color(0.4, 0.28, 0.16), 1)
 	_save(fur, "monster_fur")
 
+	# ember_core: a dark cinder lump with a hot orange core and a yellow
+	# highlight - reads as "glowing coal", distinct from the fireball spell
+	# icon (which is a flame shape).
+	var ember := _new_img()
+	_fill_circle(ember, 12, 13, 8, Color(0.28, 0.18, 0.14))
+	_fill_circle(ember, 12, 13, 5.5, Color(0.9, 0.35, 0.08))
+	_fill_circle(ember, 11, 12, 2.5, Color(1.0, 0.75, 0.25))
+	_draw_line(ember, 6, 9, 9, 12, Color(0.95, 0.5, 0.12), 1)
+	_draw_line(ember, 16, 17, 18, 15, Color(0.95, 0.5, 0.12), 1)
+	_save(ember, "ember_core")
+
 func _build_spells() -> void:
 	# fireball: layered orange/red circles + flame tip
 	var fire := _new_img()

@@ -36,6 +36,68 @@ const RECIPES := {
 	},
 }
 
+# --- Enhancements (UI redesign Phase 2): a special ingredient applied to an
+# existing piece of gear adds a mod (see inventory.gd's instance shape).
+# `slot` says what kind of gear it fits. One enhancement per item for now -
+# applying another REPLACES it (nothing can be bricked, no stacking maths
+# to balance yet). ---
+const ENHANCEMENTS := {
+	"fur_lined": {
+		"name": "Fur-lined", "slot": "armor",
+		"cost": {"monster_fur": 3},
+		"mod": {"kind": "defense", "value": 1},
+		"desc": "Line the armour with monster pelt. +1 Defense.",
+	},
+	"ember_forged": {
+		"name": "Ember-forged", "slot": "weapon",
+		"cost": {"ember_core": 1},
+		"mod": {"kind": "attack", "value": 2},
+		"desc": "Temper the edge in an ember core. +2 Attack, and it runs hot.",
+	},
+}
+
+# Enhancement ids that fit this instance's slot.
+func enhancements_for(inst: Dictionary) -> Array:
+	var slot: String = Items.ITEMS.get(inst.base, {}).get("slot", "")
+	var out: Array = []
+	for enh_id in ENHANCEMENTS:
+		if ENHANCEMENTS[enh_id].slot == slot:
+			out.append(enh_id)
+	return out
+
+func has_ingredients(cost: Dictionary) -> bool:
+	for item_id in cost.keys():
+		if Inventory.get_count(item_id) < cost[item_id]:
+			return false
+	return true
+
+func can_enhance(inst: Dictionary, enh_id: String) -> bool:
+	return enh_id in enhancements_for(inst) and has_ingredients(ENHANCEMENTS[enh_id].cost)
+
+# The instance may be carried (Inventory.gear) or worn (Character.equipment);
+# both are edited in place. Returns false if it isn't found / can't be done.
+func find_instance(uid: int) -> Dictionary:
+	var inst: Dictionary = Inventory.find_gear(uid)
+	if not inst.is_empty():
+		return inst
+	for slot in Character.SLOTS:
+		var worn: Dictionary = Character.equipped(slot)
+		if not worn.is_empty() and worn.uid == uid:
+			return worn
+	return {}
+
+func enhance(uid: int, enh_id: String) -> bool:
+	var inst: Dictionary = find_instance(uid)
+	if inst.is_empty() or not can_enhance(inst, enh_id):
+		return false
+	var enh: Dictionary = ENHANCEMENTS[enh_id]
+	for item_id in enh.cost.keys():
+		Inventory.remove_item(item_id, enh.cost[item_id])
+	inst.mods = [{"id": enh_id, "label": enh.name, "kind": enh.mod.kind, "value": enh.mod.value}]
+	Inventory.changed.emit()
+	Character.changed.emit()
+	return true
+
 func can_craft(recipe_id: String) -> bool:
 	var recipe: Dictionary = RECIPES[recipe_id]
 	var cost: Dictionary = recipe.cost

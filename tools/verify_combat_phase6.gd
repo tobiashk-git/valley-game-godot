@@ -64,7 +64,7 @@ func _initialize() -> void:
 	print("Bone Greatsword obtained: ", inventory.get_count("bone_greatsword") == 1)
 	print("Bone Greatsword stat suffix: ", items.describe_stats("bone_greatsword"))
 	character.equip("weapon", "bone_greatsword")
-	print("Equipping Bone Greatsword works: ", character.equipment.weapon == "bone_greatsword")
+	print("Equipping Bone Greatsword works: ", character.equipped_id("weapon") == "bone_greatsword")
 	await process_frame
 	print("Boss sprite dims after defeat: ", boss.get_node("Sprite2D").modulate == boss.DEFEATED_TINT)
 	root.get_texture().get_image().save_png("res://verify_p6_boss_defeated.png")

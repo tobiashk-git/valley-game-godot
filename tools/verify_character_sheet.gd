@@ -24,9 +24,6 @@ func _initialize() -> void:
 	var combat: Node = root.get_node("Combat")
 	var quick_bar: CanvasLayer = root.get_node("QuickBar")
 	var panel_buttons: Node = root.get_node("PanelButtons")
-	var crafting_panel: Node = root.get_node("CraftingPanel")
-	var old_inventory: Node = root.get_node("InventoryPanel")
-	var old_character: Node = root.get_node("CharacterPanel")
 
 	var overworld: Node2D = load("res://scenes/Overworld.tscn").instantiate()
 	root.add_child(overworld)
@@ -40,7 +37,7 @@ func _initialize() -> void:
 	# --- Opening. ---
 	await _press("toggle_inventory")
 	print("I opens the sheet on the Inventory tab: ", sheet.is_open() and sheet.current_tab == "inventory")
-	print("Old Inventory/Character popups stay closed: ", not old_inventory.is_open() and not old_character.is_open())
+	print("Old Inventory/Character popups are gone (autoloads deleted): ", not root.has_node("InventoryPanel") and not root.has_node("CharacterPanel"))
 	print("Quick bar hidden while the sheet is open: ", not quick_bar.visible)
 	print("Window sits below the toolbar row (y >= 52) and inside the viewport: ", sheet.window.position.y >= 52.0 and sheet.window.position.y + sheet.window.size.y <= 600.0)
 
@@ -73,7 +70,8 @@ func _initialize() -> void:
 	for item_id in inventory.backpack.keys():
 		if inventory.backpack[item_id] > 0:
 			carried += 1
-	print("Grid shows one slot per carried item (", carried, "): ", sheet.grid.get_child_count() == carried)
+	carried += inventory.gear.size() # one slot per gear INSTANCE
+	print("Grid shows one slot per carried stack + gear instance (", carried, "): ", sheet.grid.get_child_count() == carried)
 	var potion_slot: Button = sheet.grid.get_node_or_null("HealingPotionSlot")
 	print("Slots are 64px touch targets: ", potion_slot != null and potion_slot.size.x >= 64.0 and potion_slot.size.y >= 64.0)
 	print("Stacked items show a count badge: ", potion_slot != null and potion_slot.has_node("Count") and potion_slot.get_node("Count").text == "2")
@@ -105,14 +103,14 @@ func _initialize() -> void:
 	print("Gear shows its slot + stat and offers Equip: ", sheet.detail_type.text == "Weapon  -  Attack +2" and sheet.primary_action.text == "Equip")
 	sheet.primary_action.pressed.emit()
 	await process_frame
-	print("Equip moves it into the weapon slot: ", character.equipment.weapon == "wooden_pickaxe" and sheet.get_node("Window/Header/WeaponSlot").icon != null and sheet.grid.get_node_or_null("WoodenPickaxeSlot") == null)
+	print("Equip moves it into the weapon slot: ", character.equipped_id("weapon") == "wooden_pickaxe" and sheet.get_node("Window/Header/WeaponSlot").icon != null and sheet.grid.get_node_or_null("WoodenPickaxeSlot") == null)
 	print("Header shows the weapon bonus: ", sheet.bonus_label.text == "ATK +2 (Wooden Pickaxe)")
 	print("Pane follows the item into its slot and offers Unequip: ", sheet.selected_slot == "weapon" and sheet.primary_action.text == "Unequip" and sheet.detail_type.text.ends_with("equipped"))
 	sheet.grid.get_node("LeatherArmorSlot").pressed.emit()
 	await process_frame
 	sheet.primary_action.pressed.emit()
 	await process_frame
-	print("Armor equips and DEF updates in the header: ", character.equipment.armor == "leather_armor" and sheet.stats_label.text.ends_with("DEF 3"))
+	print("Armor equips and DEF updates in the header: ", character.equipped_id("armor") == "leather_armor" and sheet.stats_label.text.ends_with("DEF 3"))
 	print("Combat reads the same totals (attack +2, defence 3): ", combat._weapon_attack_bonus() == 2 and combat._player_defense_bonus() == 3 and character.gear_names("attack") == ["Wooden Pickaxe"])
 	root.get_texture().get_image().save_png("res://verify_sheet_equipped.png")
 	print("Saved verify_sheet_equipped.png")
@@ -121,7 +119,7 @@ func _initialize() -> void:
 	print("Tapping a header slot selects the worn item: ", sheet.selected_item == "wooden_pickaxe" and sheet.selected_slot == "weapon")
 	sheet.primary_action.pressed.emit()
 	await process_frame
-	print("Unequip returns it to the backpack: ", character.equipment.weapon == "" and inventory.get_count("wooden_pickaxe") == 1 and sheet.grid.get_node_or_null("WoodenPickaxeSlot") != null and sheet.bonus_label.text == "No weapon equipped")
+	print("Unequip returns it to the backpack: ", character.equipped_id("weapon") == "" and inventory.get_count("wooden_pickaxe") == 1 and sheet.grid.get_node_or_null("WoodenPickaxeSlot") != null and sheet.bonus_label.text == "No weapon equipped")
 	sheet.get_node("Window/Header/AccessorySlot").pressed.emit()
 	await process_frame
 	print("Tapping an empty slot explains itself: ", sheet.detail_name.text == "No accessory equipped" and not sheet.primary_action.visible)
@@ -160,7 +158,7 @@ func _initialize() -> void:
 	print("Saved verify_sheet_character.png")
 	unequip_btn.pressed.emit()
 	await process_frame
-	print("Unequip from the doll pane works: ", character.equipment.armor == "" and inventory.get_count("leather_armor") == 1 and doll_armor.icon == null)
+	print("Unequip from the doll pane works: ", character.equipped_id("armor") == "" and inventory.get_count("leather_armor") == 1 and doll_armor.icon == null)
 	# Tap the weapon slot -> both carried weapons offered; equip the greatsword.
 	doll_weapon.pressed.emit()
 	await process_frame
@@ -174,7 +172,7 @@ func _initialize() -> void:
 	print("Weapon slot pane lists every carried weapon with Equip: ", sheet.slot_pane_title.text == "Weapon" and carried_offered.has("wooden_pickaxe") and carried_offered.has("bone_greatsword") and carried_offered.size() == 2)
 	greatsword_equip.pressed.emit()
 	await process_frame
-	print("Equip from the doll pane works and the doll updates: ", character.equipment.weapon == "bone_greatsword" and doll_weapon.icon != null and inventory.get_count("bone_greatsword") == 0 and sheet.bonus_label.text == "ATK +6 (Bone Greatsword)")
+	print("Equip from the doll pane works and the doll updates: ", character.equipped_id("weapon") == "bone_greatsword" and doll_weapon.icon != null and inventory.get_count("bone_greatsword") == 0 and sheet.bonus_label.text == "ATK +6 (Bone Greatsword)")
 	root.get_texture().get_image().save_png("res://verify_sheet_doll_equipped.png")
 	print("Saved verify_sheet_doll_equipped.png")
 	await _press("toggle_inventory")
@@ -189,10 +187,10 @@ func _initialize() -> void:
 	await process_frame
 	sheet.tabs.get_node("CraftingTab").pressed.emit()
 	await process_frame
-	print("Crafting tab closes the sheet and opens the Crafting panel: ", not sheet.is_open() and crafting_panel.is_open())
+	print("Crafting tab switches within the sheet (no standalone panel any more): ", sheet.is_open() and sheet.current_tab == "crafting" and sheet.crafting_view.visible and not root.has_node("CraftingPanel"))
 	panel_buttons.inventory_btn.pressed.emit()
 	await process_frame
-	print("Toolbar I from Crafting switches to the sheet and closes Crafting: ", sheet.is_open() and sheet.current_tab == "inventory" and not crafting_panel.is_open())
+	print("Toolbar I from the Crafting tab switches back to Inventory: ", sheet.is_open() and sheet.current_tab == "inventory")
 	sheet.tabs.get_node("CloseBtn".replace("CloseBtn", "CharacterTab")).pressed.emit()
 	await process_frame
 	print("In-window Character tab switches: ", sheet.current_tab == "character")

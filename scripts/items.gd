@@ -35,8 +35,38 @@ const ITEMS := {
 	# (see wild_monster.gd) - a placeholder single resource type for now, more
 	# variety and crafting uses planned later. Sellable at the same basic-
 	# material tier as wood/stone.
-	"monster_fur": {"name": "Monster Fur", "icon": "🧶", "value": 4, "desc": "Coarse pelt from the wilds beyond the river. Someone will want this."},
+	"monster_fur": {"name": "Monster Fur", "icon": "🧶", "value": 4, "desc": "Coarse pelt from the wilds beyond the river. Lines armour well - see Crafting."},
+	# Enhancement ingredient (Crafting.ENHANCEMENTS): a chance drop from the
+	# three Badlands species, so hunting a specific monster has a point.
+	"ember_core": {"name": "Ember Core", "icon": "🔥", "value": 15, "desc": "Still warm. Cut from the heart of a Badlands beast - temper a blade in it."},
 }
+
+# --- Gear instances (see inventory.gd): a piece of gear is {"uid", "base",
+# "mods"}; mods are enhancement entries {id, label, kind, value} that add to
+# the base item's stats. ---
+
+# "Fur-lined Leather Armor" - enhancement labels prefix the base name.
+func instance_name(inst: Dictionary) -> String:
+	var name: String = get_item_name(inst.base)
+	for mod in inst.get("mods", []):
+		name = "%s %s" % [mod.label, name]
+	return name
+
+# Base stat + every mod of that kind.
+func instance_stat(inst: Dictionary, field: String) -> int:
+	var total: int = int(ITEMS.get(inst.base, {}).get(field, 0))
+	for mod in inst.get("mods", []):
+		if mod.kind == field:
+			total += int(mod.value)
+	return total
+
+# "Defense +3, Fur-lined +1" - base stat line plus each mod.
+func describe_instance(inst: Dictionary) -> String:
+	var text: String = describe_stats(inst.base)
+	for mod in inst.get("mods", []):
+		var part := "%s +%d" % [mod.label, mod.value]
+		text = part if text == "" else "%s, %s" % [text, part]
+	return text
 
 func is_usable(item_id: String) -> bool:
 	return ITEMS.has(item_id) and ITEMS[item_id].has("effect")

@@ -116,7 +116,11 @@ func _build() -> void:
 	_bar(header, "HP", Vector2(112, 42), &"HPBar")
 	_bar(header, "MP", Vector2(112, 62), &"MPBar")
 	_label(header, "StatsLabel", "", Vector2(350, 45), 14)
-	_label(header, "BonusLabel", "", Vector2(350, 64), 12, &"DimLabel")
+	# Trimmed with an ellipsis: "ATK +4 (Ember-forged Wooden Pickaxe)" would
+	# otherwise run under the equipment slots' labels.
+	var bonus := _label(header, "BonusLabel", "", Vector2(350, 64), 12, &"DimLabel")
+	bonus.size = Vector2(165, 16)
+	bonus.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 
 	# One header slot per Character.SLOTS entry, right-aligned to x=712 so a
 	# new slot grows the row leftwards (six fit before it meets the bars).
@@ -299,6 +303,87 @@ func _build() -> void:
 	slot_list.name = "SlotList"
 	slot_list.add_theme_constant_override("separation", 4)
 	slot_scroll.add_child(slot_list)
+
+	# --- Crafting view (UI redesign Phase 2): two modes sharing one grid +
+	# detail pane. Craft = recipe grid -> ingredient checklist -> Craft.
+	# Enhance = carried/worn gear grid -> the enhancements that fit it ->
+	# Enhance. Rows inside the pane are built at runtime. ---
+	var crf := Control.new()
+	crf.name = "CraftingView"
+	crf.position = Vector2(0, 158)
+	crf.size = Vector2(720, 360)
+	crf.visible = false
+	window.add_child(crf)
+	var modes := HBoxContainer.new()
+	modes.name = "Modes"
+	modes.position = Vector2(20, 0)
+	modes.add_theme_constant_override("separation", 6)
+	crf.add_child(modes)
+	for entry in [["CraftMode", "Craft"], ["EnhanceMode", "Enhance"]]:
+		var b := Button.new()
+		b.name = entry[0]
+		b.text = entry[1]
+		b.custom_minimum_size = Vector2(100, 28)
+		b.theme_type_variation = &"TabButton"
+		b.add_theme_font_size_override("font_size", 13)
+		modes.add_child(b)
+	var craft_count := _label(crf, "CraftCountLabel", "", Vector2(300, 8), 11, &"DimLabel")
+	craft_count.size = Vector2(140, 16)
+	craft_count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var craft_scroll := ScrollContainer.new()
+	craft_scroll.name = "CraftScroll"
+	craft_scroll.position = Vector2(20, 36)
+	craft_scroll.size = Vector2(424, 284)
+	craft_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	crf.add_child(craft_scroll)
+	var craft_grid := GridContainer.new()
+	craft_grid.name = "CraftGrid"
+	craft_grid.columns = 6
+	craft_grid.add_theme_constant_override("h_separation", 6)
+	craft_grid.add_theme_constant_override("v_separation", 6)
+	craft_scroll.add_child(craft_grid)
+	var craft_pane := Panel.new()
+	craft_pane.name = "CraftPane"
+	craft_pane.position = Vector2(452, 0)
+	craft_pane.size = Vector2(248, 320)
+	craft_pane.theme_type_variation = &"DetailPanel"
+	crf.add_child(craft_pane)
+	var craft_icon := TextureRect.new()
+	craft_icon.name = "CraftIcon"
+	craft_icon.position = Vector2(12, 12)
+	craft_icon.size = Vector2(48, 48)
+	craft_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	craft_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	craft_pane.add_child(craft_icon)
+	# Enhanced names run to two lines ("Ember-forged Wooden Pickaxe"), so the
+	# name, type and description each get their own band.
+	var craft_name := _label(craft_pane, "CraftName", "", Vector2(68, 8), 15, &"PanelTitle")
+	craft_name.size = Vector2(170, 42)
+	craft_name.autowrap_mode = TextServer.AUTOWRAP_WORD
+	var craft_type := _label(craft_pane, "CraftType", "", Vector2(68, 52), 11, &"DimLabel")
+	craft_type.size = Vector2(170, 30)
+	craft_type.autowrap_mode = TextServer.AUTOWRAP_WORD
+	var craft_desc := _label(craft_pane, "CraftDesc", "", Vector2(12, 88), 12)
+	craft_desc.size = Vector2(224, 44)
+	craft_desc.autowrap_mode = TextServer.AUTOWRAP_WORD
+	var craft_scroll2 := ScrollContainer.new()
+	craft_scroll2.name = "CraftRowsScroll"
+	craft_scroll2.position = Vector2(12, 136)
+	craft_scroll2.size = Vector2(224, 126)
+	craft_scroll2.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	craft_pane.add_child(craft_scroll2)
+	var craft_rows := VBoxContainer.new()
+	craft_rows.name = "CraftRows"
+	craft_rows.add_theme_constant_override("separation", 4)
+	craft_scroll2.add_child(craft_rows)
+	var craft_action := Button.new()
+	craft_action.name = "CraftAction"
+	craft_action.position = Vector2(12, 268)
+	craft_action.size = Vector2(224, 40)
+	craft_action.theme_type_variation = &"PrimaryButton"
+	craft_action.add_theme_font_size_override("font_size", 15)
+	craft_pane.add_child(craft_action)
+	_label(crf, "CraftHint", "", Vector2(20, 330), 12, &"DimLabel")
 
 	_own(layer, layer)
 	var packed := PackedScene.new()

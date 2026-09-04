@@ -84,17 +84,20 @@ const ENEMIES := {
 		"name": "Magma Slime", "sprite": "res://assets/enemies/rat.png", "tint": Color(0.9, 0.35, 0.1, 1.0),
 		"max_hp": 16, "attack": 5, "defense": 0, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "poison", "chance": 0.2}, "zones": [World.Zone.BADLANDS],
-		"drop_item_ids": ["monster_fur"],
+		# Ember Core (Crafting's Ember-forged enhancement) is a Badlands-only
+		# chance drop - the Fire Drake is the best source, so it's worth
+		# hunting specifically.
+		"drop_item_ids": ["monster_fur", {"item": "ember_core", "chance": 0.3}],
 	},
 	"fire_drake": {
 		"name": "Fire Drake", "sprite": "res://assets/enemies/bat.png", "tint": Color(0.85, 0.3, 0.1, 1.0),
 		"max_hp": 18, "attack": 7, "defense": 1, "gold_min": 9, "gold_max": 15, "zones": [World.Zone.BADLANDS],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "ember_core", "chance": 0.5}],
 	},
 	"ash_golem": {
 		"name": "Ash Golem", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.25, 0.22, 0.2, 1.0),
 		"max_hp": 24, "attack": 6, "defense": 4, "gold_min": 10, "gold_max": 16, "zones": [World.Zone.BADLANDS],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "ember_core", "chance": 0.3}],
 	},
 
 	# --- Gloomfen Marsh (west) ---

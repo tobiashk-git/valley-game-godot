@@ -77,12 +77,16 @@ func _refresh() -> void:
 			_add_row(label_text, "Buy", Inventory.get_count("gold") < price, Shop.buy_item.bind(item_id))
 	else:
 		var any := false
-		for item_id in Inventory.backpack.keys():
+		# all_counts() folds gear instances in by base id (enhanced pieces
+		# sell at base price, plain ones are sold first - see
+		# Inventory.remove_item()).
+		var counts: Dictionary = Inventory.all_counts()
+		for item_id in counts.keys():
 			if item_id == "gold" or not Items.ITEMS.get(item_id, {}).has("value"):
 				continue
 			any = true
 			var price: int = Shop.sell_price(item_id)
-			var label_text := "%s x%d - %d gold" % [Items.get_item_name_bbcode(item_id), Inventory.backpack[item_id], price]
+			var label_text := "%s x%d - %d gold" % [Items.get_item_name_bbcode(item_id), counts[item_id], price]
 			_add_row(label_text, "Sell", false, Shop.sell_item.bind(item_id))
 		if not any:
 			var empty_label := Label.new()

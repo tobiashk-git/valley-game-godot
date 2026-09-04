@@ -387,8 +387,14 @@ func _defeat_enemy(index: int) -> void:
 	var gold: int = enemy.gold_min + randi() % (enemy.gold_max - enemy.gold_min + 1)
 	Inventory.add_item("gold", gold)
 	var msg := "%s defeated! Found %d gold." % [enemy.name, gold]
+	# Drop entries are either a plain item id (always drops) or
+	# {"item": id, "chance": 0..1} for rarer ingredients (Ember Core).
 	var drop_item_ids: Array = enemy.get("drop_item_ids", [])
-	for drop_item_id in drop_item_ids:
+	for entry in drop_item_ids:
+		var drop_item_id: String = entry.item if entry is Dictionary else entry
+		var chance: float = float(entry.get("chance", 1.0)) if entry is Dictionary else 1.0
+		if randf() >= chance:
+			continue
 		Inventory.add_item(drop_item_id, 1)
 		msg += " Obtained %s!" % Items.get_item_name(drop_item_id)
 	_log(msg)

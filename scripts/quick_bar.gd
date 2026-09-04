@@ -13,7 +13,7 @@ extends CanvasLayer
 const SLOT_SIZE := 48
 const BOTTOM_MARGIN := 20.0
 # Panels whose open state hides the bar - each has an is_open().
-const OVERLAY_AUTOLOADS := ["CharacterSheet", "CraftingPanel", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel"]
+const OVERLAY_AUTOLOADS := ["CharacterSheet", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel"]
 
 @onready var hbox: HBoxContainer = $HBox
 @onready var feedback_label: Label = $FeedbackLabel

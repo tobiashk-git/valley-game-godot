@@ -35,39 +35,62 @@ const SLOTS := {
 	"accessory": {"label": "Accessory", "doll": Vector2(504, 14), "line_to": Vector2(420, 84), "stat": "bonus"},
 }
 
-# slot -> item_id or "" (empty); one key per SLOTS entry.
+# slot -> gear INSTANCE ({"uid", "base", "mods"}, see inventory.gd) or {}
+# when empty; one key per SLOTS entry.
 var equipment: Dictionary = {}
 
 func _init() -> void:
 	for slot in SLOTS:
-		equipment[slot] = ""
+		equipment[slot] = {}
 
-# Equipping consumes 1 of item_id from the backpack; any item already in
-# that slot is returned to the backpack first (a swap, not a stack).
-func equip(slot: String, item_id: String) -> void:
-	if not SLOTS.has(slot) or not Inventory.remove_item(item_id, 1):
+func equipped(slot: String) -> Dictionary:
+	return equipment.get(slot, {})
+
+# The worn item's base id ("" if the slot is empty) - for callers that only
+# care what kind of thing is worn.
+func equipped_id(slot: String) -> String:
+	var inst: Dictionary = equipped(slot)
+	return inst.base if not inst.is_empty() else ""
+
+# Equips a carried instance - by uid (int), or by base id (String: the first
+# carried instance of that kind, plain ones first). Anything already in the
+# slot goes back to the backpack (a swap, not a stack).
+func equip(slot: String, what) -> void:
+	if not SLOTS.has(slot):
 		return
-	var previous: String = equipment[slot]
-	if previous != "":
-		Inventory.add_item(previous, 1)
-	equipment[slot] = item_id
+	var inst: Dictionary
+	if what is int:
+		inst = Inventory.take_gear(what)
+	else:
+		var candidates: Array = Inventory.gear_of(str(what))
+		if candidates.is_empty():
+			return
+		candidates.sort_custom(func(a, b): return a.mods.size() < b.mods.size())
+		inst = Inventory.take_gear(candidates[0].uid)
+	if inst.is_empty():
+		return
+	var previous: Dictionary = equipment[slot]
+	if not previous.is_empty():
+		Inventory.add_gear_instance(previous)
+	equipment[slot] = inst
 	changed.emit()
 
 func unequip(slot: String) -> void:
-	var item_id: String = equipment.get(slot, "")
-	if item_id == "":
+	var inst: Dictionary = equipped(slot)
+	if inst.is_empty():
 		return
-	Inventory.add_item(item_id, 1)
-	equipment[slot] = ""
+	Inventory.add_gear_instance(inst)
+	equipment[slot] = {}
 	changed.emit()
 
-# Sum of an item field over every equipped slot whose stat is that field -
-# e.g. gear_total("defense") = armour + (a future helmet) + ...
+# Sum of an item field over every equipped slot whose stat is that field,
+# base stats plus enhancement mods - e.g. gear_total("defense") = armour 3
+# + Fur-lined 1 + (a future helmet) + ...
 func gear_total(field: String) -> int:
 	var total := 0
 	for slot in SLOTS:
-		if SLOTS[slot].stat == field and equipment[slot] != "":
-			total += int(Items.ITEMS.get(equipment[slot], {}).get(field, 0))
+		if SLOTS[slot].stat == field and not equipment[slot].is_empty():
+			total += Items.instance_stat(equipment[slot], field)
 	return total
 
 # Best value of a `bonus` key across the equipped "bonus" slots (max, not
@@ -75,8 +98,8 @@ func gear_total(field: String) -> int:
 func gear_bonus(key: String) -> float:
 	var best := 0.0
 	for slot in SLOTS:
-		if SLOTS[slot].stat == "bonus" and equipment[slot] != "":
-			best = maxf(best, float(Items.ITEMS.get(equipment[slot], {}).get("bonus", {}).get(key, 0.0)))
+		if SLOTS[slot].stat == "bonus" and not equipment[slot].is_empty():
+			best = maxf(best, float(Items.ITEMS.get(equipment[slot].base, {}).get("bonus", {}).get(key, 0.0)))
 	return best
 
 # Names of the items equipped in every slot feeding `field`, for UI hints
@@ -84,6 +107,6 @@ func gear_bonus(key: String) -> float:
 func gear_names(field: String) -> Array:
 	var names: Array = []
 	for slot in SLOTS:
-		if SLOTS[slot].stat == field and equipment[slot] != "":
-			names.append(Items.get_item_name(equipment[slot]))
+		if SLOTS[slot].stat == field and not equipment[slot].is_empty():
+			names.append(Items.instance_name(equipment[slot]))
 	return names
