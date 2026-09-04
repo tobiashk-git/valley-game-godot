@@ -57,16 +57,24 @@ const ZONE_KEYS := {
 func _tile_center(pos: Vector2i) -> Vector2:
 	return Vector2(pos.x * 32 + 16, pos.y * 32 + 16)
 
-func _spawn_prop(scene: PackedScene, tile_pos: Vector2i) -> void:
+func _spawn_prop(scene: PackedScene, tile_pos: Vector2i) -> Node2D:
 	var instance: Node2D = scene.instantiate()
 	instance.position = _tile_center(tile_pos)
 	ysort.add_child(instance)
+	return instance
 
 # The entrance tile itself is solid (the prop blocks it), so the player is
 # always standing on an *adjacent* tile when "at" the entrance — size this
 # bigger than one tile so it still triggers.
-func _add_entrance(prop_scene: PackedScene, entrance_tile: Vector2i, target_scene: String, target_spawn: Vector2) -> void:
-	_spawn_prop(prop_scene, entrance_tile)
+# texture_path: optional per-instance sprite swap for props that share one
+# scene - the village houses all use HouseEntrance.tscn (baked to
+# assets/house.png) but the Elder's/Ranger's get their own roof-recoloured
+# variant. Every house PNG is exactly 123px tall, so the scene's baked
+# scale/offset keep working unchanged.
+func _add_entrance(prop_scene: PackedScene, entrance_tile: Vector2i, target_scene: String, target_spawn: Vector2, texture_path: String = "") -> void:
+	var prop: Node2D = _spawn_prop(prop_scene, entrance_tile)
+	if texture_path != "":
+		prop.get_node("Sprite2D").texture = load(texture_path)
 	var portal: Area2D = PORTAL_SCENE.instantiate()
 	portal.position = _tile_center(entrance_tile)
 	portal.get_node("CollisionShape2D").shape.size = Vector2(56, 56)
@@ -209,9 +217,11 @@ func _ready() -> void:
 	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
 	# target spawn is always the tile just inside the door (one row up).
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.HOUSE_ENTRANCE, "res://scenes/House.tscn", Vector2(5 * 32 + 16, 7 * 32 + 16))
-	_add_entrance(HOUSE_ENTRANCE_SCENE, World.ELDER_HOUSE_ENTRANCE, "res://scenes/ElderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
+	# Elder = moss-green roof, Ranger (the old empty house) = dark shingle;
+	# Trader and Oliver's own house keep the terracotta default.
+	_add_entrance(HOUSE_ENTRANCE_SCENE, World.ELDER_HOUSE_ENTRANCE, "res://scenes/ElderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16), "res://assets/house_elder.png")
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.TRADER_HOUSE_ENTRANCE, "res://scenes/TraderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
-	_add_entrance(HOUSE_ENTRANCE_SCENE, World.EMPTY_HOUSE_ENTRANCE, "res://scenes/EmptyHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
+	_add_entrance(HOUSE_ENTRANCE_SCENE, World.EMPTY_HOUSE_ENTRANCE, "res://scenes/EmptyHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16), "res://assets/house_ranger.png")
 	# Dungeon.tscn/Castle.tscn/FinalBoss.tscn all regenerate their maze fresh
 	# every visit and always spawn the player at their own entrance, so the
 	# target_spawn passed here is unused.
