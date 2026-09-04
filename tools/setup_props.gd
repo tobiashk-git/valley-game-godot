@@ -8,7 +8,12 @@ extends SceneTree
 const TILE := 32.0
 const HALF := TILE / 2.0
 
-func _build_sprite_prop(scene_name: String, tex_path: String, src_w: float, src_h: float, scale: float, region: Rect2 = Rect2(), z_index: int = 1) -> void:
+# solid_footprint: block the sprite's whole drawn rect (down to the tile's
+# bottom edge) instead of the single tile - for buildings the player must not
+# be able to step into from the sides/back. See tools/setup_house_collision.gd
+# (the standalone patch that first applied this to HouseEntrance) for the
+# geometry.
+func _build_sprite_prop(scene_name: String, tex_path: String, src_w: float, src_h: float, scale: float, region: Rect2 = Rect2(), z_index: int = 1, solid_footprint: bool = false) -> void:
 	var body := StaticBody2D.new()
 	body.name = scene_name
 	body.z_index = z_index # Two-tier layering: everything that stands proud of the
@@ -37,7 +42,13 @@ func _build_sprite_prop(scene_name: String, tex_path: String, src_w: float, src_
 	var collision := CollisionShape2D.new()
 	collision.name = "CollisionShape2D"
 	var shape := RectangleShape2D.new()
-	shape.size = Vector2(TILE - 4, TILE - 4) # collision stays a single tile even though the sprite overflows visually
+	if solid_footprint:
+		var drawn_w: float = src_w * scale
+		var top: float = sprite.offset.y * scale - drawn_h / 2.0
+		shape.size = Vector2(drawn_w - 2.0, HALF - top)
+		collision.position = Vector2(0, (top + HALF) / 2.0)
+	else:
+		shape.size = Vector2(TILE - 4, TILE - 4) # collision stays a single tile even though the sprite overflows visually
 	collision.shape = shape
 	body.add_child(collision)
 	collision.owner = body
@@ -77,7 +88,7 @@ func _initialize() -> void:
 	# cottage, keyed/cropped/downscaled to exactly 123px tall so this call's
 	# baked scale+offset kept working as a pure PNG swap (was the 69x123 LPC
 	# crop). Wider than before (117px) - the sprite is centred so that's free.
-	_build_sprite_prop("HouseEntrance", "res://assets/house.png", 117.0, 123.0, 0.75)
+	_build_sprite_prop("HouseEntrance", "res://assets/house.png", 117.0, 123.0, 0.75, Rect2(), 1, true)
 	_build_drawn_prop("DungeonEntrance", "res://scripts/dungeon_entrance.gd")
 	_build_drawn_prop("CastleEntrance", "res://scripts/castle_entrance.gd")
 	# Phase 7b - real cropped-sprite entrance props (LPC Cavern & Ruin Tiles /

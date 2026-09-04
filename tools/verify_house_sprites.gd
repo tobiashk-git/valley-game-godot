@@ -42,6 +42,74 @@ func _initialize() -> void:
 		print(name, " house shows its own sprite: ", sprite != null and sprite.texture.resource_path == expected[name][1])
 		print(name, " house sprite is the shared 123px height: ", sprite != null and sprite.texture.get_height() == base_h and base_h == 123)
 
+	# --- Solid footprint: the house blocks from every side, not just its
+	# entrance tile (user report: could walk into the drawn wall from the
+	# back and get hidden behind it). Walk at the Elder's house from the
+	# left, right and top; the player's body must never enter the drawn
+	# sprite rect. From below the doorstep band stays walkable so the
+	# entrance portal is still reachable - verify_house_portal.gd covers
+	# that. ---
+	# Oliver's house has open grass either side (the village wall runs one
+	# tile above every house, so a pure top approach can't start far enough
+	# back - the side approaches at roof height cover "walking in from the
+	# back" instead). Each walk must actually REACH the house: a gap of more
+	# than a few px means something else stopped the player and the check
+	# would be vacuous.
+	var house: Node2D = _house_at(ysort, world.HOUSE_ENTRANCE)
+	var hsprite: Sprite2D = house.get_node("Sprite2D")
+	var drawn: Vector2 = hsprite.texture.get_size() * hsprite.scale
+	var sprite_rect := Rect2(house.position + Vector2(-drawn.x / 2.0, hsprite.offset.y * hsprite.scale.y - drawn.y / 2.0), drawn)
+	var combat: Node = root.get_node("Combat")
+	const PLAYER_HALF := 10.0
+	# The collider itself: one rect from the sprite's top edge down to the
+	# tile's bottom edge (HALF=16), full drawn width minus a 1px trim - the
+	# geometry the walks below exercise from the sides; the top edge is
+	# asserted here directly because the village wall sits one tile above
+	# every house, too close for a clean top-down walk to start from.
+	var collider: CollisionShape2D = house.get_node("CollisionShape2D")
+	var col_rect := Rect2(house.position + collider.position - collider.shape.size / 2.0, collider.shape.size)
+	print("Collider spans the drawn sprite from its top edge to the tile bottom: ", absf(col_rect.position.y - sprite_rect.position.y) < 1.0 and absf(col_rect.end.y - (house.position.y + 16.0)) < 1.0 and absf(col_rect.size.x - (drawn.x - 2.0)) < 1.0, " collider=", col_rect)
+	# Scattered valley Tree/Rock props can sit right beside the house and stop
+	# a walk short - clear them (same pattern as the other verify scripts).
+	for child in ysort.get_children():
+		if (child.scene_file_path.ends_with("Tree.tscn") or child.scene_file_path.ends_with("Rock.tscn")) and child.position.distance_to(house.position) < 140.0:
+			child.queue_free()
+	await process_frame
+	await process_frame
+	# Starts 30px out (player body spans 20-40px from the wall) - a 50px
+	# start overlapped a village wall post beside the house at roof height
+	# and got pushed to its far side.
+	var approaches := [
+		["left, wall height", sprite_rect.position + Vector2(-30.0, drawn.y * 0.8), "move_right", "left"],
+		["left, roof height", sprite_rect.position + Vector2(-30.0, drawn.y * 0.25), "move_right", "left"],
+		["right, wall height", sprite_rect.position + Vector2(drawn.x + 30.0, drawn.y * 0.8), "move_left", "right"],
+		["right, roof height", sprite_rect.position + Vector2(drawn.x + 30.0, drawn.y * 0.25), "move_left", "right"],
+	]
+	for approach in approaches:
+		var start: Vector2 = approach[1]
+		player.position = start
+		cam.reset_smoothing()
+		for i in range(3):
+			await physics_frame
+		Input.action_press(approach[2])
+		for i in range(45):
+			await physics_frame
+		Input.action_release(approach[2])
+		await physics_frame
+		while combat.in_combat:
+			combat.player_run()
+			await physics_frame
+		# Gap between the player's body edge and the drawn sprite edge on the
+		# approach side: negative = inside the drawn house (the bug), more
+		# than a few px = never got there (test setup problem, not a pass).
+		var gap: float
+		match approach[3]:
+			"left": gap = sprite_rect.position.x - (player.position.x + PLAYER_HALF)
+			"right": gap = (player.position.x - PLAYER_HALF) - sprite_rect.end.x
+			_: gap = sprite_rect.position.y - (player.position.y + PLAYER_HALF)
+		print("House is solid from the ", approach[0], " (stopped touching the drawn edge, gap ", snappedf(gap, 0.1), "px): ", gap >= -2.0 and gap <= 6.0, "  start=", start, " end=", player.position)
+	print("House sprite still bottom-anchored at its entrance tile: ", absf(sprite_rect.end.y - (house.position.y + 16.0)) < 12.0)
+
 	var elder: Node2D = _house_at(ysort, world.ELDER_HOUSE_ENTRANCE)
 	player.position = elder.position + Vector2(0, 3 * 32)
 	cam.reset_smoothing()
