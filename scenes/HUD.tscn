@@ -5,58 +5,103 @@
 [ext_resource type="Texture2D" path="res://assets/icons/stone.png" id="3_nysna"]
 [ext_resource type="Texture2D" path="res://assets/icons/gold.png" id="4_f6qnu"]
 
-[node name="HUD" type="CanvasLayer" unique_id=1103561212]
+[node name="HUD" type="CanvasLayer" unique_id=1351880585]
 script = ExtResource("1_qpvh6")
 
-[node name="Panel" type="Panel" parent="." unique_id=1406196427]
+[node name="Panel" type="Panel" parent="." unique_id=1537957773]
 offset_left = 12.0
 offset_top = 12.0
 offset_right = 452.0
-offset_bottom = 68.0
+offset_bottom = 136.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1434302450]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=2051482369]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="HBox" type="HBoxContainer" parent="Panel/Margin" unique_id=587663115]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=616652741]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HBox" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1389091517]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="WoodIcon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=70753778]
+[node name="WoodIcon" type="TextureRect" parent="Panel/Margin/VBox/HBox" unique_id=407191701]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("2_7hsmw")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="WoodLabel" type="Label" parent="Panel/Margin/HBox" unique_id=1389528777]
+[node name="WoodLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=913617110]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 
-[node name="StoneIcon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=392922700]
+[node name="StoneIcon" type="TextureRect" parent="Panel/Margin/VBox/HBox" unique_id=1217725490]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("3_nysna")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StoneLabel" type="Label" parent="Panel/Margin/HBox" unique_id=896171307]
+[node name="StoneLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=189256720]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 
-[node name="GoldIcon" type="TextureRect" parent="Panel/Margin/HBox" unique_id=973468900]
+[node name="GoldIcon" type="TextureRect" parent="Panel/Margin/VBox/HBox" unique_id=1702199936]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("4_f6qnu")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="GoldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=748853065]
+[node name="GoldLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=971867639]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 
-[node name="WorldLabel" type="Label" parent="Panel/Margin/HBox" unique_id=406194476]
+[node name="WorldLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=281660890]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 20
+
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=1767720741]
+custom_minimum_size = Vector2(300, 20)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 2
+theme_type_variation = &"HPBar"
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/HPBar" unique_id=818991877]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=1414687629]
+custom_minimum_size = Vector2(300, 20)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 2
+theme_type_variation = &"MPBar"
+show_percentage = false
+
+[node name="MPLabel" type="Label" parent="Panel/Margin/VBox/MPBar" unique_id=2140020272]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox" unique_id=292450973]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 14

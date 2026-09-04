@@ -12,11 +12,9 @@ const NORMAL_TINT := Color(1, 1, 1)
 
 @onready var panel: Panel = $Panel
 @onready var enemy_slots: Array = []
-@onready var player_hp_bar: ProgressBar = $Panel/Margin/VBox/PlayerRow/PlayerHPBar
-@onready var player_hp_label: Label = $Panel/Margin/VBox/PlayerRow/PlayerHPBar/PlayerHPLabel
-@onready var player_mp_bar: ProgressBar = $Panel/Margin/VBox/PlayerRow/PlayerMPBar
-@onready var player_mp_label: Label = $Panel/Margin/VBox/PlayerRow/PlayerMPBar/PlayerMPLabel
-@onready var status_row: HBoxContainer = $Panel/Margin/VBox/PlayerRow/StatusRow
+# The player's HP/MP bars and status badges used to be here too - they now
+# live in the always-visible HUD (hud.gd), which stays uncovered while this
+# panel is up.
 @onready var log_label: Label = $Panel/Margin/VBox/LogPanel/LogLabel
 @onready var commands: HBoxContainer = $Panel/Margin/VBox/Commands
 @onready var attack_btn: Button = $Panel/Margin/VBox/Commands/AttackBtn
@@ -70,15 +68,6 @@ func _refresh() -> void:
 		var hp_label: Label = hp_bar.get_node("HPLabel")
 		hp_label.text = "%d / %d" % [enemy.hp, enemy.max_hp]
 
-	var stats: Dictionary = Character.stats
-	player_hp_bar.max_value = stats.max_hp
-	player_hp_bar.value = stats.hp
-	player_hp_label.text = "HP: %d / %d" % [stats.hp, stats.max_hp]
-	player_mp_bar.max_value = stats.max_mp
-	player_mp_bar.value = stats.mp
-	player_mp_label.text = "MP: %d / %d" % [stats.mp, stats.max_mp]
-	_refresh_status_row()
-
 	var text := ""
 	for i in range(Combat.battle_log.size()):
 		if i > 0:
@@ -87,18 +76,6 @@ func _refresh() -> void:
 	log_label.text = text
 
 	_refresh_submenu()
-
-func _refresh_status_row() -> void:
-	for child in status_row.get_children():
-		child.queue_free()
-	for status_id in Combat.player_status.keys():
-		var def: Dictionary = Statuses.STATUSES[status_id]
-		var turns_left: int = Combat.player_status[status_id].turns_left
-		var badge := Label.new()
-		badge.text = "%s (%d)" % [def.name, turns_left]
-		badge.theme_type_variation = &"DimLabel"
-		badge.add_theme_font_size_override("font_size", 12)
-		status_row.add_child(badge)
 
 func _clear_submenu() -> void:
 	for child in submenu.get_children():

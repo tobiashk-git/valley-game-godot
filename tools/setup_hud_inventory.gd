@@ -21,20 +21,35 @@ func _build_hud() -> void:
 	# unit maps to fewer physical on-screen pixels than the same 800 units
 	# would on a standard-DPI desktop - everything at a fixed size in game
 	# units ends up physically smaller the higher the screen's DPI.
-	panel.size = Vector2(440, 56)
+	# Taller again (was 440x56) for the HP/MP bars + effects line stacked
+	# underneath the counters as a left-hand column - kept ABOVE y=140 on
+	# purpose: BattlePanel's 480x400 panel sits at y=140..540 in the 800x600
+	# base viewport (pushed down from the centred y=100 specifically to make
+	# room for this column) and draws above this layer (later autoload, same
+	# CanvasLayer.layer), so the column stays fully visible mid-fight only as
+	# long as this panel ends above it. See setup_battle_panel.gd.
+	panel.size = Vector2(440, 124)
 	layer.add_child(panel)
 	panel.owner = layer
 
 	var margin := MarginContainer.new()
 	margin.name = "Margin"
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "top", "right", "bottom"]:
+		margin.add_theme_constant_override("margin_%s" % side, 8)
 	panel.add_child(margin)
 	margin.owner = layer
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "VBox"
+	vbox.add_theme_constant_override("separation", 6)
+	margin.add_child(vbox)
+	vbox.owner = layer
 
 	var hbox := HBoxContainer.new()
 	hbox.name = "HBox"
 	hbox.add_theme_constant_override("separation", 16)
-	margin.add_child(hbox)
+	vbox.add_child(hbox)
 	hbox.owner = layer
 
 	for entry in [["wood", "WoodLabel"], ["stone", "StoneLabel"], ["gold", "GoldLabel"]]:
@@ -62,6 +77,44 @@ func _build_hud() -> void:
 	world_label.add_theme_font_size_override("font_size", 20) # was 14
 	hbox.add_child(world_label)
 	world_label.owner = layer
+
+	# HP bar over MP bar, left-aligned (SHRINK_BEGIN, fixed width) so they
+	# read as a column running down the left side under the counters, plus
+	# an effects line beneath (active statuses, e.g. "Poison (3)") - all
+	# always visible, so the battle screen no longer needs its own copies
+	# (see setup_battle_panel.gd). Same HPBar/MPBar theme variations +
+	# centred-label-in-bar shape the Character panel and enemy slots use.
+	for entry in [["HP", &"HPBar"], ["MP", &"MPBar"]]:
+		var prefix: String = entry[0]
+		var bar := ProgressBar.new()
+		bar.name = prefix + "Bar"
+		bar.custom_minimum_size = Vector2(300, 20)
+		bar.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		bar.show_percentage = false
+		bar.theme_type_variation = entry[1]
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		vbox.add_child(bar)
+		bar.owner = layer
+
+		var bar_label := Label.new()
+		bar_label.name = prefix + "Label"
+		bar_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+		bar_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		bar_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		bar_label.add_theme_font_size_override("font_size", 13)
+		bar_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bar.add_child(bar_label)
+		bar_label.owner = layer
+
+	# Effects line - text/variation set at runtime by hud.gd ("No effects"
+	# dimmed, or the active statuses with turns left).
+	var status_label := Label.new()
+	status_label.name = "StatusLabel"
+	status_label.theme_type_variation = &"DimLabel"
+	status_label.add_theme_font_size_override("font_size", 14)
+	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_child(status_label)
+	status_label.owner = layer
 
 	var packed := PackedScene.new()
 	packed.pack(layer)

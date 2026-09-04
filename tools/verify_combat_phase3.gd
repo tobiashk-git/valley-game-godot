@@ -11,8 +11,11 @@ func _initialize() -> void:
 	var character: Node = root.get_node("Character")
 	var combat: Node = root.get_node("Combat")
 	var inventory: Node = root.get_node("Inventory")
-	var battle_panel: Node = root.get_node("BattlePanel")
-	var status_row: HBoxContainer = battle_panel.get_node("Panel/Margin/VBox/PlayerRow/StatusRow")
+	# Status badges moved from the battle panel's own StatusRow to the
+	# always-visible HUD's effects line (hud.gd) - same "<Name> (<turns>)"
+	# wording, one comma-joined label instead of one badge node per status.
+	var hud: Node = root.get_node("HUD")
+	var statuses: Node = root.get_node("Statuses")
 
 	# --- Poison: DOT damage + badge + expiry after its duration. ---
 	combat.start_combat("dungeon_rat")
@@ -20,7 +23,7 @@ func _initialize() -> void:
 	combat.player_status["poison"] = {"turns_left": 3}
 	combat.changed.emit() # setting the dict directly bypasses the signal a real infliction would fire
 	await process_frame
-	print("Status badge count (poison): ", status_row.get_child_count())
+	print("HUD effects line shows the poison badge: ", hud.status_label.text == "%s (3)" % statuses.STATUSES["poison"].name)
 	root.get_texture().get_image().save_png("res://verify_p3_poison_badge.png")
 
 	combat.player_defend() # any action ticks poison via _begin_player_turn(), then enemy retaliates + duration-ticks

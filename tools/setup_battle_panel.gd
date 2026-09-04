@@ -68,7 +68,12 @@ func _build_battle_panel() -> void:
 	var panel := Panel.new()
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.position = Vector2(-240, -200)
+	# Was centred (y offset -200 -> y=100..500 in the 800x600 base viewport);
+	# pushed down 40px so the top-left HUD column (counters + HP/MP bars +
+	# effects line, ends at y=136 - see setup_hud_inventory.gd) stays fully
+	# uncovered mid-fight. On a phone (keep_width, much taller viewport) the
+	# panel is far lower still, so only the desktop layout was ever tight.
+	panel.position = Vector2(-240, -160)
 	panel.size = Vector2(480, 400)
 	layer.add_child(panel)
 	panel.owner = layer
@@ -93,24 +98,12 @@ func _build_battle_panel() -> void:
 	for i in range(MAX_ENEMY_SLOTS):
 		enemies_row.add_child(_build_enemy_slot(i))
 
-	# Player row: HP + MP bars stacked.
-	var player_row := VBoxContainer.new()
-	player_row.name = "PlayerRow"
-	player_row.add_theme_constant_override("separation", 4)
-	vbox.add_child(player_row)
-
-	var player_hp_bar := _bar_with_label("PlayerHP", &"HPBar")
-	player_row.add_child(player_hp_bar)
-
-	var player_mp_bar := _bar_with_label("PlayerMP", &"MPBar")
-	player_row.add_child(player_mp_bar)
-
-	# Active status badges (poison/paralysis/sleep/confusion/silence) - built
-	# dynamically by battle_panel.gd, empty at build time.
-	var status_row := HBoxContainer.new()
-	status_row.name = "StatusRow"
-	status_row.add_theme_constant_override("separation", 8)
-	player_row.add_child(status_row)
+	# No player row any more: the player's HP/MP bars and the active-status
+	# badges (poison/paralysis/sleep/confusion/silence) used to sit here
+	# between the enemies and the log, but now live in the always-visible
+	# HUD (top-left column, see setup_hud_inventory.gd/hud.gd) which stays
+	# uncovered while this panel is up - duplicating them here was redundant
+	# (user feedback).
 
 	# Battle log.
 	var log_panel := PanelContainer.new()
