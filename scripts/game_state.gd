@@ -37,6 +37,9 @@ var village_gates_open := false
 # True from New Game until the in-world opening (Intro autoload, played by
 # House._ready()) has run through. Saved, so a quit mid-intro replays it.
 var intro_pending := false
+# True for the half-second of a gathering swing (gatherable.gd): the player
+# is held still and no other prop takes the E. Never saved.
+var gathering := false
 
 # World Map fast-travel unlocks. House/village start known (the player
 # spawns right there); the dungeon/castle unlock themselves in
@@ -78,6 +81,7 @@ func consume_next_spawn(player: Node2D) -> bool:
 # Back to a fresh game's values (SaveSystem.new_game()).
 func reset() -> void:
 	next_spawn_position = NO_OVERRIDE
+	gathering = false
 	for key in boss_defeated.keys():
 		boss_defeated[key] = false
 	wild_monsters_defeated.clear()
@@ -101,7 +105,7 @@ func is_gameplay() -> bool:
 # press that closes a chat also opens the chest / walks through the door /
 # starts a fight the player is standing next to.
 func interact_blocked() -> bool:
-	return get_node("/root/DialogueUI").is_open() or get_node("/root/Intro").is_playing()
+	return gathering or get_node("/root/DialogueUI").is_open() or get_node("/root/Intro").is_playing()
 
 func put_wild_monster_to_sleep(key: String) -> void:
 	wild_monsters_defeated[key] = int(Time.get_unix_time_from_system()) + WILD_MONSTER_SLEEP_SECONDS
