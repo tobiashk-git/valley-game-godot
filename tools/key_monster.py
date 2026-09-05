@@ -102,9 +102,10 @@ def islands_except_signature(mask, min_px=30, band=0.12):
 
 
 def holes_to_fill(mask, pure_bg):
-    """Enclosed transparent pockets whose pixels are mostly NOT pure
-    background (so: keyed by the shadow rule inside the creature)."""
+    """Enclosed transparent pockets to paint back in: tiny ones (specks),
+    or ones mostly NOT made of background/shadow-proper pixels."""
     holes = fill_holes(mask) & ~mask
+    small = max(64, int(0.002 * mask.sum()))
     h, w = holes.shape
     seen = np.zeros_like(holes)
     out = np.zeros_like(holes)
@@ -123,7 +124,10 @@ def holes_to_fill(mask, pure_bg):
                     seen[ny, nx] = True
                     stack.append((ny, nx))
         bg_share = sum(1 for y, x in comp if pure_bg[y, x]) / len(comp)
-        if bg_share < 0.5:
+        # A tiny pocket is a speck of dark fur the shadow rule caught (fill
+        # it whatever its colour); a big one is filled only if it is mostly
+        # peeled outline rather than background or shadow proper.
+        if len(comp) <= small or bg_share < 0.5:
             for y, x in comp:
                 out[y, x] = True
     return out
@@ -178,8 +182,15 @@ def main():
     proj = (rgb * unit).sum(-1, keepdims=True)
     perp = np.linalg.norm(rgb - proj * unit, axis=-1)
     same_hue = (hue_d < 15.0) & (np.abs(hsv[..., 1] - bg_hsv[..., 1]) < 0.09) & (perp < 14.0)
+    # ...and only in the lower half of the image: a drop shadow sits at the
+    # feet, while a near-black hide (Cinderjaw's mane) is the same colour as
+    # a shadow and must not be touched up top.
+    lower = np.zeros((h, w), bool)
+    lower[h // 2:, :] = True
+    same_hue = same_hue & lower
     shadow = same_hue & (hsv[..., 2] <= bg_hsv[..., 2] + 0.05)
     keyed = bg | shadow
+    keyed_by_colour = keyed.copy() # background or shadow proper, not the outline peel
     if shadow_xy is not None:
         sx, sy = shadow_xy
         tone = rgb[sy, sx]
@@ -194,6 +205,7 @@ def main():
         band[max(0, int(sy - 0.10 * h)):, :] = True
         extra = (near | on_line) & band
         keyed = keyed | extra
+        keyed_by_colour = keyed_by_colour | extra
         print("manual shadow sample", tone.astype(int), "keyed", int((extra & ~(bg | shadow)).sum()), "more px")
 
     # Edge peel: blended outline pixels next to the keyed region - toward
@@ -222,12 +234,12 @@ def main():
     # background-hued colour in an eye or an ear): only transparent regions
     # that reach the image border stay transparent.
     if not mist:
-        # Enclosed transparent pockets: a gap of pure background between a
-        # golem's arm and its torso stays open; a patch that was keyed only
-        # by the shadow rule (a dark crease inside an ear, a fleck in an eye)
-        # is creature and is filled. Decided per pocket by its share of pure
-        # background pixels.
-        holes = holes_to_fill(fig, bg)
+        # Enclosed transparent pockets: a gap of background OR shadow (between
+        # a hound's legs) stays open; only a pocket made mostly of peeled
+        # outline pixels is a keying artefact and is filled. (The shadow key
+        # is confined to the lower half, so an upper-body crease can no
+        # longer become a pocket in the first place.)
+        holes = holes_to_fill(fig, keyed_by_colour)
         alpha[holes] = 255
         fig = fig | holes
         alpha[~fig] = 0

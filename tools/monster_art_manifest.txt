@@ -1,0 +1,28 @@
+# Leonardo source (in the user's Art folder) | species id | key_monster.py flags
+# Re-key everything with: python tools/key_all_monsters.py
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0.jpg|dungeon_rat|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (1).jpg|cave_bat|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (2).jpg|skeleton|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (3).jpg|giant_spider|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (4).jpg|ghost|--mist
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (5).jpg|ice_wraith|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (6).jpg|stone_sentinel|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (7).jpg|frost_wolf|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (8).jpg|forest_spirit|--keep-islands
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (9).jpg|bandit|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (10).jpg|corrupted_fauna|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (11).jpg|magma_slime|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (12).jpg|fire_drake|--keep-islands --shadow 520,735
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (13).jpg|ash_golem|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (14).jpg|swamp_hag|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (15).jpg|giant_insect|--keep-islands
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (16).jpg|spectral_undead|--shadow 330,855
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (18).jpg|dungeon_boss|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (19).jpg|castle_boss|--shadow 380,925
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (20).jpg|frostpeak_boss|--crop 60,60,964,964
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (21).jpg|verdantwood_boss|--shadow 300,815
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (22).jpg|verdantwood_maze_guardian_1|--shadow 526,810
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (23).jpg|badlands_boss|--shadow 250,830
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (24).jpg|gloomfen_boss|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (25).jpg|golden_plains_boss|
+lucid-origin_Stardew_Valley_style_monster_sprite_2D_game_art_painterly_fantasy_RPG_creature_i-0 (26).jpg|final_boss|--shadow 250,895

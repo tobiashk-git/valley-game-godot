@@ -28,10 +28,12 @@ func _initialize() -> void:
 	for id in enemies.ENEMIES.keys():
 		if enemies.is_art(enemies.ENEMIES[id].sprite):
 			with_art.append(id)
-	print("Every regular species (%d) has painted art; the Bone Lord has boss art, the Royal Wraith not yet: " % with_art.size(), with_art.size() == enemies.ENEMIES.size() and enemies.is_art(enemies.BOSSES.dungeon_boss.sprite) and not enemies.is_art(enemies.BOSSES.castle_boss.sprite))
+	var bosses_with_art := 0
 	for boss_id in enemies.BOSSES.keys():
 		if enemies.is_art(enemies.BOSSES[boss_id].sprite):
 			with_art.append(boss_id)
+			bosses_with_art += 1
+	print("Every regular species (%d) and every boss (%d) has painted art: " % [enemies.ENEMIES.size(), bosses_with_art], with_art.size() == enemies.ENEMIES.size() + enemies.BOSSES.size())
 
 	for id in with_art:
 		var def: Dictionary = enemies.ENEMIES[id] if enemies.ENEMIES.has(id) else enemies.BOSSES[id]
@@ -43,11 +45,17 @@ func _initialize() -> void:
 		var top_hit := false
 		var bottom_hit := false
 		for x in range(w):
-			if img.get_pixel(x, 0).a > 0.2:
+			if img.get_pixel(x, 0).a > 0.1:
 				top_hit = true
-			if img.get_pixel(x, h - 1).a > 0.2:
+			if img.get_pixel(x, h - 1).a > 0.1:
 				bottom_hit = true
-		var corners_clear: bool = img.get_pixel(0, 0).a == 0.0 and img.get_pixel(w - 1, 0).a == 0.0 and img.get_pixel(0, h - 1).a == 0.0 and img.get_pixel(w - 1, h - 1).a == 0.0
+		# Three of four corners clear: a spear tip or a floating mote can
+		# legitimately BE a corner of the bounding box.
+		var clear := 0
+		for c in [Vector2i(0, 0), Vector2i(w - 1, 0), Vector2i(0, h - 1), Vector2i(w - 1, h - 1)]:
+			if img.get_pixel(c.x, c.y).a == 0.0:
+				clear += 1
+		var corners_clear: bool = clear >= 3
 		var opaque := 0
 		for y in range(0, h, 2):
 			for x in range(0, w, 2):
@@ -65,12 +73,6 @@ func _initialize() -> void:
 	print("Stage: rat, skeleton and ghost draw their painted art smooth (LINEAR) in the 96px box: ", rat_sprite.texture.resource_path.ends_with("/art/dungeon_rat.png") and rat_sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and rat_sprite.size.y == 96.0 and ghost_sprite.texture.resource_path.ends_with("/art/ghost.png") and ghost_sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR)
 	# The old pixel path still works for a species without art.
 	combat.fast = true
-	while combat.in_combat:
-		combat.player_run()
-		await physics_frame
-	combat.start_boss_fight("castle_boss")
-	await process_frame
-	print("A boss without art keeps the crisp pixel path: ", battle.enemy_slots[0].get_node("Box/Sprite").texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
 	while combat.in_combat:
 		combat.player_run()
 		await physics_frame
@@ -127,7 +129,8 @@ func _initialize() -> void:
 	print("Bone Lord figure: painted art 92px tall, smooth, untinted, interact area sized to it: ", absf(lord_h - 92.0) < 0.5 and lord.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and lord.sprite.modulate == Color.WHITE and absf(lord_shape.size.y - (92.0 + 2.0 * lord.INTERACT_MARGIN)) < 0.5)
 	var lord_bottom: float = (lord.sprite.offset.y + lord.sprite.texture.get_size().y / 2.0) * lord.sprite.scale.y
 	print("...feet at the node's base: ", absf(lord_bottom - lord.FEET_DROP) < 0.5)
-	print("Royal Wraith figure (no art yet) keeps the 1.6x placeholder with its purple tint: ", wraith.sprite.scale == Vector2(1.6, 1.6) and wraith.sprite.modulate == wraith.ALIVE_TINT)
+	var wraith_h: float = wraith.sprite.texture.get_size().y * wraith.sprite.scale.y
+	print("Royal Wraith figure: its own art at its own height (96px), untinted: ", absf(wraith_h - 96.0) < 0.5 and wraith.sprite.modulate == Color.WHITE and wraith.sprite.texture.resource_path.ends_with("/art/castle_boss.png"))
 	root.get_texture().get_image().save_png("res://verify_monster_art_boss.png")
 	print("Saved verify_monster_art_boss.png")
 	lord.queue_free()

@@ -157,8 +157,7 @@ const BOSSES := {
 		"drop_item_ids": ["bone_greatsword", "magic_crystal"],
 	},
 	"castle_boss": {
-		"name": "Royal Wraith", "sprite": "res://assets/enemies/ghost.png",
-		"tint": Color(0.85, 0.7, 0.25, 1.0),
+		"name": "Royal Wraith", "sprite": "res://assets/enemies/art/castle_boss.png", "art_height": 96,
 		"max_hp": 80, "attack": 9, "defense": 4, "gold_min": 60, "gold_max": 90,
 		"status_attack": {"status": "silence", "chance": 0.25},
 		"drop_item_ids": ["royal_plate", "magic_crystal"],
@@ -171,8 +170,7 @@ const BOSSES := {
 	# condition is written around as a fixed pair. Reuses the Ghost sprite,
 	# tinted pale icy blue.
 	"frostpeak_boss": {
-		"name": "Glacial Revenant", "sprite": "res://assets/enemies/ghost.png",
-		"tint": Color(0.65, 0.85, 1.0, 1.0),
+		"name": "Glacial Revenant", "sprite": "res://assets/enemies/art/frostpeak_boss.png", "art_height": 96,
 		"max_hp": 70, "attack": 8, "defense": 4, "gold_min": 45, "gold_max": 65,
 		"status_attack": {"status": "paralysis", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
@@ -182,8 +180,7 @@ const BOSSES := {
 	# tinted deep forest green - distinct from final_boss's dark red/black
 	# tint on the same base sprite.
 	"verdantwood_boss": {
-		"name": "Elder Bramblewood", "sprite": "res://assets/enemies/spider.png",
-		"tint": Color(0.2, 0.45, 0.15, 1.0),
+		"name": "Elder Bramblewood", "sprite": "res://assets/enemies/art/verdantwood_boss.png", "art_height": 92,
 		"max_hp": 75, "attack": 8, "defense": 4, "gold_min": 45, "gold_max": 65,
 		"status_attack": {"status": "sleep", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
@@ -195,8 +192,7 @@ const BOSSES := {
 	# outright. Distinct id from verdantwood_boss, already claimed by
 	# VerdantwoodInterior.tscn's own dungeon boss.
 	"verdantwood_maze_guardian_1": {
-		"name": "Thornback Warden", "sprite": "res://assets/enemies/skeleton.png",
-		"tint": Color(0.35, 0.5, 0.25, 1.0),
+		"name": "Thornback Warden", "sprite": "res://assets/enemies/art/verdantwood_maze_guardian_1.png", "art_height": 92,
 		"max_hp": 38, "attack": 7, "defense": 3, "gold_min": 20, "gold_max": 35,
 		"status_attack": {"status": "sleep", "chance": 0.2},
 		"drop_item_ids": ["healing_potion"],
@@ -205,8 +201,7 @@ const BOSSES := {
 	# reasoning as frostpeak_boss/verdantwood_boss above. Reuses the Rat
 	# sprite (not yet used for a biome boss), tinted volcanic orange/red.
 	"badlands_boss": {
-		"name": "Cinderjaw", "sprite": "res://assets/enemies/rat.png",
-		"tint": Color(0.75, 0.25, 0.1, 1.0),
+		"name": "Cinderjaw", "sprite": "res://assets/enemies/art/badlands_boss.png", "art_height": 84,
 		"max_hp": 78, "attack": 9, "defense": 3, "gold_min": 45, "gold_max": 65,
 		"status_attack": {"status": "poison", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
@@ -215,8 +210,7 @@ const BOSSES := {
 	# reasoning as frostpeak_boss/verdantwood_boss/badlands_boss above. Reuses
 	# the Bat sprite (not yet used for a biome boss), tinted murky purple-green.
 	"gloomfen_boss": {
-		"name": "The Bogmaw", "sprite": "res://assets/enemies/bat.png",
-		"tint": Color(0.4, 0.3, 0.45, 1.0),
+		"name": "The Bogmaw", "sprite": "res://assets/enemies/art/gloomfen_boss.png", "art_height": 80,
 		"max_hp": 80, "attack": 9, "defense": 4, "gold_min": 45, "gold_max": 65,
 		"status_attack": {"status": "silence", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
@@ -229,8 +223,7 @@ const BOSSES := {
 	# dungeon_boss, tinted purple there) with a warm gold/tan tint instead.
 	# No magic_crystal drop, same rule as every non-Guardian boss.
 	"golden_plains_boss": {
-		"name": "The Barrow Warden", "sprite": "res://assets/enemies/skeleton.png",
-		"tint": Color(0.8, 0.7, 0.45, 1.0),
+		"name": "The Barrow Warden", "sprite": "res://assets/enemies/art/golden_plains_boss.png", "art_height": 92,
 		"max_hp": 40, "attack": 5, "defense": 2, "gold_min": 25, "gold_max": 40,
 		"drop_item_ids": ["healing_potion"],
 	},
@@ -239,8 +232,7 @@ const BOSSES := {
 	# tuning note. Reuses the Giant Spider sprite, tinted dark red/black -
 	# distinct from both Guardians' purple/gold.
 	"final_boss": {
-		"name": "The Ancient Warden", "sprite": "res://assets/enemies/spider.png",
-		"tint": Color(0.5, 0.1, 0.1, 1.0),
+		"name": "The Ancient Warden", "sprite": "res://assets/enemies/art/final_boss.png", "art_height": 104,
 		"max_hp": 150, "attack": 17, "defense": 7, "gold_min": 150, "gold_max": 200,
 		"status_attack": {"status": "paralysis", "chance": 0.3},
 		"drop_item_ids": ["magic_crystal"],
