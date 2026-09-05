@@ -110,3 +110,12 @@ func gear_names(field: String) -> Array:
 		if SLOTS[slot].stat == field and not equipment[slot].is_empty():
 			names.append(Items.instance_name(equipment[slot]))
 	return names
+
+const DEFAULT_STATS := {"hp": 20, "max_hp": 20, "mp": 10, "max_mp": 10, "strength": 5, "agility": 5}
+
+func reset() -> void:
+	for key in DEFAULT_STATS:
+		stats[key] = DEFAULT_STATS[key]
+	for slot in SLOTS:
+		equipment[slot] = {}
+	changed.emit()

@@ -91,3 +91,9 @@ func all_counts() -> Dictionary:
 	for inst in gear:
 		counts[inst.base] = counts.get(inst.base, 0) + 1
 	return counts
+
+func reset() -> void:
+	backpack = {}
+	gear = []
+	_next_uid = 1
+	changed.emit()

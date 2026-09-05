@@ -67,3 +67,8 @@ func take_gear(storage_id: String, uid: int) -> Dictionary:
 			changed.emit()
 			return inst
 	return {}
+
+func reset() -> void:
+	storages = {"house_chest": {}}
+	gear_storages = {}
+	changed.emit()

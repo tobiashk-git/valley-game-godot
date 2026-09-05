@@ -267,3 +267,9 @@ func mark_npc_met(npc_id: String) -> bool:
 	GameState.village_gates_open = true
 	changed.emit()
 	return true
+
+func reset() -> void:
+	quest_state = {}
+	npcs_met = {}
+	tracked_quests.clear()
+	changed.emit()

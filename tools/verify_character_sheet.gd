@@ -134,6 +134,8 @@ func _initialize() -> void:
 			continue
 		if child is Label:
 			lines.append(child.text)
+		elif child is Button:
+			continue # the Game block's Save / Load / New game buttons
 		else:
 			lines.append(child.get_child(0).text + "=" + child.get_child(1).text)
 	print("Stats column lists attributes, core stats and effects: ", lines.has("Attributes") and lines.has("Core stats") and lines.has("Active effects") and lines.has("Strength=%d" % stats.strength) and lines.has("Defense=3") and lines.has("Attack=+0") and lines.has("None"))

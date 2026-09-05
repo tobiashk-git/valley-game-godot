@@ -367,7 +367,7 @@ func _layout_character(pos: Vector2, size: Vector2) -> void:
 		slot_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		slot_list.vertical = false
 		_place(stats_list, Vector2(20, 456), Vector2(iw - 40.0, 0))
-		character_view.custom_minimum_size = Vector2(iw, 456.0 + 300.0)
+		character_view.custom_minimum_size = Vector2(iw, 456.0 + 460.0)
 
 # Doll slots / labels / connector lines from the Character.SLOTS table. The
 # table's positions are for the figure at x=300 (wide); a figure elsewhere
@@ -665,6 +665,14 @@ func _refresh_character() -> void:
 	else:
 		for status_id in Combat.player_status.keys():
 			_stat_row(Statuses.STATUSES[status_id].name, "%d turns" % Combat.player_status[status_id].turns_left)
+	# --- Game: save / load / new (the title screen will take over New Game /
+	# Continue; this is the in-game home for it meanwhile). ---
+	_stats_title("Game")
+	_stats_line(SaveSystem.saved_ago_text() + "  -  autosaves as you play", true)
+	_game_button("SaveNowBtn", "Save now", &"PrimaryButton", _on_save_now)
+	var load_btn: Button = _game_button("LoadBtn", "Load last save", &"SecondaryButton", _on_load_save)
+	load_btn.disabled = not SaveSystem.has_save()
+	_game_button("NewGameBtn", "Confirm new game?" if _new_game_armed else "New game", &"SecondaryButton", _on_new_game)
 
 	# --- Centre: the doll's slots ---
 	for slot in Character.SLOTS:
@@ -692,6 +700,42 @@ func _refresh_character() -> void:
 			_pane_item(inst, "Equip", Callable(Character, "equip").bind(doll_slot, inst.uid), &"PrimaryButton")
 	if not any_fit:
 		_pane_label("- nothing fits -", true)
+
+func _game_button(node_name: String, text: String, variation: StringName, on_pressed: Callable) -> Button:
+	var b := Button.new()
+	b.name = node_name
+	b.text = text
+	b.theme_type_variation = variation
+	b.custom_minimum_size = Vector2(0, 34)
+	b.add_theme_font_size_override("font_size", 13)
+	b.pressed.connect(on_pressed)
+	stats_list.add_child(b)
+	return b
+
+func _on_save_now() -> void:
+	if SaveSystem.save_game():
+		_refresh()
+
+func _on_load_save() -> void:
+	close()
+	SaveSystem.load_game()
+
+# Two taps: the first arms the button ("Confirm new game?") for a few
+# seconds, the second wipes the save and restarts.
+var _new_game_armed := false
+
+func _on_new_game() -> void:
+	if not _new_game_armed:
+		_new_game_armed = true
+		_refresh()
+		get_tree().create_timer(4.0).timeout.connect(func() -> void:
+			if _new_game_armed:
+				_new_game_armed = false
+				_refresh())
+		return
+	_new_game_armed = false
+	close()
+	SaveSystem.new_game()
 
 func _clear(container: Node) -> void:
 	var dying := 0

@@ -66,3 +66,17 @@ func consume_next_spawn(player: Node2D) -> bool:
 	player.position = next_spawn_position
 	next_spawn_position = NO_OVERRIDE
 	return true
+
+# Back to a fresh game's values (SaveSystem.new_game()).
+func reset() -> void:
+	next_spawn_position = NO_OVERRIDE
+	for key in boss_defeated.keys():
+		boss_defeated[key] = false
+	wild_monsters_defeated.clear()
+	village_gates_open = false
+	for key in discovered_pois.keys():
+		discovered_pois[key] = key == "house" or key == "village"
+	for key in world_progress.keys():
+		world_progress[key] = false
+	for key in biome_paths_open.keys():
+		biome_paths_open[key] = false

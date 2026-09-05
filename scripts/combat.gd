@@ -461,3 +461,16 @@ func _defeat() -> void:
 	changed.emit()
 	ended.emit(false)
 	get_tree().change_scene_to_file("res://scenes/House.tscn")
+
+# Drops any fight state (SaveSystem.new_game() / load).
+func reset() -> void:
+	in_combat = false
+	current_enemies = []
+	player_defending = false
+	battle_log = []
+	active_submenu = ""
+	player_status = {}
+	selecting_target = ""
+	current_boss_id = ""
+	current_wild_monster_key = ""
+	changed.emit()
