@@ -80,3 +80,10 @@ func reset() -> void:
 		world_progress[key] = false
 	for key in biome_paths_open.keys():
 		biome_paths_open[key] = false
+
+# True on any scene with a player (overworld, houses, interiors); false on
+# the title screen. The always-on overlays (HUD, toolbar, quick bar,
+# tracker, touch controls) and the sheet's shortcuts key off this.
+func is_gameplay() -> bool:
+	var scene: Node = get_tree().current_scene
+	return scene != null and scene.has_node("YSort/Player")

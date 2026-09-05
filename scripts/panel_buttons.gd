@@ -38,6 +38,9 @@ func _apply_layout() -> void:
 	hbox.visible = not Layout.is_narrow()
 	menu_btn.visible = Layout.is_narrow()
 
+func _process(_delta: float) -> void:
+	visible = GameState.is_gameplay()
+
 # Menu: anything open -> close it all; nothing open -> the sheet on its
 # last tab.
 func _on_menu_pressed() -> void:

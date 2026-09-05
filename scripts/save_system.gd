@@ -5,7 +5,8 @@ extends Node
 # flags, the backpack + gear instances (with enhancements) + the uid
 # counter, stats + equipment, quest state / tracking / villagers met, chest
 # contents, and where the player is (scene + position; maze interiors
-# regenerate and use their own spawn). Never mid-fight.
+# regenerate and use their own spawn). Never mid-fight, never on the title
+# screen (the title's Continue calls load_game(); New Game calls new_game()).
 #
 # Autosave: on every scene change (two frames after, so the spawn override
 # has been consumed) and, debounced, after anything that changes progress
@@ -39,8 +40,6 @@ func _ready() -> void:
 	Inventory.changed.connect(_mark_dirty)
 	Character.changed.connect(_mark_dirty)
 	Combat.ended.connect(func(_victory: bool) -> void: _mark_dirty())
-	if enabled and has_save(AUTO_SLOT):
-		_boot_continue()
 
 func slot_path(slot: String) -> String:
 	return "user://save_%s.json" % slot
@@ -214,8 +213,15 @@ func delete_save(slot: String = AUTO_SLOT) -> void:
 
 # Fresh start: every autoload back to its defaults, the auto slot removed,
 # and the overworld loaded at its default spawn.
+func quit_to_title() -> void:
+	if GameState.is_gameplay() and not Combat.in_combat:
+		save_game(AUTO_SLOT)
+	get_tree().change_scene_to_file("res://scenes/Title.tscn")
+	_last_scene = null
+
 func new_game() -> void:
 	delete_save(AUTO_SLOT)
+	Combat.in_combat = false
 	GameState.reset()
 	Inventory.reset()
 	Character.reset()
@@ -270,6 +276,9 @@ func _process(_delta: float) -> void:
 	if not enabled:
 		return
 	var scene: Node = get_tree().current_scene
+	if not GameState.is_gameplay():
+		_last_scene = scene
+		return
 	if scene != _last_scene and scene != null:
 		_last_scene = scene
 		_save_in_frames = 2

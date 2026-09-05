@@ -137,4 +137,4 @@ func _process(_delta: float) -> void:
 			if get_node("/root/%s" % autoload_name).is_open():
 				any_panel_open = true
 				break
-	visible = not any_panel_open and not Combat.in_combat and not Quests.tracked_quests.is_empty()
+	visible = GameState.is_gameplay() and not any_panel_open and not Combat.in_combat and not Quests.tracked_quests.is_empty()

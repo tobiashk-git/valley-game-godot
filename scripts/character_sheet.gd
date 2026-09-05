@@ -672,7 +672,7 @@ func _refresh_character() -> void:
 	_game_button("SaveNowBtn", "Save now", &"PrimaryButton", _on_save_now)
 	var load_btn: Button = _game_button("LoadBtn", "Load last save", &"SecondaryButton", _on_load_save)
 	load_btn.disabled = not SaveSystem.has_save()
-	_game_button("NewGameBtn", "Confirm new game?" if _new_game_armed else "New game", &"SecondaryButton", _on_new_game)
+	_game_button("QuitBtn", "Save and quit to title", &"SecondaryButton", _on_quit_to_title)
 
 	# --- Centre: the doll's slots ---
 	for slot in Character.SLOTS:
@@ -720,22 +720,9 @@ func _on_load_save() -> void:
 	close()
 	SaveSystem.load_game()
 
-# Two taps: the first arms the button ("Confirm new game?") for a few
-# seconds, the second wipes the save and restarts.
-var _new_game_armed := false
-
-func _on_new_game() -> void:
-	if not _new_game_armed:
-		_new_game_armed = true
-		_refresh()
-		get_tree().create_timer(4.0).timeout.connect(func() -> void:
-			if _new_game_armed:
-				_new_game_armed = false
-				_refresh())
-		return
-	_new_game_armed = false
+func _on_quit_to_title() -> void:
 	close()
-	SaveSystem.new_game()
+	SaveSystem.quit_to_title()
 
 func _clear(container: Node) -> void:
 	var dying := 0
@@ -1137,7 +1124,7 @@ func _clear_flash() -> void:
 # --- input ---
 
 func _process(_delta: float) -> void:
-	if Combat.in_combat:
+	if Combat.in_combat or not GameState.is_gameplay():
 		if is_open():
 			close()
 		return

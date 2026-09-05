@@ -60,7 +60,7 @@ func _on_layout_changed() -> void:
 func _process(_delta: float) -> void:
 	# Nothing to steer or interact with during a fight - and the joystick
 	# would draw over the battle panel's bottom on a phone.
-	visible = not Combat.in_combat
+	visible = GameState.is_gameplay() and not Combat.in_combat
 	var cam := get_viewport().get_camera_2d()
 	if cam != null and cam != _zoomed_camera:
 		_zoomed_camera = cam

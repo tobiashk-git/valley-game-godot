@@ -140,4 +140,4 @@ func _overlay_open() -> bool:
 	return false
 
 func _process(_delta: float) -> void:
-	visible = not Combat.in_combat and not _overlay_open()
+	visible = GameState.is_gameplay() and not Combat.in_combat and not _overlay_open()

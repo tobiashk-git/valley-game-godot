@@ -94,11 +94,8 @@ func _initialize() -> void:
 	await process_frame
 	var save_btn: Button = sheet.stats_list.get_node_or_null("SaveNowBtn")
 	var load_btn: Button = sheet.stats_list.get_node_or_null("LoadBtn")
-	var new_btn: Button = sheet.stats_list.get_node_or_null("NewGameBtn")
-	print("Hero tab shows Save now / Load / New game: ", save_btn != null and load_btn != null and new_btn != null and new_btn.text == "New game")
-	new_btn.pressed.emit()
-	await process_frame
-	print("New game asks for a second tap: ", sheet.stats_list.get_node("NewGameBtn").text == "Confirm new game?" and not quests.quest_state.is_empty())
+	var quit_btn: Button = sheet.stats_list.get_node_or_null("QuitBtn")
+	print("Hero tab shows Save now / Load / Save and quit to title: ", save_btn != null and load_btn != null and quit_btn != null and quit_btn.text == "Save and quit to title")
 	root.get_texture().get_image().save_png("res://verify_save_hero_tab.png")
 	print("Saved verify_save_hero_tab.png")
 	sheet.close()
@@ -114,8 +111,8 @@ func _initialize() -> void:
 	print("Scene change autosaves to the auto slot: ", save.has_save(save.AUTO_SLOT) and save.read_save(save.AUTO_SLOT).scene == "res://scenes/Overworld.tscn")
 	print("Saved-ago text reads 'just now': ", save.saved_ago_text() == "Saved just now")
 
-	# --- Boot-continue: with an auto save pointing at the house, the boot
-	# path restores state and travels there. ---
+	# --- Title screen: Continue restores the auto save and travels to its
+	# scene; New Game confirms before overwriting. ---
 	var here: CharacterBody2D = current_scene.get_node("YSort/Player")
 	here.position = Vector2(999, 999)
 	change_scene_to_packed(load("res://scenes/House.tscn"))
@@ -135,11 +132,22 @@ func _initialize() -> void:
 	var f := FileAccess.open(save.slot_path(save.AUTO_SLOT), FileAccess.WRITE)
 	f.store_string(JSON.stringify(auto))
 	f.close()
-	save._boot_continue()
+	change_scene_to_packed(load("res://scenes/Title.tscn"))
+	await process_frame
+	await process_frame
+	var title: Control = current_scene
+	print("Title shows Continue (primary) with the save line, overlays hidden: ", title.continue_btn.visible and title.continue_btn.theme_type_variation == &"PrimaryButton" and title.save_line.text.begins_with("Saved just now  -  in your House") and not root.get_node("HUD").visible and not root.get_node("PanelButtons").visible and not root.get_node("QuickBar").visible)
+	root.get_texture().get_image().save_png("res://verify_title_continue.png")
+	print("Saved verify_title_continue.png")
+	title.new_game_btn.pressed.emit()
+	await process_frame
+	print("New Game with a save asks to confirm first: ", title.new_game_btn.text == "Overwrite save?" and save.has_save(save.AUTO_SLOT))
+	title.continue_btn.pressed.emit()
 	await process_frame
 	await process_frame
 	await process_frame
-	print("Boot-continue restores the state and travels to the saved scene: ", current_scene.name == "House" and inventory.get_count("wood") == 7)
+	print("Continue restores the state and travels to the saved scene, overlays back: ", current_scene.name == "House" and inventory.get_count("wood") == 7 and root.get_node("HUD").visible)
+	save.enabled = false
 
 	# --- Clean up: no real saves left behind by this run. ---
 	save.delete_save(save.AUTO_SLOT)

@@ -149,6 +149,9 @@ func location_name() -> String:
 	return SCENE_LOCATIONS.get(current.name, current.name)
 
 func _process(_delta: float) -> void:
+	visible = GameState.is_gameplay()
+	if not visible:
+		return
 	var location: String = location_name()
 	if location != _last_location:
 		_last_location = location
