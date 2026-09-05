@@ -22,7 +22,8 @@ func _initialize() -> void:
 	await process_frame
 	var frame_rect: Rect2 = dialogue.portrait_frame.get_global_rect()
 	var text_rect: Rect2 = dialogue.text_label.get_global_rect()
-	print("Oliver's bust shows in a 96px frame at the left, text column to its right: ", dialogue.portrait_frame.visible and dialogue.portrait.texture != null and frame_rect.size == Vector2(96, 96) and text_rect.position.x >= frame_rect.end.x + 8.0)
+	print("Oliver's bust in a 96px frame at the top-left, name + tagline beside it: ", dialogue.portrait_frame.visible and dialogue.portrait.texture != null and frame_rect.size == Vector2(96, 96) and dialogue.name_label.get_global_rect().position.x >= frame_rect.end.x + 8.0 and dialogue.tagline_label.visible and dialogue.tagline_label.text == dialogue.TAGLINES["Oliver"] and dialogue.tagline_label.get_global_rect().position.y >= dialogue.name_label.get_global_rect().end.y)
+	print("Dialogue text sits below the portrait, left-aligned with it, full width; Accept under it at the same left edge: ", text_rect.position.y >= frame_rect.end.y and absf(text_rect.position.x - frame_rect.position.x) < 1.0 and text_rect.size.x > dialogue.panel.size.x - 40.0 and absf(dialogue.actions_row.get_child(0).get_global_rect().position.x - frame_rect.position.x) < 1.0 and dialogue.actions_row.get_global_rect().position.y >= text_rect.end.y)
 	print("The box fits the taller of bust and text (button inside the panel): ", dialogue.actions_row.get_global_rect().end.y <= dialogue.panel.get_global_rect().end.y and frame_rect.end.y <= dialogue.panel.get_global_rect().end.y)
 	root.get_texture().get_image().save_png("res://verify_portrait_oliver.png")
 	print("Saved verify_portrait_oliver.png")
@@ -35,7 +36,7 @@ func _initialize() -> void:
 		await process_frame
 		await process_frame
 		var fr: Rect2 = dialogue.portrait_frame.get_global_rect()
-		print("%s: bust shows beside the text, box fits: " % speaker, dialogue.portrait_frame.visible and fr.size == Vector2(96, 96) and dialogue.actions_row.get_global_rect().end.y <= dialogue.panel.get_global_rect().end.y)
+		print("%s: bust, tagline, text below, box fits: " % speaker, dialogue.portrait_frame.visible and fr.size == Vector2(96, 96) and dialogue.tagline_label.visible and dialogue.text_label.get_global_rect().position.y >= fr.end.y and dialogue.actions_row.get_global_rect().end.y <= dialogue.panel.get_global_rect().end.y)
 		var file: String = "res://verify_portrait_%s.png" % speaker.to_lower().replace(" ", "_")
 		root.get_texture().get_image().save_png(file)
 		print("Saved ", file)
@@ -51,7 +52,7 @@ func _initialize() -> void:
 	dialogue.show_dialogue(bare, "You've wandered far from the village.")
 	await process_frame
 	await process_frame
-	print("Speaker without a portrait file (%s): frame hidden, text spans the box: " % bare, not dialogue.portrait_frame.visible and dialogue.portrait.texture == null and dialogue.text_label.get_global_rect().position.x < dialogue.panel.get_global_rect().position.x + 20.0)
+	print("Speaker without a portrait file (%s): frame and tagline hidden, name at the left: " % bare, not dialogue.portrait_frame.visible and dialogue.portrait.texture == null and not dialogue.tagline_label.visible and dialogue.name_label.get_global_rect().position.x < dialogue.panel.get_global_rect().position.x + 20.0)
 	print("Unknown speaker name gets no portrait either: ", dialogue.portrait_for("Nobody") == null)
 	dialogue.hide_dialogue()
 
@@ -64,7 +65,7 @@ func _initialize() -> void:
 	await process_frame
 	var p: Rect2 = dialogue.panel.get_global_rect()
 	frame_rect = dialogue.portrait_frame.get_global_rect()
-	print("Phone: box spans the width (12px margins), 72px bust, text beside it, everything inside: ", layout.is_narrow() and p.position.x == 12.0 and p.end.x == 388.0 and frame_rect.size == Vector2(72, 72) and dialogue.text_label.get_global_rect().position.x >= frame_rect.end.x + 8.0 and dialogue.actions_row.get_global_rect().end.y <= p.end.y and p.end.y <= 660.0)
+	print("Phone: box spans the width (12px margins), 72px bust, text full width below it, everything inside: ", layout.is_narrow() and p.position.x == 12.0 and p.end.x == 388.0 and frame_rect.size == Vector2(72, 72) and dialogue.text_label.get_global_rect().position.y >= frame_rect.end.y and dialogue.text_label.get_global_rect().size.x > 340.0 and dialogue.actions_row.get_global_rect().end.y <= p.end.y and p.end.y <= 660.0)
 	root.get_texture().get_image().save_png("res://verify_portrait_phone.png")
 	print("Saved verify_portrait_phone.png")
 	dialogue.hide_dialogue()

@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/dialogue_ui.gd" id="1_0qyo7"]
 
-[node name="DialogueUI" type="CanvasLayer" unique_id=1039831032]
+[node name="DialogueUI" type="CanvasLayer" unique_id=1547758576]
 script = ExtResource("1_0qyo7")
 
-[node name="Panel" type="Panel" parent="." unique_id=8645308]
+[node name="Panel" type="Panel" parent="." unique_id=945388768]
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 40.0
@@ -13,7 +13,7 @@ offset_top = 152.0
 offset_right = -40.0
 offset_bottom = 372.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1433904943]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=752997756]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -22,17 +22,21 @@ theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="Row" type="HBoxContainer" parent="Panel/Margin" unique_id=1183301279]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1836171299]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Row" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=728337572]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="PortraitFrame" type="Panel" parent="Panel/Margin/Row" unique_id=2102921160]
+[node name="PortraitFrame" type="Panel" parent="Panel/Margin/VBox/Row" unique_id=1300095662]
 custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 size_flags_vertical = 0
 theme_type_variation = &"DetailPanel"
 
-[node name="Portrait" type="TextureRect" parent="Panel/Margin/Row/PortraitFrame" unique_id=763843811]
+[node name="Portrait" type="TextureRect" parent="Panel/Margin/VBox/Row/PortraitFrame" unique_id=417797621]
 texture_filter = 2
 layout_mode = 0
 anchor_right = 1.0
@@ -44,29 +48,37 @@ offset_bottom = -4.0
 expand_mode = 1
 stretch_mode = 5
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin/Row" unique_id=683251473]
+[node name="Head" type="VBoxContainer" parent="Panel/Margin/VBox/Row" unique_id=894255999]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 2
 
-[node name="NameLabel" type="Label" parent="Panel/Margin/Row/VBox" unique_id=1282733808]
+[node name="NameLabel" type="Label" parent="Panel/Margin/VBox/Row/Head" unique_id=375794167]
 layout_mode = 2
 theme_type_variation = &"PanelTitle"
 theme_override_font_sizes/font_size = 24
 
-[node name="TextLabel" type="RichTextLabel" parent="Panel/Margin/Row/VBox" unique_id=1737885191]
+[node name="TaglineLabel" type="Label" parent="Panel/Margin/VBox/Row/Head" unique_id=1661365751]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 15
+autowrap_mode = 2
+
+[node name="TextLabel" type="RichTextLabel" parent="Panel/Margin/VBox" unique_id=726166582]
 layout_mode = 2
 theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="HintLabel" type="Label" parent="Panel/Margin/Row/VBox" unique_id=970377573]
+[node name="HintLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1807003561]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 15
 text = "Press E to close"
 
-[node name="ActionsRow" type="HBoxContainer" parent="Panel/Margin/Row/VBox" unique_id=1891174661]
+[node name="ActionsRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1357772056]
 visible = false
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2

@@ -8,12 +8,24 @@ extends CanvasLayer
 
 @onready var panel: Panel = $Panel
 @onready var margin: MarginContainer = $Panel/Margin
-@onready var portrait_frame: Panel = $Panel/Margin/Row/PortraitFrame
-@onready var portrait: TextureRect = $Panel/Margin/Row/PortraitFrame/Portrait
-@onready var name_label: Label = $Panel/Margin/Row/VBox/NameLabel
-@onready var text_label: RichTextLabel = $Panel/Margin/Row/VBox/TextLabel
-@onready var hint_label: Label = $Panel/Margin/Row/VBox/HintLabel
-@onready var actions_row: HBoxContainer = $Panel/Margin/Row/VBox/ActionsRow
+@onready var portrait_frame: Panel = $Panel/Margin/VBox/Row/PortraitFrame
+@onready var portrait: TextureRect = $Panel/Margin/VBox/Row/PortraitFrame/Portrait
+@onready var name_label: Label = $Panel/Margin/VBox/Row/Head/NameLabel
+@onready var tagline_label: Label = $Panel/Margin/VBox/Row/Head/TaglineLabel
+@onready var text_label: RichTextLabel = $Panel/Margin/VBox/TextLabel
+@onready var hint_label: Label = $Panel/Margin/VBox/HintLabel
+@onready var actions_row: HBoxContainer = $Panel/Margin/VBox/ActionsRow
+
+# One line about the speaker, under the name in the header row.
+const TAGLINES := {
+	"Oliver": "New to the valley, first morning",
+	"Village Elder": "Looks after the village",
+	"Village Trader": "Buys and sells most anything",
+	"Frostpeak Ranger": "Knows the northern ridge",
+	"Forest Druid": "Warden of Verdantwood",
+	"Badlands Prospector": "Digs the Emberfall wastes",
+	"Marsh Guide": "Knows every board of Gloomfen",
+}
 
 # Speaker name -> bust portrait (assets/portraits/, painterly busts in the
 # Oliver-illustration style, keyed from a magenta background). A speaker
@@ -67,6 +79,9 @@ func show_dialogue(npc_name: String, text: String, actions: Array = []) -> void:
 	var tex: Texture2D = portrait_for(npc_name)
 	portrait.texture = tex
 	portrait_frame.visible = tex != null
+	var tag: String = TAGLINES.get(npc_name, "")
+	tagline_label.text = tag
+	tagline_label.visible = tag != ""
 	panel.visible = true
 	_ignore_close_this_frame = true
 

@@ -38,13 +38,20 @@ func _initialize() -> void:
 	panel.add_child(margin)
 	margin.owner = layer
 
-	# Portrait (bust of the speaker, dialogue_ui.gd's PORTRAITS by speaker
-	# name) at the left of the text column; hidden when the speaker has no
-	# portrait file so the text takes the full width.
+	# Layout (user feedback: text beside the portrait left the left side
+	# "a bit messy"): a header row of portrait + name/tagline, then the
+	# dialogue text full width below it, left-aligned with the portrait,
+	# then the hint or the choice buttons.
+	var vbox := VBoxContainer.new()
+	vbox.name = "VBox"
+	vbox.add_theme_constant_override("separation", 8)
+	margin.add_child(vbox)
+	vbox.owner = layer
+
 	var row := HBoxContainer.new()
 	row.name = "Row"
 	row.add_theme_constant_override("separation", 12)
-	margin.add_child(row)
+	vbox.add_child(row)
 	row.owner = layer
 
 	var frame := Panel.new()
@@ -68,18 +75,30 @@ func _initialize() -> void:
 	frame.add_child(portrait)
 	portrait.owner = layer
 
-	var vbox := VBoxContainer.new()
-	vbox.name = "VBox"
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(vbox)
-	vbox.owner = layer
+	# Name over a one-line description of the speaker (dialogue_ui.gd's
+	# TAGLINES), beside the portrait.
+	var head := VBoxContainer.new()
+	head.name = "Head"
+	head.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	head.add_theme_constant_override("separation", 2)
+	row.add_child(head)
+	head.owner = layer
 
 	var name_label := Label.new()
 	name_label.name = "NameLabel"
 	name_label.theme_type_variation = &"PanelTitle"
 	name_label.add_theme_font_size_override("font_size", 24) # was 20 - readability pass
-	vbox.add_child(name_label)
+	head.add_child(name_label)
 	name_label.owner = layer
+
+	var tagline := Label.new()
+	tagline.name = "TaglineLabel"
+	tagline.theme_type_variation = &"DimLabel"
+	tagline.add_theme_font_size_override("font_size", 15)
+	tagline.autowrap_mode = TextServer.AUTOWRAP_WORD
+	head.add_child(tagline)
+	tagline.owner = layer
 
 	# RichTextLabel (not Label) so quest-progress text ("3/5 [icon] Wood")
 	# can embed an inline item icon via BBCode - see Quests.
