@@ -1,6 +1,10 @@
 """Cut a seamless music loop out of a full-length track and write it as OGG.
 
-  python tools/make_music_loop.py <in.wav|mp3> <out.ogg> [--min 45] [--max 110] [--start-after 0.5] [--report]
+  python tools/make_music_loop.py <in.wav|mp3> <out.ogg> [--min 45] [--max 110] [--start-after 0.5] [--report] [--keep-intro]
+
+--keep-intro: write the track from its very beginning to the loop end, so
+the intro plays once; the printed LOOP OFFSET (seconds) is where the
+engine should jump back to (Audio's MUSIC entry "loop_offset").
 
 How it picks the loop (no listening involved, so it goes by the numbers):
   1. Beat grid: an onset envelope (spectral flux) autocorrelated over 60-180
@@ -85,6 +89,9 @@ def main():
     report = "--report" in args
     if report:
         args.remove("--report")
+    keep_intro = "--keep-intro" in args
+    if keep_intro:
+        args.remove("--keep-intro")
     src, dst = args
     audio, sr = sf.read(src, dtype="float32", always_2d=True)
     mono = audio.mean(axis=1)
@@ -140,8 +147,9 @@ def main():
         raise SystemExit("no loop candidate in the length range - widen --min/--max")
     score, end_i, dist = best
     end = beat_samples[end_i]
-    loop = audio[start:end].copy()
-    # seam: fade the tail into the natural lead-in to the start
+    file_start = 0 if keep_intro else start
+    loop = audio[file_start:end].copy()
+    # seam: fade the tail into the natural lead-in to the loop start
     fade = int(sr * 0.06)
     pre = audio[start - fade:start]
     t = np.linspace(0.0, 1.0, fade, dtype=np.float32)[:, None]
@@ -160,6 +168,8 @@ def main():
     except ImportError:
         sf.write(dst, loop, sr, format="OGG", subtype="VORBIS")
     print("loop: start %.2f s (beat %d) -> end %.2f s (beat %d), %.1f s long, join score %.3f, peak normalised from %.2f" % (start / sr, start_i, end / sr, end_i, (end - start) / sr, score, peak))
+    if keep_intro:
+        print("LOOP OFFSET %.3f s (intro kept: file runs %.1f s, repeats from the offset)" % (start / sr, (end - file_start) / sr))
     print("wrote", dst)
 
 

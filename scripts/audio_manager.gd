@@ -29,11 +29,27 @@ const CROSSFADE_SECONDS := 1.2
 const PLAYER_BUSES := ["MusicA", "MusicB"]
 const SILENT_DB := -40.0
 
+# A plain path loops whole; {"path", "loop_offset"} plays its intro once and
+# repeats from the offset (tools/make_music_loop.py --keep-intro).
 const MUSIC := {
 	"village": "res://assets/music/village.ogg",
 	"battle": "res://assets/music/battle.ogg",
 	"frostpeak": "res://assets/music/frostpeak.ogg",
+	"verdantwood": {"path": "res://assets/music/verdantwood.ogg", "loop_offset": 12.63},
 }
+
+static func music_path(id: String) -> String:
+	var entry = MUSIC[id]
+	return entry.path if entry is Dictionary else entry
+
+static func _load_music(id: String):
+	var entry = MUSIC[id]
+	var stream = load(music_path(id))
+	if stream != null and "loop" in stream:
+		stream.loop = true
+		if entry is Dictionary and "loop_offset" in stream:
+			stream.loop_offset = float(entry.loop_offset)
+	return stream
 # Scene name -> music id. Until more tracks exist the village theme carries
 # the valley and the houses; interiors and the title stay quiet.
 const SCENE_MUSIC := {
@@ -44,12 +60,14 @@ const SCENE_MUSIC := {
 	"TraderHouse": "village",
 	"BlacksmithHouse": "village",
 	"FrostpeakInterior": "frostpeak",
+	"VerdantwoodInterior": "verdantwood",
 }
 # On the overworld the track follows the biome under Oliver's feet (the
 # valley keeps the village theme until it has its own); biomes without a
 # track yet fall back to the valley's.
 const ZONE_MUSIC := {
 	World.Zone.FROSTPEAK: "frostpeak",
+	World.Zone.VERDANTWOOD: "verdantwood",
 }
 const SFX := {}
 
@@ -137,10 +155,7 @@ func play_music(id: String) -> void:
 		outgoing.stop()
 		AudioServer.set_bus_volume_db(out_bus, SILENT_DB)
 		if id != "" and MUSIC.has(id):
-			var stream_w = load(MUSIC[id])
-			if stream_w != null and "loop" in stream_w:
-				stream_w.loop = true
-			incoming.stream = stream_w
+			incoming.stream = _load_music(id)
 			incoming.volume_db = 0.0
 			AudioServer.set_bus_volume_db(in_bus, 0.0)
 			incoming.play()
@@ -150,10 +165,7 @@ func play_music(id: String) -> void:
 		_fade.tween_method(func(db: float) -> void: AudioServer.set_bus_volume_db(out_bus, db), AudioServer.get_bus_volume_db(out_bus), SILENT_DB, CROSSFADE_SECONDS)
 		_fade.parallel()
 	if id != "" and MUSIC.has(id):
-		var stream = load(MUSIC[id])
-		if stream != null and "loop" in stream:
-			stream.loop = true
-		incoming.stream = stream
+		incoming.stream = _load_music(id)
 		incoming.volume_db = 0.0
 		AudioServer.set_bus_volume_db(in_bus, SILENT_DB)
 		incoming.play()
