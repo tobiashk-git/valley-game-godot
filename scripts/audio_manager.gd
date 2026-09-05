@@ -139,6 +139,21 @@ func play_sfx(id: String) -> void:
 	_sfx_pool[0].stream = load(SFX[id])
 	_sfx_pool[0].play()
 
+# One line for the Hero tab: what the game is trying to play and, on the
+# web, whether the browser's audio context is actually running (phones
+# keep it suspended until the first tap, and an iPhone's silent switch
+# mutes it outright - neither shows up any other way).
+func debug_state() -> String:
+	var playing := ""
+	for p in _players:
+		if p.playing:
+			playing = "on" if playing == "" else playing
+	var line: String = "Audio: %s%s" % ["silence" if _current == "" else _current, "" if enabled else " (muted for tests)"]
+	if OS.has_feature("web"):
+		var state = JavaScriptBridge.eval("(typeof GodotAudio !== 'undefined' && GodotAudio.ctx) ? GodotAudio.ctx.state : 'no context'", true)
+		line += "  -  browser audio: %s" % str(state)
+	return line
+
 # --- settings ---
 
 func set_music_volume(v: float) -> void:

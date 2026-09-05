@@ -679,6 +679,7 @@ func _refresh_character() -> void:
 		load_btn.disabled = not SaveSystem.has_save()
 		_volume_row("MusicSlider", "Music", Audio.music_volume, Audio.set_music_volume)
 		_volume_row("SfxSlider", "Sounds", Audio.sfx_volume, Audio.set_sfx_volume)
+		_stats_line(Audio.debug_state(), true)
 	else:
 		# Wide: one compact row so the 200px column keeps its height for the
 		# stats (Save & Quit is beside the X).
@@ -699,6 +700,7 @@ func _refresh_character() -> void:
 		row.get_node("LoadBtn").disabled = not SaveSystem.has_save()
 		_volume_row("MusicSlider", "Music", Audio.music_volume, Audio.set_music_volume)
 		_volume_row("SfxSlider", "Sounds", Audio.sfx_volume, Audio.set_sfx_volume)
+		_stats_line(Audio.debug_state(), true)
 	_stats_title("Level %d" % stats.level)
 	if stats.level >= Character.MAX_LEVEL:
 		_stat_row("Experience", "max level")
