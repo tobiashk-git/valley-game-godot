@@ -89,6 +89,7 @@ const SFX := {
 	"tap": "res://assets/sfx/tap.wav", # Freesound 423128 "menu click sound" by killersmurf96
 	"craft": "res://assets/sfx/craft.wav", # Freesound 567849 "kill-crafting-sound" by madpancake
 	"hit": "res://assets/sfx/hit.wav", # Freesound 783874 "general fight sounds 9" by inkyframes
+	"level_up": "res://assets/sfx/level_up.wav", # Freesound 682633 "level up" by bastianhallo
 }
 # One-shot pieces of music: played once over silence, then the scene's
 # track resumes (a won fight plays "victory" between the battle track

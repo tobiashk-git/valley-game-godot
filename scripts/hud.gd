@@ -77,7 +77,9 @@ func _apply_layout() -> void:
 
 func _connect_stats() -> void:
 	Character.changed.connect(_refresh_stats)
-	Character.levelled_up.connect(func(level: int) -> void: _spawn_text_popup("Level %d!" % level, Color(1.0, 0.85, 0.3)))
+	Character.levelled_up.connect(func(level: int) -> void:
+		Audio.play_sfx("level_up")
+		_spawn_text_popup("Level %d!" % level, Color(1.0, 0.85, 0.3)))
 	# In-fight damage/healing/status changes mutate Character.stats and
 	# Combat.player_status and announce it via Combat.changed (that's what
 	# the battle panel refreshes on), so listen to both.
