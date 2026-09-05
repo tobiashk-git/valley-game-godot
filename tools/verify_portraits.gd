@@ -40,11 +40,18 @@ func _initialize() -> void:
 		root.get_texture().get_image().save_png(file)
 		print("Saved ", file)
 
-	# --- A speaker without a file: no frame, full-width text. ---
-	dialogue.show_dialogue("Forest Druid", "You've wandered far from the village.")
+	# --- A speaker without a file: no frame, full-width text. (The first
+	# registered speaker still lacking a bust; once all six exist an
+	# unregistered name stands in.) ---
+	var bare: String = "Old Hermit"
+	for speaker in dialogue.PORTRAITS.keys():
+		if dialogue.portrait_for(speaker) == null:
+			bare = speaker
+			break
+	dialogue.show_dialogue(bare, "You've wandered far from the village.")
 	await process_frame
 	await process_frame
-	print("Speaker without a portrait file: frame hidden, text spans the box: ", not dialogue.portrait_frame.visible and dialogue.portrait.texture == null and dialogue.text_label.get_global_rect().position.x < dialogue.panel.get_global_rect().position.x + 20.0)
+	print("Speaker without a portrait file (%s): frame hidden, text spans the box: " % bare, not dialogue.portrait_frame.visible and dialogue.portrait.texture == null and dialogue.text_label.get_global_rect().position.x < dialogue.panel.get_global_rect().position.x + 20.0)
 	print("Unknown speaker name gets no portrait either: ", dialogue.portrait_for("Nobody") == null)
 	dialogue.hide_dialogue()
 
