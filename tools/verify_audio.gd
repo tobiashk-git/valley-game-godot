@@ -128,6 +128,17 @@ func _initialize() -> void:
 		if s.playing and s.stream is AudioStreamWAV:
 			sfx_playing = true
 	print("The chop effect exists as a WAV and plays from the effects pool: ", ResourceLoader.exists("res://assets/sfx/chop.wav") and sfx_playing)
+	for s in audio._sfx_pool:
+		s.stop()
+	var quests: Node = root.get_node("Quests")
+	quests.quest_state["gather_wood"] = "active"
+	quests._complete_quest("gather_wood")
+	await process_frame
+	var quest_sfx := false
+	for s in audio._sfx_pool:
+		if s.playing and s.stream.resource_path.ends_with("quest.wav"):
+			quest_sfx = true
+	print("Completing a quest plays the quest fanfare (2-5 s WAV): ", quest_sfx and load("res://assets/sfx/quest.wav").get_length() >= 2.0 and load("res://assets/sfx/quest.wav").get_length() <= 5.0)
 	# Buttons tap: a button added anywhere is hooked, and pressing it plays.
 	var btn := Button.new()
 	root.add_child(btn)

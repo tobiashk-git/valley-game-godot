@@ -224,6 +224,7 @@ func _mark_completed(quest_id: String) -> void:
 	tracked_quests.erase(quest_id)
 
 func _complete_quest(quest_id: String) -> void:
+	Audio.play_sfx("quest")
 	var def: Dictionary = QUEST_DEFS[quest_id]
 	var objective: Dictionary = def.objective
 	if objective.has("items"):
