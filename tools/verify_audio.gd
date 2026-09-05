@@ -29,6 +29,17 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	print("The overworld asks for the village theme: ", audio.current_music() == "village")
+	print("Battle loop file exists, 15-80 s: ", ResourceLoader.exists("res://assets/music/battle.ogg") and load("res://assets/music/battle.ogg").get_length() >= 15.0 and load("res://assets/music/battle.ogg").get_length() <= 80.0)
+	var combat: Node = root.get_node("Combat")
+	combat.start_combat(["dungeon_rat"])
+	await process_frame
+	print("A fight starting takes the music over: ", audio.current_music() == "battle")
+	combat.fast = true
+	while combat.in_combat:
+		combat.player_run()
+		await physics_frame
+	await process_frame
+	print("...and the village theme returns when it ends: ", audio.current_music() == "village")
 
 	# Audible path, muted: crossfade players.
 	var music_bus: int = AudioServer.get_bus_index("Music")

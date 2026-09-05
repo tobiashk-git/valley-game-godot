@@ -2,8 +2,8 @@ extends Node
 # Autoload "Audio" - music and sound effects.
 #
 # Music: one looping track per situation (MUSIC), chosen by the current
-# scene (SCENE_MUSIC; a fight overrides with "battle" once that track
-# exists). Two players crossfade so a scene change never cuts a track
+# scene (SCENE_MUSIC); a fight overrides with "battle" and the scene's
+# track comes back when it ends. Two players crossfade so a scene change never cuts a track
 # dead; a scene that maps to the track already playing just keeps it
 # going. Sound effects: a small pool of players over the SFX table (empty
 # until the first effects land - play_sfx() of an unknown id is a no-op).
@@ -21,6 +21,7 @@ const CROSSFADE_SECONDS := 1.2
 
 const MUSIC := {
 	"village": "res://assets/music/village.ogg",
+	"battle": "res://assets/music/battle.ogg",
 }
 # Scene name -> music id. Until more tracks exist the village theme carries
 # the valley and the houses; interiors and the title stay quiet.
@@ -42,7 +43,6 @@ var _active := 0
 var _current := ""
 var _fade: Tween = null
 var _sfx_pool: Array[AudioStreamPlayer] = []
-var _last_scene: Node = null
 
 func _ready() -> void:
 	enabled = get_tree().get_script() == null
@@ -75,12 +75,16 @@ func current_music() -> String:
 	return _current
 
 func _process(_delta: float) -> void:
+	play_music(wanted_music())
+
+# What should be playing right now: the fight, else the scene's track.
+func wanted_music() -> String:
+	if Combat.in_combat:
+		return "battle"
 	var scene: Node = get_tree().current_scene
-	if scene == null or scene == _last_scene:
-		return
-	_last_scene = scene
-	var id: String = SCENE_MUSIC.get(scene.name, "")
-	play_music(id)
+	if scene == null:
+		return _current # mid scene change: hold whatever plays
+	return SCENE_MUSIC.get(scene.name, "")
 
 # Switch to a track ("" = fade out to silence). The same track keeps playing.
 func play_music(id: String) -> void:
