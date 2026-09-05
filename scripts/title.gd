@@ -11,6 +11,7 @@ extends Control
 @onready var map_bg: TextureRect = $MapBackground
 @onready var figure: TextureRect = $Figure
 @onready var menu: Panel = $MenuPanel
+@onready var title_top: Label = $MenuPanel/TitleTop
 @onready var title_label: Label = $MenuPanel/TitleLabel
 @onready var tagline: Label = $MenuPanel/Tagline
 @onready var buttons: VBoxContainer = $MenuPanel/Buttons
@@ -41,17 +42,18 @@ func _apply_layout() -> void:
 	var h: float = Layout.size().y
 	if not Layout.is_narrow():
 		# Menu column left of centre, Oliver on the right.
-		_place(menu, Vector2(w * 0.5 - 300.0, h * 0.5 - 170.0), Vector2(360, 340))
-		_place(figure, Vector2(w * 0.5 + 90.0, h * 0.5 - 170.0), Vector2(156, 340))
+		_place(menu, Vector2(w * 0.5 - 300.0, h * 0.5 - 185.0), Vector2(360, 370))
+		_place(figure, Vector2(w * 0.5 + 90.0, h * 0.5 - 185.0), Vector2(156, 370))
 	else:
 		# Oliver above the menu, both centred.
 		var fig_h: float = minf(260.0, h * 0.34)
 		_place(figure, Vector2((w - 120.0) / 2.0, h * 0.08), Vector2(120, fig_h))
-		_place(menu, Vector2(12, h * 0.08 + fig_h + 12.0), Vector2(w - 24.0, 330))
-	_place(title_label, Vector2(0, 18), Vector2(menu.size.x, 48))
-	_place(tagline, Vector2(0, 66), Vector2(menu.size.x, 20))
-	_place(buttons, Vector2((menu.size.x - 280.0) / 2.0, 110), Vector2(280, 124))
-	_place(save_line, Vector2(16, 244), Vector2(menu.size.x - 32.0, 60))
+		_place(menu, Vector2(12, h * 0.08 + fig_h + 12.0), Vector2(w - 24.0, 360))
+	_place(title_top, Vector2(0, 14), Vector2(menu.size.x, 26))
+	_place(title_label, Vector2(0, 40), Vector2(menu.size.x, 44))
+	_place(tagline, Vector2(0, 88), Vector2(menu.size.x, 20))
+	_place(buttons, Vector2((menu.size.x - 280.0) / 2.0, 132), Vector2(280, 124))
+	_place(save_line, Vector2(16, 268), Vector2(menu.size.x - 32.0, 60))
 	_place(version_label, Vector2(w - 160.0, h - 24.0), Vector2(148, 16))
 
 # Button states from the auto save (Continue first when one exists).
