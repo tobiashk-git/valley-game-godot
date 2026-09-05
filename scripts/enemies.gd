@@ -14,9 +14,16 @@ extends Node
 # existing sprite files with a distinct tint - the exact technique already
 # used for all 3 bosses - so this needs zero new art assets.
 
+# Painted creature art (Leonardo, keyed by tools/key_monster.py) lives in
+# assets/enemies/art/<id>.png and replaces the tinted placeholder pixel
+# sprites species by species; is_art() tells the stage and the overworld
+# to draw it smooth and scaled by height rather than at pixel scale.
+static func is_art(sprite_path: String) -> bool:
+	return sprite_path.contains("/enemies/art/")
+
 const ENEMIES := {
 	"dungeon_rat": {
-		"name": "Dungeon Rat", "sprite": "res://assets/enemies/rat.png",
+		"name": "Dungeon Rat", "sprite": "res://assets/enemies/art/dungeon_rat.png",
 		"max_hp": 12, "attack": 3, "defense": 0, "gold_min": 3, "gold_max": 6,
 		"status_attack": {"status": "poison", "chance": 0.25}, "zones": [],
 	},

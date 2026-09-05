@@ -14,6 +14,7 @@ extends StaticBody2D
 # full boss size a 64px skeleton/spider became a ~102px sprite that dwarfed
 # the player (user feedback after the first playtest).
 const SPRITE_SCALE := 0.8
+const ART_HEIGHT := 60.0 # on-screen height of a painted creature (assets/enemies/art)
 # World px the sprite's bottom edge sits below the body centre, so the
 # monster visibly stands ON its tile rather than floating above it (the
 # boss's fixed -35.2 offset left the feet ~5px ABOVE the body at 1.6x).
@@ -38,11 +39,17 @@ func _ready() -> void:
 	var def: Dictionary = Enemies.ENEMIES[enemy_id]
 	var tex: Texture2D = load(def.sprite)
 	sprite.texture = tex
-	sprite.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE)
+	var tex_size: Vector2 = tex.get_size()
+	# Painted art (assets/enemies/art) is a ~256px illustration: draw it
+	# smooth at a fixed on-screen height; the pixel placeholders keep their
+	# fixed pixel scale.
+	var art: bool = Enemies.is_art(def.sprite)
+	var scale_f: float = ART_HEIGHT / tex_size.y if art else SPRITE_SCALE
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if art else CanvasItem.TEXTURE_FILTER_NEAREST
+	sprite.scale = Vector2(scale_f, scale_f)
 	# Sprite2D.offset is in texture px and gets scaled with the node, so the
 	# grounding maths works in texture space then lets the scale apply.
-	var tex_size: Vector2 = tex.get_size()
-	sprite.offset = Vector2(0.0, FEET_DROP / SPRITE_SCALE - tex_size.y / 2.0)
+	sprite.offset = Vector2(0.0, FEET_DROP / scale_f - tex_size.y / 2.0)
 
 	# The InteractArea has to cover the VISIBLE sprite, not just the 28x28
 	# blocking collider at its feet: a real player walks up until their own
@@ -53,8 +60,8 @@ func _ready() -> void:
 	# the player 40-120px outside it, which read as "can't interact at all".
 	# Per-instance shape (not the scene's shared SubResource) since every
 	# species' sprite is a different size.
-	var visual_size: Vector2 = tex_size * SPRITE_SCALE
-	var visual_center: Vector2 = sprite.offset * SPRITE_SCALE
+	var visual_size: Vector2 = tex_size * scale_f
+	var visual_center: Vector2 = sprite.offset * scale_f
 	var shape := RectangleShape2D.new()
 	shape.size = visual_size + Vector2(INTERACT_MARGIN, INTERACT_MARGIN) * 2.0
 	interact_shape.shape = shape

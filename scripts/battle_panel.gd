@@ -113,6 +113,8 @@ func _refresh() -> void:
 			continue
 		var sprite: TextureRect = slot.get_node("Box/Sprite")
 		sprite.texture = load(enemy.sprite)
+		# Painted art scales down smoothly; the old pixel sprites stay crisp.
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if Enemies.is_art(enemy.sprite) else CanvasItem.TEXTURE_FILTER_NEAREST
 		sprite.modulate = enemy.get("tint", Color(1, 1, 1, 1))
 		slot.get_node("Box/NameLabel").text = enemy.name
 		var hp_bar: ProgressBar = slot.get_node("Box/BarBox/HPBar")
