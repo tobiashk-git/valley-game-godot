@@ -53,7 +53,7 @@ func _initialize() -> void:
 	var panel := Panel.new()
 	panel.name = "MenuPanel"
 	root_node.add_child(panel)
-	var title := _label(panel, "TitleLabel", "Valley of Adventure", 38, &"PanelTitle")
+	var title := _label(panel, "TitleLabel", "Valley of Adventure", 32, &"PanelTitle")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var tagline := _label(panel, "Tagline", "A small valley with a lot going on.", 14, &"DimLabel")
 	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

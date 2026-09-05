@@ -23,7 +23,9 @@ var _confirm_new := false
 
 func _ready() -> void:
 	map_bg.texture = WorldMap.render_map(Rect2i(World.WORLD_CENTER_X - 60, World.WORLD_CENTER_Y - 60, 120, 120))
-	version_label.text = "build %s" % ProjectSettings.get_setting("application/config/version", "dev")
+	var version: String = str(ProjectSettings.get_setting("application/config/version", ""))
+	version_label.text = "build %s" % version
+	version_label.visible = version != ""
 	continue_btn.pressed.connect(_on_continue)
 	new_game_btn.pressed.connect(_on_new_game)
 	Layout.changed.connect(_apply_layout)
