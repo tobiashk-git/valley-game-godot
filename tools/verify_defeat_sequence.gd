@@ -46,6 +46,7 @@ func _initialize() -> void:
 	Input.action_release("move_right")
 	await process_frame
 	print("Movement is blocked while the panel is up: ", player.position == before)
+	print("Panel draws above the quest tracker (expanded tracker used to cover it): ", defeat.layer > root.get_node("QuestTracker").layer and defeat.layer > root.get_node("PanelButtons").layer and defeat.layer < root.get_node("Intro").layer)
 	root.get_texture().get_image().save_png("res://verify_defeat_panel.png")
 	print("Saved verify_defeat_panel.png")
 	defeat.wake_btn.pressed.emit()

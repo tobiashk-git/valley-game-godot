@@ -20,6 +20,10 @@ var _open := false
 var _tween: Tween = null
 
 func _ready() -> void:
+	# Modal: above the tracker, toolbar and quick bar (same default layer,
+	# later in the tree, so they used to draw over the panel) - only the
+	# opening (Intro, 100) sits higher.
+	layer = 90
 	black.visible = false
 	panel.visible = false
 	Combat.defeated.connect(show_defeat)
