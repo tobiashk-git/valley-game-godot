@@ -81,7 +81,11 @@ const ZONE_MUSIC := {
 	World.Zone.BADLANDS: "badlands",
 	World.Zone.GLOOMFEN: "gloomfen",
 }
-const SFX := {}
+# Sound effects (assets/sfx, prepared by tools/make_sfx.py). An id that
+# isn't here yet is a harmless no-op, so call sites can be wired ahead.
+const SFX := {
+	"chop": "res://assets/sfx/chop.wav",
+}
 # One-shot pieces of music: played once over silence, then the scene's
 # track resumes (a won fight plays "victory" between the battle track
 # stopping and the area's theme returning).

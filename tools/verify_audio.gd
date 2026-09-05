@@ -120,6 +120,15 @@ func _initialize() -> void:
 	print("...and the village player has stopped once the crossfade is done: ", not p0.playing and audio._players[audio._active].playing)
 	audio.play_sfx("nothing_like_this")
 	print("An unknown sound effect is a no-op: ", true)
+	AudioServer.set_bus_mute(AudioServer.get_bus_index("Sfx"), true)
+	audio.play_sfx("chop")
+	await process_frame
+	var sfx_playing := false
+	for s in audio._sfx_pool:
+		if s.playing and s.stream is AudioStreamWAV:
+			sfx_playing = true
+	print("The chop effect exists as a WAV and plays from the effects pool: ", ResourceLoader.exists("res://assets/sfx/chop.wav") and sfx_playing)
+	AudioServer.set_bus_mute(AudioServer.get_bus_index("Sfx"), false)
 
 	# Sliders on the Hero tab set the buses and persist.
 	change_scene_to_packed(load("res://scenes/Overworld.tscn"))

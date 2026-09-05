@@ -95,7 +95,12 @@ func _swing() -> void:
 		shake.tween_property(sprite, "position:x", 0.0, 0.04)
 		shake.tween_interval(0.08)
 
+# One hit's worth of feedback: the sound and the chips.
+func _hit_sound() -> void:
+	Audio.play_sfx("chop" if item_id == "wood" else "mine")
+
 func _chips() -> void:
+	_hit_sound()
 	var p := CPUParticles2D.new()
 	p.name = "Chips"
 	p.one_shot = true
@@ -119,6 +124,8 @@ func _chips() -> void:
 			p.queue_free())
 
 func _grant() -> void:
+	if not animated:
+		_hit_sound() # no swing to carry it
 	Inventory.add_item(item_id, 1)
 	amount -= 1
 	_popup()
