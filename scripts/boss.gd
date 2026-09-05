@@ -5,8 +5,15 @@ extends StaticBody2D
 # (GameState.boss_defeated[boss_id]), it stays beaten for the session and
 # the tile becomes an inert, dimmed landmark rather than being removed.
 
-const ALIVE_TINT := Color(0.55, 0.35, 0.75, 1.0) # keep in sync with enemies.gd's BOSSES tint
+const ALIVE_TINT := Color(0.55, 0.35, 0.75, 1.0) # the placeholder skeleton's purple (bosses without art yet)
 const DEFEATED_TINT := Color(0.4, 0.4, 0.4, 1.0)
+# Painted boss art (assets/enemies/art/<boss_id>.png, see Enemies.is_art):
+# drawn smooth at a fixed height - bigger than any wild monster - with the
+# feet FEET_DROP below the node and the interact area covering the figure
+# (same grounding maths as wild_monster.gd).
+const ART_HEIGHT := 92.0
+const FEET_DROP := 10.0
+const INTERACT_MARGIN := 24.0
 
 @export var boss_id := "dungeon_boss"
 
@@ -15,8 +22,23 @@ const DEFEATED_TINT := Color(0.4, 0.4, 0.4, 1.0)
 
 var _player_inside := false
 var _sleep_marker: SleepMarker
+var _art := false
 
 func _ready() -> void:
+	var def: Dictionary = Enemies.BOSSES.get(boss_id, {})
+	_art = not def.is_empty() and Enemies.is_art(def.sprite)
+	if _art:
+		var tex: Texture2D = load(def.sprite)
+		sprite.texture = tex
+		var tex_size: Vector2 = tex.get_size()
+		var scale_f: float = float(def.get("art_height", ART_HEIGHT)) / tex_size.y
+		sprite.scale = Vector2(scale_f, scale_f)
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		sprite.offset = Vector2(0.0, FEET_DROP / scale_f - tex_size.y / 2.0)
+		var shape := RectangleShape2D.new()
+		shape.size = tex_size * scale_f + Vector2(INTERACT_MARGIN, INTERACT_MARGIN) * 2.0
+		interact_area.get_node("CollisionShape2D").shape = shape
+		interact_area.position = sprite.offset * scale_f
 	interact_area.body_entered.connect(_on_body_entered)
 	interact_area.body_exited.connect(_on_body_exited)
 	# A beaten boss sleeps for good (a story gate); "z z Z" says so.
@@ -31,9 +53,13 @@ func _on_body_exited(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		_player_inside = false
 
+# The tint a living boss wears: none for painted art, the placeholder purple otherwise.
+func alive_tint() -> Color:
+	return Color.WHITE if _art else ALIVE_TINT
+
 func _process(_delta: float) -> void:
 	var defeated: bool = GameState.boss_defeated.get(boss_id, false)
-	sprite.modulate = DEFEATED_TINT if defeated else ALIVE_TINT
+	sprite.modulate = DEFEATED_TINT if defeated else alive_tint()
 	_sleep_marker.visible = defeated
 	if _player_inside and not defeated and not Combat.in_combat and not GameState.interact_blocked() and Input.is_action_just_pressed("interact"):
 		Combat.start_boss_fight(boss_id)

@@ -25,7 +25,7 @@ func _initialize() -> void:
 
 	print("Boss node found in Dungeon scene: ", boss != null)
 	print("Boss starts undefeated: ", not game_state.boss_defeated.dungeon_boss)
-	print("Boss sprite tint alive (purple): ", boss.get_node("Sprite2D").modulate == boss.ALIVE_TINT)
+	print("Boss sprite wears its living tint: ", boss.get_node("Sprite2D").modulate == boss.alive_tint())
 
 	# --- Real interaction path: walk up to the boss and press E. ---
 	# Being dropped onto the boss's collision pushes the player out, which

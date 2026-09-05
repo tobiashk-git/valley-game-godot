@@ -28,10 +28,14 @@ func _initialize() -> void:
 	for id in enemies.ENEMIES.keys():
 		if enemies.is_art(enemies.ENEMIES[id].sprite):
 			with_art.append(id)
-	print("Every regular species (%d) has painted art; a boss without art yet (Bone Lord) still uses its pixel sprite: " % with_art.size(), with_art.size() == enemies.ENEMIES.size() and not enemies.is_art(enemies.BOSSES.dungeon_boss.sprite))
+	print("Every regular species (%d) has painted art; the Bone Lord has boss art, the Royal Wraith not yet: " % with_art.size(), with_art.size() == enemies.ENEMIES.size() and enemies.is_art(enemies.BOSSES.dungeon_boss.sprite) and not enemies.is_art(enemies.BOSSES.castle_boss.sprite))
+	for boss_id in enemies.BOSSES.keys():
+		if enemies.is_art(enemies.BOSSES[boss_id].sprite):
+			with_art.append(boss_id)
 
 	for id in with_art:
-		var path: String = enemies.ENEMIES[id].sprite
+		var def: Dictionary = enemies.ENEMIES[id] if enemies.ENEMIES.has(id) else enemies.BOSSES[id]
+		var path: String = def.sprite
 		var tex: Texture2D = load(path)
 		var img: Image = tex.get_image()
 		var w: int = img.get_width()
@@ -64,9 +68,17 @@ func _initialize() -> void:
 	while combat.in_combat:
 		combat.player_run()
 		await physics_frame
-	combat.start_boss_fight("dungeon_boss")
+	combat.start_boss_fight("castle_boss")
 	await process_frame
 	print("A boss without art keeps the crisp pixel path: ", battle.enemy_slots[0].get_node("Box/Sprite").texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
+	while combat.in_combat:
+		combat.player_run()
+		await physics_frame
+	combat.start_boss_fight("dungeon_boss")
+	await process_frame
+	print("The Bone Lord's art draws smooth on the stage: ", battle.enemy_slots[0].get_node("Box/Sprite").texture.resource_path.ends_with("/art/dungeon_boss.png") and battle.enemy_slots[0].get_node("Box/Sprite").texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR)
+	root.get_texture().get_image().save_png("res://verify_monster_art_boss_stage.png")
+	print("Saved verify_monster_art_boss_stage.png")
 	root.get_texture().get_image().save_png("res://verify_monster_art_stage.png")
 	print("Saved verify_monster_art_stage.png")
 	combat.fast = true
@@ -98,6 +110,28 @@ func _initialize() -> void:
 	print("Its feet sit at the node's base (bottom of the drawn sprite %.0fpx below the origin, = FEET_DROP): " % bottom, absf(bottom - rat.FEET_DROP) < 0.5)
 	root.get_texture().get_image().save_png("res://verify_monster_art_overworld.png")
 	print("Saved verify_monster_art_overworld.png")
+	# --- Boss figures (Boss.tscn): painted art at boss size, placeholder untouched. ---
+	var boss_scene: PackedScene = load("res://scenes/props/Boss.tscn")
+	var lord: StaticBody2D = boss_scene.instantiate()
+	lord.boss_id = "dungeon_boss"
+	lord.position = player.position + Vector2(0, -96)
+	overworld.get_node("YSort").add_child(lord)
+	var wraith: StaticBody2D = boss_scene.instantiate()
+	wraith.boss_id = "castle_boss"
+	wraith.position = player.position + Vector2(-160, -96)
+	overworld.get_node("YSort").add_child(wraith)
+	await process_frame
+	await process_frame
+	var lord_h: float = lord.sprite.texture.get_size().y * lord.sprite.scale.y
+	var lord_shape: RectangleShape2D = lord.interact_area.get_node("CollisionShape2D").shape
+	print("Bone Lord figure: painted art 92px tall, smooth, untinted, interact area sized to it: ", absf(lord_h - 92.0) < 0.5 and lord.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and lord.sprite.modulate == Color.WHITE and absf(lord_shape.size.y - (92.0 + 2.0 * lord.INTERACT_MARGIN)) < 0.5)
+	var lord_bottom: float = (lord.sprite.offset.y + lord.sprite.texture.get_size().y / 2.0) * lord.sprite.scale.y
+	print("...feet at the node's base: ", absf(lord_bottom - lord.FEET_DROP) < 0.5)
+	print("Royal Wraith figure (no art yet) keeps the 1.6x placeholder with its purple tint: ", wraith.sprite.scale == Vector2(1.6, 1.6) and wraith.sprite.modulate == wraith.ALIVE_TINT)
+	root.get_texture().get_image().save_png("res://verify_monster_art_boss.png")
+	print("Saved verify_monster_art_boss.png")
+	lord.queue_free()
+	wraith.queue_free()
 	rat.queue_free()
 	skel.queue_free()
 	await process_frame

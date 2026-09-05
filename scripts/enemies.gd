@@ -151,8 +151,7 @@ func pick_random_id_for_zone(zone: int) -> String:
 # also drop a Magic Crystal alongside their usual gear - see altar.gd.
 const BOSSES := {
 	"dungeon_boss": {
-		"name": "Bone Lord", "sprite": "res://assets/enemies/skeleton.png",
-		"tint": Color(0.55, 0.35, 0.75, 1.0),
+		"name": "Bone Lord", "sprite": "res://assets/enemies/art/dungeon_boss.png", "art_height": 92,
 		"max_hp": 60, "attack": 8, "defense": 3, "gold_min": 40, "gold_max": 60,
 		"status_attack": {"status": "paralysis", "chance": 0.2},
 		"drop_item_ids": ["bone_greatsword", "magic_crystal"],
