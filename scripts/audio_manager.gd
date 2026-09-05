@@ -8,9 +8,17 @@ extends Node
 # going. Sound effects: a small pool of players over the SFX table (empty
 # until the first effects land - play_sfx() of an unknown id is a no-op).
 #
-# Two buses, Music and Sfx, are created here on top of Master so the Hero
-# tab's sliders set real bus volumes; the settings persist in
-# user://settings.cfg. On the web the browser only unmutes after the
+# Buses (res://default_bus_layout.tres): Music and Sfx under Master carry
+# the Hero tab's sliders; MusicA and MusicB under Music hold one player
+# each, and the crossfade is done on THOSE bus volumes. Web-build facts
+# behind this shape (found with an analyser tapped on the page's output):
+# a bus added at runtime made the engine's web audio graph unplug the
+# master output (total silence); and once a sample is playing on the web
+# NO later volume change is honoured - neither the player's volume_db nor
+# any bus volume - so the web gets a clean cut between tracks instead of a
+# crossfade, and the Music slider restarts the track at its position so
+# the new bus volume is picked up. Desktop keeps the crossfade. The
+# settings persist in user://settings.cfg. On the web the browser only unmutes after the
 # player's first tap - Godot resumes the audio context itself.
 #
 # Under a verify script nothing is audible (`enabled` off) but the choice
@@ -18,6 +26,8 @@ extends Node
 
 const SETTINGS_PATH := "user://settings.cfg"
 const CROSSFADE_SECONDS := 1.2
+const PLAYER_BUSES := ["MusicA", "MusicB"]
+const SILENT_DB := -40.0
 
 const MUSIC := {
 	"village": "res://assets/music/village.ogg",
@@ -44,6 +54,7 @@ const ZONE_MUSIC := {
 const SFX := {}
 
 var enabled := true
+var hard_switch := false # web: cut between tracks, no fades (see above)
 var music_volume := 0.8 # 0..1
 var sfx_volume := 0.9
 var _players: Array[AudioStreamPlayer] = []
@@ -54,14 +65,16 @@ var _sfx_pool: Array[AudioStreamPlayer] = []
 
 func _ready() -> void:
 	enabled = get_tree().get_script() == null
-	_ensure_bus("Music")
-	_ensure_bus("Sfx")
+	hard_switch = OS.has_feature("web")
+	for bus_name in ["Music", "MusicA", "MusicB", "Sfx"]:
+		_ensure_bus(bus_name)
 	for i in range(2):
 		var p := AudioStreamPlayer.new()
 		p.name = "Music%d" % i
-		p.bus = "Music"
+		p.bus = PLAYER_BUSES[i]
 		add_child(p)
 		_players.append(p)
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(PLAYER_BUSES[i]), SILENT_DB)
 	for i in range(4):
 		var s := AudioStreamPlayer.new()
 		s.name = "Sfx%d" % i
@@ -71,9 +84,15 @@ func _ready() -> void:
 	_load_settings()
 	_apply_volumes()
 
+# The buses come from res://default_bus_layout.tres so they exist before any
+# playback. Adding a bus at RUNTIME broke the web build: the engine's web
+# audio graph disconnected the master output from the speakers and wired
+# it into the new bus instead (silence on every browser). This is only a
+# fallback for a missing layout.
 func _ensure_bus(bus_name: String) -> void:
 	if AudioServer.get_bus_index(bus_name) != -1:
 		return
+	push_warning("Audio bus '%s' missing from the bus layout - adding at runtime (silent on the web)" % bus_name)
 	AudioServer.add_bus()
 	var idx: int = AudioServer.get_bus_count() - 1
 	AudioServer.set_bus_name(idx, bus_name)
@@ -108,22 +127,37 @@ func play_music(id: String) -> void:
 	if not enabled:
 		return
 	var outgoing: AudioStreamPlayer = _players[_active]
+	var out_bus: int = AudioServer.get_bus_index(PLAYER_BUSES[_active])
 	_active = 1 - _active
 	var incoming: AudioStreamPlayer = _players[_active]
+	var in_bus: int = AudioServer.get_bus_index(PLAYER_BUSES[_active])
 	if _fade != null:
 		_fade.kill()
+	if hard_switch:
+		outgoing.stop()
+		AudioServer.set_bus_volume_db(out_bus, SILENT_DB)
+		if id != "" and MUSIC.has(id):
+			var stream_w = load(MUSIC[id])
+			if stream_w != null and "loop" in stream_w:
+				stream_w.loop = true
+			incoming.stream = stream_w
+			incoming.volume_db = 0.0
+			AudioServer.set_bus_volume_db(in_bus, 0.0)
+			incoming.play()
+		return
 	_fade = create_tween()
 	if outgoing.playing:
-		_fade.tween_property(outgoing, "volume_db", -40.0, CROSSFADE_SECONDS)
+		_fade.tween_method(func(db: float) -> void: AudioServer.set_bus_volume_db(out_bus, db), AudioServer.get_bus_volume_db(out_bus), SILENT_DB, CROSSFADE_SECONDS)
 		_fade.parallel()
 	if id != "" and MUSIC.has(id):
 		var stream = load(MUSIC[id])
 		if stream != null and "loop" in stream:
 			stream.loop = true
 		incoming.stream = stream
-		incoming.volume_db = -40.0
+		incoming.volume_db = 0.0
+		AudioServer.set_bus_volume_db(in_bus, SILENT_DB)
 		incoming.play()
-		_fade.tween_property(incoming, "volume_db", 0.0, CROSSFADE_SECONDS)
+		_fade.tween_method(func(db: float) -> void: AudioServer.set_bus_volume_db(in_bus, db), SILENT_DB, 0.0, CROSSFADE_SECONDS)
 	_fade.tween_callback(func() -> void:
 		if outgoing.playing and outgoing != incoming:
 			outgoing.stop())
@@ -148,15 +182,15 @@ func debug_state() -> String:
 	for p in _players:
 		if p.playing:
 			playing = true
-	var line: String = "Audio: %s, player %s, %d Hz%s" % ["silence" if _current == "" else _current, "playing" if playing else "stopped", int(AudioServer.get_mix_rate()), "" if enabled else " (muted for tests)"]
+	var line: String = "Audio: %s, %s, %d kHz%s" % ["silence" if _current == "" else _current, "playing" if playing else "stopped", int(AudioServer.get_mix_rate() / 1000.0), "" if enabled else " (test mute)"]
 	if OS.has_feature("web"):
-		# The engine's own context is out of reach from here; a probe
-		# context says whether this browser has unlocked audio at all.
 		# The export's head_include captures the engine's own context as
-		# window.__godotCtx and resumes it inside every tap.
+		# window.__godotCtx, resumes it inside every tap, and taps an
+		# analyser onto the output so the actual signal level is readable.
 		var state = JavaScriptBridge.eval("window.__godotCtx ? window.__godotCtx.state : 'not captured'", true)
-		var ua = JavaScriptBridge.eval("(navigator.userAgent.match(/(iPhone|iPad|Android)[^)]*/)||['other'])[0].slice(0,26)", true)
-		line += ", browser %s, %s" % [str(state), str(ua)]
+		var level = JavaScriptBridge.eval("window.__godotLevel ? window.__godotLevel() : -1", true)
+		line += "
+Browser %s, output level %.3f" % [str(state), float(level)]
 	return line
 
 # --- settings ---
@@ -165,6 +199,14 @@ func set_music_volume(v: float) -> void:
 	music_volume = clampf(v, 0.0, 1.0)
 	_apply_volumes()
 	_save_settings()
+	if hard_switch:
+		# The web only reads bus volumes when a sample starts: restart the
+		# track where it is so the new level applies.
+		var p: AudioStreamPlayer = _players[_active]
+		if p.playing:
+			var pos: float = p.get_playback_position()
+			p.stop()
+			p.play(pos)
 
 func set_sfx_volume(v: float) -> void:
 	sfx_volume = clampf(v, 0.0, 1.0)

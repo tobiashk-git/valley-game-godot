@@ -19,7 +19,8 @@ func _initialize() -> void:
 	print("Village loop file exists and loads as an OGG stream: ", ResourceLoader.exists("res://assets/music/village.ogg") and load("res://assets/music/village.ogg") is AudioStreamOggVorbis)
 	var stream: AudioStreamOggVorbis = load("res://assets/music/village.ogg")
 	print("Loop is between 45 s and 110 s long: ", stream.get_length() >= 45.0 and stream.get_length() <= 110.0)
-	print("Music and Sfx buses exist on top of Master: ", AudioServer.get_bus_index("Music") != -1 and AudioServer.get_bus_index("Sfx") != -1 and AudioServer.get_bus_send(AudioServer.get_bus_index("Music")) == "Master")
+	print("Bus layout: Music and Sfx under Master, MusicA/MusicB under Music, all from the layout file (none added at runtime): ", AudioServer.get_bus_index("Music") != -1 and AudioServer.get_bus_index("Sfx") != -1 and AudioServer.get_bus_send(AudioServer.get_bus_index("Music")) == "Master" and AudioServer.get_bus_send(AudioServer.get_bus_index("MusicA")) == "Music" and AudioServer.get_bus_send(AudioServer.get_bus_index("MusicB")) == "Music" and ResourceLoader.exists("res://default_bus_layout.tres"))
+	print("Desktop keeps the crossfade (the web cuts between tracks): ", not audio.hard_switch)
 	print("Silent under a verify script: ", not audio.enabled)
 
 	# Scene -> music, tracked even while silent.
@@ -61,7 +62,7 @@ func _initialize() -> void:
 	audio.play_music("village")
 	await process_frame
 	var p0: AudioStreamPlayer = audio._players[audio._active]
-	print("Playing the village track on one player, looping: ", p0.playing and p0.stream is AudioStreamOggVorbis and p0.stream.loop)
+	print("Playing the village track on one player, looping, its sub-bus fading up: ", p0.playing and p0.stream is AudioStreamOggVorbis and p0.stream.loop and p0.volume_db == 0.0 and AudioServer.get_bus_volume_db(AudioServer.get_bus_index(audio.PLAYER_BUSES[audio._active])) > audio.SILENT_DB)
 	change_scene_to_packed(load("res://scenes/House.tscn"))
 	await process_frame
 	await process_frame

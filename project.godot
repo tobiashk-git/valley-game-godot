@@ -14,6 +14,10 @@ config/name="Oliver in the Valley of Adventure"
 run/main_scene="res://scenes/Title.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[audio]
+
+buses/default_bus_layout="res://default_bus_layout.tres"
+
 [autoload]
 
 Layout="*res://scripts/layout.gd"
