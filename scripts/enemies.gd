@@ -112,19 +112,19 @@ const ENEMIES := {
 
 	# --- Gloomfen Marsh (west) ---
 	"swamp_hag": {
-		"name": "Swamp Hag", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.35, 0.45, 0.3, 1.0),
+		"name": "Swamp Hag", "sprite": "res://assets/enemies/art/swamp_hag.png", "art_height": 52,
 		"max_hp": 17, "attack": 5, "defense": 2, "gold_min": 7, "gold_max": 12,
 		"status_attack": {"status": "silence", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
 		"drop_item_ids": ["monster_fur"],
 	},
 	"giant_insect": {
-		"name": "Giant Insect", "sprite": "res://assets/enemies/spider.png", "tint": Color(0.4, 0.55, 0.25, 1.0),
+		"name": "Giant Insect", "sprite": "res://assets/enemies/art/giant_insect.png", "art_height": 52,
 		"max_hp": 15, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "poison", "chance": 0.3}, "zones": [World.Zone.GLOOMFEN],
 		"drop_item_ids": ["monster_fur"],
 	},
 	"spectral_undead": {
-		"name": "Spectral Undead", "sprite": "res://assets/enemies/ghost.png", "tint": Color(0.55, 0.6, 0.55, 1.0),
+		"name": "Spectral Undead", "sprite": "res://assets/enemies/art/spectral_undead.png", "art_height": 50,
 		"max_hp": 19, "attack": 6, "defense": 1, "gold_min": 8, "gold_max": 13,
 		"status_attack": {"status": "sleep", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
 		"drop_item_ids": ["monster_fur"],
