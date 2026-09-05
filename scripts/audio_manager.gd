@@ -90,6 +90,7 @@ const SFX := {
 	"craft": "res://assets/sfx/craft.wav", # Freesound 567849 "kill-crafting-sound" by madpancake
 	"hit": "res://assets/sfx/hit.wav", # Freesound 783874 "general fight sounds 9" by inkyframes
 	"level_up": "res://assets/sfx/level_up.wav", # Freesound 682633 "level up" by bastianhallo
+	"nap": "res://assets/sfx/nap.wav", # Freesound 423144 "magic spell sleeping spell 1" by ogsoundfx
 }
 # One-shot pieces of music: played once over silence, then the scene's
 # track resumes (a won fight plays "victory" between the battle track

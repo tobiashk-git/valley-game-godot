@@ -64,6 +64,7 @@ static func story(info: Dictionary) -> String:
 	return "%s\n\nYou wake up back in your own bed. %s" % [first, purse]
 
 func show_defeat(info: Dictionary) -> void:
+	Audio.play_sfx("nap")
 	_open = true
 	if _tween != null:
 		_tween.kill()
