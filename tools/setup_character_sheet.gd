@@ -88,6 +88,16 @@ func _build() -> void:
 	close_btn.theme_type_variation = &"SecondaryButton"
 	close_btn.add_theme_font_size_override("font_size", 15)
 	window.add_child(close_btn)
+	# Save & Quit beside the X on the wide layout (the tabs shrink to 108 to
+	# make room); on a phone the Hero tab's Game block carries it instead.
+	var quit_btn := Button.new()
+	quit_btn.name = "QuitBtn"
+	quit_btn.text = "Save & Quit"
+	quit_btn.position = Vector2(576, 10)
+	quit_btn.size = Vector2(92, 32)
+	quit_btn.theme_type_variation = &"SecondaryButton"
+	quit_btn.add_theme_font_size_override("font_size", 13)
+	window.add_child(quit_btn)
 
 	# --- Header (shared by every tab) ---
 	var header := Control.new()

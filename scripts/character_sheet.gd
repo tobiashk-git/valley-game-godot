@@ -45,6 +45,7 @@ const FLASH_SECONDS := 1.4
 @onready var window: Panel = $Window
 @onready var tabs: HBoxContainer = $Window/Tabs
 @onready var close_btn: Button = $Window/CloseBtn
+@onready var quit_btn: Button = $Window/QuitBtn
 @onready var header: Control = $Window/Header
 @onready var portrait: TextureRect = $Window/Header/PortraitFrame/Portrait
 @onready var name_label: Label = $Window/Header/NameLabel
@@ -153,6 +154,7 @@ func _ready() -> void:
 	for tab in TAB_BUTTONS:
 		tabs.get_node(TAB_BUTTONS[tab]).pressed.connect(_on_tab_pressed.bind(tab))
 	close_btn.pressed.connect(close)
+	quit_btn.pressed.connect(_on_quit_to_title)
 	for slot in Character.SLOTS:
 		_header_slot_button(slot).pressed.connect(select_equipped.bind(slot))
 	primary_action.pressed.connect(_on_primary_action)
@@ -216,9 +218,11 @@ func _apply_layout() -> void:
 		for tab in TAB_BUTTONS:
 			var b: Button = tabs.get_node(TAB_BUTTONS[tab])
 			b.text = TAB_LABELS[tab][0]
-			b.custom_minimum_size = Vector2(118, 32)
+			b.custom_minimum_size = Vector2(108, 32)
 			b.add_theme_font_size_override("font_size", 14)
 		close_btn.position = Vector2(676, 10)
+		quit_btn.visible = true
+		quit_btn.position = Vector2(576, 10)
 		header.position = Vector2(0, 54)
 		header.size = Vector2(720, 92)
 		_place(hp_bar, Vector2(112, 42), Vector2(220, 16))
@@ -252,6 +256,7 @@ func _apply_layout() -> void:
 		b.custom_minimum_size = Vector2(tab_w, 36)
 		b.add_theme_font_size_override("font_size", 12)
 	close_btn.position = Vector2(iw - 44.0, 10)
+	quit_btn.visible = false # the Hero tab's Game block (at its top) has it
 	# Header grows downwards: bars beside the portrait, stats + bonus lines
 	# under them, then the equipment slot row - which the Hero tab hides (the
 	# doll shows the slots), so that tab's header stops above it.
@@ -650,6 +655,14 @@ func _refresh_character() -> void:
 	# --- Left: stats column ---
 	_clear(stats_list)
 	var stats: Dictionary = Character.stats
+	# --- Game: save / quit first, so it's found without scrolling (New Game
+	# lives on the title screen). ---
+	_stats_title("Game")
+	_stats_line(SaveSystem.saved_ago_text() + "  -  autosaves as you play", true)
+	_game_button("SaveNowBtn", "Save now", &"PrimaryButton", _on_save_now)
+	_game_button("QuitBtn", "Save and quit to title", &"SecondaryButton", _on_quit_to_title)
+	var load_btn: Button = _game_button("LoadBtn", "Load last save", &"SecondaryButton", _on_load_save)
+	load_btn.disabled = not SaveSystem.has_save()
 	_stats_title("Attributes")
 	_stat_row("Strength", str(stats.strength))
 	_stat_row("Agility", str(stats.agility))
@@ -665,14 +678,6 @@ func _refresh_character() -> void:
 	else:
 		for status_id in Combat.player_status.keys():
 			_stat_row(Statuses.STATUSES[status_id].name, "%d turns" % Combat.player_status[status_id].turns_left)
-	# --- Game: save / load / new (the title screen will take over New Game /
-	# Continue; this is the in-game home for it meanwhile). ---
-	_stats_title("Game")
-	_stats_line(SaveSystem.saved_ago_text() + "  -  autosaves as you play", true)
-	_game_button("SaveNowBtn", "Save now", &"PrimaryButton", _on_save_now)
-	var load_btn: Button = _game_button("LoadBtn", "Load last save", &"SecondaryButton", _on_load_save)
-	load_btn.disabled = not SaveSystem.has_save()
-	_game_button("QuitBtn", "Save and quit to title", &"SecondaryButton", _on_quit_to_title)
 
 	# --- Centre: the doll's slots ---
 	for slot in Character.SLOTS:

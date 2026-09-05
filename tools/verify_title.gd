@@ -46,7 +46,8 @@ func _initialize() -> void:
 	save.enabled = true
 	sheet.open("character")
 	await process_frame
-	sheet.stats_list.get_node("QuitBtn").pressed.emit()
+	print("Hero tab: Game block sits at the top of the stats column; the sheet's own Save & Quit is beside the X: ", sheet.stats_list.get_child(0).text == "Game" and sheet.stats_list.get_node("QuitBtn") != null and sheet.quit_btn.visible and sheet.quit_btn.text == "Save & Quit")
+	sheet.quit_btn.pressed.emit()
 	await process_frame
 	await process_frame
 	await process_frame

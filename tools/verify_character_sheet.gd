@@ -267,6 +267,6 @@ func _initialize() -> void:
 		await process_frame
 	sheet.open("inventory")
 	await process_frame
-	print("Back at 800 wide: wide layout restored (720px window at x=40, 6 columns, full tab names): ", layout.width == 800 and not sheet.narrow and sheet.window.position == Vector2(40, 56) and sheet.window.size == Vector2(720, 530) and sheet.grid.columns == 6 and sheet.tabs.get_node("InventoryTab").text == "Inventory")
+	print("Back at 800 wide: wide layout restored (720px window at x=40, 6 columns, full tab names, Save & Quit beside the X): ", layout.width == 800 and not sheet.narrow and sheet.window.position == Vector2(40, 56) and sheet.window.size == Vector2(720, 530) and sheet.grid.columns == 6 and sheet.tabs.get_node("InventoryTab").text == "Inventory" and sheet.quit_btn.visible and sheet.tabs.get_global_rect().end.x <= sheet.quit_btn.global_position.x and sheet.quit_btn.get_global_rect().end.x <= sheet.close_btn.global_position.x)
 	sheet.close()
 	quit()
