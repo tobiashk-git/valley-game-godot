@@ -14,7 +14,7 @@ extends StaticBody2D
 # full boss size a 64px skeleton/spider became a ~102px sprite that dwarfed
 # the player (user feedback after the first playtest).
 const SPRITE_SCALE := 0.8
-const ART_HEIGHT := 60.0 # on-screen height of a painted creature (assets/enemies/art)
+const ART_HEIGHT := 44.0 # default on-screen height of a painted creature (assets/enemies/art); a def's "art_height" overrides
 # World px the sprite's bottom edge sits below the body centre, so the
 # monster visibly stands ON its tile rather than floating above it (the
 # boss's fixed -35.2 offset left the feet ~5px ABOVE the body at 1.6x).
@@ -44,7 +44,8 @@ func _ready() -> void:
 	# smooth at a fixed on-screen height; the pixel placeholders keep their
 	# fixed pixel scale.
 	var art: bool = Enemies.is_art(def.sprite)
-	var scale_f: float = ART_HEIGHT / tex_size.y if art else SPRITE_SCALE
+	var art_height: float = float(def.get("art_height", ART_HEIGHT))
+	var scale_f: float = art_height / tex_size.y if art else SPRITE_SCALE
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if art else CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.scale = Vector2(scale_f, scale_f)
 	# Sprite2D.offset is in texture px and gets scaled with the node, so the

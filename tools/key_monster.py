@@ -2,7 +2,12 @@
 painted drop-shadow ellipse the prompt asked it not to draw) into a tight
 transparent PNG for the battle stage and the overworld.
 
-  python tools/key_monster.py <in.jpg> <out.png> [--max 256]
+  python tools/key_monster.py <in.jpg> <out.png> [--max 256] [--mist]
+
+--mist: the creature trails translucent white wisps (ghosts): pixels of the
+background hue that are paler than it are a white-over-background blend,
+so they become white with alpha = how far the saturation has dropped;
+hole filling is skipped (a swirl can enclose background).
 
 Background: a quadratic colour field fitted to the border, keyed on a
 small residual (global, so pockets between legs go too).
@@ -63,6 +68,9 @@ def fill_holes(mask):
 def main():
     args = sys.argv[1:]
     max_side = 256
+    mist = "--mist" in args
+    if mist:
+        args.remove("--mist")
     if "--max" in args:
         i = args.index("--max"); max_side = int(args[i + 1]); del args[i:i + 2]
     src, dst = args
@@ -88,7 +96,9 @@ def main():
     bg_hsv = rgb_to_hsv(field)
     hue_d = np.abs(hsv[..., 0] - bg_hsv[..., 0])
     hue_d = np.minimum(hue_d, 360.0 - hue_d)
-    same_hue = (hue_d < 7.0) & (np.abs(hsv[..., 1] - bg_hsv[..., 1]) < 0.09)
+    # (The ghost's shadow drifted 13 deg from its background; the rat's
+    # darkest fur is 4 deg off but 0.15 lower in saturation - hence 15 / 0.09.)
+    same_hue = (hue_d < 15.0) & (np.abs(hsv[..., 1] - bg_hsv[..., 1]) < 0.09)
     shadow = same_hue & (hsv[..., 2] <= bg_hsv[..., 2] + 0.05)
     keyed = bg | shadow
 
@@ -100,18 +110,31 @@ def main():
     alpha = np.where(keyed, 0, 255).astype(np.uint8)
     ring = dilate(keyed, 1) & ~keyed
     alpha[ring] = 120
+    out_rgb = rgb.astype(np.uint8)
+    if mist:
+        # Measured on the ghost: mist hue 273-331 (bg 334), sat .11-.52 (bg
+        # .62), value about the background's; the ghost's own pale blue body
+        # is 130 deg off in hue, so a wide hue window is safe.
+        pale = (~keyed) & (hue_d < 65.0) & (hsv[..., 2] >= bg_hsv[..., 2] - 0.1) & (hsv[..., 1] < bg_hsv[..., 1] - 0.08)
+        cover = np.clip(1.0 - hsv[..., 1] / np.maximum(bg_hsv[..., 1], 1e-6), 0.0, 1.0)
+        alpha[pale] = (cover[pale] * 255.0).astype(np.uint8)
+        out_rgb = out_rgb.copy()
+        out_rgb[pale] = np.array([236, 242, 250], dtype=np.uint8)
 
     fig = largest_component(alpha > 0)
+    if mist:
+        alpha[~fig] = 0
     # Fill holes that are entirely inside the creature (a fleck of
     # background-hued colour in an eye or an ear): only transparent regions
     # that reach the image border stay transparent.
-    holes = fill_holes(fig) & ~fig
-    alpha[holes] = 255
-    fig = fig | holes
-    alpha[~fig] = 0
+    if not mist:
+        holes = fill_holes(fig) & ~fig
+        alpha[holes] = 255
+        fig = fig | holes
+        alpha[~fig] = 0
     ys, xs = np.where(fig)
     x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
-    out = np.dstack([rgb.astype(np.uint8), alpha])[y0:y1, x0:x1]
+    out = np.dstack([out_rgb, alpha])[y0:y1, x0:x1]
     img = Image.fromarray(out, "RGBA")
     scale = min(1.0, max_side / max(img.size))
     if scale < 1.0:

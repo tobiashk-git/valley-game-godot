@@ -17,33 +17,36 @@ extends Node
 # Painted creature art (Leonardo, keyed by tools/key_monster.py) lives in
 # assets/enemies/art/<id>.png and replaces the tinted placeholder pixel
 # sprites species by species; is_art() tells the stage and the overworld
-# to draw it smooth and scaled by height rather than at pixel scale.
+# to draw it smooth and scaled by height rather than at pixel scale. An
+# entry's optional "art_height" is its on-screen height on the overworld
+# (wild_monster.gd; default ART_HEIGHT there) - a rat is smaller than a
+# skeleton, and none of them should read as boss-sized next to Oliver.
 static func is_art(sprite_path: String) -> bool:
 	return sprite_path.contains("/enemies/art/")
 
 const ENEMIES := {
 	"dungeon_rat": {
-		"name": "Dungeon Rat", "sprite": "res://assets/enemies/art/dungeon_rat.png",
+		"name": "Dungeon Rat", "sprite": "res://assets/enemies/art/dungeon_rat.png", "art_height": 40,
 		"max_hp": 12, "attack": 3, "defense": 0, "gold_min": 3, "gold_max": 6,
 		"status_attack": {"status": "poison", "chance": 0.25}, "zones": [],
 	},
 	"cave_bat": {
-		"name": "Cave Bat", "sprite": "res://assets/enemies/bat.png",
+		"name": "Cave Bat", "sprite": "res://assets/enemies/art/cave_bat.png", "art_height": 36,
 		"max_hp": 8, "attack": 4, "defense": 0, "gold_min": 2, "gold_max": 4,
 		"status_attack": {"status": "confusion", "chance": 0.25}, "zones": [],
 	},
 	"skeleton": {
-		"name": "Skeleton", "sprite": "res://assets/enemies/skeleton.png",
+		"name": "Skeleton", "sprite": "res://assets/enemies/art/skeleton.png", "art_height": 52,
 		"max_hp": 18, "attack": 5, "defense": 2, "gold_min": 8, "gold_max": 12,
 		"status_attack": {"status": "paralysis", "chance": 0.25}, "zones": [],
 	},
 	"giant_spider": {
-		"name": "Giant Spider", "sprite": "res://assets/enemies/spider.png",
+		"name": "Giant Spider", "sprite": "res://assets/enemies/art/giant_spider.png", "art_height": 40,
 		"max_hp": 14, "attack": 4, "defense": 1, "gold_min": 5, "gold_max": 8,
 		"status_attack": {"status": "sleep", "chance": 0.3}, "zones": [],
 	},
 	"ghost": {
-		"name": "Ghost", "sprite": "res://assets/enemies/ghost.png",
+		"name": "Ghost", "sprite": "res://assets/enemies/art/ghost.png", "art_height": 46,
 		"max_hp": 10, "attack": 3, "defense": 0, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "silence", "chance": 0.3}, "zones": [],
 	},

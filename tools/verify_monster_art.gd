@@ -28,7 +28,7 @@ func _initialize() -> void:
 	for id in enemies.ENEMIES.keys():
 		if enemies.is_art(enemies.ENEMIES[id].sprite):
 			with_art.append(id)
-	print("Species with painted art so far (%s); the Cave Bat still uses its pixel sprite: " % ", ".join(with_art), with_art.has("dungeon_rat") and not enemies.is_art(enemies.ENEMIES.cave_bat.sprite))
+	print("All five starters have painted art; an outer-biome species (Bandit) still uses its pixel sprite: ", with_art.has("dungeon_rat") and with_art.has("cave_bat") and with_art.has("skeleton") and with_art.has("giant_spider") and with_art.has("ghost") and not enemies.is_art(enemies.ENEMIES.bandit.sprite))
 
 	for id in with_art:
 		var path: String = enemies.ENEMIES[id].sprite
@@ -39,21 +39,34 @@ func _initialize() -> void:
 		var top_hit := false
 		var bottom_hit := false
 		for x in range(w):
-			if img.get_pixel(x, 0).a > 0.5:
+			if img.get_pixel(x, 0).a > 0.2:
 				top_hit = true
-			if img.get_pixel(x, h - 1).a > 0.5:
+			if img.get_pixel(x, h - 1).a > 0.2:
 				bottom_hit = true
 		var corners_clear: bool = img.get_pixel(0, 0).a == 0.0 and img.get_pixel(w - 1, 0).a == 0.0 and img.get_pixel(0, h - 1).a == 0.0 and img.get_pixel(w - 1, h - 1).a == 0.0
-		var centre_opaque: bool = img.get_pixel(w / 2, h / 2).a > 0.9
-		print("%s art: %dx%d, longest side 256, cropped tight (opaque top and bottom rows), corners clear, middle opaque: " % [id, w, h], max(w, h) == 256 and top_hit and bottom_hit and corners_clear and centre_opaque)
+		var opaque := 0
+		for y in range(0, h, 2):
+			for x in range(0, w, 2):
+				if img.get_pixel(x, y).a > 0.9:
+					opaque += 1
+		var filled: float = float(opaque) / float((w / 2) * (h / 2))
+		print("%s art: %dx%d, longest side 256, cropped tight (art touches top and bottom rows), corners clear, mostly opaque (%d%%): " % [id, w, h, int(filled * 100.0)], max(w, h) == 256 and top_hit and bottom_hit and corners_clear and filled > 0.3)
 
 	# --- Battle stage. ---
-	combat.start_combat(["dungeon_rat", "cave_bat"])
+	combat.start_combat(["dungeon_rat", "skeleton", "ghost"])
 	await process_frame
 	await process_frame
 	var rat_sprite: TextureRect = battle.enemy_slots[0].get_node("Box/Sprite")
-	var bat_sprite: TextureRect = battle.enemy_slots[1].get_node("Box/Sprite")
-	print("Stage: the rat draws its painted art smooth (LINEAR) in the 96px box, the bat stays crisp (NEAREST): ", rat_sprite.texture.resource_path.ends_with("/art/dungeon_rat.png") and rat_sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and rat_sprite.size.y == 96.0 and bat_sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
+	var ghost_sprite: TextureRect = battle.enemy_slots[2].get_node("Box/Sprite")
+	print("Stage: rat, skeleton and ghost draw their painted art smooth (LINEAR) in the 96px box: ", rat_sprite.texture.resource_path.ends_with("/art/dungeon_rat.png") and rat_sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and rat_sprite.size.y == 96.0 and ghost_sprite.texture.resource_path.ends_with("/art/ghost.png") and ghost_sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR)
+	# The old pixel path still works for a species without art.
+	combat.fast = true
+	while combat.in_combat:
+		combat.player_run()
+		await physics_frame
+	combat.start_combat(["bandit"])
+	await process_frame
+	print("A species without art keeps the crisp pixel path: ", battle.enemy_slots[0].get_node("Box/Sprite").texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
 	root.get_texture().get_image().save_png("res://verify_monster_art_stage.png")
 	print("Saved verify_monster_art_stage.png")
 	combat.fast = true
@@ -69,22 +82,30 @@ func _initialize() -> void:
 	rat.placement_key = "verify_rat"
 	rat.position = player.position + Vector2(64, 0)
 	overworld.get_node("YSort").add_child(rat)
+	var skel: Node2D = WILD_SCENE.instantiate()
+	skel.enemy_id = "skeleton"
+	skel.zone = -1
+	skel.placement_key = "verify_skel"
+	skel.position = player.position + Vector2(-64, 0)
+	overworld.get_node("YSort").add_child(skel)
 	var bat: Node2D = WILD_SCENE.instantiate()
-	bat.enemy_id = "cave_bat"
+	bat.enemy_id = "bandit" # still on the pixel sprite
 	bat.zone = -1
-	bat.placement_key = "verify_bat"
-	bat.position = player.position + Vector2(-64, 0)
+	bat.placement_key = "verify_bandit"
+	bat.position = player.position + Vector2(-128, 0)
 	overworld.get_node("YSort").add_child(bat)
 	await process_frame
 	await process_frame
 	var drawn_h: float = rat.sprite.texture.get_size().y * rat.sprite.scale.y
 	var shape: RectangleShape2D = rat.interact_shape.shape
-	print("Wild rat: painted art at 60px tall, smooth, interact area sized to it (%.0fpx high), bat still at pixel scale 0.8: " % drawn_h, absf(drawn_h - 60.0) < 0.5 and rat.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and absf(shape.size.y - (60.0 + 2.0 * rat.INTERACT_MARGIN)) < 0.5 and bat.sprite.scale == Vector2(0.8, 0.8) and bat.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
+	var skel_h: float = skel.sprite.texture.get_size().y * skel.sprite.scale.y
+	print("Wild rat 40px tall, skeleton 52px (per-species art_height), smooth, interact area sized to the drawing, bandit still at pixel scale 0.8: ", absf(drawn_h - 40.0) < 0.5 and absf(skel_h - 52.0) < 0.5 and rat.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and absf(shape.size.y - (40.0 + 2.0 * rat.INTERACT_MARGIN)) < 0.5 and bat.sprite.scale == Vector2(0.8, 0.8) and bat.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
 	var bottom: float = rat.sprite.position.y + (rat.sprite.offset.y + rat.sprite.texture.get_size().y / 2.0) * rat.sprite.scale.y
 	print("Its feet sit at the node's base (bottom of the drawn sprite %.0fpx below the origin, = FEET_DROP): " % bottom, absf(bottom - rat.FEET_DROP) < 0.5)
 	root.get_texture().get_image().save_png("res://verify_monster_art_overworld.png")
 	print("Saved verify_monster_art_overworld.png")
 	rat.queue_free()
+	skel.queue_free()
 	bat.queue_free()
 	await process_frame
 	quit()
