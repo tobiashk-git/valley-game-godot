@@ -11,6 +11,7 @@ Moonlit Moss Path, Ash Rift Pulse, Mire Clock, Basalt Catacombs, Lantern Map, Cr
 - craft: "Kill / Crafting sound" by MadPanCake, Freesound #567849, CC0 (https://freesound.org/people/madpancake/sounds/567849/)
 - hit: "General Fight Sounds9" by inkyframes, Freesound #783874, CC BY 4.0 (https://freesound.org/people/inkyframes/sounds/783874/)
 - level_up: "Level up" by Bastianhallo, Freesound #682633, CC0 (https://freesound.org/people/bastianhallo/sounds/682633/)
+- nap: "Magic Speel - Sleeping spell 1" by OGsoundFX, Freesound #423144, CC BY 4.0 (https://freesound.org/people/ogsoundfx/sounds/423144/)
 
 ## Art
 Creature, portrait and prop illustrations generated with Leonardo (Lucid Origin) by Tobias Keuneke.
