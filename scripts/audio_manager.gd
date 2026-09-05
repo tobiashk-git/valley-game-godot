@@ -86,6 +86,7 @@ const ZONE_MUSIC := {
 const SFX := {
 	"chop": "res://assets/sfx/chop.wav",
 	"mine": "res://assets/sfx/mine.wav", # Freesound 593897 "dig5" by igroglaz
+	"tap": "res://assets/sfx/tap.wav", # Freesound 423128 "menu click sound" by killersmurf96
 }
 # One-shot pieces of music: played once over silence, then the scene's
 # track resumes (a won fight plays "victory" between the battle track
@@ -132,6 +133,23 @@ func _ready() -> void:
 	_apply_volumes()
 	# Combat is a later autoload; connect once everything exists.
 	_connect_combat.call_deferred()
+	# Every button in the game taps: hook the ones that exist and every
+	# one added later (tabs, kit windows, dialogue choices, the title).
+	get_tree().node_added.connect(_on_node_added)
+	_hook_buttons.call_deferred()
+
+func _hook_buttons() -> void:
+	_hook_button_tree(get_tree().root)
+
+func _hook_button_tree(node: Node) -> void:
+	_on_node_added(node)
+	for child in node.get_children():
+		_hook_button_tree(child)
+
+func _on_node_added(node: Node) -> void:
+	if node is BaseButton and not node.has_meta("tap_hooked"):
+		node.set_meta("tap_hooked", true)
+		node.pressed.connect(func() -> void: play_sfx("tap"))
 
 func _connect_combat() -> void:
 	Combat.ended.connect(func(victory: bool) -> void:

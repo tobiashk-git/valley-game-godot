@@ -128,6 +128,20 @@ func _initialize() -> void:
 		if s.playing and s.stream is AudioStreamWAV:
 			sfx_playing = true
 	print("The chop effect exists as a WAV and plays from the effects pool: ", ResourceLoader.exists("res://assets/sfx/chop.wav") and sfx_playing)
+	# Buttons tap: a button added anywhere is hooked, and pressing it plays.
+	var btn := Button.new()
+	root.add_child(btn)
+	await process_frame
+	for s in audio._sfx_pool:
+		s.stop()
+	btn.pressed.emit()
+	await process_frame
+	var tapped := false
+	for s in audio._sfx_pool:
+		if s.playing and s.stream.resource_path.ends_with("tap.wav"):
+			tapped = true
+	print("Any button pressed plays the tap: ", btn.has_meta("tap_hooked") and tapped)
+	btn.queue_free()
 	AudioServer.set_bus_mute(AudioServer.get_bus_index("Sfx"), false)
 
 	# Sliders on the Hero tab set the buses and persist.
