@@ -36,6 +36,23 @@ const ITEMS := {
 	# variety and crafting uses planned later. Sellable at the same basic-
 	# material tier as wood/stone.
 	"monster_fur": {"name": "Monster Fur", "icon": "🧶", "value": 4, "desc": "Coarse pelt from the wilds beyond the river. Lines armour well - see Crafting."},
+	# --- Gear tiers per biome (item progression). Each outer biome's
+	# monsters drop a material (chance drop, see enemies.gd) that crafts
+	# that biome's weapon and armour; tiers climb Frostpeak -> Verdantwood
+	# -> Badlands (ember cores, shared with the Ember-forged enhancement) ->
+	# Gloomfen. "tier" orders them in the Crafting tab. Icons are drawn
+	# placeholders until painted ones replace them. ---
+	"frost_shard": {"name": "Frost Shard", "icon": "❄️", "value": 6, "desc": "A sliver of never-melting ice from Frostpeak's creatures. Cold enough to work like steel."},
+	"ironwood": {"name": "Ironwood", "icon": "🪵", "value": 8, "desc": "Heartwood from Verdantwood's corrupted growth. Dense as metal and just as hard to cut."},
+	"bog_iron": {"name": "Bog Iron", "icon": "⚙️", "value": 10, "desc": "Lumps of rust-black iron dredged from Gloomfen's things. Smelts dark and heavy."},
+	"frost_pick": {"name": "Frost Pick", "icon": "⛏️", "slot": "weapon", "attack": 4, "tier": 1, "value": 40, "desc": "A pick headed with frost shard. Bites deep and numbs what it hits."},
+	"frostweave_coat": {"name": "Frostweave Coat", "icon": "🧥", "slot": "armor", "defense": 5, "tier": 1, "value": 45, "desc": "Fur coat stitched through with frost shard thread. Stiff, warm, and hard to claw."},
+	"ironwood_blade": {"name": "Ironwood Blade", "icon": "🗡️", "slot": "weapon", "attack": 6, "tier": 2, "value": 60, "desc": "A sword carved from a single ironwood bough and honed on stone."},
+	"ironwood_mail": {"name": "Ironwood Mail", "icon": "🛡️", "slot": "armor", "defense": 7, "tier": 2, "value": 65, "desc": "Ironwood scales sewn over fur. Lighter than it looks."},
+	"ember_blade": {"name": "Ember Blade", "icon": "🔥", "slot": "weapon", "attack": 8, "tier": 3, "value": 85, "desc": "Ironwood forged around two ember cores. The edge never quite cools."},
+	"ember_plate": {"name": "Ember Plate", "icon": "🛡️", "slot": "armor", "defense": 9, "tier": 3, "value": 90, "desc": "Fur-backed plate quenched in ember core. Warm to wear, worse to bite."},
+	"bogiron_cleaver": {"name": "Bog-iron Cleaver", "icon": "🪓", "slot": "weapon", "attack": 10, "tier": 4, "value": 110, "desc": "A brutal cleaver of Gloomfen bog iron, ember-tempered. Nothing in the valley shrugs it off."},
+	"bogiron_harness": {"name": "Bog-iron Harness", "icon": "🛡️", "slot": "armor", "defense": 11, "tier": 4, "value": 120, "desc": "Bog iron plates on a fur harness. Heavy, dark, and the best the valley makes."},
 	# Enhancement ingredient (Crafting.ENHANCEMENTS): a chance drop from the
 	# three Badlands species, so hunting a specific monster has a point.
 	"ember_core": {"name": "Ember Core", "icon": "🔥", "value": 15, "desc": "Still warm. Cut from the heart of a Badlands beast - temper a blade in it."},

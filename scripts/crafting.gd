@@ -34,6 +34,17 @@ const RECIPES := {
 		"amount": 1,
 		"cost": {"wood": 2, "stone": 2, "gold": 5},
 	},
+	# --- Biome gear tiers (see items.gd): each tier's material comes from
+	# that biome's monsters. Listed in tier order - the Crafting tab keeps
+	# this order within its Equipment section. ---
+	"frost_pick": {"result": "frost_pick", "amount": 1, "cost": {"frost_shard": 3, "wood": 2}},
+	"frostweave_coat": {"result": "frostweave_coat", "amount": 1, "cost": {"frost_shard": 3, "monster_fur": 2}},
+	"ironwood_blade": {"result": "ironwood_blade", "amount": 1, "cost": {"ironwood": 3, "stone": 2}},
+	"ironwood_mail": {"result": "ironwood_mail", "amount": 1, "cost": {"ironwood": 3, "monster_fur": 2}},
+	"ember_blade": {"result": "ember_blade", "amount": 1, "cost": {"ember_core": 2, "ironwood": 2}},
+	"ember_plate": {"result": "ember_plate", "amount": 1, "cost": {"ember_core": 2, "monster_fur": 3}},
+	"bogiron_cleaver": {"result": "bogiron_cleaver", "amount": 1, "cost": {"bog_iron": 3, "ember_core": 1}},
+	"bogiron_harness": {"result": "bogiron_harness", "amount": 1, "cost": {"bog_iron": 3, "monster_fur": 3}},
 }
 
 # --- Enhancements (UI redesign Phase 2): a special ingredient applied to an

@@ -56,18 +56,18 @@ const ENEMIES := {
 		"name": "Ice Wraith", "sprite": "res://assets/enemies/art/ice_wraith.png", "art_height": 48,
 		"max_hp": 16, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "paralysis", "chance": 0.25}, "zones": [World.Zone.FROSTPEAK],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "frost_shard", "chance": 0.5}],
 	},
 	"frost_wolf": {
 		"name": "Frost Wolf", "sprite": "res://assets/enemies/art/frost_wolf.png", "art_height": 44,
 		"max_hp": 14, "attack": 6, "defense": 0, "gold_min": 5, "gold_max": 9,
 		"status_attack": {"status": "sleep", "chance": 0.2}, "zones": [World.Zone.FROSTPEAK],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "frost_shard", "chance": 0.5}],
 	},
 	"stone_sentinel": {
 		"name": "Stone Sentinel", "sprite": "res://assets/enemies/art/stone_sentinel.png", "art_height": 54,
 		"max_hp": 22, "attack": 5, "defense": 4, "gold_min": 8, "gold_max": 14, "zones": [World.Zone.FROSTPEAK],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "frost_shard", "chance": 0.5}],
 	},
 
 	# --- Verdantwood Forest (east) ---
@@ -75,18 +75,18 @@ const ENEMIES := {
 		"name": "Forest Spirit", "sprite": "res://assets/enemies/art/forest_spirit.png", "art_height": 46,
 		"max_hp": 15, "attack": 4, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "confusion", "chance": 0.25}, "zones": [World.Zone.VERDANTWOOD],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "ironwood", "chance": 0.5}],
 	},
 	"bandit": {
 		"name": "Bandit", "sprite": "res://assets/enemies/art/bandit.png", "art_height": 50,
 		"max_hp": 18, "attack": 6, "defense": 2, "gold_min": 10, "gold_max": 16, "zones": [World.Zone.VERDANTWOOD],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "ironwood", "chance": 0.5}],
 	},
 	"corrupted_fauna": {
 		"name": "Corrupted Fauna", "sprite": "res://assets/enemies/art/corrupted_fauna.png", "art_height": 58,
 		"max_hp": 16, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 11,
 		"status_attack": {"status": "poison", "chance": 0.25}, "zones": [World.Zone.VERDANTWOOD],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "ironwood", "chance": 0.5}],
 	},
 
 	# --- Emberfall Badlands (south) ---
@@ -115,19 +115,19 @@ const ENEMIES := {
 		"name": "Swamp Hag", "sprite": "res://assets/enemies/art/swamp_hag.png", "art_height": 52,
 		"max_hp": 17, "attack": 5, "defense": 2, "gold_min": 7, "gold_max": 12,
 		"status_attack": {"status": "silence", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "bog_iron", "chance": 0.5}],
 	},
 	"giant_insect": {
 		"name": "Giant Insect", "sprite": "res://assets/enemies/art/giant_insect.png", "art_height": 52,
 		"max_hp": 15, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "poison", "chance": 0.3}, "zones": [World.Zone.GLOOMFEN],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "bog_iron", "chance": 0.5}],
 	},
 	"spectral_undead": {
 		"name": "Spectral Undead", "sprite": "res://assets/enemies/art/spectral_undead.png", "art_height": 50,
 		"max_hp": 19, "attack": 6, "defense": 1, "gold_min": 8, "gold_max": 13,
 		"status_attack": {"status": "sleep", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
-		"drop_item_ids": ["monster_fur"],
+		"drop_item_ids": ["monster_fur", {"item": "bog_iron", "chance": 0.5}],
 	},
 }
 
