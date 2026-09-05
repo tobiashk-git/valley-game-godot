@@ -8,6 +8,7 @@ Moonlit Moss Path, Ash Rift Pulse, Mire Clock, Basalt Catacombs, Lantern Map, Cr
 - chop: made with jsfxr (sfxr.me)
 - mine: "dig5" by igroglaz, Freesound #593897, CC0 (https://freesound.org/people/igroglaz/sounds/593897/)
 - tap: "Menu_Click_Sound.wav" by Killersmurf96, Freesound #423128, CC BY 4.0 (https://freesound.org/people/killersmurf96/sounds/423128/)
+- craft: "Kill / Crafting sound" by MadPanCake, Freesound #567849, CC0 (https://freesound.org/people/madpancake/sounds/567849/)
 
 ## Art
 Creature, portrait and prop illustrations generated with Leonardo (Lucid Origin) by Tobias Keuneke.
