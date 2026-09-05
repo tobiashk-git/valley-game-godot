@@ -221,7 +221,7 @@ func _ready() -> void:
 	# Trader and Oliver's own house keep the terracotta default.
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.ELDER_HOUSE_ENTRANCE, "res://scenes/ElderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16), "res://assets/house_elder.png")
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.TRADER_HOUSE_ENTRANCE, "res://scenes/TraderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
-	_add_entrance(HOUSE_ENTRANCE_SCENE, World.EMPTY_HOUSE_ENTRANCE, "res://scenes/EmptyHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16), "res://assets/house_ranger.png")
+	_add_entrance(HOUSE_ENTRANCE_SCENE, World.BLACKSMITH_HOUSE_ENTRANCE, "res://scenes/BlacksmithHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16), "res://assets/house_ranger.png")
 	# Dungeon.tscn/Castle.tscn/FinalBoss.tscn all regenerate their maze fresh
 	# every visit and always spawn the player at their own entrance, so the
 	# target_spawn passed here is unused.
@@ -252,10 +252,22 @@ func _ready() -> void:
 	elder.intro_text = "Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler."
 	ysort.add_child(elder)
 
-	# The Verdantwood ford-crossing quest giver - unlike the Frostpeak
-	# Ranger (housed in EmptyHouse.tscn, Phase 2's only empty village slot),
-	# this one stands directly in the valley near the ford itself, a few
-	# tiles off the direct crossing line so it doesn't block the path.
+	# The Frostpeak ford-crossing quest giver, camped in the valley near the
+	# northern ford (moved out of the village's bottom-right house, which is
+	# the Blacksmith's now).
+	var ranger: StaticBody2D = NPC_SCENE.instantiate()
+	ranger.position = _tile_center(World.RANGER_CAMP_POS)
+	ranger.sprite_path = "res://assets/trader.png"
+	ranger.sprite_tint = Color(0.75, 0.88, 1.0, 1.0)
+	ranger.npc_name = "Frostpeak Ranger"
+	ranger.quest_id = "cross_frostpeak"
+	ranger.npc_id = "frostpeak_ranger"
+	ranger.intro_text = "You made it this far? Frostpeak Ridge lies past that river to the north - the old ford's been washed out for ages, or I'd be up there myself."
+	ysort.add_child(ranger)
+
+	# The Verdantwood ford-crossing quest giver stands in the valley near
+	# the ford itself, a few tiles off the direct crossing line so it
+	# doesn't block the path.
 	var druid: StaticBody2D = NPC_SCENE.instantiate()
 	druid.position = _tile_center(World.DRUID_GLADE_POS)
 	druid.sprite_path = "res://assets/elder.png"

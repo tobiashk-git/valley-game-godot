@@ -3,6 +3,8 @@ extends Node
 # stick to existing materials (wood/stone/gold) since no herb-gathering
 # exists yet.
 
+signal changed # station entered/left
+
 const RECIPES := {
 	"wooden_pickaxe": {
 		"result": "wooden_pickaxe",
@@ -83,7 +85,7 @@ func has_ingredients(cost: Dictionary) -> bool:
 	return true
 
 func can_enhance(inst: Dictionary, enh_id: String) -> bool:
-	return enh_id in enhancements_for(inst) and has_ingredients(ENHANCEMENTS[enh_id].cost)
+	return station_ok() and enh_id in enhancements_for(inst) and has_ingredients(ENHANCEMENTS[enh_id].cost)
 
 # The instance may be carried (Inventory.gear) or worn (Character.equipment);
 # both are edited in place. Returns false if it isn't found / can't be done.
@@ -109,7 +111,68 @@ func enhance(uid: int, enh_id: String) -> bool:
 	Character.changed.emit()
 	return true
 
+# --- Workbench. Crafting, enhancing and salvaging happen at the
+# Blacksmith's bench (workbench.gd keeps `at_station` current as the
+# player walks up to or away from it). `require_station` is off under a
+# verify script so the older verifies' direct craft() calls keep working;
+# verify scripts that test the station turn it on. ---
+var require_station := true
+var at_station := false
+var _stations_near := 0
+
+func _ready() -> void:
+	require_station = get_tree().get_script() == null
+
+func station_entered() -> void:
+	_stations_near += 1
+	at_station = true
+	changed.emit()
+
+func station_left() -> void:
+	_stations_near = max(0, _stations_near - 1)
+	at_station = _stations_near > 0
+	changed.emit()
+
+func station_ok() -> bool:
+	return at_station or not require_station
+
+const STATION_HINT := "Craft at the Blacksmith's workbench - the smithy on the village square."
+
+# --- Salvage: break a carried (not worn) piece of gear back into half of
+# what its recipe cost, rounded down (at least one of the first
+# ingredient). Gear without a recipe - boss drops - can't be broken down. ---
+const SALVAGE_FRACTION := 0.5
+
+func salvage_yield(base_id: String) -> Dictionary:
+	if not RECIPES.has(base_id):
+		return {}
+	var out: Dictionary = {}
+	var cost: Dictionary = RECIPES[base_id].cost
+	for item_id in cost.keys():
+		var n: int = int(floor(cost[item_id] * SALVAGE_FRACTION))
+		if n > 0:
+			out[item_id] = n
+	if out.is_empty():
+		out[cost.keys()[0]] = 1
+	return out
+
+func can_salvage(uid: int) -> bool:
+	var inst: Dictionary = Inventory.find_gear(uid) # carried only
+	return not inst.is_empty() and RECIPES.has(inst.base) and station_ok()
+
+func salvage(uid: int) -> Dictionary:
+	if not can_salvage(uid):
+		return {}
+	var inst: Dictionary = Inventory.take_gear(uid)
+	var got: Dictionary = salvage_yield(inst.base)
+	for item_id in got.keys():
+		Inventory.add_item(item_id, got[item_id])
+	Inventory.changed.emit()
+	return got
+
 func can_craft(recipe_id: String) -> bool:
+	if not station_ok():
+		return false
 	var recipe: Dictionary = RECIPES[recipe_id]
 	var cost: Dictionary = recipe.cost
 	for item_id in cost.keys():

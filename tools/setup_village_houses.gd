@@ -1,5 +1,5 @@
 extends SceneTree
-# Builds ElderHouse.tscn, TraderHouse.tscn, EmptyHouse.tscn — all sharing
+# Builds ElderHouse.tscn, TraderHouse.tscn, BlacksmithHouse.tscn — all sharing
 # village_house.gd, configured per-house (matching world.js's villageHouses
 # loop, where the same buildInterior() call is branched by index).
 # Run via: godot --headless --script res://tools/setup_village_houses.gd
@@ -99,14 +99,22 @@ func _initialize() -> void:
 		"Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell."
 	)
 
+	# The Blacksmith's: the village's crafting station. The Workbench prop
+	# (workbench.gd) is the only place crafting, enhancing and salvaging
+	# work; the stove stands in for the forge until the smithy gets art.
 	_build(
-		"EmptyHouse", true, "res://assets/trader.png", "Frostpeak Ranger",
-		"", # superseded by npc_quest_id
-		[], [],
-		World.EMPTY_HOUSE_ENTRANCE,
-		"cross_frostpeak", false, "frostpeak_ranger",
-		"You made it this far? Frostpeak Ridge lies past that river to the north - the old ford's been washed out for ages, or I'd be up there myself.",
-		Color(0.75, 0.88, 1.0, 1.0)
+		"BlacksmithHouse", true, "res://assets/trader.png", "Village Blacksmith",
+		"Need something made? The bench in the corner is yours - bring the makings and I'll keep the forge hot. Old gear you don't want, I'll break down for parts.",
+		[
+			{"kind": "Workbench", "x": 2, "y": 3},
+			{"kind": "Stove", "x": 6, "y": 2},
+			{"kind": "Barrel", "x": 6, "y": 4},
+		],
+		[Vector2i(8, 1), Vector2i(8, 2)],
+		World.BLACKSMITH_HOUSE_ENTRANCE,
+		"", false, "village_blacksmith",
+		"Hah, the new arrival. I'm the Blacksmith - anything that needs hammering, forging or breaking down, that's my bench in the corner. Walk up to it and press E.",
+		Color(0.62, 0.6, 0.68, 1.0)
 	)
 
 	print("=== Village houses setup complete ===")

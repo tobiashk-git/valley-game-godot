@@ -341,7 +341,7 @@ func _build() -> void:
 	modes.position = Vector2(20, 0)
 	modes.add_theme_constant_override("separation", 6)
 	crf.add_child(modes)
-	for entry in [["CraftMode", "Craft"], ["EnhanceMode", "Enhance"]]:
+	for entry in [["CraftMode", "Craft"], ["EnhanceMode", "Enhance"], ["SalvageMode", "Salvage"]]:
 		var b := Button.new()
 		b.name = entry[0]
 		b.text = entry[1]

@@ -52,7 +52,7 @@ func _initialize() -> void:
 	dialogue.show_dialogue(bare, "You've wandered far from the village.")
 	await process_frame
 	await process_frame
-	print("Speaker without a portrait file (%s): frame and tagline hidden, name at the left: " % bare, not dialogue.portrait_frame.visible and dialogue.portrait.texture == null and not dialogue.tagline_label.visible and dialogue.name_label.get_global_rect().position.x < dialogue.panel.get_global_rect().position.x + 20.0)
+	print("Speaker without a portrait file (%s): frame hidden, tagline only if they have one, name at the left: " % bare, not dialogue.portrait_frame.visible and dialogue.portrait.texture == null and dialogue.tagline_label.visible == dialogue.TAGLINES.has(bare) and dialogue.name_label.get_global_rect().position.x < dialogue.panel.get_global_rect().position.x + 20.0)
 	print("Unknown speaker name gets no portrait either: ", dialogue.portrait_for("Nobody") == null)
 	dialogue.hide_dialogue()
 

@@ -31,7 +31,7 @@ func _initialize() -> void:
 	var expected := {
 		"Elder": [world.ELDER_HOUSE_ENTRANCE, "res://assets/house_elder.png"],
 		"Trader": [world.TRADER_HOUSE_ENTRANCE, "res://assets/house.png"],
-		"Ranger": [world.EMPTY_HOUSE_ENTRANCE, "res://assets/house_ranger.png"],
+		"Blacksmith": [world.BLACKSMITH_HOUSE_ENTRANCE, "res://assets/house_ranger.png"],
 		"Oliver's": [world.HOUSE_ENTRANCE, "res://assets/house.png"],
 	}
 	var base_h: int = load("res://assets/house.png").get_height()

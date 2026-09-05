@@ -61,8 +61,8 @@ func _initialize() -> void:
 	var character: Node = root.get_node("Character")
 	var world_map_panel: Node = root.get_node("WorldMapPanel")
 
-	# --- 1. Quest flow via the Frostpeak Ranger (EmptyHouse). ---
-	var empty_house: Node2D = load("res://scenes/EmptyHouse.tscn").instantiate()
+	# --- 1. Quest flow via the Frostpeak Ranger (camped by the north ford). ---
+	var empty_house: Node2D = load("res://scenes/Overworld.tscn").instantiate()
 	root.add_child(empty_house)
 	current_scene = empty_house
 	await process_frame
@@ -72,7 +72,7 @@ func _initialize() -> void:
 	var house_ysort: Node2D = empty_house.get_node("YSort")
 	var ranger: Node = null
 	for child in house_ysort.get_children():
-		if child.name.begins_with("NPC"):
+		if child.get("npc_id") == "frostpeak_ranger":
 			ranger = child
 	print("Frostpeak Ranger NPC found: ", ranger != null)
 

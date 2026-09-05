@@ -42,7 +42,7 @@ func _initialize() -> void:
 	var overworld2 := current_scene
 	var player2: CharacterBody2D = overworld2.get_node("YSort/Player")
 	var cam2: Camera2D = player2.get_node("Camera2D")
-	player2.position = Vector2(World.EMPTY_HOUSE_ENTRANCE.x * 32 + 16, (World.EMPTY_HOUSE_ENTRANCE.y + 1) * 32 + 16)
+	player2.position = Vector2(World.BLACKSMITH_HOUSE_ENTRANCE.x * 32 + 16, (World.BLACKSMITH_HOUSE_ENTRANCE.y + 1) * 32 + 16)
 	cam2.reset_smoothing()
 	for i in range(3):
 		await process_frame

@@ -1,0 +1,56 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/village_house.gd" id="1_s1vax"]
+[ext_resource type="TileSet" path="res://resources/house_tileset.tres" id="2_pfm20"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="3_lw5a3"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="4_83ib1"]
+[ext_resource type="Script" path="res://scripts/portal.gd" id="5_anjel"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jcpg3"]
+size = Vector2(28, 28)
+
+[node name="BlacksmithHouse" type="Node2D" unique_id=1019782670]
+script = ExtResource("1_s1vax")
+has_npc = true
+npc_sprite_path = "res://assets/trader.png"
+npc_name_text = "Village Blacksmith"
+npc_dialogue = "Need something made? The bench in the corner is yours - bring the makings and I'll keep the forge hot. Old gear you don't want, I'll break down for parts."
+npc_id_text = "village_blacksmith"
+npc_intro = "Hah, the new arrival. I'm the Blacksmith - anything that needs hammering, forging or breaking down, that's my bench in the corner. Walk up to it and press E."
+npc_sprite_tint = Color(0.62, 0.6, 0.68, 1)
+furniture_layout = Array[Dictionary]([{
+"kind": "Workbench",
+"x": 2,
+"y": 3
+}, {
+"kind": "Stove",
+"x": 6,
+"y": 2
+}, {
+"kind": "Barrel",
+"x": 6,
+"y": 4
+}])
+window_tiles = Array[Vector2i]([Vector2i(8, 1), Vector2i(8, 2)])
+overworld_return_tile = Vector2i(105, 103)
+
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=1280294067]
+tile_set = ExtResource("2_pfm20")
+
+[node name="YSort" type="Node2D" parent="." unique_id=1414288112]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("3_lw5a3")]
+z_index = 1
+script = ExtResource("4_83ib1")
+
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=1606531048]
+zoom = Vector2(2, 2)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="OutPortal" type="Area2D" parent="." unique_id=1117490033]
+script = ExtResource("5_anjel")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=891498958]
+shape = SubResource("RectangleShape2D_jcpg3")

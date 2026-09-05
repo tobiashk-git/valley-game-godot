@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/furniture/table.png" id="1_tbltx"]
+[ext_resource type="Script" path="res://scripts/workbench.gd" id="2_wbnch"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_solid"]
+size = Vector2(28, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_reach"]
+size = Vector2(88, 80)
+
+[node name="Workbench" type="StaticBody2D" unique_id=1790233800]
+script = ExtResource("2_wbnch")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=570069900]
+texture = ExtResource("1_tbltx")
+offset = Vector2(0, -6.5)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=308359700]
+shape = SubResource("RectangleShape2D_solid")
+
+[node name="InteractArea" type="Area2D" parent="." unique_id=1409821400]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractArea" unique_id=1409821401]
+shape = SubResource("RectangleShape2D_reach")

@@ -35,7 +35,7 @@ const SCENE_LOCATIONS := {
 	"House": "Village",
 	"ElderHouse": "Village",
 	"TraderHouse": "Village",
-	"EmptyHouse": "Village",
+	"BlacksmithHouse": "Village",
 	"FrostpeakInterior": "Frostpeak Ridge",
 	"VerdantwoodInterior": "Verdantwood Forest",
 	"BadlandsInterior": "Emberfall Badlands",

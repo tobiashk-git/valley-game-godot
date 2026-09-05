@@ -79,6 +79,7 @@ const FLASH_SECONDS := 1.4
 @onready var journal_view: Control = $Window/JournalView
 @onready var craft_mode_btn: Button = $Window/CraftingView/Modes/CraftMode
 @onready var enhance_mode_btn: Button = $Window/CraftingView/Modes/EnhanceMode
+@onready var salvage_mode_btn: Button = $Window/CraftingView/Modes/SalvageMode
 @onready var craft_count_label: Label = $Window/CraftingView/CraftCountLabel
 @onready var craft_scroll: ScrollContainer = $Window/CraftingView/CraftScroll
 @onready var craft_groups: VBoxContainer = $Window/CraftingView/CraftScroll/CraftGroups
@@ -115,7 +116,8 @@ var selected_uid := 0 # the gear instance's uid (0 for stackables)
 var selected_slot := ""
 var _primary_kind := "" # "use" | "equip" | "unequip"
 # Crafting tab state.
-var craft_mode := "craft" # "craft" | "enhance"
+var craft_mode := "craft" # "craft" | "enhance" | "salvage"
+var salvage_uid := 0 # carried gear instance picked in Salvage mode
 var selected_recipe := ""
 var enhance_uid := 0 # gear instance picked in Enhance mode
 var enhance_worn_slot := "" # "" if carried, else the slot it's worn in
@@ -160,6 +162,8 @@ func _ready() -> void:
 	primary_action.pressed.connect(_on_primary_action)
 	craft_mode_btn.pressed.connect(_set_craft_mode.bind("craft"))
 	enhance_mode_btn.pressed.connect(_set_craft_mode.bind("enhance"))
+	salvage_mode_btn.pressed.connect(_set_craft_mode.bind("salvage"))
+	Crafting.changed.connect(_refresh)
 	craft_action.pressed.connect(_on_craft_action)
 	# The crafting feedback line sits over the ingredient checklist while a
 	# Crafted!/Enhanced! pop is showing (built here, not in the scene, so the
@@ -402,6 +406,9 @@ func _layout_crafting(pos: Vector2, size: Vector2) -> void:
 		craft_columns = 6
 		_apply_craft_columns()
 		craft_count_label.position = Vector2(300, 8)
+		craft_count_label.visible = true
+		for b in [craft_mode_btn, enhance_mode_btn, salvage_mode_btn]:
+			b.custom_minimum_size = Vector2(100, 28)
 		_place(craft_scroll, Vector2(20, 36), Vector2(424, 284))
 		pw = 248.0
 		pane_h = 320.0
@@ -411,7 +418,11 @@ func _layout_crafting(pos: Vector2, size: Vector2) -> void:
 		var iw: float = size.x
 		craft_columns = _columns_for(iw - 40.0)
 		_apply_craft_columns()
-		craft_count_label.position = Vector2(iw - 160.0, 8)
+		# Three mode buttons take the row on a phone: the count label would
+		# sit under the third one, so it goes (the hint line says the same).
+		craft_count_label.visible = false
+		for b in [craft_mode_btn, enhance_mode_btn, salvage_mode_btn]:
+			b.custom_minimum_size = Vector2(minf(100.0, (iw - 40.0 - 12.0) / 3.0), 28)
 		# The pane needs ~228px (name / type / desc / two checklist rows / the
 		# button); the grid gets whatever is left above it, capped at three
 		# rows (two titled sections) and never less than one row - it scrolls.
@@ -908,6 +919,7 @@ func craft_slot(node_name: String) -> Button:
 func _refresh_crafting() -> void:
 	craft_mode_btn.theme_type_variation = &"TabButtonActive" if craft_mode == "craft" else &"TabButton"
 	enhance_mode_btn.theme_type_variation = &"TabButtonActive" if craft_mode == "enhance" else &"TabButton"
+	salvage_mode_btn.theme_type_variation = &"TabButtonActive" if craft_mode == "salvage" else &"TabButton"
 	_clear(craft_groups)
 	_clear(craft_rows)
 	craft_action.visible = false
@@ -915,6 +927,8 @@ func _refresh_crafting() -> void:
 	flash_label.visible = flash_kind != ""
 	if craft_mode == "craft":
 		_refresh_craft_mode()
+	elif craft_mode == "salvage":
+		_refresh_salvage_mode()
 	else:
 		_refresh_enhance_mode()
 
@@ -956,7 +970,7 @@ func _refresh_craft_mode() -> void:
 				btn.modulate.a = 0.55
 			section.add_child(btn)
 	craft_count_label.text = "%d of %d craftable" % [craftable, Crafting.RECIPES.size()]
-	craft_hint.text = "Blueprints: tap one to see what it needs. Dimmed ones are missing ingredients."
+	craft_hint.text = "Blueprints: tap one to see what it needs. Dimmed ones are missing ingredients." if Crafting.station_ok() else Crafting.STATION_HINT
 
 	var recipe: Dictionary = Crafting.RECIPES[selected_recipe]
 	var result: String = recipe.result
@@ -1032,7 +1046,7 @@ func _refresh_enhance_mode() -> void:
 				btn.add_child(worn_badge)
 			section.add_child(btn)
 	craft_count_label.text = "%d piece%s of gear" % [entries.size(), "" if entries.size() == 1 else "s"] if not entries.is_empty() else "No gear to enhance"
-	craft_hint.text = "Tap a piece of gear. Enhancing again replaces its current enhancement."
+	craft_hint.text = "Tap a piece of gear. Enhancing again replaces its current enhancement." if Crafting.station_ok() else Crafting.STATION_HINT
 	if flash_kind == "":
 		craft_icon.modulate = Color.WHITE
 
@@ -1067,6 +1081,92 @@ func _refresh_enhance_mode() -> void:
 	else:
 		craft_action.text = "Enhance"
 		craft_action.disabled = not Crafting.can_enhance(inst, selected_enhancement)
+
+# Salvage mode: carried gear only (worn gear stays on), grouped by slot;
+# the pane says what breaking it down gives back.
+func _refresh_salvage_mode() -> void:
+	var carried: Array = Inventory.gear.duplicate()
+	var still_there := false
+	for inst in carried:
+		if inst.uid == salvage_uid:
+			still_there = true
+	if not still_there:
+		salvage_uid = carried[0].uid if not carried.is_empty() else 0
+	var seen: Dictionary = {}
+	for slot_id in Character.SLOTS:
+		var in_slot: Array = carried.filter(func(e): return Items.ITEMS[e.base].get("slot", "") == slot_id)
+		if in_slot.is_empty():
+			continue
+		var section: GridContainer = _craft_section(SLOT_GROUP_NAMES.get(slot_id, Character.SLOTS[slot_id].label))
+		for inst in in_slot:
+			seen[inst.base] = seen.get(inst.base, 0) + 1
+			var btn: Button = _make_slot(inst.base, 1, inst.uid == salvage_uid, inst, false)
+			btn.name = "Salvage%sSlot%s" % [inst.base.to_pascal_case(), "" if seen[inst.base] == 1 else str(seen[inst.base])]
+			btn.pressed.connect(_select_salvage_target.bind(inst.uid))
+			section.add_child(btn)
+	craft_count_label.text = "%d carried piece%s" % [carried.size(), "" if carried.size() == 1 else "s"] if not carried.is_empty() else "Nothing to salvage"
+	craft_hint.text = "Tap carried gear to break it down for half its materials. Worn gear stays on." if Crafting.station_ok() else Crafting.STATION_HINT
+	if flash_kind == "":
+		craft_icon.modulate = Color.WHITE
+
+	if salvage_uid == 0:
+		craft_icon.texture = null
+		craft_name.text = "Nothing to salvage"
+		craft_type.text = ""
+		craft_desc.text = "Only gear in your backpack can be broken down."
+		return
+	var inst: Dictionary = Inventory.find_gear(salvage_uid)
+	var def: Dictionary = Items.ITEMS[inst.base]
+	craft_icon.texture = Items.get_item_icon(inst.base)
+	craft_name.text = Items.instance_name(inst)
+	craft_type.text = "%s  -  %s" % [Character.SLOTS[def.slot].label, Items.describe_instance(inst)]
+	var got: Dictionary = Crafting.salvage_yield(inst.base)
+	if got.is_empty():
+		craft_desc.text = "Nothing to reclaim - this was never crafted, and it won't come apart."
+	else:
+		craft_desc.text = "Breaking it down returns:"
+		for item_id in got.keys():
+			_yield_row(item_id, got[item_id])
+		if not inst.mods.is_empty():
+			_craft_row_label("Its %s enhancement is lost." % inst.mods[0].label, true)
+	craft_action.visible = true
+	if flash_kind != "":
+		# The piece just salvaged is gone; the pane has moved on to the
+		# next one but the button still reports what happened.
+		craft_action.text = "Salvaged!"
+		craft_action.disabled = true
+	else:
+		craft_action.text = "Salvage"
+		craft_action.disabled = got.is_empty() or not Crafting.can_salvage(salvage_uid)
+
+func _select_salvage_target(uid: int) -> void:
+	salvage_uid = uid
+	_clear_flash()
+	_refresh()
+
+# "[icon] Frost Shard   +1"
+func _yield_row(item_id: String, amount: int) -> void:
+	var row := HBoxContainer.new()
+	row.name = "Yield" + item_id.to_pascal_case()
+	row.add_theme_constant_override("separation", 6)
+	var icon := TextureRect.new()
+	icon.texture = Items.get_item_icon(item_id)
+	icon.custom_minimum_size = Vector2(20, 20)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	row.add_child(icon)
+	var name_label := Label.new()
+	name_label.text = Items.get_item_name(item_id)
+	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(name_label)
+	var count := Label.new()
+	count.name = "Count"
+	count.text = "+%d" % amount
+	count.add_theme_font_size_override("font_size", 13)
+	count.add_theme_color_override("font_color", Color(0.55, 0.9, 0.5))
+	row.add_child(count)
+	craft_rows.add_child(row)
 
 func _select_enhance_target(uid: int, worn_slot: String) -> void:
 	enhance_uid = uid
@@ -1115,6 +1215,15 @@ func _on_craft_action() -> void:
 		if Crafting.craft(selected_recipe):
 			var owned: int = Inventory.get_count(result)
 			_start_flash("craft", "Crafted %s!\nIt's in your backpack - you now have %d." % [Items.get_item_name(result), owned])
+	elif craft_mode == "salvage":
+		var inst: Dictionary = Inventory.find_gear(salvage_uid)
+		var name: String = Items.instance_name(inst) if not inst.is_empty() else ""
+		var got: Dictionary = Crafting.salvage(salvage_uid)
+		if not got.is_empty():
+			var parts: Array[String] = []
+			for item_id in got.keys():
+				parts.append("%d %s" % [got[item_id], Items.get_item_name(item_id)])
+			_start_flash("craft", "Salvaged %s!\nYou got %s." % [name, ", ".join(parts)])
 	else:
 		var inst: Dictionary = Crafting.find_instance(enhance_uid)
 		var before: String = Items.instance_name(inst) if not inst.is_empty() else ""

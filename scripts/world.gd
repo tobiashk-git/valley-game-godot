@@ -51,7 +51,10 @@ const TRADER_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y + 3)
 # doorstep the player needs to enter), so the tutorial quest has to be
 # collected from him in person - see overworld.gd.
 const ELDER_POS := Vector2i(ELDER_HOUSE_ENTRANCE.x - 2, ELDER_HOUSE_ENTRANCE.y + 1)
-const EMPTY_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y + 3)
+const BLACKSMITH_HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X + 5, WORLD_CENTER_Y + 3) # was the empty house / the Ranger's
+# The Frostpeak Ranger camps in the valley near the northern ford, like the
+# other three biome guides at theirs (mirrors MARSH_GUIDE_POS / DRUID_GLADE_POS).
+const RANGER_CAMP_POS := Vector2i(WORLD_CENTER_X - 4, WORLD_CENTER_Y - VALLEY_RADIUS + 5)
 
 # Unlike DUNGEON/CASTLE/HOUSE/FINAL_BOSS_ENTRANCE above (all kept inside
 # VALLEY_RADIUS), this one is deliberately past the river ring, in real
@@ -362,6 +365,7 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 	_reserve_entrance_clearance(occupied, HOUSE_ENTRANCE)
 	_reserve_entrance_clearance(occupied, FINAL_BOSS_ENTRANCE)
 	_reserve_entrance_clearance(occupied, DRUID_GLADE_POS)
+	_reserve_entrance_clearance(occupied, RANGER_CAMP_POS)
 	_reserve_entrance_clearance(occupied, PROSPECTOR_CAMP_POS)
 	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS)
 	_reserve_entrance_clearance(occupied, GOLDEN_PLAINS_INTERIOR_ENTRANCE)
