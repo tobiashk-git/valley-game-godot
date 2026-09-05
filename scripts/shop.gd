@@ -23,6 +23,7 @@ func buy_item(item_id: String) -> bool:
 		return false
 	Inventory.remove_item("gold", price)
 	Inventory.add_item(item_id, 1)
+	Audio.play_sfx("coin")
 	changed.emit()
 	return true
 
@@ -33,6 +34,7 @@ func sell_item(item_id: String, amount: int = 1) -> bool:
 		return false
 	Inventory.remove_item(item_id, amount)
 	Inventory.add_item("gold", sell_price(item_id) * amount)
+	Audio.play_sfx("coin")
 	changed.emit()
 	return true
 
@@ -43,5 +45,6 @@ func sell_gear(uid: int) -> bool:
 	if inst.is_empty():
 		return false
 	Inventory.add_item("gold", sell_price(inst.base))
+	Audio.play_sfx("coin")
 	changed.emit()
 	return true

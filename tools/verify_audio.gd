@@ -139,6 +139,16 @@ func _initialize() -> void:
 		if s.playing and s.stream.resource_path.ends_with("quest.wav"):
 			quest_sfx = true
 	print("Completing a quest plays the quest fanfare (2-5 s WAV): ", quest_sfx and load("res://assets/sfx/quest.wav").get_length() >= 2.0 and load("res://assets/sfx/quest.wav").get_length() <= 5.0)
+	for s in audio._sfx_pool:
+		s.stop()
+	root.get_node("Inventory").add_item("healing_potion", 1)
+	root.get_node("Shop").sell_item("healing_potion")
+	await process_frame
+	var coin_sfx := false
+	for s in audio._sfx_pool:
+		if s.playing and s.stream.resource_path.ends_with("coin.wav"):
+			coin_sfx = true
+	print("Selling to the Trader plays the coin (short WAV, under 1 s): ", coin_sfx and load("res://assets/sfx/coin.wav").get_length() < 1.0)
 	# Buttons tap: a button added anywhere is hooked, and pressing it plays.
 	var btn := Button.new()
 	root.add_child(btn)

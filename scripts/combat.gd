@@ -468,6 +468,7 @@ func _defeat_enemy(index: int) -> void:
 	# Experience: paid per enemy as it drops (a boss is worth double).
 	var xp: int = Enemies.xp_for(enemy, current_boss_id != "")
 	msg += " +%d XP." % xp
+	Audio.play_sfx("coin")
 	await _beat(msg)
 	var level_before: int = Character.stats.level
 	if Character.gain_xp(xp) > 0:
