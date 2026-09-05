@@ -85,6 +85,7 @@ const ZONE_MUSIC := {
 # isn't here yet is a harmless no-op, so call sites can be wired ahead.
 const SFX := {
 	"chop": "res://assets/sfx/chop.wav",
+	"mine": "res://assets/sfx/mine.wav", # Freesound 593897 "dig5" by igroglaz
 }
 # One-shot pieces of music: played once over silence, then the scene's
 # track resumes (a won fight plays "victory" between the battle track
