@@ -42,9 +42,48 @@ var current_wild_monster_key := "" # set for the duration of a wild-monster figh
 
 var _steps_since_encounter := ENCOUNTER_COOLDOWN_STEPS
 
+# ---------------------------------------------------------------------------
+# Beats - the fight's rhythm (user's reference: Shining in the Darkness).
+# Every event is one BEAT: a message the battle screen shows big on its
+# own, with the command buttons hidden until the whole sequence has played,
+# so an enemy's turn is something you sit through ("prepares to strike..."
+# then the hit) rather than a line scrolling past. Each beat lasts
+# BEAT_SECONDS; a tap on the message or E skips ahead (skip_beat()). Under
+# a verify script (`fast`) beats never wait, so `await _beat()` returns at
+# once and the old synchronous flow - and every existing verify - holds.
+# ---------------------------------------------------------------------------
+
+signal beat(message: String)
+const BEAT_SECONDS := 1.1
+const BEAT_SECONDS_SHORT := 0.7
+var playing := false # a sequence of beats is on screen: commands hidden, actions ignored
+var fast := false
+var _skip := false
+
+func _ready() -> void:
+	fast = get_tree().get_script() != null
+
+func skip_beat() -> void:
+	_skip = true
+
+func _beat(message: String, seconds: float = BEAT_SECONDS) -> void:
+	_log(message)
+	changed.emit()
+	beat.emit(message)
+	if fast:
+		return
+	_skip = false
+	var deadline: int = Time.get_ticks_msec() + int(seconds * 1000.0)
+	while Time.get_ticks_msec() < deadline and not _skip:
+		await get_tree().process_frame
+
+func _end_turn() -> void:
+	playing = false
+	changed.emit()
+
 func _log(message: String) -> void:
 	battle_log.append(message)
-	if battle_log.size() > 5:
+	if battle_log.size() > 8:
 		battle_log.pop_front()
 
 func alive_enemies() -> Array:
@@ -188,15 +227,15 @@ func _apply_status_to_player(status_id: String) -> void:
 		return # no stacking/refresh this pass
 	var def: Dictionary = Statuses.STATUSES[status_id]
 	player_status[status_id] = {"turns_left": def.duration}
-	_log("Oliver is afflicted with %s!" % def.name)
+	await _beat("Oliver is afflicted with %s!" % def.name)
 
 func _tick_player_poison() -> void:
 	if not player_status.has("poison"):
 		return
 	var dmg: int = Statuses.STATUSES.poison.dot_damage
 	Character.stats.hp = max(0, Character.stats.hp - dmg)
-	_log("Oliver takes %d poison damage!" % dmg)
 	Character.changed.emit()
+	await _beat("Oliver takes %d poison damage!" % dmg, BEAT_SECONDS_SHORT)
 
 func _tick_status_durations() -> void:
 	var expired: Array = []
@@ -205,38 +244,40 @@ func _tick_status_durations() -> void:
 		if player_status[status_id].turns_left <= 0:
 			expired.append(status_id)
 	for status_id in expired:
-		_log("Oliver's %s wears off." % Statuses.STATUSES[status_id].name)
 		player_status.erase(status_id)
+		await _beat("Oliver's %s wears off." % Statuses.STATUSES[status_id].name, BEAT_SECONDS_SHORT)
 
 # Gate run at the start of every player-committing action. Ticks poison,
 # then checks Sleep/Paralysis. Returns true if the action should proceed;
 # if false, it has already resolved the turn as skipped (or handled defeat).
 func _begin_player_turn() -> bool:
-	_tick_player_poison()
+	await _tick_player_poison()
 	if Character.stats.hp <= 0:
-		_defeat("poison")
+		await _defeat("poison")
 		return false
 	if player_status.has("sleep"):
-		_log("Oliver is fast asleep and can't act!")
-		changed.emit()
-		_enemy_turn()
+		await _beat("Oliver is fast asleep and can't act!")
+		await _enemy_turn()
 		return false
 	if player_status.has("paralysis") and randf() >= Statuses.STATUSES.paralysis.act_chance:
-		_log("Oliver is paralyzed and can't move!")
-		changed.emit()
-		_enemy_turn()
+		await _beat("Oliver is paralyzed and can't move!")
+		await _enemy_turn()
 		return false
 	return true
 
 # ---------------------------------------------------------------------------
-# Player actions
+# Player actions - each one is a sequence of beats; `playing` is true from
+# the press until the last beat has shown (the screen hides the commands).
 # ---------------------------------------------------------------------------
 
 func player_attack() -> void:
-	if not in_combat or alive_enemies().is_empty():
+	if not in_combat or playing or alive_enemies().is_empty():
 		return
 	active_submenu = ""
-	if not _begin_player_turn():
+	playing = true
+	changed.emit()
+	if not await _begin_player_turn():
+		_end_turn()
 		return
 	player_defending = false
 
@@ -244,47 +285,51 @@ func player_attack() -> void:
 		var self_power: int = Character.stats.strength * 2 + _weapon_attack_bonus()
 		var self_dmg := _physical_damage(self_power, 0)
 		Character.stats.hp = max(0, Character.stats.hp - self_dmg)
-		_log("Oliver is confused and hits himself for %d damage!" % self_dmg)
 		Character.changed.emit()
+		await _beat("Oliver is confused and hits himself for %d damage!" % self_dmg)
 		if Character.stats.hp <= 0:
-			_defeat("confusion")
+			await _defeat("confusion")
+			_end_turn()
 			return
-		_enemy_turn()
+		await _enemy_turn()
+		_end_turn()
 		return
 
 	var alive := alive_enemies()
 	if alive.size() == 1:
-		_resolve_attack_on_target(alive[0])
+		await _resolve_attack_on_target(alive[0])
 	else:
-		selecting_target = "attack"
-		changed.emit()
+		selecting_target = "attack" # the sequence resumes in select_target()
+	_end_turn()
 
 func _resolve_attack_on_target(index: int) -> void:
 	var enemy: Dictionary = current_enemies[index]
 	var power: int = Character.stats.strength * 2 + _weapon_attack_bonus()
 	var dmg := _physical_damage(power, enemy.defense)
 	enemy.hp = max(0, enemy.hp - dmg)
-	_log("Oliver attacks %s for %d damage!" % [enemy.name, dmg])
-	changed.emit()
+	await _beat("Oliver attacks %s for %d damage!" % [enemy.name, dmg])
 	if enemy.hp <= 0:
-		_defeat_enemy(index)
+		await _defeat_enemy(index)
 	else:
-		_enemy_turn()
+		await _enemy_turn()
 
-# Click handler for an enemy slot — only does anything while a target is
+# Click handler for an enemy slot - only does anything while a target is
 # being chosen (2+ enemies were alive when Attack/a damage spell was picked).
 func select_target(index: int) -> void:
-	if selecting_target == "" or index >= current_enemies.size() or current_enemies[index] == null:
+	if playing or selecting_target == "" or index >= current_enemies.size() or current_enemies[index] == null:
 		return
 	var action := selecting_target
 	selecting_target = ""
+	playing = true
+	changed.emit()
 	if action == "attack":
-		_resolve_attack_on_target(index)
+		await _resolve_attack_on_target(index)
 	elif action.begins_with("spell:"):
-		_resolve_spell_on_target(action.substr(6), index)
+		await _resolve_spell_on_target(action.substr(6), index)
+	_end_turn()
 
 func open_magic_menu() -> void:
-	if not in_combat or alive_enemies().is_empty():
+	if not in_combat or playing or alive_enemies().is_empty():
 		return
 	if player_status.has("silence"):
 		_log("Oliver is silenced and cannot cast spells!")
@@ -294,7 +339,7 @@ func open_magic_menu() -> void:
 	changed.emit()
 
 func open_item_menu() -> void:
-	if not in_combat or alive_enemies().is_empty():
+	if not in_combat or playing or alive_enemies().is_empty():
 		return
 	active_submenu = "item"
 	changed.emit()
@@ -304,13 +349,16 @@ func close_submenu() -> void:
 	changed.emit()
 
 func cast_spell(spell_id: String) -> void:
-	if not in_combat or alive_enemies().is_empty():
+	if not in_combat or playing or alive_enemies().is_empty():
 		return
 	var spell: Dictionary = Spells.SPELLS.get(spell_id, {})
 	if spell.is_empty() or Character.stats.mp < spell.mp_cost:
 		return
 	active_submenu = ""
-	if not _begin_player_turn():
+	playing = true
+	changed.emit()
+	if not await _begin_player_turn():
+		_end_turn()
 		return
 	player_defending = false
 	Character.stats.mp -= spell.mp_cost
@@ -319,60 +367,68 @@ func cast_spell(spell_id: String) -> void:
 	if spell.kind == "damage":
 		var alive := alive_enemies()
 		if alive.size() == 1:
-			_resolve_spell_on_target(spell_id, alive[0])
+			await _resolve_spell_on_target(spell_id, alive[0])
 		else:
 			selecting_target = "spell:%s" % spell_id
-			changed.emit()
 	elif spell.kind == "heal":
 		var healed: int = min(spell.power, Character.stats.max_hp - Character.stats.hp)
 		Character.stats.hp += healed
-		_log("Oliver casts %s and recovers %d HP!" % [spell.name, healed])
 		Character.changed.emit()
-		_enemy_turn()
+		await _beat("Oliver casts %s and recovers %d HP!" % [spell.name, healed])
+		await _enemy_turn()
+	_end_turn()
 
 func _resolve_spell_on_target(spell_id: String, index: int) -> void:
 	var spell: Dictionary = Spells.SPELLS[spell_id]
 	var enemy: Dictionary = current_enemies[index]
 	var dmg := _physical_damage(spell.power, 0)
 	enemy.hp = max(0, enemy.hp - dmg)
-	_log("Oliver casts %s on %s for %d damage!" % [spell.name, enemy.name, dmg])
-	changed.emit()
+	await _beat("Oliver casts %s on %s for %d damage!" % [spell.name, enemy.name, dmg])
 	if enemy.hp <= 0:
-		_defeat_enemy(index)
+		await _defeat_enemy(index)
 	else:
-		_enemy_turn()
+		await _enemy_turn()
 
 func use_item(item_id: String) -> void:
-	if not in_combat or alive_enemies().is_empty() or Inventory.get_count(item_id) <= 0:
+	if not in_combat or playing or alive_enemies().is_empty() or Inventory.get_count(item_id) <= 0:
 		return
 	var def: Dictionary = Items.ITEMS.get(item_id, {})
 	var effect: Dictionary = def.get("effect", {})
 	if effect.is_empty():
 		return
 	active_submenu = ""
-	if not _begin_player_turn():
+	playing = true
+	changed.emit()
+	if not await _begin_player_turn():
+		_end_turn()
 		return
 	player_defending = false
 	Inventory.remove_item(item_id, 1)
 	# Effect maths lives in Items.apply_effect() (shared with the
 	# out-of-combat QuickBar); in combat the item is always spent since the
 	# turn is used either way.
-	_log(Items.apply_effect(item_id).message)
+	var message: String = Items.apply_effect(item_id).message
 	Character.changed.emit()
-	_enemy_turn()
+	await _beat(message)
+	await _enemy_turn()
+	_end_turn()
 
 func player_defend() -> void:
-	if not in_combat:
+	if not in_combat or playing:
 		return
 	active_submenu = ""
-	if not _begin_player_turn():
+	playing = true
+	changed.emit()
+	if not await _begin_player_turn():
+		_end_turn()
 		return
 	player_defending = true
-	_log("Oliver braces for the next attack.")
-	_enemy_turn()
+	await _beat("Oliver braces for the next attack.", BEAT_SECONDS_SHORT)
+	await _enemy_turn()
+	_end_turn()
 
 func player_run() -> void:
-	if not in_combat:
+	if not in_combat or playing:
 		return
 	_log("Oliver flees the battle!")
 	in_combat = false
@@ -389,10 +445,11 @@ func player_run() -> void:
 # Enemy turn / resolution
 # ---------------------------------------------------------------------------
 
-# One enemy dropping to 0 HP: grants its gold (and drop item, if any)
-# immediately, logs it, and clears its slot. If that empties the whole
-# group, ends combat in victory (marking a boss's checkpoint permanently
-# defeated); otherwise the fight continues with the survivors' turn.
+# One enemy dropping to 0 HP: grants its gold (and drop item, if any) and
+# XP, tells it in beats (the doze-off, then any level-up), and clears its
+# slot. If that empties the whole group, ends combat in victory (marking a
+# boss's checkpoint permanently defeated); otherwise the survivors take
+# their turn.
 func _defeat_enemy(index: int) -> void:
 	var enemy: Dictionary = current_enemies[index]
 	var gold: int = enemy.gold_min + randi() % (enemy.gold_max - enemy.gold_min + 1)
@@ -411,12 +468,12 @@ func _defeat_enemy(index: int) -> void:
 	# Experience: paid per enemy as it drops (a boss is worth double).
 	var xp: int = Enemies.xp_for(enemy, current_boss_id != "")
 	msg += " +%d XP." % xp
-	_log(msg)
+	await _beat(msg)
 	var level_before: int = Character.stats.level
 	if Character.gain_xp(xp) > 0:
-		_log("Level up! Oliver is now level %d (%s)." % [Character.stats.level, Character.level_up_text(Character.stats.level)])
+		await _beat("Level up! Oliver is now level %d (%s)." % [Character.stats.level, Character.level_up_text(Character.stats.level)])
 		if Character.stats.level - level_before > 1:
-			_log("...and climbed %d levels at once!" % (Character.stats.level - level_before))
+			await _beat("...and climbed %d levels at once!" % (Character.stats.level - level_before), BEAT_SECONDS_SHORT)
 	current_enemies[index] = null
 	if alive_enemies().is_empty():
 		in_combat = false
@@ -433,50 +490,52 @@ func _defeat_enemy(index: int) -> void:
 		ended.emit(true)
 	else:
 		changed.emit()
-		_enemy_turn()
+		await _enemy_turn()
 
 func _enemy_turn() -> void:
 	var was_asleep: bool = player_status.has("sleep")
 	var woke_this_round := false
 	for index in alive_enemies():
 		var enemy: Dictionary = current_enemies[index]
+		# The wind-up: a beat of nothing you can do about it.
+		await _beat("%s prepares to strike..." % enemy.name, BEAT_SECONDS_SHORT)
 		# Agility above its starting value lets Oliver slip a blow entirely.
 		if randf() < Character.dodge_chance():
-			_log("%s attacks - Oliver dodges!" % enemy.name)
+			await _beat("%s attacks - Oliver dodges!" % enemy.name)
 			if was_asleep and not woke_this_round:
 				player_status.erase("sleep")
-				_log("Oliver wakes up!")
+				await _beat("Oliver wakes up!", BEAT_SECONDS_SHORT)
 				woke_this_round = true
 			continue
 		var dmg := _physical_damage(enemy.attack, _player_defense_bonus())
 		if player_defending:
 			dmg = max(1, dmg / 2)
 		Character.stats.hp = max(0, Character.stats.hp - dmg)
-		_log("%s attacks Oliver for %d damage!" % [enemy.name, dmg])
 		Character.changed.emit()
+		await _beat("%s attacks Oliver for %d damage!" % [enemy.name, dmg])
 
 		if Character.stats.hp <= 0:
-			_defeat(enemy.name)
+			await _defeat(enemy.name)
 			return
 
 		var status_attack: Dictionary = enemy.get("status_attack", {})
 		if not status_attack.is_empty():
 			var chance: float = status_attack.chance * (1.0 - _accessory_bonus("status_resistance"))
 			if randf() < chance:
-				_apply_status_to_player(status_attack.status)
+				await _apply_status_to_player(status_attack.status)
 
 		if was_asleep and not woke_this_round:
 			player_status.erase("sleep")
-			_log("Oliver wakes up!")
+			await _beat("Oliver wakes up!", BEAT_SECONDS_SHORT)
 			woke_this_round = true
 
-	_tick_status_durations()
+	await _tick_status_durations()
 	changed.emit()
 
 # Losing: HP/MP restored, a tenth of the gold lost, back home in bed. The
 # DefeatPanel autoload covers the scene change and tells the story.
 func _defeat(cause: String = "") -> void:
-	_log("Oliver is worn out and needs a nap...")
+	await _beat("Oliver is worn out and needs a nap...")
 	var gold_lost: int = int(floor(Inventory.get_count("gold") * DEFEAT_GOLD_FRACTION))
 	if gold_lost > 0:
 		Inventory.remove_item("gold", gold_lost)
@@ -509,4 +568,5 @@ func reset() -> void:
 	selecting_target = ""
 	current_boss_id = ""
 	current_wild_monster_key = ""
+	playing = false
 	changed.emit()

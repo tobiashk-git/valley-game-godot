@@ -39,7 +39,7 @@ func _initialize() -> void:
 	var slot2: PanelContainer = battle.enemy_slots[2]
 	print("Two slots shown, third hidden; sprites 96px, names and HP bars filled: ", slot0.visible and slot1.visible and not slot2.visible and slot0.get_node("Box/Sprite").size.x >= 96.0 and slot0.get_node("Box/NameLabel").text == "Dungeon Rat" and slot1.get_node("Box/NameLabel").text == "Skeleton" and slot0.get_node("Box/BarBox/HPBar/HPLabel").text == "12 / 12")
 	print("Commands are kit buttons, Attack gold, 48px tall: ", battle.attack_btn.theme_type_variation == &"PrimaryButton" and battle.run_btn.theme_type_variation == &"SecondaryButton" and battle.attack_btn.size.y >= 48.0)
-	print("Log: newest line bright, no target hint yet: ", battle.log_label.text.ends_with("[color=#ffffff]A Dungeon Rat and a Skeleton appear![/color]") and battle.target_hint.modulate.a == 0.0)
+	print("Log: newest line bright, no target hint yet: ", battle.log_label.text.contains("[color=#ffffff]A Dungeon Rat and a Skeleton appear![/color]") and battle.target_hint.modulate.a == 0.0)
 	print("Touch controls hidden during the fight: ", not touch.visible)
 	root.get_texture().get_image().save_png("res://verify_battle_open.png")
 	print("Saved verify_battle_open.png")

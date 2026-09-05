@@ -50,6 +50,8 @@ func _ready() -> void:
 	Character.changed.connect(_refresh)
 	Layout.changed.connect(_apply_layout)
 	_apply_layout()
+	# A tap on the message (or E, see _process) hurries the current beat.
+	log_panel.gui_input.connect(_on_log_gui_input)
 	attack_btn.pressed.connect(Combat.player_attack)
 	magic_btn.pressed.connect(Combat.open_magic_menu)
 	item_btn.pressed.connect(Combat.open_item_menu)
@@ -73,6 +75,16 @@ func _apply_layout() -> void:
 	for slot in enemy_slots:
 		slot.get_node("Box/Sprite").custom_minimum_size = Vector2(sprite_px, sprite_px)
 		slot.get_node("Box/BarBox/HPBar").custom_minimum_size = Vector2(96 if narrow else 120, 16)
+
+func _on_log_gui_input(event: InputEvent) -> void:
+	if not Combat.playing:
+		return
+	if (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed) or (event is InputEventScreenTouch and event.pressed):
+		Combat.skip_beat()
+
+func _process(_delta: float) -> void:
+	if Combat.in_combat and Combat.playing and Input.is_action_just_pressed("interact"):
+		Combat.skip_beat()
 
 func _on_slot_gui_input(event: InputEvent, index: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -116,12 +128,16 @@ func _refresh() -> void:
 		if i < _last_hp.size():
 			_last_hp[i] = enemy.hp
 
-	# Log: newest line bright, the rest dimmed.
+	# The message: the current beat big and bright, the two before it small
+	# and dim above (so a result never gets lost in a scrolling log).
 	var lines: Array = []
 	var n: int = Combat.battle_log.size()
-	for i in range(n):
+	for i in range(max(0, n - 3), n):
 		var line: String = Combat.battle_log[i]
-		lines.append("[color=#ffffff]%s[/color]" % line if i == n - 1 else "[color=#9a9a9a]%s[/color]" % line)
+		if i == n - 1:
+			lines.append("[font_size=%d][color=#ffffff]%s[/color][/font_size]" % [17 if narrow else 19, line])
+		else:
+			lines.append("[font_size=12][color=#8a8a8a]%s[/color][/font_size]" % line)
 	log_label.text = "\n".join(lines)
 
 	_refresh_submenu()
@@ -174,7 +190,8 @@ func _refresh_submenu() -> void:
 	# target is being chosen - only tapping an enemy slot does anything then.
 	var targeting: bool = Combat.selecting_target != ""
 	var open: bool = Combat.active_submenu != "" and not targeting
-	commands.visible = not open and not targeting
+	# While beats play the commands are gone - you wait the enemy's turn out.
+	commands.visible = not open and not targeting and not Combat.playing
 	# The submenu takes the log's space while it's open (its rows are taller
 	# than the command row and would run out of the panel otherwise).
 	log_panel.visible = not open

@@ -59,6 +59,9 @@ func _initialize() -> void:
 	var gold_before: int = inventory.get_count("gold")
 	var guard := 0
 	var initial_alive: int = combat.alive_enemies().size()
+	# Three enemies can put Oliver to sleep before he lands a kill - keep him up.
+	character.stats.max_hp = 500
+	character.stats.hp = 500
 	while combat.alive_enemies().size() == initial_alive and combat.in_combat and guard < 30:
 		var alive: Array = combat.alive_enemies()
 		if alive.size() == 1:

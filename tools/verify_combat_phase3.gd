@@ -77,7 +77,7 @@ func _initialize() -> void:
 		var hp_before: int = character.stats.hp
 		combat.player_attack()
 		await process_frame
-		if combat.battle_log[-1].begins_with("Oliver is confused") or (combat.battle_log.size() >= 2 and combat.battle_log[-2].begins_with("Oliver is confused")):
+		if _recent_line_starts_with(combat, "Oliver is confused"):
 			confusion_self_hit = true
 			break
 	print("Confusion caused a self-hit at least once over 20 trials: ", confusion_self_hit)
@@ -139,3 +139,12 @@ func _initialize() -> void:
 	print("player_status empty after combat ends: ", combat.player_status.is_empty())
 
 	quit()
+
+# The enemy's turn now adds a "prepares to strike..." beat before each hit,
+# so the player's own line sits a few entries back.
+func _recent_line_starts_with(combat: Node, prefix: String) -> bool:
+	var n: int = combat.battle_log.size()
+	for i in range(max(0, n - 5), n):
+		if combat.battle_log[i].begins_with(prefix):
+			return true
+	return false
