@@ -92,10 +92,9 @@ func _initialize() -> void:
 	# --- Hero tab's Game block. ---
 	sheet.open("character")
 	await process_frame
-	var save_btn: Button = sheet.stats_list.get_node_or_null("SaveNowBtn")
-	var load_btn: Button = sheet.stats_list.get_node_or_null("LoadBtn")
-	var quit_btn: Button = sheet.stats_list.get_node_or_null("QuitBtn")
-	print("Hero tab shows Save now / Load / Save and quit to title: ", save_btn != null and load_btn != null and quit_btn != null and quit_btn.text == "Save and quit to title")
+	var save_btn: Button = sheet.stats_list.find_child("SaveNowBtn", true, false)
+	var load_btn: Button = sheet.stats_list.find_child("LoadBtn", true, false)
+	print("Hero tab shows Save now / Load, and Save & Quit sits beside the X (wide): ", save_btn != null and load_btn != null and sheet.quit_btn.visible and sheet.quit_btn.text == "Save & Quit")
 	root.get_texture().get_image().save_png("res://verify_save_hero_tab.png")
 	print("Saved verify_save_hero_tab.png")
 	sheet.close()

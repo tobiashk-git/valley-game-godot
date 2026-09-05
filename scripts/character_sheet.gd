@@ -658,11 +658,32 @@ func _refresh_character() -> void:
 	# --- Game: save / quit first, so it's found without scrolling (New Game
 	# lives on the title screen). ---
 	_stats_title("Game")
-	_stats_line(SaveSystem.saved_ago_text() + "  -  autosaves as you play", true)
-	_game_button("SaveNowBtn", "Save now", &"PrimaryButton", _on_save_now)
-	_game_button("QuitBtn", "Save and quit to title", &"SecondaryButton", _on_quit_to_title)
-	var load_btn: Button = _game_button("LoadBtn", "Load last save", &"SecondaryButton", _on_load_save)
-	load_btn.disabled = not SaveSystem.has_save()
+	_stats_line(SaveSystem.saved_ago_text(), true)
+	if narrow:
+		# Phone: stacked full-width buttons (the view scrolls); Save & Quit
+		# lives here since the tab strip has no room for it.
+		_game_button("SaveNowBtn", "Save now", &"PrimaryButton", _on_save_now)
+		_game_button("QuitBtn", "Save and quit to title", &"SecondaryButton", _on_quit_to_title)
+		var load_btn: Button = _game_button("LoadBtn", "Load last save", &"SecondaryButton", _on_load_save)
+		load_btn.disabled = not SaveSystem.has_save()
+	else:
+		# Wide: one compact row so the 200px column keeps its height for the
+		# stats (Save & Quit is beside the X).
+		var row := HBoxContainer.new()
+		row.name = "GameRow"
+		row.add_theme_constant_override("separation", 6)
+		stats_list.add_child(row)
+		for entry in [["SaveNowBtn", "Save now", &"PrimaryButton", _on_save_now], ["LoadBtn", "Load", &"SecondaryButton", _on_load_save]]:
+			var b := Button.new()
+			b.name = entry[0]
+			b.text = entry[1]
+			b.theme_type_variation = entry[2]
+			b.custom_minimum_size = Vector2(0, 30)
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			b.add_theme_font_size_override("font_size", 12)
+			b.pressed.connect(entry[3])
+			row.add_child(b)
+		row.get_node("LoadBtn").disabled = not SaveSystem.has_save()
 	_stats_title("Attributes")
 	_stat_row("Strength", str(stats.strength))
 	_stat_row("Agility", str(stats.agility))

@@ -46,7 +46,7 @@ func _initialize() -> void:
 	save.enabled = true
 	sheet.open("character")
 	await process_frame
-	print("Hero tab: Game block sits at the top of the stats column; the sheet's own Save & Quit is beside the X: ", sheet.stats_list.get_child(0).text == "Game" and sheet.stats_list.get_node("QuitBtn") != null and sheet.quit_btn.visible and sheet.quit_btn.text == "Save & Quit")
+	print("Hero tab: Game block sits at the top of the stats column; the sheet's own Save & Quit is beside the X: ", sheet.stats_list.get_child(0).text == "Game" and sheet.stats_list.find_child("SaveNowBtn", true, false) != null and sheet.quit_btn.visible and sheet.quit_btn.text == "Save & Quit")
 	sheet.quit_btn.pressed.emit()
 	await process_frame
 	await process_frame
@@ -59,6 +59,14 @@ func _initialize() -> void:
 	for i in range(6):
 		await process_frame
 	var t: Control = current_scene
+	sheet.open("character")
+	await process_frame
+	print("Phone: Hero tab carries Save and quit to title in its Game block (no room beside the X): ", sheet.stats_list.get_node_or_null("QuitBtn") != null and not sheet.quit_btn.visible)
+	sheet.close()
+	change_scene_to_packed(load("res://scenes/Title.tscn"))
+	await process_frame
+	await process_frame
+	t = current_scene
 	print("Phone: Oliver above the menu, menu spans the width, buttons inside: ", layout.is_narrow() and t.figure.position.y < t.menu.position.y and t.menu.size.x == 376.0 and t.buttons.get_global_rect().end.y <= t.menu.get_global_rect().end.y and t.menu.get_global_rect().end.y <= 660.0)
 	root.get_texture().get_image().save_png("res://verify_title_phone.png")
 	print("Saved verify_title_phone.png")
