@@ -65,20 +65,10 @@ def fill_holes(mask):
     return ~outside
 
 
-def small_holes(mask, max_area):
+def holes_to_fill(mask, pure_bg):
+    """Enclosed transparent pockets whose pixels are mostly NOT pure
+    background (so: keyed by the shadow rule inside the creature)."""
     holes = fill_holes(mask) & ~mask
-    try:
-        from scipy import ndimage
-        labels, n = ndimage.label(holes)
-        if n == 0:
-            return holes
-        sizes = ndimage.sum(holes, labels, range(1, n + 1))
-        keep = np.zeros(n + 1, bool)
-        keep[1:] = np.asarray(sizes) <= max_area
-        return keep[labels]
-    except ImportError:
-        pass
-    # No scipy: flood each hole by hand (holes are a small share of the image).
     h, w = holes.shape
     seen = np.zeros_like(holes)
     out = np.zeros_like(holes)
@@ -96,7 +86,8 @@ def small_holes(mask, max_area):
                 if 0 <= ny < h and 0 <= nx < w and holes[ny, nx] and not seen[ny, nx]:
                     seen[ny, nx] = True
                     stack.append((ny, nx))
-        if len(comp) <= max_area:
+        bg_share = sum(1 for y, x in comp if pure_bg[y, x]) / len(comp)
+        if bg_share < 0.5:
             for y, x in comp:
                 out[y, x] = True
     return out
@@ -165,9 +156,12 @@ def main():
     # background-hued colour in an eye or an ear): only transparent regions
     # that reach the image border stay transparent.
     if not mist:
-        # Only SMALL holes: a fleck in an eye or an ear. A big enclosed pocket
-        # (the gap between a golem's arm and its torso) is real background.
-        holes = small_holes(fig, max_area=max(64, int(0.001 * fig.sum())))
+        # Enclosed transparent pockets: a gap of pure background between a
+        # golem's arm and its torso stays open; a patch that was keyed only
+        # by the shadow rule (a dark crease inside an ear, a fleck in an eye)
+        # is creature and is filled. Decided per pocket by its share of pure
+        # background pixels.
+        holes = holes_to_fill(fig, bg)
         alpha[holes] = 255
         fig = fig | holes
         alpha[~fig] = 0
