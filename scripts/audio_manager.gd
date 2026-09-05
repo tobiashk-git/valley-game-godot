@@ -144,14 +144,17 @@ func play_sfx(id: String) -> void:
 # keep it suspended until the first tap, and an iPhone's silent switch
 # mutes it outright - neither shows up any other way).
 func debug_state() -> String:
-	var playing := ""
+	var playing := false
 	for p in _players:
 		if p.playing:
-			playing = "on" if playing == "" else playing
-	var line: String = "Audio: %s%s" % ["silence" if _current == "" else _current, "" if enabled else " (muted for tests)"]
+			playing = true
+	var line: String = "Audio: %s, player %s, %d Hz%s" % ["silence" if _current == "" else _current, "playing" if playing else "stopped", int(AudioServer.get_mix_rate()), "" if enabled else " (muted for tests)"]
 	if OS.has_feature("web"):
-		var state = JavaScriptBridge.eval("(typeof GodotAudio !== 'undefined' && GodotAudio.ctx) ? GodotAudio.ctx.state : 'no context'", true)
-		line += "  -  browser audio: %s" % str(state)
+		# The engine's own context is out of reach from here; a probe
+		# context says whether this browser has unlocked audio at all.
+		var state = JavaScriptBridge.eval("(function(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return 'no WebAudio';var c=new C();var s=c.state;c.close();return s;}catch(e){return 'error '+e;}})()", true)
+		var ua = JavaScriptBridge.eval("(navigator.userAgent.match(/(iPhone|iPad|Android)[^)]*/)||['other'])[0].slice(0,26)", true)
+		line += ", browser %s, %s" % [str(state), str(ua)]
 	return line
 
 # --- settings ---
