@@ -27,6 +27,19 @@ func _initialize() -> void:
 	root.get_texture().get_image().save_png("res://verify_portrait_oliver.png")
 	print("Saved verify_portrait_oliver.png")
 
+	# --- NPC busts that exist so far (added one at a time). ---
+	for speaker in ["Village Elder", "Village Trader", "Frostpeak Ranger", "Forest Druid", "Badlands Prospector", "Marsh Guide"]:
+		if dialogue.portrait_for(speaker) == null:
+			continue
+		dialogue.show_dialogue(speaker, "Ah, a new face! I'm the %s - good to meet you, traveler." % speaker, [{"label": "Accept", "callback": Callable()}, {"label": "Not now", "callback": Callable()}])
+		await process_frame
+		await process_frame
+		var fr: Rect2 = dialogue.portrait_frame.get_global_rect()
+		print("%s: bust shows beside the text, box fits: " % speaker, dialogue.portrait_frame.visible and fr.size == Vector2(96, 96) and dialogue.actions_row.get_global_rect().end.y <= dialogue.panel.get_global_rect().end.y)
+		var file: String = "res://verify_portrait_%s.png" % speaker.to_lower().replace(" ", "_")
+		root.get_texture().get_image().save_png(file)
+		print("Saved ", file)
+
 	# --- A speaker without a file: no frame, full-width text. ---
 	dialogue.show_dialogue("Forest Druid", "You've wandered far from the village.")
 	await process_frame
