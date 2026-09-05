@@ -70,6 +70,13 @@ func _initialize() -> void:
 	print("Phone: Oliver above the menu, menu spans the width, buttons inside: ", layout.is_narrow() and t.figure.position.y < t.menu.position.y and t.menu.size.x == 376.0 and t.buttons.get_global_rect().end.y <= t.menu.get_global_rect().end.y and t.menu.get_global_rect().end.y <= 660.0)
 	root.get_texture().get_image().save_png("res://verify_title_phone.png")
 	print("Saved verify_title_phone.png")
+	# Shorter still (a phone browser with its toolbars): the menu's save line
+	# stays inside the screen, Oliver shrinks to make room.
+	root.size = Vector2i(400, 600)
+	for i in range(6):
+		await process_frame
+	t = current_scene
+	print("Short phone (600): menu fully inside the screen, Oliver shrunk: ", t.save_line.get_global_rect().end.y <= t.menu.get_global_rect().end.y and t.menu.get_global_rect().end.y <= 600.0 and t.figure.size.y < 224.0)
 	root.size = Vector2i(800, 600)
 	for i in range(4):
 		await process_frame

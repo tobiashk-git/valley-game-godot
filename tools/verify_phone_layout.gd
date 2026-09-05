@@ -173,6 +173,11 @@ func _initialize() -> void:
 	await process_frame
 	var mv2: Control = sheet.map_view
 	print("Short phone, Map: map steps down to 2px/tile so the pane fits: ", mv2.map_scale == 2.0 and mv2.detail_pane.get_global_rect().end.y <= win_bottom and mv2.travel_btn.get_global_rect().end.y <= win_bottom)
+	sheet.open("character")
+	await process_frame
+	await process_frame
+	var cv: Control = sheet.character_view
+	print("Short phone, Hero: scroll extent covers the whole stats column (Game block + stats): ", cv.custom_minimum_size.y >= sheet.stats_list.position.y + sheet.stats_list.size.y and sheet.stats_list.get_node_or_null("QuitBtn") != null)
 	sheet.open("journal")
 	await process_frame
 	print("Short phone, Journal: pane inside the window: ", sheet.journal_view.detail_pane.get_global_rect().end.y <= win_bottom)

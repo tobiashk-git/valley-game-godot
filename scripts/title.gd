@@ -45,10 +45,14 @@ func _apply_layout() -> void:
 		_place(menu, Vector2(w * 0.5 - 300.0, h * 0.5 - 185.0), Vector2(360, 370))
 		_place(figure, Vector2(w * 0.5 + 90.0, h * 0.5 - 185.0), Vector2(156, 370))
 	else:
-		# Oliver above the menu, both centred.
-		var fig_h: float = minf(260.0, h * 0.34)
-		_place(figure, Vector2((w - 120.0) / 2.0, h * 0.08), Vector2(120, fig_h))
-		_place(menu, Vector2(12, h * 0.08 + fig_h + 12.0), Vector2(w - 24.0, 360))
+		# Oliver above the menu, both centred; the menu keeps its full height
+		# and Oliver takes whatever is left (a phone browser's toolbars can
+		# leave ~600 units).
+		const MENU_H := 360.0
+		var top: float = minf(h * 0.06, 40.0)
+		var fig_h: float = clampf(h - top - 12.0 - MENU_H - 12.0, 90.0, 260.0)
+		_place(figure, Vector2((w - 120.0) / 2.0, top), Vector2(120, fig_h))
+		_place(menu, Vector2(12, top + fig_h + 12.0), Vector2(w - 24.0, MENU_H))
 	_place(title_top, Vector2(0, 8), Vector2(menu.size.x, 56))
 	_place(title_label, Vector2(0, 62), Vector2(menu.size.x, 26))
 	_place(tagline, Vector2(0, 88), Vector2(menu.size.x, 20))

@@ -726,6 +726,10 @@ func _refresh_character() -> void:
 			_pane_item(inst, "Equip", Callable(Character, "equip").bind(doll_slot, inst.uid), &"PrimaryButton")
 	if not any_fit:
 		_pane_label("- nothing fits -", true)
+	# Phone: the view scrolls, so its extent must cover the stats column's
+	# real height (the Game block made it taller) - nothing gets clipped.
+	if narrow:
+		character_view.custom_minimum_size.y = stats_list.position.y + stats_list.get_combined_minimum_size().y + 16.0
 
 func _game_button(node_name: String, text: String, variation: StringName, on_pressed: Callable) -> Button:
 	var b := Button.new()
