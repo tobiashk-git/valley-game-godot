@@ -29,6 +29,17 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	print("The overworld asks for the village theme: ", audio.current_music() == "village")
+	var world: Node = root.get_node("World")
+	var ow_player: CharacterBody2D = overworld.get_node("YSort/Player")
+	var home: Vector2 = ow_player.position
+	ow_player.position = Vector2(world.WORLD_CENTER_X * 32 + 16, (world.WORLD_CENTER_Y - world.VALLEY_RADIUS - 4) * 32 + 16)
+	await process_frame
+	await process_frame
+	print("Standing in Frostpeak on the overworld switches to the Frostpeak theme: ", audio.current_music() == "frostpeak" and ResourceLoader.exists("res://assets/music/frostpeak.ogg"))
+	ow_player.position = home
+	await process_frame
+	await process_frame
+	print("Back in the valley the village theme returns; the Frostpeak interior maps to its theme too: ", audio.current_music() == "village" and audio.SCENE_MUSIC.get("FrostpeakInterior", "") == "frostpeak")
 	print("Battle loop file exists, 15-80 s: ", ResourceLoader.exists("res://assets/music/battle.ogg") and load("res://assets/music/battle.ogg").get_length() >= 15.0 and load("res://assets/music/battle.ogg").get_length() <= 80.0)
 	var combat: Node = root.get_node("Combat")
 	combat.start_combat(["dungeon_rat"])

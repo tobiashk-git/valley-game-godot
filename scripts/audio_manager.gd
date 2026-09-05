@@ -22,6 +22,7 @@ const CROSSFADE_SECONDS := 1.2
 const MUSIC := {
 	"village": "res://assets/music/village.ogg",
 	"battle": "res://assets/music/battle.ogg",
+	"frostpeak": "res://assets/music/frostpeak.ogg",
 }
 # Scene name -> music id. Until more tracks exist the village theme carries
 # the valley and the houses; interiors and the title stay quiet.
@@ -32,6 +33,13 @@ const SCENE_MUSIC := {
 	"ElderHouse": "village",
 	"TraderHouse": "village",
 	"BlacksmithHouse": "village",
+	"FrostpeakInterior": "frostpeak",
+}
+# On the overworld the track follows the biome under Oliver's feet (the
+# valley keeps the village theme until it has its own); biomes without a
+# track yet fall back to the valley's.
+const ZONE_MUSIC := {
+	World.Zone.FROSTPEAK: "frostpeak",
 }
 const SFX := {}
 
@@ -84,6 +92,12 @@ func wanted_music() -> String:
 	var scene: Node = get_tree().current_scene
 	if scene == null:
 		return _current # mid scene change: hold whatever plays
+	if HUD.BIOME_SCENES.has(scene.name):
+		var player: Node2D = scene.get_node_or_null("YSort/Player")
+		if player != null:
+			var zone: int = World.biome_at(floori(player.position.x / 32.0), floori(player.position.y / 32.0)).zone
+			if ZONE_MUSIC.has(zone):
+				return ZONE_MUSIC[zone]
 	return SCENE_MUSIC.get(scene.name, "")
 
 # Switch to a track ("" = fade out to silence). The same track keeps playing.
