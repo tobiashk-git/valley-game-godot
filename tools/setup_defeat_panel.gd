@@ -27,7 +27,7 @@ func _initialize() -> void:
 
 	var title := Label.new()
 	title.name = "TitleLabel"
-	title.text = "You were defeated"
+	title.text = "Nap time"
 	title.theme_type_variation = &"PanelTitle"
 	title.add_theme_font_size_override("font_size", 22)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

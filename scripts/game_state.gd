@@ -22,7 +22,12 @@ var boss_defeated: Dictionary = {"dungeon_boss": false, "castle_boss": false, "f
 # many placements share the same species per biome. Empty until populated by
 # World.scatter_wild_monsters() at world-gen time - unlike boss_defeated,
 # there's no fixed list of ids known ahead of time.
+# Value = the unix time the monster wakes up (nothing dies in the valley:
+# a beaten wild monster dozes off, you take its things, and it's back on
+# its feet WILD_MONSTER_SLEEP_SECONDS later). A plain `true` (older saves,
+# test fixtures) means "asleep, no wake time".
 var wild_monsters_defeated: Dictionary = {}
+const WILD_MONSTER_SLEEP_SECONDS := 600
 
 # Set once by Quests.mark_npc_met() when the meet_villagers tutorial quest
 # completes. overworld.gd checks this every time it (re)builds the map, since
@@ -87,3 +92,18 @@ func reset() -> void:
 func is_gameplay() -> bool:
 	var scene: Node = get_tree().current_scene
 	return scene != null and scene.has_node("YSort/Player")
+
+func put_wild_monster_to_sleep(key: String) -> void:
+	wild_monsters_defeated[key] = int(Time.get_unix_time_from_system()) + WILD_MONSTER_SLEEP_SECONDS
+
+# True while the placement is sleeping; a passed wake time clears it.
+func is_wild_monster_asleep(key: String) -> bool:
+	if not wild_monsters_defeated.has(key):
+		return false
+	var v = wild_monsters_defeated[key]
+	if v is bool:
+		return v
+	if int(Time.get_unix_time_from_system()) >= int(v):
+		wild_monsters_defeated.erase(key)
+		return false
+	return true

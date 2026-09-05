@@ -48,22 +48,22 @@ static func story(info: Dictionary) -> String:
 	var cause: String = str(info.get("cause", ""))
 	var first: String
 	if cause == "poison":
-		first = "The poison finally took its toll."
+		first = "The poison wore you out."
 	elif cause == "confusion":
-		first = "Confused, you struck yourself down."
+		first = "Confused, you wore yourself out."
 	elif cause == "":
-		first = "The fight went badly."
+		first = "That was too much for one day."
 	else:
-		first = "The %s got the better of you." % cause
+		first = "The %s wore you out." % cause
 	var lost: int = int(info.get("gold_lost", 0))
-	var purse: String = "%d gold slipped from your purse on the way." % lost if lost > 0 else "Your purse, at least, is untouched."
-	return "%s\n\nYou come to in your own bed at home. %s" % [first, purse]
+	var purse: String = "%d gold slipped out of your pocket while you slept." % lost if lost > 0 else "Your pocket, at least, is untouched."
+	return "%s\n\nYou wake up back in your own bed. %s" % [first, purse]
 
 func show_defeat(info: Dictionary) -> void:
 	_open = true
 	if _tween != null:
 		_tween.kill()
-	title_label.text = "You were defeated"
+	title_label.text = "Nap time"
 	body_label.text = story(info)
 	black.visible = true
 	black.modulate.a = 1.0

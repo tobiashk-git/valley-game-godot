@@ -32,6 +32,7 @@ const INTERACT_MARGIN := 24.0
 @onready var interact_shape: CollisionShape2D = $InteractArea/CollisionShape2D
 
 var _player_inside := false
+var _sleep_marker: SleepMarker
 
 func _ready() -> void:
 	var def: Dictionary = Enemies.ENEMIES[enemy_id]
@@ -61,6 +62,11 @@ func _ready() -> void:
 
 	interact_area.body_entered.connect(_on_body_entered)
 	interact_area.body_exited.connect(_on_body_exited)
+	# "z z Z" just above the drawn sprite while it sleeps.
+	_sleep_marker = SleepMarker.attach(self, visual_center.y - visual_size.y / 2.0 - 26.0)
+
+func is_asleep() -> bool:
+	return GameState.is_wild_monster_asleep(placement_key)
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
@@ -73,7 +79,8 @@ func _on_body_exited(body: Node2D) -> void:
 func _process(_delta: float) -> void:
 	var def: Dictionary = Enemies.ENEMIES[enemy_id]
 	var base_tint: Color = def.get("tint", Color(1, 1, 1, 1))
-	var defeated: bool = GameState.wild_monsters_defeated.get(placement_key, false)
+	var defeated: bool = is_asleep()
+	_sleep_marker.visible = defeated
 	# Darkens the species' own tint rather than boss.gd's flat grey, so a
 	# defeated Ice Wraith still reads faintly blue instead of every dead
 	# placement collapsing to the same look - darkened(0.55) lands at roughly

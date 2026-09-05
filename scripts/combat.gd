@@ -19,6 +19,11 @@ signal ended(victory: bool)
 # DefeatPanel autoload plays the death sequence from it.
 signal defeated(info: Dictionary)
 const DEFEAT_GOLD_FRACTION := 0.1
+# Where a nap ends: the floor tile beside Oliver's bed in House.tscn (the
+# bed stands at (2, 4)) - mirrors house.gd's NAP_SPAWN_TILE (not preloaded
+# from there: pulling house.gd into a --script compile drags chest.gd in,
+# where autoload names don't resolve).
+const NAP_SPAWN_TILE := Vector2i(3, 4)
 var last_defeat: Dictionary = {}
 
 const ENCOUNTER_CHANCE := 0.12
@@ -392,7 +397,7 @@ func _defeat_enemy(index: int) -> void:
 	var enemy: Dictionary = current_enemies[index]
 	var gold: int = enemy.gold_min + randi() % (enemy.gold_max - enemy.gold_min + 1)
 	Inventory.add_item("gold", gold)
-	var msg := "%s defeated! Found %d gold." % [enemy.name, gold]
+	var msg := "%s dozes off! You pocket %d gold." % [enemy.name, gold]
 	# Drop entries are either a plain item id (always drops) or
 	# {"item": id, "chance": 0..1} for rarer ingredients (Ember Core).
 	var drop_item_ids: Array = enemy.get("drop_item_ids", [])
@@ -414,7 +419,7 @@ func _defeat_enemy(index: int) -> void:
 			GameState.boss_defeated[current_boss_id] = true
 			current_boss_id = ""
 		if current_wild_monster_key != "":
-			GameState.wild_monsters_defeated[current_wild_monster_key] = true
+			GameState.put_wild_monster_to_sleep(current_wild_monster_key)
 			current_wild_monster_key = ""
 		changed.emit()
 		ended.emit(true)
@@ -455,7 +460,7 @@ func _enemy_turn() -> void:
 # Losing: HP/MP restored, a tenth of the gold lost, back home in bed. The
 # DefeatPanel autoload covers the scene change and tells the story.
 func _defeat(cause: String = "") -> void:
-	_log("Oliver was defeated...")
+	_log("Oliver is worn out and needs a nap...")
 	var gold_lost: int = int(floor(Inventory.get_count("gold") * DEFEAT_GOLD_FRACTION))
 	if gold_lost > 0:
 		Inventory.remove_item("gold", gold_lost)
@@ -472,6 +477,8 @@ func _defeat(cause: String = "") -> void:
 	current_wild_monster_key = "" # same - losing to a wild monster leaves it re-challengeable
 	changed.emit()
 	ended.emit(false)
+	# Nap time: wake up beside the bed at home.
+	GameState.set_next_spawn(Vector2(NAP_SPAWN_TILE.x * 32 + 16, NAP_SPAWN_TILE.y * 32 + 16))
 	get_tree().change_scene_to_file("res://scenes/House.tscn")
 	defeated.emit(last_defeat)
 

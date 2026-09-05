@@ -8,6 +8,9 @@ const HEIGHT := 9
 const DOOR_TILE := Vector2i(5, 8)
 
 const BED_SCENE := preload("res://scenes/props/Bed.tscn")
+# Where Oliver comes to after a nap (a lost fight): the floor tile right of
+# his bed (the bed stands at (2, 4)).
+const NAP_SPAWN_TILE := Vector2i(3, 4)
 const CHAIR_SCENE := preload("res://scenes/props/Chair.tscn")
 const TABLE_SCENE := preload("res://scenes/props/Table.tscn")
 const STOVE_SCENE := preload("res://scenes/props/Stove.tscn")

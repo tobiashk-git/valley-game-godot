@@ -14,10 +14,14 @@ const DEFEATED_TINT := Color(0.4, 0.4, 0.4, 1.0)
 @onready var interact_area: Area2D = $InteractArea
 
 var _player_inside := false
+var _sleep_marker: SleepMarker
 
 func _ready() -> void:
 	interact_area.body_entered.connect(_on_body_entered)
 	interact_area.body_exited.connect(_on_body_exited)
+	# A beaten boss sleeps for good (a story gate); "z z Z" says so.
+	var top: float = sprite.position.y + sprite.get_rect().position.y * sprite.scale.y if sprite.texture else -40.0
+	_sleep_marker = SleepMarker.attach(self, top - 26.0)
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
@@ -30,5 +34,6 @@ func _on_body_exited(body: Node2D) -> void:
 func _process(_delta: float) -> void:
 	var defeated: bool = GameState.boss_defeated.get(boss_id, false)
 	sprite.modulate = DEFEATED_TINT if defeated else ALIVE_TINT
+	_sleep_marker.visible = defeated
 	if _player_inside and not defeated and not Combat.in_combat and Input.is_action_just_pressed("interact"):
 		Combat.start_boss_fight(boss_id)
