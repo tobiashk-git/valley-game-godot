@@ -39,6 +39,7 @@ const MUSIC := {
 	"badlands": "res://assets/music/badlands.ogg",
 	"gloomfen": "res://assets/music/gloomfen.ogg",
 	"dungeon": "res://assets/music/dungeon.ogg",
+	"title": {"path": "res://assets/music/title.ogg", "loop_offset": 20.91},
 }
 
 static func music_path(id: String) -> String:
@@ -53,10 +54,10 @@ static func _load_music(id: String):
 		if entry is Dictionary and "loop_offset" in stream:
 			stream.loop_offset = float(entry.loop_offset)
 	return stream
-# Scene name -> music id. Until more tracks exist the village theme carries
-# the valley and the houses; interiors and the title stay quiet.
+# Scene name -> music id (the overworld's outer biomes override this via
+# ZONE_MUSIC below).
 const SCENE_MUSIC := {
-	"Title": "village",
+	"Title": "title",
 	"Overworld": "village",
 	"House": "village",
 	"ElderHouse": "village",
