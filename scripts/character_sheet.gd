@@ -1267,6 +1267,7 @@ func _on_craft_action() -> void:
 # is picked. The Inventory.changed refresh the craft itself triggers keeps
 # the state (only _clear_flash() ends it early).
 func _start_flash(kind: String, message: String) -> void:
+	Audio.play_sfx("craft")
 	flash_kind = kind
 	flash_label.text = message
 	if _flash_tween != null:

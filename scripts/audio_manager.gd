@@ -87,6 +87,7 @@ const SFX := {
 	"chop": "res://assets/sfx/chop.wav",
 	"mine": "res://assets/sfx/mine.wav", # Freesound 593897 "dig5" by igroglaz
 	"tap": "res://assets/sfx/tap.wav", # Freesound 423128 "menu click sound" by killersmurf96
+	"craft": "res://assets/sfx/craft.wav", # Freesound 567849 "kill-crafting-sound" by madpancake
 }
 # One-shot pieces of music: played once over silence, then the scene's
 # track resumes (a won fight plays "victory" between the battle track
