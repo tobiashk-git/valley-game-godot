@@ -408,7 +408,15 @@ func _defeat_enemy(index: int) -> void:
 			continue
 		Inventory.add_item(drop_item_id, 1)
 		msg += " Obtained %s!" % Items.get_item_name(drop_item_id)
+	# Experience: paid per enemy as it drops (a boss is worth double).
+	var xp: int = Enemies.xp_for(enemy, current_boss_id != "")
+	msg += " +%d XP." % xp
 	_log(msg)
+	var level_before: int = Character.stats.level
+	if Character.gain_xp(xp) > 0:
+		_log("Level up! Oliver is now level %d (%s)." % [Character.stats.level, Character.level_up_text(Character.stats.level)])
+		if Character.stats.level - level_before > 1:
+			_log("...and climbed %d levels at once!" % (Character.stats.level - level_before))
 	current_enemies[index] = null
 	if alive_enemies().is_empty():
 		in_combat = false
@@ -432,6 +440,14 @@ func _enemy_turn() -> void:
 	var woke_this_round := false
 	for index in alive_enemies():
 		var enemy: Dictionary = current_enemies[index]
+		# Agility above its starting value lets Oliver slip a blow entirely.
+		if randf() < Character.dodge_chance():
+			_log("%s attacks - Oliver dodges!" % enemy.name)
+			if was_asleep and not woke_this_round:
+				player_status.erase("sleep")
+				_log("Oliver wakes up!")
+				woke_this_round = true
+			continue
 		var dmg := _physical_damage(enemy.attack, _player_defense_bonus())
 		if player_defending:
 			dmg = max(1, dmg / 2)

@@ -77,6 +77,7 @@ func _apply_layout() -> void:
 
 func _connect_stats() -> void:
 	Character.changed.connect(_refresh_stats)
+	Character.levelled_up.connect(func(level: int) -> void: _spawn_text_popup("Level %d!" % level, Color(1.0, 0.85, 0.3)))
 	# In-fight damage/healing/status changes mutate Character.stats and
 	# Combat.player_status and announce it via Combat.changed (that's what
 	# the battle panel refreshes on), so listen to both.
@@ -118,17 +119,30 @@ func _refresh_stats() -> void:
 		status_label.theme_type_variation = &""
 
 func _spawn_popup(delta: int) -> void:
+	_spawn_text_popup(("+%d" if delta > 0 else "%d") % delta, Color(0.55, 0.95, 0.5) if delta > 0 else Color(1.0, 0.35, 0.3))
+
+# A line of text floating up from beside the HP bar (damage/heal numbers,
+# "Level 3!").
+func _spawn_text_popup(text: String, color: Color) -> void:
 	var label := Label.new()
 	label.name = "HpPopup"
-	label.text = ("+%d" if delta > 0 else "%d") % delta
+	label.set_meta("popup", true) # siblings get auto-renamed, so tag rather than trust the name
+	label.text = text
 	label.add_theme_font_size_override("font_size", 22)
-	label.add_theme_color_override("font_color", Color(0.55, 0.95, 0.5) if delta > 0 else Color(1.0, 0.35, 0.3))
+	label.add_theme_color_override("font_color", color)
 	label.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.02))
 	label.add_theme_constant_override("outline_size", 6)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.z_index = 10
 	var rect: Rect2 = hp_bar.get_global_rect()
-	label.global_position = Vector2(rect.end.x + 8.0, rect.position.y - 6.0)
+	# Popups that spawn together (a level-up's full heal + "Level 3!")
+	# stack upwards instead of landing on top of each other: a new one goes
+	# a line above the highest popup still floating.
+	var y: float = rect.position.y - 6.0
+	for child in get_children():
+		if child is Control and child.has_meta("popup"):
+			y = minf(y, child.global_position.y - 24.0)
+	label.global_position = Vector2(rect.end.x + 8.0, y)
 	add_child(label)
 	var tween := create_tween()
 	tween.tween_property(label, "position:y", label.position.y - 36.0, 0.9).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

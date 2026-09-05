@@ -517,7 +517,7 @@ func _refresh() -> void:
 func _refresh_header() -> void:
 	var stats: Dictionary = Character.stats
 	name_label.text = "Oliver"
-	location_label.text = "Adventurer  -  " + HUD.location_name()
+	location_label.text = "Level %d adventurer  -  %s" % [stats.level, HUD.location_name()]
 	hp_bar.max_value = stats.max_hp
 	hp_bar.value = stats.hp
 	hp_label.text = "HP %d / %d" % [stats.hp, stats.max_hp]
@@ -684,9 +684,15 @@ func _refresh_character() -> void:
 			b.pressed.connect(entry[3])
 			row.add_child(b)
 		row.get_node("LoadBtn").disabled = not SaveSystem.has_save()
+	_stats_title("Level %d" % stats.level)
+	if stats.level >= Character.MAX_LEVEL:
+		_stat_row("Experience", "max level")
+	else:
+		_stat_row("Experience", "%d / %d" % [stats.xp, Character.xp_to_next(stats.level)])
+		_stat_row("Next level in", "%d XP" % (Character.xp_to_next(stats.level) - stats.xp))
 	_stats_title("Attributes")
 	_stat_row("Strength", str(stats.strength))
-	_stat_row("Agility", str(stats.agility))
+	_stat_row("Agility", str(stats.agility) + ("  (dodge %d%%)" % int(round(Character.dodge_chance() * 100.0)) if Character.dodge_chance() > 0.0 else ""))
 	_stats_title("Core stats")
 	_stat_row("Health", "%d / %d" % [stats.hp, stats.max_hp])
 	_stat_row("Mana", "%d / %d" % [stats.mp, stats.max_mp])

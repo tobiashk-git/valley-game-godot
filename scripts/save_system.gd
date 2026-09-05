@@ -135,6 +135,10 @@ func apply(data: Dictionary) -> void:
 	Inventory._next_uid = int(inv.get("next_uid", 1))
 
 	var ch: Dictionary = data.get("character", {})
+	# Start from the defaults so a save from before a stat existed (level,
+	# xp) doesn't inherit whatever the previous game had.
+	for k in Character.DEFAULT_STATS:
+		Character.stats[k] = Character.DEFAULT_STATS[k]
 	for k in ch.get("stats", {}).keys():
 		Character.stats[k] = int(ch.stats[k])
 	for slot in Character.SLOTS:

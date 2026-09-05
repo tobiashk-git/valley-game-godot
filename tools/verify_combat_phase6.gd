@@ -28,6 +28,9 @@ func _initialize() -> void:
 	print("Boss sprite tint alive (purple): ", boss.get_node("Sprite2D").modulate == boss.ALIVE_TINT)
 
 	# --- Real interaction path: walk up to the boss and press E. ---
+	# Being dropped onto the boss's collision pushes the player out, which
+	# counts as steps and could roll a random encounter first - suppress.
+	combat._steps_since_encounter = -100000
 	player.position = boss.position + Vector2(0, 20)
 	for i in range(3):
 		await process_frame

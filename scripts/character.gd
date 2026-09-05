@@ -8,7 +8,60 @@ var stats: Dictionary = {
 	"hp": 20, "max_hp": 20,
 	"mp": 10, "max_mp": 10,
 	"strength": 5, "agility": 5,
+	"level": 1, "xp": 0, # xp counts within the current level (see gain_xp)
 }
+
+# Levelling: every fight pays XP (Enemies.xp_for()); a level costs
+# xp_to_next(level) and each one raises the caps and strength, agility on
+# even levels, with a full heal - the classic feel. Agility only does
+# something above its starting value (dodge_chance()), so the verifies that
+# assume every enemy hit lands keep holding at level 1.
+const MAX_LEVEL := 30
+const LEVEL_UP_HP := 4
+const LEVEL_UP_MP := 2
+const LEVEL_UP_STR := 1
+const BASE_AGILITY := 5
+const DODGE_PER_AGILITY := 0.02
+const DODGE_MAX := 0.3
+
+signal levelled_up(new_level: int)
+
+static func xp_to_next(level: int) -> int:
+	return 30 * level
+
+# Adds XP, applies every level reached, returns how many levels were gained.
+func gain_xp(amount: int) -> int:
+	if amount <= 0:
+		return 0
+	var gained := 0
+	stats.xp += amount
+	while stats.level < MAX_LEVEL and stats.xp >= xp_to_next(stats.level):
+		stats.xp -= xp_to_next(stats.level)
+		stats.level += 1
+		gained += 1
+		stats.max_hp += LEVEL_UP_HP
+		stats.max_mp += LEVEL_UP_MP
+		stats.strength += LEVEL_UP_STR
+		if stats.level % 2 == 0:
+			stats.agility += 1
+		stats.hp = stats.max_hp
+		stats.mp = stats.max_mp
+		levelled_up.emit(stats.level)
+	if stats.level >= MAX_LEVEL:
+		stats.xp = 0
+	changed.emit()
+	return gained
+
+# What one level brings, for the battle log / sheet.
+static func level_up_text(new_level: int) -> String:
+	var parts: Array[String] = ["+%d HP" % LEVEL_UP_HP, "+%d MP" % LEVEL_UP_MP, "+%d STR" % LEVEL_UP_STR]
+	if new_level % 2 == 0:
+		parts.append("+1 AGI")
+	return ", ".join(parts)
+
+# Chance an enemy's attack misses Oliver outright - grows with agility.
+func dodge_chance() -> float:
+	return clampf((stats.agility - BASE_AGILITY) * DODGE_PER_AGILITY, 0.0, DODGE_MAX)
 
 # THE single source of truth for equipment slots. Adding a slot = one entry
 # here + items carrying "slot": "<id>" in Items.ITEMS. Everything else is
@@ -111,7 +164,7 @@ func gear_names(field: String) -> Array:
 			names.append(Items.instance_name(equipment[slot]))
 	return names
 
-const DEFAULT_STATS := {"hp": 20, "max_hp": 20, "mp": 10, "max_mp": 10, "strength": 5, "agility": 5}
+const DEFAULT_STATS := {"hp": 20, "max_hp": 20, "mp": 10, "max_mp": 10, "strength": 5, "agility": 5, "level": 1, "xp": 0}
 
 func reset() -> void:
 	for key in DEFAULT_STATS:

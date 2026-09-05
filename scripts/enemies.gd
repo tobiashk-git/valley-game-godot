@@ -237,3 +237,11 @@ const BOSSES := {
 		"drop_item_ids": ["magic_crystal"],
 	},
 }
+
+# XP a beaten enemy is worth: half its HP plus its attack and twice its
+# defence (a tough, hard-hitting thing pays more), doubled for a boss.
+# Derived rather than stored so every existing entry pays out without a
+# per-enemy field.
+static func xp_for(def: Dictionary, is_boss: bool = false) -> int:
+	var base: int = int(ceil(float(def.max_hp) / 2.0)) + int(def.attack) + 2 * int(def.defense)
+	return base * 2 if is_boss else base
