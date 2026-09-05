@@ -38,9 +38,40 @@ func _initialize() -> void:
 	panel.add_child(margin)
 	margin.owner = layer
 
+	# Portrait (bust of the speaker, dialogue_ui.gd's PORTRAITS by speaker
+	# name) at the left of the text column; hidden when the speaker has no
+	# portrait file so the text takes the full width.
+	var row := HBoxContainer.new()
+	row.name = "Row"
+	row.add_theme_constant_override("separation", 12)
+	margin.add_child(row)
+	row.owner = layer
+
+	var frame := Panel.new()
+	frame.name = "PortraitFrame"
+	frame.theme_type_variation = &"DetailPanel"
+	frame.custom_minimum_size = Vector2(96, 96)
+	frame.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(frame)
+	frame.owner = layer
+
+	var portrait := TextureRect.new()
+	portrait.name = "Portrait"
+	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+	portrait.offset_left = 4
+	portrait.offset_top = 4
+	portrait.offset_right = -4
+	portrait.offset_bottom = -4
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	frame.add_child(portrait)
+	portrait.owner = layer
+
 	var vbox := VBoxContainer.new()
 	vbox.name = "VBox"
-	margin.add_child(vbox)
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(vbox)
 	vbox.owner = layer
 
 	var name_label := Label.new()

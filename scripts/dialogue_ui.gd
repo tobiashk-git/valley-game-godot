@@ -8,10 +8,28 @@ extends CanvasLayer
 
 @onready var panel: Panel = $Panel
 @onready var margin: MarginContainer = $Panel/Margin
-@onready var name_label: Label = $Panel/Margin/VBox/NameLabel
-@onready var text_label: RichTextLabel = $Panel/Margin/VBox/TextLabel
-@onready var hint_label: Label = $Panel/Margin/VBox/HintLabel
-@onready var actions_row: HBoxContainer = $Panel/Margin/VBox/ActionsRow
+@onready var portrait_frame: Panel = $Panel/Margin/Row/PortraitFrame
+@onready var portrait: TextureRect = $Panel/Margin/Row/PortraitFrame/Portrait
+@onready var name_label: Label = $Panel/Margin/Row/VBox/NameLabel
+@onready var text_label: RichTextLabel = $Panel/Margin/Row/VBox/TextLabel
+@onready var hint_label: Label = $Panel/Margin/Row/VBox/HintLabel
+@onready var actions_row: HBoxContainer = $Panel/Margin/Row/VBox/ActionsRow
+
+# Speaker name -> bust portrait (assets/portraits/, painterly busts in the
+# Oliver-illustration style, keyed from a magenta background). A speaker
+# without a file here, or whose file is missing, gets no frame and the text
+# spans the whole box - so NPCs can gain portraits one at a time.
+const PORTRAITS := {
+	"Oliver": "res://assets/portraits/oliver.png",
+	"Village Elder": "res://assets/portraits/village_elder.png",
+	"Village Trader": "res://assets/portraits/village_trader.png",
+	"Frostpeak Ranger": "res://assets/portraits/frostpeak_ranger.png",
+	"Forest Druid": "res://assets/portraits/forest_druid.png",
+	"Badlands Prospector": "res://assets/portraits/badlands_prospector.png",
+	"Marsh Guide": "res://assets/portraits/marsh_guide.png",
+}
+const PORTRAIT_SIZE_WIDE := 96.0
+const PORTRAIT_SIZE_NARROW := 72.0
 
 var _ignore_close_this_frame := false
 
@@ -21,6 +39,24 @@ func _ready() -> void:
 	# close-press is seen by them as "still open" this frame and they don't
 	# immediately reopen what this same press just closed.
 	process_priority = 10
+	Layout.changed.connect(_apply_layout)
+	_apply_layout()
+
+func _apply_layout() -> void:
+	# Phones: the box takes nearly the full width (the portrait needs the
+	# room) and the bust is a little smaller.
+	var narrow: bool = Layout.is_narrow()
+	panel.offset_left = 12 if narrow else 40
+	panel.offset_right = -12 if narrow else -40
+	var s: float = PORTRAIT_SIZE_NARROW if narrow else PORTRAIT_SIZE_WIDE
+	portrait_frame.custom_minimum_size = Vector2(s, s)
+
+# The portrait texture for a speaker, or null when there isn't one (yet).
+static func portrait_for(speaker: String) -> Texture2D:
+	var path: String = PORTRAITS.get(speaker, "")
+	if path == "" or not ResourceLoader.exists(path):
+		return null
+	return load(path)
 
 func is_open() -> bool:
 	return panel.visible
@@ -28,6 +64,9 @@ func is_open() -> bool:
 func show_dialogue(npc_name: String, text: String, actions: Array = []) -> void:
 	name_label.text = npc_name
 	text_label.text = text
+	var tex: Texture2D = portrait_for(npc_name)
+	portrait.texture = tex
+	portrait_frame.visible = tex != null
 	panel.visible = true
 	_ignore_close_this_frame = true
 
