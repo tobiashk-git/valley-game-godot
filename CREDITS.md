@@ -10,6 +10,7 @@ Moonlit Moss Path, Ash Rift Pulse, Mire Clock, Basalt Catacombs, Lantern Map, Cr
 - tap: "Menu_Click_Sound.wav" by Killersmurf96, Freesound #423128, CC BY 4.0 (https://freesound.org/people/killersmurf96/sounds/423128/)
 - craft: "Kill / Crafting sound" by MadPanCake, Freesound #567849, CC0 (https://freesound.org/people/madpancake/sounds/567849/)
 - hit: "General Fight Sounds9" by inkyframes, Freesound #783874, CC BY 4.0 (https://freesound.org/people/inkyframes/sounds/783874/)
+- level_up: "Level up" by Bastianhallo, Freesound #682633, CC0 (https://freesound.org/people/bastianhallo/sounds/682633/)
 
 ## Art
 Creature, portrait and prop illustrations generated with Leonardo (Lucid Origin) by Tobias Keuneke.
