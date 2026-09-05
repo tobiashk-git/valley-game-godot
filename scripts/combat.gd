@@ -14,6 +14,12 @@ extends Node
 
 signal changed
 signal ended(victory: bool)
+# Emitted after a lost fight, once the player has been sent home:
+# {"cause": enemy name | "poison" | "confusion", "gold_lost": int}. The
+# DefeatPanel autoload plays the death sequence from it.
+signal defeated(info: Dictionary)
+const DEFEAT_GOLD_FRACTION := 0.1
+var last_defeat: Dictionary = {}
 
 const ENCOUNTER_CHANCE := 0.12
 const ENCOUNTER_COOLDOWN_STEPS := 4
@@ -203,7 +209,7 @@ func _tick_status_durations() -> void:
 func _begin_player_turn() -> bool:
 	_tick_player_poison()
 	if Character.stats.hp <= 0:
-		_defeat()
+		_defeat("poison")
 		return false
 	if player_status.has("sleep"):
 		_log("Oliver is fast asleep and can't act!")
@@ -236,7 +242,7 @@ func player_attack() -> void:
 		_log("Oliver is confused and hits himself for %d damage!" % self_dmg)
 		Character.changed.emit()
 		if Character.stats.hp <= 0:
-			_defeat()
+			_defeat("confusion")
 			return
 		_enemy_turn()
 		return
@@ -429,7 +435,7 @@ func _enemy_turn() -> void:
 		Character.changed.emit()
 
 		if Character.stats.hp <= 0:
-			_defeat()
+			_defeat(enemy.name)
 			return
 
 		var status_attack: Dictionary = enemy.get("status_attack", {})
@@ -446,8 +452,14 @@ func _enemy_turn() -> void:
 	_tick_status_durations()
 	changed.emit()
 
-func _defeat() -> void:
+# Losing: HP/MP restored, a tenth of the gold lost, back home in bed. The
+# DefeatPanel autoload covers the scene change and tells the story.
+func _defeat(cause: String = "") -> void:
 	_log("Oliver was defeated...")
+	var gold_lost: int = int(floor(Inventory.get_count("gold") * DEFEAT_GOLD_FRACTION))
+	if gold_lost > 0:
+		Inventory.remove_item("gold", gold_lost)
+	last_defeat = {"cause": cause, "gold_lost": gold_lost}
 	Character.stats.hp = Character.stats.max_hp
 	Character.stats.mp = Character.stats.max_mp
 	Character.changed.emit()
@@ -461,6 +473,7 @@ func _defeat() -> void:
 	changed.emit()
 	ended.emit(false)
 	get_tree().change_scene_to_file("res://scenes/House.tscn")
+	defeated.emit(last_defeat)
 
 # Drops any fight state (SaveSystem.new_game() / load).
 func reset() -> void:

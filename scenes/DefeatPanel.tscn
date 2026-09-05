@@ -1,0 +1,53 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/defeat_panel.gd" id="1_03g0b"]
+
+[node name="DefeatPanel" type="CanvasLayer" unique_id=682063237]
+script = ExtResource("1_03g0b")
+
+[node name="Black" type="ColorRect" parent="." unique_id=281831221]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 1)
+
+[node name="Panel" type="Panel" parent="." unique_id=28738873]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -130.0
+offset_right = 220.0
+offset_bottom = 130.0
+
+[node name="TitleLabel" type="Label" parent="Panel" unique_id=694152086]
+layout_mode = 0
+offset_top = 16.0
+offset_right = 440.0
+offset_bottom = 46.0
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 22
+text = "You were defeated"
+horizontal_alignment = 1
+
+[node name="BodyLabel" type="Label" parent="Panel" unique_id=19537367]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 54.0
+offset_right = 420.0
+offset_bottom = 174.0
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="WakeBtn" type="Button" parent="Panel" unique_id=1965315311]
+layout_mode = 0
+offset_left = 110.0
+offset_top = 196.0
+offset_right = 330.0
+offset_bottom = 240.0
+theme_type_variation = &"PrimaryButton"
+theme_override_font_sizes/font_size = 17
+text = "Wake up"

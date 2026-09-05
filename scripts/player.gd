@@ -10,7 +10,8 @@ func _ready() -> void:
 	add_to_group("player")
 
 func _physics_process(_delta: float) -> void:
-	if Combat.in_combat:
+	# Frozen mid-fight and while the defeat panel is up.
+	if Combat.in_combat or get_node("/root/DefeatPanel").is_open():
 		velocity = Vector2.ZERO
 		move_and_slide()
 		sprite.play(facing + "_idle")
