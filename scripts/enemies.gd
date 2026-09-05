@@ -72,18 +72,18 @@ const ENEMIES := {
 
 	# --- Verdantwood Forest (east) ---
 	"forest_spirit": {
-		"name": "Forest Spirit", "sprite": "res://assets/enemies/ghost.png", "tint": Color(0.3, 0.75, 0.35, 1.0),
+		"name": "Forest Spirit", "sprite": "res://assets/enemies/art/forest_spirit.png", "art_height": 46,
 		"max_hp": 15, "attack": 4, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "confusion", "chance": 0.25}, "zones": [World.Zone.VERDANTWOOD],
 		"drop_item_ids": ["monster_fur"],
 	},
 	"bandit": {
-		"name": "Bandit", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.55, 0.4, 0.25, 1.0),
+		"name": "Bandit", "sprite": "res://assets/enemies/art/bandit.png", "art_height": 50,
 		"max_hp": 18, "attack": 6, "defense": 2, "gold_min": 10, "gold_max": 16, "zones": [World.Zone.VERDANTWOOD],
 		"drop_item_ids": ["monster_fur"],
 	},
 	"corrupted_fauna": {
-		"name": "Corrupted Fauna", "sprite": "res://assets/enemies/spider.png", "tint": Color(0.35, 0.15, 0.4, 1.0),
+		"name": "Corrupted Fauna", "sprite": "res://assets/enemies/art/corrupted_fauna.png", "art_height": 58,
 		"max_hp": 16, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 11,
 		"status_attack": {"status": "poison", "chance": 0.25}, "zones": [World.Zone.VERDANTWOOD],
 		"drop_item_ids": ["monster_fur"],

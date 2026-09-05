@@ -2,7 +2,11 @@
 painted drop-shadow ellipse the prompt asked it not to draw) into a tight
 transparent PNG for the battle stage and the overworld.
 
-  python tools/key_monster.py <in.jpg> <out.png> [--max 256] [--mist]
+  python tools/key_monster.py <in.jpg> <out.png> [--max 256] [--mist] [--keep-islands]
+
+--keep-islands: keep detached pieces (floating motes, sparks) of 30+ px,
+except in the bottom 12% of the image where Leonardo's fake signatures
+sit; default keeps only the largest island.
 
 --mist: the creature trails translucent white wisps (ghosts): pixels of the
 background hue that are paler than it are a white-over-background blend,
@@ -65,6 +69,33 @@ def fill_holes(mask):
     return ~outside
 
 
+def islands_except_signature(mask, min_px=30, band=0.12):
+    """Every island of min_px+ pixels, minus anything wholly inside the
+    bottom band (where the fake signature scrawl goes)."""
+    h, w = mask.shape
+    seen = np.zeros_like(mask)
+    out = np.zeros_like(mask)
+    ys, xs = np.where(mask)
+    for y0, x0 in zip(ys, xs):
+        if seen[y0, x0]:
+            continue
+        stack = [(y0, x0)]
+        seen[y0, x0] = True
+        comp = []
+        while stack:
+            y, x = stack.pop()
+            comp.append((y, x))
+            for ny, nx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
+                if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and not seen[ny, nx]:
+                    seen[ny, nx] = True
+                    stack.append((ny, nx))
+        top = min(y for y, _ in comp)
+        if len(comp) >= min_px and not (top > h * (1.0 - band) and len(comp) < h * w * 0.01):
+            for y, x in comp:
+                out[y, x] = True
+    return out
+
+
 def holes_to_fill(mask, pure_bg):
     """Enclosed transparent pockets whose pixels are mostly NOT pure
     background (so: keyed by the shadow rule inside the creature)."""
@@ -99,6 +130,9 @@ def main():
     mist = "--mist" in args
     if mist:
         args.remove("--mist")
+    keep_islands = "--keep-islands" in args
+    if keep_islands:
+        args.remove("--keep-islands")
     if "--max" in args:
         i = args.index("--max"); max_side = int(args[i + 1]); del args[i:i + 2]
     src, dst = args
@@ -149,7 +183,7 @@ def main():
         out_rgb = out_rgb.copy()
         out_rgb[pale] = np.array([236, 242, 250], dtype=np.uint8)
 
-    fig = largest_component(alpha > 0)
+    fig = largest_component(alpha > 0) if not keep_islands else islands_except_signature(alpha > 0)
     if mist:
         alpha[~fig] = 0
     # Fill holes that are entirely inside the creature (a fleck of
