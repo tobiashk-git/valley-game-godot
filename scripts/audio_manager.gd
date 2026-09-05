@@ -37,6 +37,7 @@ const MUSIC := {
 	"frostpeak": "res://assets/music/frostpeak.ogg",
 	"verdantwood": {"path": "res://assets/music/verdantwood.ogg", "loop_offset": 12.63},
 	"badlands": "res://assets/music/badlands.ogg",
+	"gloomfen": "res://assets/music/gloomfen.ogg",
 }
 
 static func music_path(id: String) -> String:
@@ -63,6 +64,7 @@ const SCENE_MUSIC := {
 	"FrostpeakInterior": "frostpeak",
 	"VerdantwoodInterior": "verdantwood",
 	"BadlandsInterior": "badlands",
+	"GloomfenInterior": "gloomfen",
 }
 # On the overworld the track follows the biome under Oliver's feet (the
 # valley keeps the village theme until it has its own); biomes without a
@@ -71,6 +73,7 @@ const ZONE_MUSIC := {
 	World.Zone.FROSTPEAK: "frostpeak",
 	World.Zone.VERDANTWOOD: "verdantwood",
 	World.Zone.BADLANDS: "badlands",
+	World.Zone.GLOOMFEN: "gloomfen",
 }
 const SFX := {}
 

@@ -47,6 +47,10 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	print("Standing in the Badlands switches to its theme (interior mapped too): ", audio.current_music() == "badlands" and ResourceLoader.exists("res://assets/music/badlands.ogg") and audio.SCENE_MUSIC.get("BadlandsInterior", "") == "badlands")
+	ow_player.position = Vector2((world.WORLD_CENTER_X - world.VALLEY_RADIUS - 4) * 32 + 16, world.WORLD_CENTER_Y * 32 + 16)
+	await process_frame
+	await process_frame
+	print("Standing in Gloomfen switches to its theme (interior mapped too): ", audio.current_music() == "gloomfen" and ResourceLoader.exists("res://assets/music/gloomfen.ogg") and audio.SCENE_MUSIC.get("GloomfenInterior", "") == "gloomfen")
 	ow_player.position = home
 	await process_frame
 	await process_frame
