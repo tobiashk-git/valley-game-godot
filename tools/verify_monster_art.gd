@@ -28,7 +28,7 @@ func _initialize() -> void:
 	for id in enemies.ENEMIES.keys():
 		if enemies.is_art(enemies.ENEMIES[id].sprite):
 			with_art.append(id)
-	print("All five starters have painted art; a species without art yet (Magma Slime) still uses its pixel sprite: ", with_art.has("dungeon_rat") and with_art.has("cave_bat") and with_art.has("skeleton") and with_art.has("giant_spider") and with_art.has("ghost") and not enemies.is_art(enemies.ENEMIES.magma_slime.sprite))
+	print("All five starters have painted art; a species without art yet (Swamp Hag) still uses its pixel sprite: ", with_art.has("dungeon_rat") and with_art.has("cave_bat") and with_art.has("skeleton") and with_art.has("giant_spider") and with_art.has("ghost") and not enemies.is_art(enemies.ENEMIES.swamp_hag.sprite))
 
 	for id in with_art:
 		var path: String = enemies.ENEMIES[id].sprite
@@ -64,7 +64,7 @@ func _initialize() -> void:
 	while combat.in_combat:
 		combat.player_run()
 		await physics_frame
-	combat.start_combat(["magma_slime"])
+	combat.start_combat(["swamp_hag"])
 	await process_frame
 	print("A species without art keeps the crisp pixel path: ", battle.enemy_slots[0].get_node("Box/Sprite").texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
 	root.get_texture().get_image().save_png("res://verify_monster_art_stage.png")
@@ -89,9 +89,9 @@ func _initialize() -> void:
 	skel.position = player.position + Vector2(-64, 0)
 	overworld.get_node("YSort").add_child(skel)
 	var bat: Node2D = WILD_SCENE.instantiate()
-	bat.enemy_id = "magma_slime" # still on the pixel sprite
+	bat.enemy_id = "swamp_hag" # still on the pixel sprite
 	bat.zone = -1
-	bat.placement_key = "verify_slime"
+	bat.placement_key = "verify_hag"
 	bat.position = player.position + Vector2(-128, 0)
 	overworld.get_node("YSort").add_child(bat)
 	await process_frame
@@ -99,7 +99,7 @@ func _initialize() -> void:
 	var drawn_h: float = rat.sprite.texture.get_size().y * rat.sprite.scale.y
 	var shape: RectangleShape2D = rat.interact_shape.shape
 	var skel_h: float = skel.sprite.texture.get_size().y * skel.sprite.scale.y
-	print("Wild rat 40px tall, skeleton 52px (per-species art_height), smooth, interact area sized to the drawing, slime still at pixel scale 0.8: ", absf(drawn_h - 40.0) < 0.5 and absf(skel_h - 52.0) < 0.5 and rat.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and absf(shape.size.y - (40.0 + 2.0 * rat.INTERACT_MARGIN)) < 0.5 and bat.sprite.scale == Vector2(0.8, 0.8) and bat.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
+	print("Wild rat 40px tall, skeleton 52px (per-species art_height), smooth, interact area sized to the drawing, hag still at pixel scale 0.8: ", absf(drawn_h - 40.0) < 0.5 and absf(skel_h - 52.0) < 0.5 and rat.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and absf(shape.size.y - (40.0 + 2.0 * rat.INTERACT_MARGIN)) < 0.5 and bat.sprite.scale == Vector2(0.8, 0.8) and bat.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
 	var bottom: float = rat.sprite.position.y + (rat.sprite.offset.y + rat.sprite.texture.get_size().y / 2.0) * rat.sprite.scale.y
 	print("Its feet sit at the node's base (bottom of the drawn sprite %.0fpx below the origin, = FEET_DROP): " % bottom, absf(bottom - rat.FEET_DROP) < 0.5)
 	root.get_texture().get_image().save_png("res://verify_monster_art_overworld.png")

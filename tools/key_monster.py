@@ -2,7 +2,12 @@
 painted drop-shadow ellipse the prompt asked it not to draw) into a tight
 transparent PNG for the battle stage and the overworld.
 
-  python tools/key_monster.py <in.jpg> <out.png> [--max 256] [--mist] [--keep-islands]
+  python tools/key_monster.py <in.jpg> <out.png> [--max 256] [--mist] [--keep-islands] [--shadow X,Y]
+
+--shadow X,Y: sample a stubborn shadow tone at that source pixel (an odd
+second shadow colour the automatic rule misses); pixels near that colour,
+or on the blend line between it and the background, are keyed - but only
+in the lower part of the image (from 10% above the sample upward is left).
 
 --keep-islands: keep detached pieces (floating motes, sparks) of 30+ px,
 except in the bottom 12% of the image where Leonardo's fake signatures
@@ -133,6 +138,11 @@ def main():
     keep_islands = "--keep-islands" in args
     if keep_islands:
         args.remove("--keep-islands")
+    shadow_xy = None
+    if "--shadow" in args:
+        i = args.index("--shadow")
+        shadow_xy = tuple(int(v) for v in args[i + 1].split(","))
+        del args[i:i + 2]
     if "--max" in args:
         i = args.index("--max"); max_side = int(args[i + 1]); del args[i:i + 2]
     src, dst = args
@@ -160,9 +170,31 @@ def main():
     hue_d = np.minimum(hue_d, 360.0 - hue_d)
     # (The ghost's shadow drifted 13 deg from its background; the rat's
     # darkest fur is 4 deg off but 0.15 lower in saturation - hence 15 / 0.09.)
-    same_hue = (hue_d < 15.0) & (np.abs(hsv[..., 1] - bg_hsv[..., 1]) < 0.09)
+    # ...and a real shadow is the background DARKENED, so in RGB it lies on
+    # the line from black through the background colour: a red drake's dark
+    # reds share the hue/sat window (hue 355-3 vs 344, sat .78 vs .72) but
+    # sit 19-39 units off that line, the shadows 2-11.
+    unit = field / np.maximum(np.linalg.norm(field, axis=-1, keepdims=True), 1e-6)
+    proj = (rgb * unit).sum(-1, keepdims=True)
+    perp = np.linalg.norm(rgb - proj * unit, axis=-1)
+    same_hue = (hue_d < 15.0) & (np.abs(hsv[..., 1] - bg_hsv[..., 1]) < 0.09) & (perp < 14.0)
     shadow = same_hue & (hsv[..., 2] <= bg_hsv[..., 2] + 0.05)
     keyed = bg | shadow
+    if shadow_xy is not None:
+        sx, sy = shadow_xy
+        tone = rgb[sy, sx]
+        near = np.sqrt(((rgb - tone) ** 2).sum(-1)) < 26.0
+        # blend line between the sampled tone and the local background
+        seg = field - tone
+        seg_len = np.maximum(np.linalg.norm(seg, axis=-1, keepdims=True), 1e-6)
+        seg_u = seg / seg_len
+        t = ((rgb - tone) * seg_u).sum(-1, keepdims=True)
+        on_line = (np.linalg.norm((rgb - tone) - t * seg_u, axis=-1) < 14.0) & (t[..., 0] >= -5.0) & (t[..., 0] <= seg_len[..., 0] + 5.0)
+        band = np.zeros((h, w), bool)
+        band[max(0, int(sy - 0.10 * h)):, :] = True
+        extra = (near | on_line) & band
+        keyed = keyed | extra
+        print("manual shadow sample", tone.astype(int), "keyed", int((extra & ~(bg | shadow)).sum()), "more px")
 
     # Edge peel: blended outline pixels next to the keyed region - toward
     # the background field, or toward the shadow (same hue/sat, any value).
