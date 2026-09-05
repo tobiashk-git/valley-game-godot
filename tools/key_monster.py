@@ -65,6 +65,43 @@ def fill_holes(mask):
     return ~outside
 
 
+def small_holes(mask, max_area):
+    holes = fill_holes(mask) & ~mask
+    try:
+        from scipy import ndimage
+        labels, n = ndimage.label(holes)
+        if n == 0:
+            return holes
+        sizes = ndimage.sum(holes, labels, range(1, n + 1))
+        keep = np.zeros(n + 1, bool)
+        keep[1:] = np.asarray(sizes) <= max_area
+        return keep[labels]
+    except ImportError:
+        pass
+    # No scipy: flood each hole by hand (holes are a small share of the image).
+    h, w = holes.shape
+    seen = np.zeros_like(holes)
+    out = np.zeros_like(holes)
+    ys, xs = np.where(holes)
+    for y0, x0 in zip(ys, xs):
+        if seen[y0, x0]:
+            continue
+        stack = [(y0, x0)]
+        seen[y0, x0] = True
+        comp = []
+        while stack:
+            y, x = stack.pop()
+            comp.append((y, x))
+            for ny, nx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
+                if 0 <= ny < h and 0 <= nx < w and holes[ny, nx] and not seen[ny, nx]:
+                    seen[ny, nx] = True
+                    stack.append((ny, nx))
+        if len(comp) <= max_area:
+            for y, x in comp:
+                out[y, x] = True
+    return out
+
+
 def main():
     args = sys.argv[1:]
     max_side = 256
@@ -128,7 +165,9 @@ def main():
     # background-hued colour in an eye or an ear): only transparent regions
     # that reach the image border stay transparent.
     if not mist:
-        holes = fill_holes(fig) & ~fig
+        # Only SMALL holes: a fleck in an eye or an ear. A big enclosed pocket
+        # (the gap between a golem's arm and its torso) is real background.
+        holes = small_holes(fig, max_area=max(64, int(0.001 * fig.sum())))
         alpha[holes] = 255
         fig = fig | holes
         alpha[~fig] = 0

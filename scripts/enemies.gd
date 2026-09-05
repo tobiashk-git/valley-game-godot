@@ -53,19 +53,19 @@ const ENEMIES := {
 
 	# --- Frostpeak Ridge (north) ---
 	"ice_wraith": {
-		"name": "Ice Wraith", "sprite": "res://assets/enemies/ghost.png", "tint": Color(0.55, 0.8, 0.95, 1.0),
+		"name": "Ice Wraith", "sprite": "res://assets/enemies/art/ice_wraith.png", "art_height": 48,
 		"max_hp": 16, "attack": 5, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "paralysis", "chance": 0.25}, "zones": [World.Zone.FROSTPEAK],
 		"drop_item_ids": ["monster_fur"],
 	},
 	"frost_wolf": {
-		"name": "Frost Wolf", "sprite": "res://assets/enemies/spider.png", "tint": Color(0.75, 0.85, 0.95, 1.0),
+		"name": "Frost Wolf", "sprite": "res://assets/enemies/art/frost_wolf.png", "art_height": 44,
 		"max_hp": 14, "attack": 6, "defense": 0, "gold_min": 5, "gold_max": 9,
 		"status_attack": {"status": "sleep", "chance": 0.2}, "zones": [World.Zone.FROSTPEAK],
 		"drop_item_ids": ["monster_fur"],
 	},
 	"stone_sentinel": {
-		"name": "Stone Sentinel", "sprite": "res://assets/enemies/skeleton.png", "tint": Color(0.5, 0.5, 0.52, 1.0),
+		"name": "Stone Sentinel", "sprite": "res://assets/enemies/art/stone_sentinel.png", "art_height": 54,
 		"max_hp": 22, "attack": 5, "defense": 4, "gold_min": 8, "gold_max": 14, "zones": [World.Zone.FROSTPEAK],
 		"drop_item_ids": ["monster_fur"],
 	},
