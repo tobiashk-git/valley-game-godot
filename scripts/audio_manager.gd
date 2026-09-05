@@ -152,7 +152,9 @@ func debug_state() -> String:
 	if OS.has_feature("web"):
 		# The engine's own context is out of reach from here; a probe
 		# context says whether this browser has unlocked audio at all.
-		var state = JavaScriptBridge.eval("(function(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return 'no WebAudio';var c=new C();var s=c.state;c.close();return s;}catch(e){return 'error '+e;}})()", true)
+		# The export's head_include captures the engine's own context as
+		# window.__godotCtx and resumes it inside every tap.
+		var state = JavaScriptBridge.eval("window.__godotCtx ? window.__godotCtx.state : 'not captured'", true)
 		var ua = JavaScriptBridge.eval("(navigator.userAgent.match(/(iPhone|iPad|Android)[^)]*/)||['other'])[0].slice(0,26)", true)
 		line += ", browser %s, %s" % [str(state), str(ua)]
 	return line
