@@ -68,8 +68,10 @@ func _process(_delta: float) -> void:
 	var wanted: float = margin.get_combined_minimum_size().y + 16.0
 	if absf(panel.size.y - wanted) > 0.5:
 		panel.offset_bottom = panel.offset_top + wanted
-	if Input.is_action_just_pressed("interact"):
-		if _ignore_close_this_frame:
-			_ignore_close_this_frame = false
-		else:
-			hide_dialogue()
+	# The press that opened the box (npc.gd, same frame, lower priority)
+	# must not close it; the guard lasts exactly one frame, so a box opened
+	# by a button or a script closes on the very next E rather than the
+	# second one.
+	if Input.is_action_just_pressed("interact") and not _ignore_close_this_frame:
+		hide_dialogue()
+	_ignore_close_this_frame = false

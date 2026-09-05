@@ -86,5 +86,5 @@ func _process(_delta: float) -> void:
 	# placement collapsing to the same look - darkened(0.55) lands at roughly
 	# the same alive->dead contrast boss.gd's own two flat tints have.
 	sprite.modulate = base_tint.darkened(0.55) if defeated else base_tint
-	if _player_inside and not defeated and not Combat.in_combat and Input.is_action_just_pressed("interact"):
+	if _player_inside and not defeated and not Combat.in_combat and not GameState.interact_blocked() and Input.is_action_just_pressed("interact"):
 		Combat.start_wild_encounter(enemy_id, zone, placement_key)

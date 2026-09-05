@@ -75,6 +75,10 @@ func _ready() -> void:
 	cam.limit_bottom = HEIGHT * 32
 	cam.reset_smoothing()
 
+	# A brand-new game opens here: Oliver's first morning (see intro.gd).
+	if GameState.intro_pending:
+		Intro.play(player)
+
 	out_portal.position = _tile_center(DOOR_TILE)
 	out_portal.target_scene = "res://scenes/Overworld.tscn"
 	out_portal.target_spawn = Vector2(World.HOUSE_ENTRANCE.x * 32 + 16, (World.HOUSE_ENTRANCE.y + 1) * 32 + 16)

@@ -70,7 +70,7 @@ func _initialize() -> void:
 	save.new_game()
 	await process_frame
 	await process_frame
-	print("New game resets everything and lands on the Overworld: ", current_scene.name == "Overworld" and inventory.backpack.is_empty() and inventory.gear.is_empty() and character.equipped_id("weapon") == "" and character.stats.hp == 20 and quests.quest_state.is_empty() and quests.tracked_quests.is_empty() and storage.get_count("house_chest", "stone") == 0 and not game_state.village_gates_open and not game_state.discovered_pois.dungeon and not game_state.biome_paths_open.frostpeak and game_state.wild_monsters_defeated.is_empty() and not game_state.boss_defeated.dungeon_boss)
+	print("New game resets everything and wakes Oliver beside his bed with the intro pending: ", current_scene.name == "House" and current_scene.get_node("YSort/Player").position == Vector2(3 * 32 + 16, 4 * 32 + 16) and game_state.intro_pending and root.get_node("Intro").is_playing() and inventory.backpack.is_empty() and inventory.gear.is_empty() and character.equipped_id("weapon") == "" and character.stats.hp == 20 and quests.quest_state.is_empty() and quests.tracked_quests.is_empty() and storage.get_count("house_chest", "stone") == 0 and not game_state.village_gates_open and not game_state.discovered_pois.dungeon and not game_state.biome_paths_open.frostpeak and game_state.wild_monsters_defeated.is_empty() and not game_state.boss_defeated.dungeon_boss)
 	print("Test slot untouched by new_game (only the auto slot is wiped): ", save.has_save(SLOT))
 
 	# --- Load. ---

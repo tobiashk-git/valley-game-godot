@@ -39,7 +39,7 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	await process_frame
-	print("New Game lands on the overworld with a clean state, overlays back: ", current_scene.name == "Overworld" and inventory.backpack.is_empty() and hud.visible and root.get_node("PanelButtons").visible)
+	print("New Game wakes Oliver at home with a clean state, overlays back: ", current_scene.name == "House" and root.get_node("Intro").is_playing() and inventory.backpack.is_empty() and hud.visible and root.get_node("PanelButtons").visible)
 
 	# --- Save and quit to title from the Hero tab. ---
 	inventory.add_item("wood", 3)
@@ -51,7 +51,7 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	await process_frame
-	print("Save and quit returns to the title with Continue offered: ", current_scene.name == "Title" and save.has_save(save.AUTO_SLOT) and current_scene.continue_btn.visible and current_scene.save_line.text.contains("in the Valley") and not sheet.is_open())
+	print("Save and quit returns to the title with Continue offered: ", current_scene.name == "Title" and save.has_save(save.AUTO_SLOT) and current_scene.continue_btn.visible and current_scene.save_line.text.contains("in your House") and not sheet.is_open())
 	save.enabled = false
 
 	# --- Phone layout. ---

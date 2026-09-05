@@ -102,6 +102,7 @@ func snapshot() -> Dictionary:
 			"boss_defeated": GameState.boss_defeated.duplicate(),
 			"wild_monsters_defeated": GameState.wild_monsters_defeated.duplicate(),
 			"village_gates_open": GameState.village_gates_open,
+			"intro_pending": GameState.intro_pending,
 			"discovered_pois": GameState.discovered_pois.duplicate(),
 			"world_progress": GameState.world_progress.duplicate(),
 			"biome_paths_open": GameState.biome_paths_open.duplicate(),
@@ -124,6 +125,7 @@ func apply(data: Dictionary) -> void:
 			for k in gs[key].keys():
 				target[k] = gs[key][k]
 	GameState.village_gates_open = bool(gs.get("village_gates_open", false))
+	GameState.intro_pending = bool(gs.get("intro_pending", false)) # older saves: intro long done
 
 	var inv: Dictionary = data.get("inventory", {})
 	Inventory.backpack = _int_dict(inv.get("backpack", {}))
@@ -230,7 +232,12 @@ func new_game() -> void:
 	Combat.reset()
 	last_saved_unix = 0
 	_dirty = false
-	get_tree().change_scene_to_file("res://scenes/Overworld.tscn")
+	# The game opens in-world: Oliver wakes up beside his bed at home and
+	# the Intro autoload plays his first morning (House._ready()).
+	GameState.intro_pending = true
+	var bed_side: Vector2i = Combat.NAP_SPAWN_TILE # == House.NAP_SPAWN_TILE (preloading house.gd here drags Combat into the compile)
+	GameState.set_next_spawn(Vector2(bed_side.x * 32 + 16, bed_side.y * 32 + 16))
+	get_tree().change_scene_to_file("res://scenes/House.tscn")
 	_last_scene = null
 
 func _boot_continue() -> void:

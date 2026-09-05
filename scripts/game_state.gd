@@ -34,6 +34,9 @@ const WILD_MONSTER_SLEEP_SECONDS := 600
 # the player is always inside a house interior (never the Overworld itself)
 # at the exact moment this flips - see world.gd's open_gates().
 var village_gates_open := false
+# True from New Game until the in-world opening (Intro autoload, played by
+# House._ready()) has run through. Saved, so a quit mid-intro replays it.
+var intro_pending := false
 
 # World Map fast-travel unlocks. House/village start known (the player
 # spawns right there); the dungeon/castle unlock themselves in
@@ -92,6 +95,13 @@ func reset() -> void:
 func is_gameplay() -> bool:
 	var scene: Node = get_tree().current_scene
 	return scene != null and scene.has_node("YSort/Player")
+
+# True while a dialogue box or the opening is up: world interactables
+# (chests, doors, monsters, gatherables, bosses) must ignore E then, or the
+# press that closes a chat also opens the chest / walks through the door /
+# starts a fight the player is standing next to.
+func interact_blocked() -> bool:
+	return get_node("/root/DialogueUI").is_open() or get_node("/root/Intro").is_playing()
 
 func put_wild_monster_to_sleep(key: String) -> void:
 	wild_monsters_defeated[key] = int(Time.get_unix_time_from_system()) + WILD_MONSTER_SLEEP_SECONDS
