@@ -215,7 +215,7 @@ func _accept_quest(quest_id: String) -> void:
 	# Elder says so (the Accept button's own box has just closed).
 	if quest_id == "meet_villagers" and objective_met(quest_id):
 		_mark_completed(quest_id)
-		GameState.village_gates_open = true
+		_open_village_gates()
 		get_node("/root/DialogueUI").show_dialogue(QUEST_DEFS[quest_id].giver_name, "You've already met the Trader? Splendid. The village gates are open - the valley's yours to explore.")
 	changed.emit()
 
@@ -264,9 +264,19 @@ func mark_npc_met(npc_id: String) -> bool:
 	if not objective_met("meet_villagers"):
 		return false
 	_mark_completed("meet_villagers")
-	GameState.village_gates_open = true
+	_open_village_gates()
 	changed.emit()
 	return true
+
+# Flips the flag AND repaints the gates if the player is standing on the
+# overworld right now - the scene only reads the flag in its _ready(), so
+# completing the tutorial outside (met the Trader first, then accepted from
+# the Elder on the square) used to leave the gates shut until a reload.
+func _open_village_gates() -> void:
+	GameState.village_gates_open = true
+	var scene: Node = get_tree().current_scene
+	if scene != null and scene.name == "Overworld" and scene.has_node("TileMapLayer"):
+		World.open_gates(scene.get_node("TileMapLayer"))
 
 func reset() -> void:
 	quest_state = {}

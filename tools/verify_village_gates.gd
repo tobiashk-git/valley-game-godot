@@ -171,6 +171,33 @@ func _initialize() -> void:
 	print("Accepting after already meeting the Trader completes it at once and opens the gates: ", quests.quest_state.get("meet_villagers", "") == "completed" and game_state.village_gates_open and dialogue_ui.is_open() and dialogue_ui.text_label.text.begins_with("You've already met the Trader"))
 	dialogue_ui.hide_dialogue()
 
+	# --- The bug: completing the tutorial while STANDING on the overworld
+	# must open the gates right there, without a scene reload. ---
+	var live: Node2D = load("res://scenes/Overworld.tscn").instantiate()
+	quests.quest_state.erase("meet_villagers")
+	game_state.village_gates_open = false
+	root.add_child(live)
+	current_scene = live
+	await process_frame
+	await process_frame
+	var live_map: TileMapLayer = live.get_node("TileMapLayer")
+	print("Gate tile painted shut on this fresh overworld: ", live_map.get_cell_source_id(south_gate) == world.SRC_GATE)
+	quests._accept_quest("meet_villagers") # Trader already met -> completes on the spot
+	await process_frame
+	dialogue_ui.hide_dialogue()
+	print("Gates repaint open immediately, no reload: ", game_state.village_gates_open and live_map.get_cell_source_id(south_gate) == world.SRC_GRASS)
+	var live_player: CharacterBody2D = live.get_node("YSort/Player")
+	live_player.position = Vector2(south_gate.x * 32 + 16, (south_gate.y - 2) * 32 + 16)
+	live_player.get_node("Camera2D").reset_smoothing()
+	for i in range(3):
+		await process_frame
+	await _clear_point(live, live_player, Vector2(south_gate.x * 32 + 16, south_gate.y * 32 + 16), 100.0)
+	await _walk(live_player, "move_down", 60)
+	print("...and the south gate is walkable at once: ", live_player.position.y > (south_gate.y + 1) * 32.0)
+	root.remove_child(live)
+	live.queue_free()
+	await process_frame
+
 	# --- Fresh Overworld reload: gates should paint open from the start. ---
 	var overworld2_scene: PackedScene = load("res://scenes/Overworld.tscn")
 	var overworld2: Node2D = overworld2_scene.instantiate()
