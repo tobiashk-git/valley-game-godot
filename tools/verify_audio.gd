@@ -43,6 +43,10 @@ func _initialize() -> void:
 	var vw: AudioStreamOggVorbis = audio._load_music("verdantwood")
 	print("Verdantwood keeps its intro: the file runs past the loop and repeats from 12.63 s: ", vw.loop and absf(vw.loop_offset - 12.63) < 0.01 and vw.get_length() > 60.0)
 	print("Standing in Verdantwood switches to its theme (interior mapped too): ", audio.current_music() == "verdantwood" and ResourceLoader.exists("res://assets/music/verdantwood.ogg") and audio.SCENE_MUSIC.get("VerdantwoodInterior", "") == "verdantwood")
+	ow_player.position = Vector2(world.WORLD_CENTER_X * 32 + 16, (world.WORLD_CENTER_Y + world.VALLEY_RADIUS + 4) * 32 + 16)
+	await process_frame
+	await process_frame
+	print("Standing in the Badlands switches to its theme (interior mapped too): ", audio.current_music() == "badlands" and ResourceLoader.exists("res://assets/music/badlands.ogg") and audio.SCENE_MUSIC.get("BadlandsInterior", "") == "badlands")
 	ow_player.position = home
 	await process_frame
 	await process_frame
