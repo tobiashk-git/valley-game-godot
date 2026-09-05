@@ -107,7 +107,10 @@ def main():
     alpha[~fig] = 0
     ys, xs = np.where(fig)
     x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
-    side = x1 - x0
+    # Square side = bust width, but never under 70% of its height - a narrow
+    # bust (high collar, no shoulders) would otherwise crowd the frame.
+    side = max(x1 - x0, int((y1 - y0) * 0.7))
+    side = min(side, w, h)
     top = max(0, int(y0 - side * top_air))
     cx = (x0 + x1) // 2
     left = max(0, min(w - side, cx - side // 2))
