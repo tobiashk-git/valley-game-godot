@@ -67,7 +67,19 @@ func _initialize() -> void:
 		combat.player_run()
 		await physics_frame
 	await process_frame
-	print("...and the village theme returns when it ends: ", audio.current_music() == "village")
+	print("...and the village theme returns when it ends (running away: no sting): ", audio.current_music() == "village" and audio.last_sting == "")
+	print("Victory sting file exists, 2-8 s, plays once (no loop): ", ResourceLoader.exists("res://assets/music/victory.ogg") and load("res://assets/music/victory.ogg").get_length() >= 2.0 and load("res://assets/music/victory.ogg").get_length() <= 8.0 and not load("res://assets/music/victory.ogg").loop)
+	var character: Node = root.get_node("Character")
+	combat.start_combat(["dungeon_rat"])
+	await process_frame
+	while combat.in_combat:
+		character.stats.hp = 500
+		combat.current_enemies[0].hp = 1
+		combat.player_attack()
+		await process_frame
+	await process_frame
+	print("Winning a fight asks for the victory sting: ", audio.last_sting == "victory")
+	audio.last_sting = ""
 
 	# Audible path, muted: crossfade players.
 	var music_bus: int = AudioServer.get_bus_index("Music")
@@ -79,6 +91,18 @@ func _initialize() -> void:
 	await process_frame
 	var p0: AudioStreamPlayer = audio._players[audio._active]
 	print("Playing the village track on one player, looping, its sub-bus fading up: ", p0.playing and p0.stream is AudioStreamOggVorbis and p0.stream.loop and p0.volume_db == 0.0 and AudioServer.get_bus_volume_db(AudioServer.get_bus_index(audio.PLAYER_BUSES[audio._active])) > audio.SILENT_DB)
+	# Audible path: the sting silences the music while it plays, then the
+	# scene's track comes back.
+	audio.play_sting("victory")
+	await process_frame
+	await process_frame
+	print("While the sting plays the music is cleared and the sting player runs: ", audio.sting_playing() and audio.current_music() == "")
+	await create_timer(load("res://assets/music/victory.ogg").get_length() + 0.3).timeout
+	await process_frame
+	await process_frame
+	print("When the sting ends the overworld's theme comes back: ", not audio.sting_playing() and audio.current_music() == "village")
+	await create_timer(1.4).timeout
+	p0 = audio._players[audio._active]
 	change_scene_to_packed(load("res://scenes/House.tscn"))
 	await process_frame
 	await process_frame

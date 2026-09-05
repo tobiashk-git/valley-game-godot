@@ -82,6 +82,12 @@ const ZONE_MUSIC := {
 	World.Zone.GLOOMFEN: "gloomfen",
 }
 const SFX := {}
+# One-shot pieces of music: played once over silence, then the scene's
+# track resumes (a won fight plays "victory" between the battle track
+# stopping and the area's theme returning).
+const STINGS := {
+	"victory": "res://assets/music/victory.ogg",
+}
 
 var enabled := true
 var hard_switch := false # web: cut between tracks, no fades (see above)
@@ -92,6 +98,8 @@ var _active := 0
 var _current := ""
 var _fade: Tween = null
 var _sfx_pool: Array[AudioStreamPlayer] = []
+var _sting: AudioStreamPlayer
+var last_sting := "" # for verifies (silent under a script)
 
 func _ready() -> void:
 	enabled = get_tree().get_script() == null
@@ -111,8 +119,31 @@ func _ready() -> void:
 		s.bus = "Sfx"
 		add_child(s)
 		_sfx_pool.append(s)
+	_sting = AudioStreamPlayer.new()
+	_sting.name = "Sting"
+	_sting.bus = "Music"
+	add_child(_sting)
 	_load_settings()
 	_apply_volumes()
+	# Combat is a later autoload; connect once everything exists.
+	_connect_combat.call_deferred()
+
+func _connect_combat() -> void:
+	Combat.ended.connect(func(victory: bool) -> void:
+		if victory:
+			play_sting("victory"))
+
+func play_sting(id: String) -> void:
+	last_sting = id
+	if not enabled or not STINGS.has(id):
+		return
+	_sting.stream = load(STINGS[id])
+	_sting.play()
+	# Drop whatever was playing so the sting stands alone.
+	play_music("")
+
+func sting_playing() -> bool:
+	return _sting != null and _sting.playing
 
 # The buses come from res://default_bus_layout.tres so they exist before any
 # playback. Adding a bus at RUNTIME broke the web build: the engine's web
@@ -136,6 +167,8 @@ func _process(_delta: float) -> void:
 
 # What should be playing right now: the fight, else the scene's track.
 func wanted_music() -> String:
+	if sting_playing():
+		return ""
 	if Combat.in_combat:
 		return "battle"
 	var scene: Node = get_tree().current_scene
