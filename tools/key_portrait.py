@@ -39,6 +39,36 @@ def dilate(m, r=1):
     return out
 
 
+def largest_component(mask):
+    try:
+        from scipy import ndimage
+        labels, n = ndimage.label(mask)
+        if n <= 1:
+            return mask
+        sizes = ndimage.sum(mask, labels, range(1, n + 1))
+        return labels == (int(np.argmax(sizes)) + 1)
+    except ImportError:
+        pass
+    # fallback: grow from the biggest-looking seed (the mask's centre column)
+    h, w = mask.shape
+    seen = np.zeros_like(mask)
+    best = None
+    remaining = mask.copy()
+    while remaining.any():
+        ys, xs = np.where(remaining)
+        comp = np.zeros_like(mask)
+        comp[ys[0], xs[0]] = True
+        while True:
+            grown = dilate(comp, 1) & mask
+            if grown.sum() == comp.sum():
+                break
+            comp = grown
+        remaining &= ~comp
+        if best is None or comp.sum() > best.sum():
+            best = comp
+    return best
+
+
 def main():
     args = sys.argv[1:]
     size = 192
@@ -70,7 +100,11 @@ def main():
     ring = dilate(bg, 1) & ~bg
     alpha[ring] = 120
 
+    # Keep only the largest opaque island: Leonardo sometimes adds a fake
+    # signature scrawl or a stray fleck off to one side.
     fig = alpha > 0
+    fig = largest_component(fig)
+    alpha[~fig] = 0
     ys, xs = np.where(fig)
     x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
     side = x1 - x0
