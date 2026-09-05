@@ -677,6 +677,8 @@ func _refresh_character() -> void:
 		_game_button("QuitBtn", "Save and quit to title", &"SecondaryButton", _on_quit_to_title)
 		var load_btn: Button = _game_button("LoadBtn", "Load last save", &"SecondaryButton", _on_load_save)
 		load_btn.disabled = not SaveSystem.has_save()
+		_volume_row("MusicSlider", "Music", Audio.music_volume, Audio.set_music_volume)
+		_volume_row("SfxSlider", "Sounds", Audio.sfx_volume, Audio.set_sfx_volume)
 	else:
 		# Wide: one compact row so the 200px column keeps its height for the
 		# stats (Save & Quit is beside the X).
@@ -695,6 +697,8 @@ func _refresh_character() -> void:
 			b.pressed.connect(entry[3])
 			row.add_child(b)
 		row.get_node("LoadBtn").disabled = not SaveSystem.has_save()
+		_volume_row("MusicSlider", "Music", Audio.music_volume, Audio.set_music_volume)
+		_volume_row("SfxSlider", "Sounds", Audio.sfx_volume, Audio.set_sfx_volume)
 	_stats_title("Level %d" % stats.level)
 	if stats.level >= Character.MAX_LEVEL:
 		_stat_row("Experience", "max level")
@@ -747,6 +751,29 @@ func _refresh_character() -> void:
 	# real height (the Game block made it taller) - nothing gets clipped.
 	if narrow:
 		character_view.custom_minimum_size.y = stats_list.position.y + stats_list.get_combined_minimum_size().y + 16.0
+
+# "Music  [=====----]" - a labelled 0..100 slider feeding the Audio buses.
+func _volume_row(node_name: String, label_text: String, value: float, on_change: Callable) -> HSlider:
+	var row := HBoxContainer.new()
+	row.name = node_name + "Row"
+	row.add_theme_constant_override("separation", 8)
+	var l := Label.new()
+	l.text = label_text
+	l.add_theme_font_size_override("font_size", 13)
+	l.custom_minimum_size = Vector2(52, 0)
+	row.add_child(l)
+	var slider := HSlider.new()
+	slider.name = node_name
+	slider.min_value = 0
+	slider.max_value = 100
+	slider.step = 5
+	slider.value = round(value * 100.0)
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.custom_minimum_size = Vector2(0, 26)
+	slider.value_changed.connect(func(v: float) -> void: on_change.call(v / 100.0))
+	row.add_child(slider)
+	stats_list.add_child(row)
+	return slider
 
 func _game_button(node_name: String, text: String, variation: StringName, on_pressed: Callable) -> Button:
 	var b := Button.new()

@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 [autoload]
 
 Layout="*res://scripts/layout.gd"
+Audio="*res://scripts/audio_manager.gd"
 World="*res://scripts/world.gd"
 GameState="*res://scripts/game_state.gd"
 DialogueUI="*res://scenes/DialogueUI.tscn"

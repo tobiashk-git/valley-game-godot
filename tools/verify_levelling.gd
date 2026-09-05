@@ -124,7 +124,7 @@ func _initialize() -> void:
 	for child in sheet.stats_list.get_children():
 		if child is Label:
 			titles.append(child.text)
-		elif child is HBoxContainer and child.get_child_count() == 2 and child.get_child(0) is Label:
+		elif child is HBoxContainer and child.get_child_count() == 2 and child.get_child(0) is Label and child.get_child(1) is Label: # skip the Music/Sounds slider rows
 			rows[child.get_child(0).text] = child.get_child(1).text
 	print("Hero tab: 'Level 2' section with Experience 4 / 60 and Next level in 56 XP; header says level 2: ", titles.has("Level 2") and rows.get("Experience", "") == "4 / 60" and rows.get("Next level in", "") == "56 XP" and sheet.location_label.text.begins_with("Level 2 adventurer"))
 	print("Agility row shows the dodge chance once it's above base: ", rows.get("Agility", "").begins_with("7") and rows.get("Agility", "").contains("dodge 4%"))
