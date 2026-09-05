@@ -89,9 +89,9 @@ func _initialize() -> void:
 			break
 	await process_frame
 	await process_frame
-	print("The dungeon has no track yet: the music is cleared: ", audio.current_music() == "")
+	print("The dungeon plays its own theme (castle and hidden maze share it): ", audio.current_music() == "dungeon" and ResourceLoader.exists("res://assets/music/dungeon.ogg") and audio.SCENE_MUSIC.get("Castle", "") == "dungeon" and audio.SCENE_MUSIC.get("FinalBoss", "") == "dungeon")
 	await create_timer(1.5).timeout
-	print("...and the old player has stopped once the fade is done: ", not p0.playing)
+	print("...and the village player has stopped once the crossfade is done: ", not p0.playing and audio._players[audio._active].playing)
 	audio.play_sfx("nothing_like_this")
 	print("An unknown sound effect is a no-op: ", true)
 

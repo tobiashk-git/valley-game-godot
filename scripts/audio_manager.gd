@@ -38,6 +38,7 @@ const MUSIC := {
 	"verdantwood": {"path": "res://assets/music/verdantwood.ogg", "loop_offset": 12.63},
 	"badlands": "res://assets/music/badlands.ogg",
 	"gloomfen": "res://assets/music/gloomfen.ogg",
+	"dungeon": "res://assets/music/dungeon.ogg",
 }
 
 static func music_path(id: String) -> String:
@@ -65,6 +66,10 @@ const SCENE_MUSIC := {
 	"VerdantwoodInterior": "verdantwood",
 	"BadlandsInterior": "badlands",
 	"GloomfenInterior": "gloomfen",
+	"Dungeon": "dungeon",
+	"Castle": "dungeon",
+	"FinalBoss": "dungeon",
+	"GoldenPlainsInterior": "dungeon",
 }
 # On the overworld the track follows the biome under Oliver's feet (the
 # valley keeps the village theme until it has its own); biomes without a
