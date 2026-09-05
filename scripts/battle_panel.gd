@@ -146,6 +146,8 @@ func _refresh() -> void:
 
 # "-7" in red rising and fading over the sprite (or "+5" in green).
 func _spawn_popup(over: Control, delta: int) -> void:
+	if delta < 0:
+		Audio.play_sfx("hit")
 	var label := Label.new()
 	label.name = "DamagePopup"
 	label.text = ("+%d" if delta > 0 else "%d") % delta

@@ -119,6 +119,8 @@ func _refresh_stats() -> void:
 		status_label.theme_type_variation = &""
 
 func _spawn_popup(delta: int) -> void:
+	if delta < 0:
+		Audio.play_sfx("hit")
 	_spawn_text_popup(("+%d" if delta > 0 else "%d") % delta, Color(0.55, 0.95, 0.5) if delta > 0 else Color(1.0, 0.35, 0.3))
 
 # A line of text floating up from beside the HP bar (damage/heal numbers,
