@@ -22,7 +22,7 @@ func _initialize() -> void:
 	for child in h.get_node("YSort").get_children():
 		if child.scene_file_path == "res://scenes/props/Bed.tscn":
 			bed = child
-	print("Stove and bed stand on the floor rows below the painted wall (stove 8,3; bed 2,5 with its head at the wall base): ", stove != null and stove.position == Vector2(8 * 32 + 16, 3 * 32 + 16) and bed != null and bed.position == Vector2(2 * 32 + 16, 5 * 32 + 16))
+	print("Stove and bed stand on the floor rows below the painted wall (stove 9,3; bed 2,5 with its head at the wall base): ", stove != null and stove.position == Vector2(9 * 32 + 16, 3 * 32 + 16) and bed != null and bed.position == Vector2(2 * 32 + 16, 5 * 32 + 16))
 	var bed_sprite: Sprite2D = bed.get_node("Sprite2D")
 	var bed_top: float = bed.position.y + bed_sprite.offset.y - bed_sprite.texture.get_height() / 2.0
 	print("The new bed is the keyed Leonardo piece, 64 wide, its head within a tile-third of the wall base (y=96): ", bed_sprite.texture.get_width() == 64 and absf(bed_top - 96.0) <= 12.0, " top=", bed_top)
