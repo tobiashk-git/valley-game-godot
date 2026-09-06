@@ -7,7 +7,7 @@ extends Node
 # Deliberately excludes raw materials (meant to be gathered, not bought) and
 # bone_greatsword (boss-exclusive) - both still have a "value" and remain
 # sellable, just never buyable here.
-const SHOP_STOCK := ["healing_potion", "mana_potion", "antidote", "leather_armor", "charm_of_warding"]
+const SHOP_STOCK := ["healing_potion", "mana_potion", "antidote", "angel_feather", "leather_armor", "charm_of_warding"]
 
 signal changed
 
@@ -19,9 +19,9 @@ func sell_price(item_id: String) -> int:
 
 func buy_item(item_id: String) -> bool:
 	var price := buy_price(item_id)
-	if price <= 0 or Inventory.get_count("gold") < price or not Inventory.can_add(item_id):
+	if price <= 0 or Inventory.gold_available() < price or not Inventory.can_add(item_id):
 		return false
-	Inventory.remove_item("gold", price)
+	Inventory.spend_gold(price)
 	Inventory.add_item(item_id, 1)
 	Audio.play_sfx("coin")
 	changed.emit()

@@ -20,7 +20,8 @@ func open() -> void:
 	_open_window()
 
 func _subtitle() -> String:
-	return "Gold on hand: %d" % Inventory.get_count("gold")
+	var banked: int = Storage.get_count(Inventory.BANK_CHEST, "gold")
+	return "Gold on hand: %d" % Inventory.get_count("gold") + ("  -  banked: %d" % banked if banked > 0 else "")
 
 func _hint() -> String:
 	return "Tap an item to see it. Prices on the Buy tab are per item." if tab == 0 else "Tap what you want to sell. Enhanced gear sells for its base price."
@@ -48,7 +49,7 @@ func _detail_actions(entry: Dictionary) -> void:
 		detail_value.text = "Costs %d gold  -  you have %d%s" % [price, owned, "  (can't carry more)" if full else ""]
 		primary_action.visible = true
 		primary_action.text = "Buy"
-		primary_action.disabled = Inventory.get_count("gold") < price or full
+		primary_action.disabled = Inventory.gold_available() < price or full
 		return
 	var price: int = Shop.sell_price(entry.id)
 	detail_value.text = "Sells for %d gold  -  you have %d" % [price, owned]

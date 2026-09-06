@@ -38,13 +38,13 @@ func _apply_layout() -> void:
 	var w: float = Layout.width - 24.0 if Layout.is_narrow() else 440.0
 	panel.offset_left = -w / 2.0
 	panel.offset_right = w / 2.0
-	panel.offset_top = -130.0
-	panel.offset_bottom = 130.0
+	panel.offset_top = -160.0
+	panel.offset_bottom = 160.0
 	title_label.position = Vector2(0, 16)
 	title_label.size = Vector2(w, 30)
 	body_label.position = Vector2(20, 54)
-	body_label.size = Vector2(w - 40.0, 120)
-	wake_btn.position = Vector2(w / 2.0 - 110.0, 196)
+	body_label.size = Vector2(w - 40.0, 176)
+	wake_btn.position = Vector2(w / 2.0 - 110.0, 260)
 	wake_btn.size = Vector2(220, 44)
 
 # What the panel says, from Combat's defeat info ({cause, gold_lost}).
@@ -60,7 +60,20 @@ static func story(info: Dictionary) -> String:
 	else:
 		first = "The %s wore you out." % cause
 	var lost: int = int(info.get("gold_lost", 0))
-	var purse: String = "%d gold slipped out of your pocket while you slept." % lost if lost > 0 else "Your pocket, at least, is untouched."
+	var items: Dictionary = info.get("items_lost", {})
+	var parts: Array[String] = []
+	if lost > 0:
+		parts.append("%d gold" % lost)
+	var kinds: Array = items.keys()
+	for i in range(mini(kinds.size(), 5)):
+		parts.append("%d %s" % [items[kinds[i]], Items.get_item_name(kinds[i])])
+	if kinds.size() > 5:
+		parts.append("and more")
+	var purse: String
+	if parts.is_empty():
+		purse = "Your pack, at least, came home with you."
+	else:
+		purse = "Your pack was lost on the way: %s. What you wear and what's in the chest are safe." % ", ".join(parts)
 	return "%s\n\nYou wake up back in your own bed. %s" % [first, purse]
 
 func show_defeat(info: Dictionary) -> void:

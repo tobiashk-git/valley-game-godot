@@ -68,6 +68,18 @@ var biome_paths_open: Dictionary = {"frostpeak": false, "verdantwood": false, "b
 func set_next_spawn(pos: Vector2) -> void:
 	next_spawn_position = pos
 
+# "Home" is Oliver's house - the bed and the chest. Fast travel only leaves
+# from here (map_view.gd) and the Angel Feather / a nap lands here.
+func is_home() -> bool:
+	var scene: Node = get_tree().current_scene
+	return scene != null and scene.name == "House"
+
+func escape_home() -> void:
+	var bed_side: Vector2i = Combat.NAP_SPAWN_TILE
+	set_next_spawn(Vector2(bed_side.x * 32 + 16, bed_side.y * 32 + 16))
+	get_tree().change_scene_to_file("res://scenes/House.tscn")
+	HUD._spawn_text_popup.call_deferred("Home!", Color(1.0, 0.95, 0.7))
+
 # Call once from the new scene's _ready(). Returns true (and applies the
 # position) if an override was pending, false if the scene should use its
 # own default spawn instead.

@@ -21,7 +21,7 @@ signal won
 # {"cause": enemy name | "poison" | "confusion", "gold_lost": int}. The
 # DefeatPanel autoload plays the death sequence from it.
 signal defeated(info: Dictionary)
-const DEFEAT_GOLD_FRACTION := 0.1
+const FEATHER_DROP_CHANCE := 0.03
 # Where a nap ends: the floor tile beside Oliver's bed in House.tscn (the
 # bed stands at (2, 5)) - mirrors house.gd's NAP_SPAWN_TILE (not preloaded
 # from there: pulling house.gd into a --script compile drags chest.gd in,
@@ -425,6 +425,13 @@ func use_item(item_id: String) -> void:
 		return
 	player_defending = false
 	Inventory.remove_item(item_id, 1)
+	if effect.kind == "escape":
+		# The Angel Feather: a guaranteed escape that also carries Oliver
+		# home. The fight ends like a flight (no sting, boss re-challengeable).
+		await _beat("Oliver holds up the %s - a rush of wings!" % def.name)
+		_flee()
+		GameState.escape_home()
+		return
 	# Effect maths lives in Items.apply_effect() (shared with the
 	# out-of-combat QuickBar); in combat the item is always spent since the
 	# turn is used either way.
@@ -452,7 +459,12 @@ func player_run() -> void:
 	if not in_combat or playing or awaiting_exit:
 		return
 	_log("Oliver flees the battle!")
+	_flee()
+
+# Ends the fight without a victory: running, or a feather home.
+func _flee() -> void:
 	in_combat = false
+	playing = false
 	current_enemies = []
 	active_submenu = ""
 	selecting_target = ""
@@ -488,6 +500,11 @@ func _defeat_enemy(index: int) -> void:
 		Inventory.add_item(drop_item_id, 1)
 		fight_items.append(Items.get_item_name(drop_item_id))
 		msg += " Obtained %s!" % Items.get_item_name(drop_item_id)
+	# Any wild monster may drop an Angel Feather (the way home).
+	if current_boss_id == "" and randf() < FEATHER_DROP_CHANCE and Inventory.can_add("angel_feather"):
+		Inventory.add_item("angel_feather", 1)
+		fight_items.append(Items.get_item_name("angel_feather"))
+		msg += " Obtained Angel Feather!"
 	# Experience: paid per enemy as it drops (a boss is worth double).
 	var xp: int = Enemies.xp_for(enemy, current_boss_id != "")
 	fight_xp += xp
@@ -584,10 +601,13 @@ func _enemy_turn() -> void:
 # DefeatPanel autoload covers the scene change and tells the story.
 func _defeat(cause: String = "") -> void:
 	await _beat("Oliver is worn out and needs a nap...")
-	var gold_lost: int = int(floor(Inventory.get_count("gold") * DEFEAT_GOLD_FRACTION))
-	if gold_lost > 0:
-		Inventory.remove_item("gold", gold_lost)
-	last_defeat = {"cause": cause, "gold_lost": gold_lost}
+	# A nap costs the pack: all carried gold and every valued stackable
+	# (materials, potions, feathers). Gear - worn or spare - and quest items
+	# stay; gold banked in the house chest is untouched.
+	var lost: Dictionary = Inventory.drop_on_defeat()
+	var gold_lost: int = int(lost.get("gold", 0))
+	lost.erase("gold")
+	last_defeat = {"cause": cause, "gold_lost": gold_lost, "items_lost": lost}
 	Character.stats.hp = Character.stats.max_hp
 	Character.stats.mp = Character.stats.max_mp
 	Character.changed.emit()

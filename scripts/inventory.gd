@@ -27,6 +27,40 @@ func new_instance(base: String) -> Dictionary:
 # engine. Materials and gold are uncapped.
 const CONSUMABLE_CAP := 5
 
+# Gold banked in the house chest counts for purchases everywhere (the chest
+# is a real bank: what you deposit after a run is safe from a nap and still
+# spendable). Carried gold is spent first.
+const BANK_CHEST := "house_chest"
+
+func gold_available() -> int:
+	return get_count("gold") + Storage.get_count(BANK_CHEST, "gold")
+
+func spend_gold(amount: int) -> bool:
+	if gold_available() < amount:
+		return false
+	var carried: int = mini(amount, get_count("gold"))
+	if carried > 0:
+		remove_item("gold", carried)
+	if amount - carried > 0:
+		Storage.remove_item(BANK_CHEST, "gold", amount - carried)
+	return true
+
+# A nap costs the pack: every carried gold piece and every stackable that
+# has a value (materials, potions, feathers). Worn AND spare gear stays,
+# and so does anything without a value (quest items). Returns what went,
+# as {item_id: amount}, for the nap panel's story.
+func drop_on_defeat() -> Dictionary:
+	var lost: Dictionary = {}
+	for item_id in backpack.keys():
+		var count: int = backpack[item_id]
+		if count > 0 and (item_id == "gold" or Items.ITEMS.get(item_id, {}).has("value")):
+			lost[item_id] = count
+	for item_id in lost.keys():
+		backpack.erase(item_id)
+	if not lost.is_empty():
+		changed.emit()
+	return lost
+
 func stack_cap(item_id: String) -> int:
 	return CONSUMABLE_CAP if Items.is_usable(item_id) else 0
 

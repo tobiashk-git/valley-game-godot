@@ -92,7 +92,7 @@ func _initialize() -> void:
 	print("Starts on the village (where the player stands), Fast Travel disabled there: ", panel.selected_poi == "village" and panel.poi_name.text == "Village" and panel.poi_where.text == "Village, Golden Plains" and panel.poi_status.text == "You are here." and panel.travel_btn.disabled)
 	panel.markers.get_node("HouseMarker").pressed.emit()
 	await process_frame
-	print("Tapping the house marker selects it: ", panel.selected_poi == "house" and panel.poi_name.text == "Your House" and panel.poi_desc.text.begins_with("Home.") and not panel.travel_btn.disabled and panel.places_list.get_node("HouseRow").theme_type_variation == &"TabButtonActive")
+	print("Tapping the house marker selects it (Fast Travel stays off away from home - it only leaves from the house): ", panel.selected_poi == "house" and panel.poi_name.text == "Your House" and panel.poi_desc.text.begins_with("Home.") and panel.travel_btn.disabled and panel.poi_status.text == "From your house only." and panel.places_list.get_node("HouseRow").theme_type_variation == &"TabButtonActive")
 	root.get_texture().get_image().save_png("res://verify_map_before_dungeon.png")
 	print("Saved verify_map_before_dungeon.png")
 	await _press("toggle_map")

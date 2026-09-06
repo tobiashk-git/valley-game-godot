@@ -176,7 +176,8 @@ func can_craft(recipe_id: String) -> bool:
 	var recipe: Dictionary = RECIPES[recipe_id]
 	var cost: Dictionary = recipe.cost
 	for item_id in cost.keys():
-		if Inventory.get_count(item_id) < cost[item_id]:
+		var have: int = Inventory.gold_available() if item_id == "gold" else Inventory.get_count(item_id)
+		if have < cost[item_id]:
 			return false
 	return Inventory.can_add(recipe.result, recipe.amount)
 
@@ -186,6 +187,9 @@ func craft(recipe_id: String) -> bool:
 	var recipe: Dictionary = RECIPES[recipe_id]
 	var cost: Dictionary = recipe.cost
 	for item_id in cost.keys():
-		Inventory.remove_item(item_id, cost[item_id])
+		if item_id == "gold":
+			Inventory.spend_gold(cost[item_id])
+		else:
+			Inventory.remove_item(item_id, cost[item_id])
 	Inventory.add_item(recipe.result, recipe.amount)
 	return true

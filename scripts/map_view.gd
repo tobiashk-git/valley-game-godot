@@ -203,9 +203,17 @@ func refresh() -> void:
 	poi_where.text = WorldMap.poi_where(selected_poi)
 	poi_desc.text = WorldMap.POI_DESCRIPTIONS.get(selected_poi, "")
 	var at_it: bool = here == WorldMap.poi_tile(selected_poi)
-	poi_status.text = "You are here." if at_it else "Fast Travel lands at its entrance."
+	# Fast travel only LEAVES from home (Oliver's house): the way back from a
+	# run is on foot, by Angel Feather, or a nap that costs the pack.
+	var from_home: bool = GameState.is_home()
+	if at_it:
+		poi_status.text = "You are here."
+	elif from_home:
+		poi_status.text = "Fast Travel lands at its entrance."
+	else:
+		poi_status.text = "From your house only." # walk back, or use an Angel Feather
 	travel_btn.visible = true
-	travel_btn.disabled = at_it
+	travel_btn.disabled = at_it or not from_home
 
 func _on_travel_pressed() -> void:
 	if selected_poi != "":

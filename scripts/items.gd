@@ -23,6 +23,10 @@ const ITEMS := {
 	"healing_potion": {"name": "Healing Potion", "icon": "🧪", "effect": {"kind": "heal", "amount": 8}, "value": 20, "desc": "A bitter red draught brewed from valley herbs. Restores 8 HP. You can carry five."},
 	"mana_potion": {"name": "Mana Potion", "icon": "🔮", "effect": {"kind": "restore_mp", "amount": 8}, "value": 12, "desc": "Cold blue and faintly humming. Restores 8 MP."},
 	"antidote": {"name": "Antidote", "icon": "🌿", "effect": {"kind": "cure", "status": "poison"}, "value": 10, "desc": "Crushed marsh-leaf in spirit. Cures poison."},
+	# The way home. Fast travel only leaves from Oliver's house, so a trip
+	# ends either back on foot, by feather, or with a nap that costs the
+	# pack. Sold by the Trader; a rare drop from any wild monster.
+	"angel_feather": {"name": "Angel Feather", "icon": "🪶", "effect": {"kind": "escape"}, "value": 25, "desc": "A single white feather, warm to the touch. Use it anywhere - even mid-fight - and you're home by your bed in a heartbeat."},
 	# Boss-exclusive - no recipe in crafting.gd, only obtainable as a drop.
 	# Sellable for a nice payout (like the plan's boss-drop pricing), but
 	# never appears in Shop.SHOP_STOCK to buy.
@@ -107,6 +111,11 @@ func apply_effect(item_id: String) -> Dictionary:
 		var restored: int = min(effect.amount, Character.stats.max_mp - Character.stats.mp)
 		Character.stats.mp += restored
 		return {"message": "Oliver uses %s and recovers %d MP!" % [def.name, restored], "applied": restored > 0}
+	if effect.kind == "escape":
+		if GameState.is_home():
+			return {"message": "You're already home.", "applied": false}
+		GameState.escape_home.call_deferred()
+		return {"message": "A rush of wings - Oliver is carried home!", "applied": true}
 	if effect.kind == "cure":
 		if Combat.player_status.has(effect.status):
 			var status_name: String = Statuses.STATUSES[effect.status].name

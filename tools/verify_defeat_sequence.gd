@@ -34,10 +34,10 @@ func _initialize() -> void:
 	var nap_tile: Vector2i = current_scene.NAP_SPAWN_TILE
 	var woke_at: Vector2 = current_scene.get_node("YSort/Player").position
 	print("Oliver wakes up beside his bed: ", Vector2i(int(woke_at.x / 32), int(woke_at.y / 32)) == nap_tile and nap_tile == combat.NAP_SPAWN_TILE)
-	print("A tenth of the gold is lost (37 -> 34): ", inventory.get_count("gold") == 34 and combat.last_defeat.gold_lost == 3 and combat.last_defeat.cause == "Skeleton")
+	print("The whole purse is lost (37 -> 0) - the pack is the price of a nap: ", inventory.get_count("gold") == 0 and combat.last_defeat.gold_lost == 37 and combat.last_defeat.cause == "Skeleton")
 	print("The screen is black while the house loads: ", defeat.is_open() and defeat.black.visible and defeat.black.modulate.a == 1.0 and not defeat.panel.visible)
 	await create_timer(1.6).timeout
-	print("Then the panel fades in over the dimmed house: 'Nap time', the skeleton wore you out, 3 gold slipped from your pocket: ", defeat.panel.visible and defeat.panel.modulate.a > 0.95 and defeat.black.modulate.a < 0.7 and defeat.title_label.text == "Nap time" and defeat.body_label.text.begins_with("The Skeleton wore you out.") and defeat.body_label.text.contains("3 gold slipped out of your pocket"))
+	print("Then the panel fades in over the dimmed house: 'Nap time', the skeleton wore you out, 3 gold slipped from your pocket: ", defeat.panel.visible and defeat.panel.modulate.a > 0.95 and defeat.black.modulate.a < 0.7 and defeat.title_label.text == "Nap time" and defeat.body_label.text.begins_with("The Skeleton wore you out.") and defeat.body_label.text.contains("Your pack was lost on the way: 37 gold"))
 	var player: CharacterBody2D = current_scene.get_node("YSort/Player")
 	var before: Vector2 = player.position
 	Input.action_press("move_right")
@@ -60,7 +60,7 @@ func _initialize() -> void:
 	print("...and Oliver can walk again: ", player.position.x > before.x)
 
 	# --- Story lines for the other causes. ---
-	print("Poison and confusion naps get their own lines; no gold -> pocket untouched: ", defeat.story({"cause": "poison", "gold_lost": 0}).begins_with("The poison wore you out.") and defeat.story({"cause": "poison", "gold_lost": 0}).contains("untouched") and defeat.story({"cause": "confusion", "gold_lost": 2}).begins_with("Confused, you wore yourself out."))
+	print("Poison and confusion naps get their own lines; nothing carried -> the pack came home: ", defeat.story({"cause": "poison", "gold_lost": 0}).begins_with("The poison wore you out.") and defeat.story({"cause": "poison", "gold_lost": 0}).contains("came home with you") and defeat.story({"cause": "confusion", "gold_lost": 2}).begins_with("Confused, you wore yourself out."))
 
 	# --- Monsters sleep rather than die: beat a wild monster, it stays in
 	# place dimmed with a z z Z, can't be poked, and wakes when its time
