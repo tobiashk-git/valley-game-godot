@@ -221,7 +221,7 @@ func _ready() -> void:
 	# Trader and Oliver's own house keep the terracotta default.
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.ELDER_HOUSE_ENTRANCE, "res://scenes/ElderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16), "res://assets/house_elder.png")
 	_add_entrance(HOUSE_ENTRANCE_SCENE, World.TRADER_HOUSE_ENTRANCE, "res://scenes/TraderHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16))
-	_add_entrance(HOUSE_ENTRANCE_SCENE, World.BLACKSMITH_HOUSE_ENTRANCE, "res://scenes/BlacksmithHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16), "res://assets/house_ranger.png")
+	_add_entrance(HOUSE_ENTRANCE_SCENE, World.BLACKSMITH_HOUSE_ENTRANCE, "res://scenes/BlacksmithHouse.tscn", Vector2(4 * 32 + 16, 5 * 32 + 16), "res://assets/house_smithy.png")
 	# Dungeon.tscn/Castle.tscn/FinalBoss.tscn all regenerate their maze fresh
 	# every visit and always spawn the player at their own entrance, so the
 	# target_spawn passed here is unused.

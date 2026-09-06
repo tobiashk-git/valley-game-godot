@@ -31,7 +31,7 @@ func _initialize() -> void:
 	var expected := {
 		"Elder": [world.ELDER_HOUSE_ENTRANCE, "res://assets/house_elder.png"],
 		"Trader": [world.TRADER_HOUSE_ENTRANCE, "res://assets/house.png"],
-		"Blacksmith": [world.BLACKSMITH_HOUSE_ENTRANCE, "res://assets/house_ranger.png"],
+		"Blacksmith": [world.BLACKSMITH_HOUSE_ENTRANCE, "res://assets/house_smithy.png"],
 		"Oliver's": [world.HOUSE_ENTRANCE, "res://assets/house.png"],
 	}
 	var base_h: int = load("res://assets/house.png").get_height()
@@ -40,7 +40,7 @@ func _initialize() -> void:
 		var sprite: Sprite2D = house.get_node("Sprite2D") if house else null
 		print(name, " house found: ", house != null)
 		print(name, " house shows its own sprite: ", sprite != null and sprite.texture.resource_path == expected[name][1])
-		print(name, " house sprite is the shared 123px height: ", sprite != null and sprite.texture.get_height() == base_h and base_h == 123)
+		print(name, " house sprite is the shared 117px width, roughly the shared height (the smithy's steeper roof is 108 tall): ", sprite != null and sprite.texture.get_width() == 117 and sprite.texture.get_height() >= 100 and sprite.texture.get_height() <= 123)
 
 	# --- Solid footprint: the house blocks from every side, not just its
 	# entrance tile (user report: could walk into the drawn wall from the
