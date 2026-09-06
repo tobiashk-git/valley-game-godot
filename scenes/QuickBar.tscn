@@ -2,18 +2,20 @@
 
 [ext_resource type="Script" path="res://scripts/quick_bar.gd" id="1_emcfu"]
 
-[node name="QuickBar" type="CanvasLayer" unique_id=727970460]
+[node name="QuickBar" type="CanvasLayer" unique_id=568215902]
 script = ExtResource("1_emcfu")
 
-[node name="HBox" type="HBoxContainer" parent="." unique_id=2091806068]
+[node name="HBox" type="GridContainer" parent="." unique_id=1489737190]
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-theme_override_constants/separation = 8
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 4
 
-[node name="FeedbackLabel" type="Label" parent="." unique_id=1971940360]
+[node name="FeedbackLabel" type="Label" parent="." unique_id=249240780]
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0

@@ -103,7 +103,10 @@ func _update_joystick(touch_pos: Vector2) -> void:
 	# The knob's CENTRE travels at most to the base's edge minus the knob's
 	# own radius, so the knob never pokes out of the ring.
 	var travel: float = min(delta.length(), JOYSTICK_RADIUS - joystick_knob.size.x / 2.0)
-	joystick_knob.position = dir * travel - joystick_knob.size / 2.0
+	# Knob position is relative to the base's top-left corner, so start from
+	# the base's centre (the old code measured from the corner, which parked
+	# the knob outside the ring at rest - "the small circle drifts outside").
+	joystick_knob.position = joystick_base.size / 2.0 + dir * travel - joystick_knob.size / 2.0
 
 	var new_directions: Array[String] = []
 	if delta.length() > JOYSTICK_DEADZONE:
@@ -126,7 +129,7 @@ func _update_joystick(touch_pos: Vector2) -> void:
 	_active_directions = new_directions
 
 func _reset_joystick() -> void:
-	joystick_knob.position = -joystick_knob.size / 2.0
+	joystick_knob.position = joystick_base.size / 2.0 - joystick_knob.size / 2.0
 	for action in _active_directions:
 		Input.action_release(action)
 	_active_directions = []

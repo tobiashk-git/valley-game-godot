@@ -14,10 +14,14 @@ func _build() -> void:
 	# own width once the slots exist, so it stays centred whatever the
 	# viewport width (keep_width means that's fixed at 800 anyway) and
 	# tracks the bottom edge on tall phone viewports.
-	var hbox := HBoxContainer.new()
+	# A GridContainer (still named HBox for its callers): 4 columns = one
+	# row at 800 wide, 2 columns = a 2x2 block above the E button on a phone.
+	var hbox := GridContainer.new()
 	hbox.name = "HBox"
+	hbox.columns = 4
 	hbox.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	hbox.add_theme_constant_override("separation", 8)
+	hbox.add_theme_constant_override("h_separation", 8)
+	hbox.add_theme_constant_override("v_separation", 8)
 	layer.add_child(hbox)
 	hbox.owner = layer
 

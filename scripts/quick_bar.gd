@@ -19,7 +19,7 @@ const NARROW_BOTTOM_MARGIN := 194.0 # clears the 150px joystick (24px off the bo
 # Panels whose open state hides the bar - each has an is_open().
 const OVERLAY_AUTOLOADS := ["CharacterSheet", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel", "SettingsPanel"]
 
-@onready var hbox: HBoxContainer = $HBox
+@onready var hbox: GridContainer = $HBox # a row at 800 wide, a 2x2 block on a phone
 @onready var feedback_label: Label = $FeedbackLabel
 
 var item_ids: Array[String] = []
@@ -48,8 +48,26 @@ func _ready() -> void:
 func _bottom_margin() -> float:
 	return NARROW_BOTTOM_MARGIN if Layout.is_narrow() else BOTTOM_MARGIN
 
+# Phone: the slots sit 2x2 directly above the E button (user feedback),
+# whose 80px circle is INTERACT_MARGIN (120,130) in from the bottom-right
+# corner (touch_controls.gd); the toast goes above the block. Wide: one
+# centred row at the bottom as before.
+const NARROW_BLOCK_GAP := 10.0
+
 func _apply_layout() -> void:
+	hbox.columns = 2 if Layout.is_narrow() else 4
 	hbox.reset_size()
+	if Layout.is_narrow():
+		var w: float = Layout.width
+		var block: Vector2 = hbox.size
+		var centre_x: float = w - 120.0 + 40.0 # the E button's centre
+		var bottom: float = 130.0 + NARROW_BLOCK_GAP # clear of the E button's top
+		hbox.offset_left = centre_x - w / 2.0 - block.x / 2.0
+		hbox.offset_right = centre_x - w / 2.0 + block.x / 2.0
+		hbox.offset_top = -(block.y + bottom)
+		hbox.offset_bottom = -bottom
+		_place_bottom_centre(feedback_label, feedback_label.size, bottom + block.y + 6.0)
+		return
 	_place_bottom_centre(hbox, hbox.size, _bottom_margin())
 	_place_bottom_centre(feedback_label, feedback_label.size, _bottom_margin() + hbox.size.y + 6.0)
 
