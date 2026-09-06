@@ -21,6 +21,11 @@ const NPC_TILE := Vector2i(4, 2)
 @export var npc_sprite_tint := Color(1, 1, 1, 1)
 @export var furniture_layout: Array[Dictionary] = [] # [{"kind": "Bed", "x": 2, "y": 4}, ...]
 @export var window_tiles: Array[Vector2i] = []
+# Painted room shell (see house.gd): one picture of walls + floor over the
+# tile map; its wall band is `wall_rows` tiles deep and all of them are
+# solid, so the hard stop is the bottom of the painted skirting.
+@export var room_shell := ""
+@export var wall_rows := 1
 @export var overworld_return_tile := Vector2i.ZERO
 @export var overworld_return_offset := Vector2i(0, 1)
 
@@ -48,11 +53,18 @@ func _tile_center(pos: Vector2i) -> Vector2:
 func _ready() -> void:
 	for y in range(HEIGHT):
 		for x in range(WIDTH):
-			var on_border: bool = x == 0 or x == WIDTH - 1 or y == 0 or y == HEIGHT - 1
+			var on_border: bool = x == 0 or x == WIDTH - 1 or y < wall_rows or y == HEIGHT - 1
 			terrain.set_cell(Vector2i(x, y), 0 if on_border else 1, Vector2i(0, 0)) # 0=wall,1=floor
 	for w in window_tiles:
 		terrain.set_cell(w, 2, Vector2i(0, 0)) # 2=window
 	terrain.set_cell(DOOR_TILE, 1, Vector2i(0, 0))
+	if room_shell != "" and ResourceLoader.exists(room_shell):
+		var shell := Sprite2D.new()
+		shell.name = "RoomShell"
+		shell.texture = load(room_shell)
+		shell.centered = false
+		add_child(shell)
+		move_child(shell, terrain.get_index() + 1) # over the tiles, under the props
 
 	# The door is a hole carved into the border wall, with nothing at all
 	# beyond it (no wall, no floor) - without a blocker here the player can

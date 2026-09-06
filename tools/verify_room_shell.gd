@@ -35,4 +35,23 @@ func _initialize() -> void:
 	print("Oliver cannot walk up onto the painted wall (stops in row 3): ", player.position.y >= 3 * 32 and player.position.y < 4 * 32 + 8, " y=", player.position.y)
 	root.get_texture().get_image().save_png("res://verify_room_shell.png")
 	print("Saved verify_room_shell.png")
+	await _verify_elder()
 	quit()
+
+# --- Elder's house: the 9x7 village room with its own shell (2-row wall). ---
+func _verify_elder() -> void:
+	change_scene_to_packed(load("res://scenes/ElderHouse.tscn"))
+	for i in range(8):
+		await process_frame
+	var e: Node2D = current_scene
+	var shell: Sprite2D = e.get_node_or_null("RoomShell")
+	var terrain: TileMapLayer = e.get_node("TerrainLayer")
+	print("Elder's house has its own shell covering the 9x7 room (288x224), over the tiles, under the props: ", shell != null and shell.texture.get_size() == Vector2(288, 224) and shell.get_index() == terrain.get_index() + 1 and shell.get_index() < e.get_node("YSort").get_index())
+	print("Its two painted wall rows are solid, floor from row 2: ", e.wall_rows == 2 and terrain.get_cell_source_id(Vector2i(4, 1)) == 0 and terrain.get_cell_source_id(Vector2i(4, 2)) == 1)
+	var bed: Node2D = null
+	for child in e.get_node("YSort").get_children():
+		if child.scene_file_path == "res://scenes/props/Bed.tscn":
+			bed = child
+	print("Elder's bed stands with its head at the wall base (2,5): ", bed != null and bed.position == Vector2(2 * 32 + 16, 5 * 32 + 16))
+	root.get_texture().get_image().save_png("res://verify_room_shell_elder.png")
+	print("Saved verify_room_shell_elder.png")
