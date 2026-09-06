@@ -36,6 +36,7 @@ func _initialize() -> void:
 	root.get_texture().get_image().save_png("res://verify_room_shell.png")
 	print("Saved verify_room_shell.png")
 	await _verify_elder()
+	await _verify_trader()
 	quit()
 
 # --- Elder's house: the 9x7 village room with its own shell (2-row wall). ---
@@ -55,3 +56,23 @@ func _verify_elder() -> void:
 	print("Elder's bed stands with its head at the wall base (2,5): ", bed != null and bed.position == Vector2(2 * 32 + 16, 5 * 32 + 16))
 	root.get_texture().get_image().save_png("res://verify_room_shell_elder.png")
 	print("Saved verify_room_shell_elder.png")
+
+# --- Trader's house: three-row wall (the painted shelves), NPC on the first floor row. ---
+func _verify_trader() -> void:
+	change_scene_to_packed(load("res://scenes/TraderHouse.tscn"))
+	for i in range(8):
+		await process_frame
+	var t: Node2D = current_scene
+	var shell: Sprite2D = t.get_node_or_null("RoomShell")
+	var terrain: TileMapLayer = t.get_node("TerrainLayer")
+	print("Trader's house has its shell (288x224) and a three-row solid wall band: ", shell != null and shell.texture.get_size() == Vector2(288, 224) and t.wall_rows == 3 and terrain.get_cell_source_id(Vector2i(4, 2)) == 0 and terrain.get_cell_source_id(Vector2i(4, 3)) == 1)
+	var npc: Node2D = null
+	var table: Node2D = null
+	for child in t.get_node("YSort").get_children():
+		if child.scene_file_path == "res://scenes/props/NPC.tscn":
+			npc = child
+		elif child.scene_file_path == "res://scenes/props/Table.tscn":
+			table = child
+	print("Trader stands on the first floor row (4,3), the table beside it (2,3): ", npc != null and npc.position == Vector2(4 * 32 + 16, 3 * 32 + 16) and table != null and table.position == Vector2(2 * 32 + 16, 3 * 32 + 16))
+	root.get_texture().get_image().save_png("res://verify_room_shell_trader.png")
+	print("Saved verify_room_shell_trader.png")

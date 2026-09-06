@@ -8,7 +8,7 @@ extends Node2D
 const WIDTH := 9
 const HEIGHT := 7
 const DOOR_TILE := Vector2i(4, 6)
-const NPC_TILE := Vector2i(4, 2)
+const NPC_COLUMN := 4 # the NPC stands mid-room on the first floor row (under the painted wall)
 
 @export var has_npc := false
 @export var npc_sprite_path := ""
@@ -91,7 +91,7 @@ func _ready() -> void:
 
 	if has_npc:
 		var npc: StaticBody2D = NPC_SCENE.instantiate()
-		npc.position = _tile_center(NPC_TILE)
+		npc.position = _tile_center(Vector2i(NPC_COLUMN, maxi(wall_rows, 2)))
 		npc.sprite_path = npc_sprite_path
 		npc.npc_name = npc_name_text
 		npc.dialogue_text = npc_dialogue

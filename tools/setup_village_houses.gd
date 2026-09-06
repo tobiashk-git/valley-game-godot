@@ -4,7 +4,7 @@ extends SceneTree
 # loop, where the same buildInterior() call is branched by index).
 # Run via: godot --headless --script res://tools/setup_village_houses.gd
 
-func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "", is_shop: bool = false, npc_id: String = "", intro: String = "", tint: Color = Color(1, 1, 1, 1), shell: String = "") -> void:
+func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "", is_shop: bool = false, npc_id: String = "", intro: String = "", tint: Color = Color(1, 1, 1, 1), shell: String = "", shell_wall_rows: int = 2) -> void:
 	var house_tileset: TileSet = load("res://resources/house_tileset.tres")
 	var player_scene: PackedScene = load("res://scenes/Player.tscn")
 	var player_instance: CharacterBody2D = player_scene.instantiate()
@@ -22,10 +22,10 @@ func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: St
 	root.npc_id_text = npc_id
 	root.npc_intro = intro
 	root.npc_sprite_tint = tint
-	# A painted shell's wall band is two tiles deep (all solid); furniture
-	# then starts on row 2.
+	# A painted shell's wall band is two (or three, for the Trader's tall
+	# shelves) tiles deep, all solid; furniture then starts on the row below.
 	root.room_shell = shell
-	root.wall_rows = 2 if shell != "" else 1
+	root.wall_rows = shell_wall_rows if shell != "" else 1
 	root.furniture_layout = furniture
 	root.window_tiles = windows
 	root.overworld_return_tile = return_tile
@@ -95,14 +95,15 @@ func _initialize() -> void:
 		"TraderHouse", true, "res://assets/trader.png", "Village Trader",
 		"", # superseded by is_shop - E opens ShopPanel directly, no dialogue step
 		[
-			{"kind": "Table", "x": 2, "y": 2},
-			{"kind": "Barrel", "x": 2, "y": 4},
+			{"kind": "Table", "x": 2, "y": 3}, # first floor row under the painted shelves
+			{"kind": "Barrel", "x": 2, "y": 5},
 			{"kind": "Cabinet", "x": 6, "y": 4},
 		],
 		[Vector2i(8, 1), Vector2i(8, 2)],
 		World.TRADER_HOUSE_ENTRANCE,
 		"open_ancient_barrow", true, "village_trader", # quest first, shop once it's done (npc.gd)
-		"Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell."
+		"Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell.",
+		Color(1, 1, 1, 1), "res://assets/interiors/trader_shell.png", 3
 	)
 
 	# The Blacksmith's: the village's crafting station. The Workbench prop
