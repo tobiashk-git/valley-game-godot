@@ -3,13 +3,13 @@
 [ext_resource type="Texture2D" path="res://assets/furniture/table.png" id="1_4irf3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sslsb"]
-size = Vector2(28, 28)
+size = Vector2(60, 28)
 
-[node name="Table" type="StaticBody2D" unique_id=1790233732]
+[node name="Table" type="StaticBody2D" unique_id=1436220470]
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=570069881]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=709949302]
 texture = ExtResource("1_4irf3")
-offset = Vector2(0, -6.5)
+offset = Vector2(0, -0.5)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=308359616]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1625997532]
 shape = SubResource("RectangleShape2D_sslsb")

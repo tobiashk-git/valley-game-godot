@@ -34,7 +34,7 @@ func _initialize() -> void:
 	print("=== House props setup starting ===")
 	_build("Bed", "res://assets/furniture/bed.png", 64.0, 86.0) # Leonardo pixel bed, keyed (was the 64x128 placeholder)
 	_build("Chair", "res://assets/furniture/chair.png", 32.0, 32.0)
-	_build("Table", "res://assets/furniture/table.png", 66.0, 45.0)
+	_build("Table", "res://assets/furniture/table.png", 70.0, 33.0, 2.0 * TILE - 4) # Leonardo pixel table, keyed; two tiles wide
 	_build("Stove", "res://assets/furniture/stove.png", 32.0, 36.0)
 	# Chest.tscn is NOT built here any more: tools/setup_chest_interactive.gd
 	# owns it (interact area + script) and a rebuild here clobbered that.
