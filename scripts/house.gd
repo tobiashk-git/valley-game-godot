@@ -77,7 +77,7 @@ func _ready() -> void:
 	# Props stand on the floor rows (3..7): the bed's head meets the wall
 	# base, the stove sits under the right window, the chest at the bed's foot.
 	_spawn_prop(BED_SCENE, Vector2i(2, 5)) # three tiles tall: head at the wall base
-	_spawn_prop(STOVE_SCENE, Vector2i(9, 3)) # clear of the taller chair's backrest below it
+	_spawn_prop(STOVE_SCENE, Vector2i(5, 3)) # centre of the back wall, under the painted shelf
 	_spawn_prop(TABLE_SCENE, Vector2i(8, 5))
 	_spawn_prop(CHAIR_SCENE, Vector2i(8, 4)) # above the table, facing it
 	_spawn_prop(CHAIR_BACK_SCENE, Vector2i(8, 6)) # below the table, its back to us, facing it
