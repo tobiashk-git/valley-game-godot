@@ -29,8 +29,9 @@ func _initialize() -> void:
 	print("Saved verify_portrait_oliver.png")
 
 	# --- NPC busts that exist so far (added one at a time). ---
-	for speaker in ["Village Elder", "Village Trader", "Frostpeak Ranger", "Forest Druid", "Badlands Prospector", "Marsh Guide"]:
+	for speaker in ["Village Elder", "Village Trader", "Frostpeak Ranger", "Forest Druid", "Badlands Prospector", "Marsh Guide", "Village Blacksmith"]:
 		if dialogue.portrait_for(speaker) == null:
+			print("%s: bust MISSING: " % speaker, false)
 			continue
 		dialogue.show_dialogue(speaker, "Ah, a new face! I'm the %s - good to meet you, traveler." % speaker, [{"label": "Accept", "callback": Callable()}, {"label": "Not now", "callback": Callable()}])
 		await process_frame
