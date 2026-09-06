@@ -194,6 +194,12 @@ func current_music() -> String:
 
 func _process(_delta: float) -> void:
 	play_music(wanted_music())
+	# Self-heal: the scene's track should be playing whenever one is wanted
+	# (a failed web restart used to leave silence until the next scene change).
+	if enabled and _current != "" and not sting_playing() and not _restart_scheduled:
+		var p: AudioStreamPlayer = _players[_active]
+		if p.stream != null and not p.playing:
+			p.play()
 
 # What should be playing right now: the fight, else the scene's track.
 func wanted_music() -> String:
@@ -288,12 +294,33 @@ func set_music_volume(v: float) -> void:
 	_save_settings()
 	if hard_switch:
 		# The web only reads bus volumes when a sample starts: restart the
-		# track where it is so the new level applies.
-		var p: AudioStreamPlayer = _players[_active]
-		if p.playing:
-			var pos: float = p.get_playback_position()
-			p.stop()
-			p.play(pos)
+		# track where it is so the new level applies. Debounced: a slider
+		# drag fires one change per step, and a stop/play per step on the
+		# web sample path could silence the track or bring the tab down
+		# (user's phone: silence in the smithy, then a crash).
+		_restart_wanted = true
+		if not _restart_scheduled:
+			_restart_scheduled = true
+			get_tree().create_timer(RESTART_DEBOUNCE).timeout.connect(_restart_active)
+
+const RESTART_DEBOUNCE := 0.35
+var _restart_wanted := false
+var _restart_scheduled := false
+
+# One restart after the slider settles, at a position wrapped into the
+# stream (a looping track's playback position can run past its length,
+# and play() past the end just stops the player).
+func _restart_active() -> void:
+	_restart_scheduled = false
+	if not _restart_wanted:
+		return
+	_restart_wanted = false
+	var p: AudioStreamPlayer = _players[_active]
+	if p.playing and p.stream != null:
+		var length: float = maxf(p.stream.get_length(), 0.01)
+		var pos: float = fmod(p.get_playback_position(), length)
+		p.stop()
+		p.play(pos)
 
 func set_sfx_volume(v: float) -> void:
 	sfx_volume = clampf(v, 0.0, 1.0)

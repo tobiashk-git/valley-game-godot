@@ -178,12 +178,29 @@ func _initialize() -> void:
 	slider.value = 40
 	await process_frame
 	print("Dragging Music to 40 sets the bus to ~-8 dB and the setting: ", absf(AudioServer.get_bus_volume_db(music_bus) - linear_to_db(0.4)) < 0.01 and absf(audio.music_volume - 0.4) < 0.001)
+	# Web path (forced here): a slider drag restarts the track ONCE after it
+	# settles, at a wrapped position, and the track keeps playing.
+	audio.hard_switch = true
+	var p_web: AudioStreamPlayer = audio._players[audio._active]
+	var stream_len: float = p_web.stream.get_length()
+	for v in [35, 30, 25, 20, 15]:
+		slider.value = v
+		await process_frame
+	print("Five slider steps schedule one debounced restart (nothing restarted yet): ", audio._restart_scheduled and audio._restart_wanted and p_web.playing)
+	await create_timer(audio.RESTART_DEBOUNCE + 0.2).timeout
+	await process_frame
+	print("After the debounce the track is still playing from inside the stream: ", not audio._restart_scheduled and p_web.playing and p_web.get_playback_position() < stream_len)
+	p_web.stop()
+	await process_frame
+	await process_frame
+	print("A silenced music player is restarted by the self-heal: ", p_web.playing)
+	audio.hard_switch = false
 	sfx_slider.value = 0
 	await process_frame
 	print("Sounds at 0 mutes the Sfx bus (-80 dB): ", AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Sfx")) <= -79.0)
 	var cfg := ConfigFile.new()
 	var loaded: bool = cfg.load(audio.SETTINGS_PATH) == OK
-	print("Settings persisted to user://settings.cfg: ", loaded and absf(float(cfg.get_value("audio", "music", 0.0)) - 0.4) < 0.001 and float(cfg.get_value("audio", "sfx", 1.0)) == 0.0)
+	print("Settings persisted to user://settings.cfg: ", loaded and absf(float(cfg.get_value("audio", "music", 0.0)) - 0.15) < 0.001 and float(cfg.get_value("audio", "sfx", 1.0)) == 0.0)
 	root.get_texture().get_image().save_png("res://verify_audio_sliders.png")
 	print("Saved verify_audio_sliders.png")
 	# Restore the defaults so the next real session isn't muted.
