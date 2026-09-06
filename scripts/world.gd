@@ -102,6 +102,10 @@ const SRC_VERDANTWOOD := 3 # was SRC_FOREST - same texture, now placed EAST (was
 const SRC_GLOOMFEN := 4    # was SRC_HILLS - hills_ground.png reused as a marsh placeholder, now placed WEST (was east)
 const SRC_PATH := 5
 const SRC_FENCE := 6
+# Alternative-tile transform flags (TileSetAtlasSource.TRANSFORM_*) for the
+# side walls: a quarter turn clockwise / anticlockwise.
+const WALL_ROTATE_CW := TileSetAtlasSource.TRANSFORM_TRANSPOSE | TileSetAtlasSource.TRANSFORM_FLIP_H
+const WALL_ROTATE_CCW := TileSetAtlasSource.TRANSFORM_TRANSPOSE | TileSetAtlasSource.TRANSFORM_FLIP_V
 const SRC_GATE := 7
 const SRC_ALTAR := 8
 const SRC_RIVER := 9   # solid - blocks the 4 outer biomes until a ford opens
@@ -217,12 +221,21 @@ func build_overworld_map(tilemap: TileMapLayer) -> void:
 		for x in range(VILLAGE_BOUNDS.x0, VILLAGE_BOUNDS.x1 + 1):
 			tilemap.set_cell(Vector2i(x, y), SRC_GRASS, Vector2i(0, 5))
 
-	# Fence ring around the village border.
+	# Stone wall ring around the village border. The wall tile is drawn as a
+	# horizontal run (stones across, moss at the base); the two side walls
+	# use it rotated a quarter turn so the courses run down the screen, moss
+	# to the outside - left wall 90 clockwise, right wall 90 anticlockwise.
+	# The corners keep the plain tile.
 	for y in range(VILLAGE_BOUNDS.y0, VILLAGE_BOUNDS.y1 + 1):
 		for x in range(VILLAGE_BOUNDS.x0, VILLAGE_BOUNDS.x1 + 1):
-			var on_border: bool = x == VILLAGE_BOUNDS.x0 or x == VILLAGE_BOUNDS.x1 or y == VILLAGE_BOUNDS.y0 or y == VILLAGE_BOUNDS.y1
-			if on_border:
-				tilemap.set_cell(Vector2i(x, y), SRC_FENCE, Vector2i(0, 0))
+			var top_or_bottom: bool = y == VILLAGE_BOUNDS.y0 or y == VILLAGE_BOUNDS.y1
+			var side: bool = x == VILLAGE_BOUNDS.x0 or x == VILLAGE_BOUNDS.x1
+			if not (top_or_bottom or side):
+				continue
+			var alt := 0
+			if side and not top_or_bottom:
+				alt = WALL_ROTATE_CW if x == VILLAGE_BOUNDS.x0 else WALL_ROTATE_CCW
+			tilemap.set_cell(Vector2i(x, y), SRC_FENCE, Vector2i(0, 0), alt)
 
 	# Gates, cut into the fence.
 	for gate_pos in VILLAGE_GATES.values():
