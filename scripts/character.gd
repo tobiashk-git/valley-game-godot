@@ -13,7 +13,9 @@ var stats: Dictionary = {
 
 # Levelling: every fight pays XP (Enemies.xp_for()); a level costs
 # xp_to_next(level) and each one raises the caps and strength, agility on
-# even levels, with a full heal - the classic feel. Agility only does
+# even levels. Current HP/MP grow by the same amount as the caps - NOT a
+# full heal (user playtest: four levels in the first dungeon acted as a
+# health refresh and over-extended the run). Agility only does
 # something above its starting value (dodge_chance()), so the verifies that
 # assume every enemy hit lands keep holding at level 1.
 const MAX_LEVEL := 30
@@ -26,8 +28,10 @@ const DODGE_MAX := 0.3
 
 signal levelled_up(new_level: int)
 
+# 60 per level (was 30): about one level per early dungeon trip, ~130 fights
+# to level 12 across the whole valley. Armour tiers are the real progression.
 static func xp_to_next(level: int) -> int:
-	return 30 * level
+	return 60 * level
 
 # Adds XP, applies every level reached, returns how many levels were gained.
 func gain_xp(amount: int) -> int:
@@ -44,8 +48,8 @@ func gain_xp(amount: int) -> int:
 		stats.strength += LEVEL_UP_STR
 		if stats.level % 2 == 0:
 			stats.agility += 1
-		stats.hp = stats.max_hp
-		stats.mp = stats.max_mp
+		stats.hp = mini(stats.max_hp, stats.hp + LEVEL_UP_HP)
+		stats.mp = mini(stats.max_mp, stats.mp + LEVEL_UP_MP)
 		levelled_up.emit(stats.level)
 	if stats.level >= MAX_LEVEL:
 		stats.xp = 0

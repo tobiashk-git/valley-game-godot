@@ -26,18 +26,18 @@ func _initialize() -> void:
 	# --- Formulas. ---
 	var rat: Dictionary = enemies.ENEMIES.dungeon_rat
 	print("A Dungeon Rat (12 HP, ATK 4, DEF 0) is worth 10 XP; a Skeleton (18/6/2) 19; a boss pays double: ", enemies.xp_for(rat) == 10 and enemies.xp_for(enemies.ENEMIES.skeleton) == 19 and enemies.xp_for(enemies.BOSSES.dungeon_boss, true) == 2 * enemies.xp_for(enemies.BOSSES.dungeon_boss))
-	print("Level costs: 30 XP to reach 2, 60 to reach 3, 90 to reach 4: ", character.xp_to_next(1) == 30 and character.xp_to_next(2) == 60 and character.xp_to_next(3) == 90)
+	print("Level costs: 60 XP to reach 2, 120 to reach 3, 180 to reach 4: ", character.xp_to_next(1) == 60 and character.xp_to_next(2) == 120 and character.xp_to_next(3) == 180)
 
 	# --- gain_xp. ---
 	character.stats.hp = 7
 	character.stats.mp = 2
 	var gained: int = character.gain_xp(9)
-	print("9 XP at level 1: no level yet, xp 9/30, HP untouched: ", gained == 0 and character.stats.level == 1 and character.stats.xp == 9 and character.stats.hp == 7)
+	print("9 XP at level 1: no level yet, xp 9/60, HP untouched: ", gained == 0 and character.stats.level == 1 and character.stats.xp == 9 and character.stats.hp == 7)
 	var levelled: Array = []
 	character.levelled_up.connect(func(l: int) -> void: levelled.append(l))
-	gained = character.gain_xp(21)
-	print("Reaching 30 XP -> level 2: +4 max HP (24), +2 max MP (12), +1 STR (6), +1 AGI (6, even level), fully healed, xp back to 0, signal fired: ", gained == 1 and character.stats.level == 2 and character.stats.max_hp == 24 and character.stats.max_mp == 12 and character.stats.strength == 6 and character.stats.agility == 6 and character.stats.hp == 24 and character.stats.mp == 12 and character.stats.xp == 0 and levelled == [2])
-	gained = character.gain_xp(60 + 90 + 5)
+	gained = character.gain_xp(51)
+	print("Reaching 60 XP -> level 2: +4 max HP (24), +2 max MP (12), +1 STR (6), +1 AGI (6, even level), current HP/MP up by the same +4/+2 (11/4) - NOT a full heal, xp back to 0, signal fired: ", gained == 1 and character.stats.level == 2 and character.stats.max_hp == 24 and character.stats.max_mp == 12 and character.stats.strength == 6 and character.stats.agility == 6 and character.stats.hp == 11 and character.stats.mp == 4 and character.stats.xp == 0 and levelled == [2])
+	gained = character.gain_xp(120 + 180 + 5)
 	print("A big payout climbs two levels at once (2 -> 4), leftover 5 XP, AGI +1 only on the even level (7): ", gained == 2 and character.stats.level == 4 and character.stats.xp == 5 and character.stats.strength == 8 and character.stats.agility == 7 and character.stats.max_hp == 32)
 	print("Level-up text names the gains; AGI only on even levels: ", character.level_up_text(3) == "+4 HP, +2 MP, +1 STR" and character.level_up_text(4) == "+4 HP, +2 MP, +1 STR, +1 AGI")
 	print("Dodge: 0% at base agility, 2% per point above it, capped at 30%: ", character.dodge_chance() == 0.04 and _dodge_at(character, 5) == 0.0 and _dodge_at(character, 40) == 0.3)
@@ -45,7 +45,7 @@ func _initialize() -> void:
 
 	# --- In a fight: XP in the log, level-up announced. ---
 	character.reset()
-	character.stats.xp = 25 # one rat away from level 2
+	character.stats.xp = 55 # one rat (10 XP) away from level 2
 	combat.start_combat(["dungeon_rat"])
 	await process_frame
 	while combat.in_combat:
@@ -126,7 +126,7 @@ func _initialize() -> void:
 			titles.append(child.text)
 		elif child is HBoxContainer and child.get_child_count() == 2 and child.get_child(0) is Label and child.get_child(1) is Label: # skip the Music/Sounds slider rows
 			rows[child.get_child(0).text] = child.get_child(1).text
-	print("Hero tab: 'Level 2' section with Experience 5 / 60 and Next level in 55 XP; header says level 2: ", titles.has("Level 2") and rows.get("Experience", "") == "5 / 60" and rows.get("Next level in", "") == "55 XP" and sheet.location_label.text.begins_with("Level 2 adventurer"))
+	print("Hero tab: 'Level 2' section with Experience 5 / 120 and Next level in 115 XP; header says level 2: ", titles.has("Level 2") and rows.get("Experience", "") == "5 / 120" and rows.get("Next level in", "") == "115 XP" and sheet.location_label.text.begins_with("Level 2 adventurer"))
 	print("Agility row shows the dodge chance once it's above base: ", rows.get("Agility", "").begins_with("7") and rows.get("Agility", "").contains("dodge 4%"))
 	root.get_texture().get_image().save_png("res://verify_levelling_sheet.png")
 	print("Saved verify_levelling_sheet.png")
