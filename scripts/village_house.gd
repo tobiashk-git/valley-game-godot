@@ -87,7 +87,9 @@ func _ready() -> void:
 	for item in furniture_layout:
 		var scene: PackedScene = FURNITURE_SCENES[item.kind]
 		var instance: Node2D = scene.instantiate()
-		instance.position = _tile_center(Vector2i(item.x, item.y))
+		# Optional "dx"/"dy": a few px off the tile centre, to tuck a prop into
+		# a painted corner (the tile grid is coarser than the shell art).
+		instance.position = _tile_center(Vector2i(item.x, item.y)) + Vector2(item.get("dx", 0), item.get("dy", 0))
 		ysort.add_child(instance)
 
 	if has_npc:
