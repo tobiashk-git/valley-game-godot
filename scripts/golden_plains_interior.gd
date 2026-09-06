@@ -9,10 +9,6 @@ extends "res://scripts/maze_interior.gd"
 # a threat.
 
 func _process(_delta: float) -> void:
-	# Deliberately does NOT call super._process() - that method bundles
-	# fog-reveal together with Combat.check_random_encounter(encounter_zone).
-	# Duplicates just the fog-reveal half of the tile-change check.
-	var current_tile := Vector2i(int(player.position.x / 32), int(player.position.y / 32))
-	if current_tile != _last_revealed_tile:
-		_last_revealed_tile = current_tile
-		_reveal_around(current_tile)
+	# The shared per-tile step (fog reveal + boss room reveal) with
+	# encounters switched off.
+	_step(false)

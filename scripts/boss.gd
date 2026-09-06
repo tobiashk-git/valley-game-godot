@@ -23,6 +23,9 @@ const INTERACT_MARGIN := 24.0
 var _player_inside := false
 var _sleep_marker: SleepMarker
 var _art := false
+var _flashing := false
+var flashes := 0 # blinks played so far (the boss room reveal's "there it is")
+const FLASH_TINT := Color(2.5, 2.5, 2.5, 1.0)
 
 func _ready() -> void:
 	var def: Dictionary = Enemies.BOSSES.get(boss_id, {})
@@ -57,9 +60,25 @@ func _on_body_exited(body: Node2D) -> void:
 func alive_tint() -> Color:
 	return Color.WHITE if _art else ALIVE_TINT
 
+# A few bright blinks (the maze's boss room reveal). Instant under Combat.fast.
+func flash(count: int, duration: float) -> void:
+	_flashing = true
+	for i in range(count):
+		sprite.modulate = FLASH_TINT
+		flashes += 1
+		if not Combat.fast:
+			await get_tree().create_timer(duration).timeout
+		sprite.modulate = alive_tint()
+		if not Combat.fast:
+			await get_tree().create_timer(duration).timeout
+		if not is_inside_tree():
+			return
+	_flashing = false
+
 func _process(_delta: float) -> void:
 	var defeated: bool = GameState.boss_defeated.get(boss_id, false)
-	sprite.modulate = DEFEATED_TINT if defeated else alive_tint()
+	if not _flashing:
+		sprite.modulate = DEFEATED_TINT if defeated else alive_tint()
 	_sleep_marker.visible = defeated
 	if _player_inside and not defeated and not Combat.in_combat and not GameState.interact_blocked() and Input.is_action_just_pressed("interact"):
 		Combat.start_boss_fight(boss_id)

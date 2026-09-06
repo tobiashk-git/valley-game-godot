@@ -114,7 +114,7 @@ func _initialize() -> void:
 	await process_frame
 	print("Wood deducted: ", inventory.get_count("wood") == 0)
 	print("Gold granted: ", inventory.get_count("gold") == gold_before + 35)
-	print("Potions granted: ", inventory.get_count("healing_potion") == potions_before + 2)
+	print("Potion granted (one since the balance pass): ", inventory.get_count("healing_potion") == potions_before + 1)
 	print("Quest marked completed: ", quests.quest_state.get("cross_gloomfen", "") == "completed")
 	print("Gloomfen ford flag opened: ", game_state.biome_paths_open.gloomfen == true)
 	# Real bug found via a live user report: the ford flag flipping is not
@@ -283,8 +283,8 @@ func _initialize() -> void:
 	print("Boss fight started: ", combat.in_combat)
 	print("Fighting the right boss: ", combat.current_enemies[0].name == "The Bogmaw")
 
-	character.stats.max_hp = 500
-	character.stats.hp = 500
+	character.stats.max_hp = 2000 # the Bogmaw hits ~29 a round since the set-rule pass; 500 fell in 17 rounds
+	character.stats.hp = 2000
 	character.stats.mp = 999
 	var boss_gold_before: int = inventory.get_count("gold")
 	var boss_potions_before: int = inventory.get_count("healing_potion")
@@ -305,21 +305,20 @@ func _initialize() -> void:
 	player.position = interior._tile_center(interior._gen.spawn_tile)
 	await process_frame
 	await _clear_combat(combat)
+	# Encounters only roll on steps that uncover new fog (dungeon
+	# refinement), so explore: hop along the corridors into unrevealed ground.
 	var got_encounter := false
-	var directions := ["move_left", "move_right", "move_up", "move_down"]
-	for burst in range(30):
+	for corridor in interior._gen.corridors:
 		if got_encounter:
 			break
-		var action: String = directions[burst % directions.size()]
-		Input.action_press(action)
-		for i in range(20):
+		for t in corridor:
+			player.position = interior._tile_center(t)
+			await process_frame
 			await physics_frame
 			if combat.in_combat:
 				got_encounter = true
 				break
-		Input.action_release(action)
-		await physics_frame
-	print("Interior random encounter fired: ", got_encounter)
+	print("Interior random encounter fired while exploring new ground: ", got_encounter)
 	if got_encounter:
 		var names := {"Swamp Hag": true, "Giant Insect": true, "Spectral Undead": true}
 		var wrong_enemy := false

@@ -40,6 +40,8 @@ var intro_pending := false
 # True for the half-second of a gathering swing (gatherable.gd): the player
 # is held still and no other prop takes the E. Never saved.
 var gathering := false
+# A short scripted moment (the boss room reveal): movement frozen, E still works.
+var cutscene := false
 
 # World Map fast-travel unlocks. House/village start known (the player
 # spawns right there); the dungeon/castle unlock themselves in
@@ -94,6 +96,7 @@ func consume_next_spawn(player: Node2D) -> bool:
 func reset() -> void:
 	next_spawn_position = NO_OVERRIDE
 	gathering = false
+	cutscene = false
 	for key in boss_defeated.keys():
 		boss_defeated[key] = false
 	wild_monsters_defeated.clear()

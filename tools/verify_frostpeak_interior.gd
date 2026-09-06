@@ -134,7 +134,7 @@ func _initialize() -> void:
 	print("Wood deducted: ", inventory.get_count("wood") == 0)
 	print("Stone deducted: ", inventory.get_count("stone") == 0)
 	print("Gold granted: ", inventory.get_count("gold") == gold_before + 35)
-	print("Potions granted: ", inventory.get_count("healing_potion") == potions_before + 2)
+	print("Potion granted (one since the balance pass): ", inventory.get_count("healing_potion") == potions_before + 1)
 	print("Quest marked completed: ", quests.quest_state.get("cross_frostpeak", "") == "completed")
 	print("Frostpeak ford flag opened: ", game_state.biome_paths_open.frostpeak == true)
 
@@ -334,21 +334,20 @@ func _initialize() -> void:
 	# regardless of room size/shape.
 	player.position = interior._tile_center(interior._gen.spawn_tile)
 	await process_frame
+	# Encounters only roll on steps that uncover new fog (dungeon
+	# refinement), so explore: hop along the corridors into unrevealed ground.
 	var got_encounter := false
-	var directions := ["move_left", "move_right", "move_up", "move_down"]
-	for burst in range(30):
+	for corridor in interior._gen.corridors:
 		if got_encounter:
 			break
-		var action: String = directions[burst % directions.size()]
-		Input.action_press(action)
-		for i in range(20):
+		for t in corridor:
+			player.position = interior._tile_center(t)
+			await process_frame
 			await physics_frame
 			if combat.in_combat:
 				got_encounter = true
 				break
-		Input.action_release(action)
-		await physics_frame
-	print("Interior random encounter fired: ", got_encounter)
+	print("Interior random encounter fired while exploring new ground: ", got_encounter)
 	if got_encounter:
 		var names := {"Ice Wraith": true, "Frost Wolf": true, "Stone Sentinel": true}
 		var wrong_enemy := false

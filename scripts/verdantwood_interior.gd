@@ -47,9 +47,9 @@ func _place_hazards() -> void:
 			hazard_map[pos] = "canopy"
 			terrain.set_cell(pos, SRC_CANOPY, Vector2i(0, 0))
 
-func _reveal_around(center: Vector2i, radius: int = FOG_REVEAL_RADIUS) -> void:
+func _reveal_around(center: Vector2i, radius: int = FOG_REVEAL_RADIUS) -> int:
 	var r: int = CANOPY_RADIUS if hazard_map.get(center, "") == "canopy" else radius
-	super._reveal_around(center, r)
+	return super._reveal_around(center, r)
 
 # player.gd (default priority 0) runs its own move_and_slide() BEFORE this,
 # using whatever velocity it read from input - by the time this runs, that
