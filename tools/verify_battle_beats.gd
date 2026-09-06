@@ -136,6 +136,31 @@ func _initialize() -> void:
 	await process_frame
 	print("E on the summary screen leaves it too: ", not combat.in_combat and not battle.panel.visible)
 
+	# Losing holds too: the last blow and the nap line stay up until Continue,
+	# and only then does the nap (house + DefeatPanel) start.
+	combat.start_combat(["bandit"])
+	await process_frame
+	character.stats.hp = 1
+	combat.player_defend()
+	await process_frame
+	while combat.playing:
+		combat.skip_beat()
+		await process_frame
+	await process_frame
+	var defeat: Node = root.get_node("DefeatPanel")
+	print("A lost fight holds on 'needs a nap' with Continue (no scene change yet): ", combat.in_combat and combat.awaiting_exit and battle.continue_btn.visible and combat.battle_log.back().begins_with("Oliver is worn out") and current_scene == overworld and not defeat.is_open())
+	root.get_texture().get_image().save_png("res://verify_beats_defeat_hold.png")
+	print("Saved verify_beats_defeat_hold.png")
+	battle.continue_btn.pressed.emit()
+	for i in range(8):
+		await process_frame
+	print("Continue starts the nap: fight over, home, nap panel up: ", not combat.in_combat and current_scene.name == "House" and defeat.is_open())
+	defeat.wake_up()
+	for i in range(4):
+		await process_frame
+	character.stats.max_hp = 200
+	character.stats.hp = 200
+
 	# Phone.
 	root.size = Vector2i(400, 660)
 	for i in range(6):

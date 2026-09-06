@@ -30,7 +30,7 @@ func _initialize() -> void:
 	print("The whole painted wall band (rows 0-2) is solid, floor from row 3, nap tile free: ", terrain.get_cell_source_id(Vector2i(3, 0)) == 0 and terrain.get_cell_source_id(Vector2i(5, 1)) == 0 and terrain.get_cell_source_id(Vector2i(7, 2)) == 0 and terrain.get_cell_source_id(Vector2i(0, 4)) == 0 and terrain.get_cell_source_id(Vector2i(3, 3)) == 1 and terrain.get_cell_source_id(h.NAP_SPAWN_TILE) == 1 and h.WALL_ROWS == 3)
 	# Walk north from the nap tile: the wall base stops Oliver at the top of row 3.
 	var player: CharacterBody2D = h.get_node("YSort/Player")
-	player.position = Vector2(h.NAP_SPAWN_TILE.x * 32 + 16, h.NAP_SPAWN_TILE.y * 32 + 16)
+	player.position = Vector2(4 * 32 + 16, h.NAP_SPAWN_TILE.y * 32 + 16) # column 4: no prop between here and the wall
 	Input.action_press("move_up")
 	for i in range(90):
 		await physics_frame

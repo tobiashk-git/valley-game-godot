@@ -26,7 +26,7 @@ const FEATHER_DROP_CHANCE := 0.03
 # bed stands at (2, 5)) - mirrors house.gd's NAP_SPAWN_TILE (not preloaded
 # from there: pulling house.gd into a --script compile drags chest.gd in,
 # where autoload names don't resolve).
-const NAP_SPAWN_TILE := Vector2i(3, 5)
+const NAP_SPAWN_TILE := Vector2i(5, 5) # the middle of the room (the rug)
 var last_defeat: Dictionary = {}
 
 const ENCOUNTER_CHANCE := 0.12
@@ -47,6 +47,7 @@ var current_wild_monster_key := "" # set for the duration of a wild-monster figh
 # so the loot can be read (user feedback: it vanished at once). Under a
 # verify script (`fast`) the fight ends immediately as it always did.
 var awaiting_exit := false
+var _nap_pending := false # awaiting_exit after a LOSS: Continue starts the nap
 var fight_gold := 0
 var fight_xp := 0
 var fight_items: Array[String] = []
@@ -174,6 +175,7 @@ func start_combat(enemy_ids) -> void:
 	current_boss_id = ""
 	current_wild_monster_key = ""
 	awaiting_exit = false
+	_nap_pending = false
 	fight_gold = 0
 	fight_xp = 0
 	fight_items = []
@@ -555,6 +557,10 @@ func finish_combat() -> void:
 	if not awaiting_exit:
 		return
 	awaiting_exit = false
+	if _nap_pending:
+		_nap_pending = false
+		_nap()
+		return
 	in_combat = false
 	changed.emit()
 	ended.emit(true)
@@ -610,6 +616,18 @@ func _defeat(cause: String = "") -> void:
 	var gold_lost: int = int(lost.get("gold", 0))
 	lost.erase("gold")
 	last_defeat = {"cause": cause, "gold_lost": gold_lost, "items_lost": lost}
+	# The screen holds on the last blow and the nap line until Continue
+	# (user feedback: it vanished before the hit could be read) - same hold
+	# as a victory. Under a verify script the nap starts at once.
+	if fast:
+		_nap()
+	else:
+		awaiting_exit = true
+		_nap_pending = true
+		changed.emit()
+
+# The nap itself: HP/MP back, fight cleared, home to the house, DefeatPanel.
+func _nap() -> void:
 	Character.stats.hp = Character.stats.max_hp
 	Character.stats.mp = Character.stats.max_mp
 	Character.changed.emit()
@@ -640,4 +658,5 @@ func reset() -> void:
 	current_wild_monster_key = ""
 	playing = false
 	awaiting_exit = false
+	_nap_pending = false
 	changed.emit()

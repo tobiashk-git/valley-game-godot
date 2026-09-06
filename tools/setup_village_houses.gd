@@ -97,7 +97,7 @@ func _initialize() -> void:
 		[
 			{"kind": "Table", "x": 2, "y": 3}, # first floor row under the painted shelves
 			{"kind": "Barrel", "x": 2, "y": 5},
-			{"kind": "Cabinet", "x": 6, "y": 4},
+			{"kind": "Barrel", "x": 7, "y": 4}, # by the right wall (the cabinet looked odd there)
 		],
 		[Vector2i(8, 1), Vector2i(8, 2)],
 		World.TRADER_HOUSE_ENTRANCE,

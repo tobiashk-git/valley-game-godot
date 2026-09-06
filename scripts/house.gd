@@ -14,7 +14,7 @@ const ROOM_SHELL := "res://assets/interiors/house_shell.png"
 const BED_SCENE := preload("res://scenes/props/Bed.tscn")
 # Where Oliver comes to after a nap (a lost fight): the floor tile right of
 # his bed (the bed stands at (2, 4)).
-const NAP_SPAWN_TILE := Vector2i(3, 5) # the floor tile beside the bed's foot
+const NAP_SPAWN_TILE := Vector2i(5, 5) # the middle of the room, on the rug
 # The painted back wall (beam, windows, skirting) is three tile rows deep;
 # they're all solid, so the hard stop is the bottom of the skirting and
 # nothing walks up "onto" the wall (or under the HUD in the top-left).
