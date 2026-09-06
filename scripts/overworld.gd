@@ -27,6 +27,7 @@ const WILD_MONSTER_SCENE := preload("res://scenes/props/WildMonster.tscn")
 const NPC_SCENE := preload("res://scenes/props/NPC.tscn")
 const PORTAL_SCENE := preload("res://scenes/Portal.tscn")
 const ALTAR_TRIGGER_SCRIPT := preload("res://scripts/altar_trigger.gd")
+const VILLAGE_GROUND := "res://assets/interiors/village_ground.png"
 
 @onready var tilemap: TileMapLayer = $TileMapLayer
 @onready var ysort: Node2D = $YSort
@@ -299,6 +300,26 @@ func _ready() -> void:
 	guide.npc_id = "marsh_guide"
 	guide.intro_text = "Gloomfen's past that ford, if you can call it that anymore - the old boards rotted through years back. Bring me wood and I'll lay a new crossing."
 	ysort.add_child(guide)
+
+	# Painted village ground (see house.gd's room shell for the idea): one
+	# picture of the plaza, paths and grass over the interior tiles, under
+	# the props and the player; the tile map keeps the collision and the
+	# fence/gate ring stays visible around it. The altar tile is under the
+	# plate too, so its sprite is redrawn on top.
+	if ResourceLoader.exists(VILLAGE_GROUND):
+		var ground := Sprite2D.new()
+		ground.name = "VillageGround"
+		ground.texture = load(VILLAGE_GROUND)
+		ground.centered = false
+		ground.position = Vector2((World.VILLAGE_BOUNDS.x0 + 1) * 32, (World.VILLAGE_BOUNDS.y0 + 1) * 32)
+		add_child(ground)
+		move_child(ground, tilemap.get_index() + 1)
+		var altar_sprite := Sprite2D.new()
+		altar_sprite.name = "AltarSprite"
+		altar_sprite.texture = load("res://assets/altar.png")
+		altar_sprite.position = _tile_center(World.ALTAR_POS) + Vector2(0, 16.0 - altar_sprite.texture.get_height() / 2.0)
+		add_child(altar_sprite)
+		move_child(altar_sprite, ground.get_index() + 1)
 
 	# The altar tile (painted solid by build_overworld_map()) just needs an
 	# interact trigger on top of it - it isn't a separate prop/scene like
