@@ -55,7 +55,10 @@ func _build_hud() -> void:
 	vbox.add_child(hbox)
 	hbox.owner = layer
 
-	for entry in [["wood", "WoodLabel"], ["stone", "StoneLabel"], ["gold", "GoldLabel"]]:
+	# Gold only (the wood/stone counters went 2026-09-06: with many more
+	# gatherable materials coming, two of them on the HUD meant little - the
+	# backpack has them all).
+	for entry in [["gold", "GoldLabel"]]:
 		var item_id: String = entry[0]
 		var label_name: String = entry[1]
 

@@ -1,20 +1,18 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_qpvh6"]
-[ext_resource type="Texture2D" path="res://assets/icons/wood.png" id="2_7hsmw"]
-[ext_resource type="Texture2D" path="res://assets/icons/stone.png" id="3_nysna"]
 [ext_resource type="Texture2D" path="res://assets/icons/gold.png" id="4_f6qnu"]
 
-[node name="HUD" type="CanvasLayer" unique_id=1373663694]
+[node name="HUD" type="CanvasLayer" unique_id=966652706]
 script = ExtResource("1_qpvh6")
 
-[node name="Panel" type="Panel" parent="." unique_id=1700973731]
+[node name="Panel" type="Panel" parent="." unique_id=405939964]
 offset_left = 12.0
 offset_top = 12.0
 offset_right = 332.0
 offset_bottom = 132.0
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1518480603]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=871130766]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -23,39 +21,15 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1825702397]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1430535118]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="HBox" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1461263164]
+[node name="HBox" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1489100020]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="WoodIcon" type="TextureRect" parent="Panel/Margin/VBox/HBox" unique_id=1803701836]
-custom_minimum_size = Vector2(28, 28)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("2_7hsmw")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="WoodLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=1100398807]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-
-[node name="StoneIcon" type="TextureRect" parent="Panel/Margin/VBox/HBox" unique_id=968945168]
-custom_minimum_size = Vector2(28, 28)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("3_nysna")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="StoneLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=766046220]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-
-[node name="GoldIcon" type="TextureRect" parent="Panel/Margin/VBox/HBox" unique_id=469695062]
+[node name="GoldIcon" type="TextureRect" parent="Panel/Margin/VBox/HBox" unique_id=729366481]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 size_flags_vertical = 4
@@ -63,18 +37,18 @@ texture = ExtResource("4_f6qnu")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="GoldLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=371655888]
+[node name="GoldLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=413252991]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 
-[node name="LocationLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=482268721]
+[node name="LocationLabel" type="Label" parent="Panel/Margin/VBox/HBox" unique_id=513406370]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 16
 autowrap_mode = 2
 
-[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=289310354]
+[node name="HPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=1218650763]
 custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -82,7 +56,7 @@ mouse_filter = 2
 theme_type_variation = &"HPBar"
 show_percentage = false
 
-[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/HPBar" unique_id=1132589396]
+[node name="HPLabel" type="Label" parent="Panel/Margin/VBox/HPBar" unique_id=383409476]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -90,7 +64,7 @@ theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="MPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=50469256]
+[node name="MPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=2076399360]
 custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -98,7 +72,7 @@ mouse_filter = 2
 theme_type_variation = &"MPBar"
 show_percentage = false
 
-[node name="MPLabel" type="Label" parent="Panel/Margin/VBox/MPBar" unique_id=1792260884]
+[node name="MPLabel" type="Label" parent="Panel/Margin/VBox/MPBar" unique_id=139967656]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -106,7 +80,7 @@ theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="XPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=320787040]
+[node name="XPBar" type="ProgressBar" parent="Panel/Margin/VBox" unique_id=780988886]
 custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -114,7 +88,7 @@ mouse_filter = 2
 theme_type_variation = &"XPBar"
 show_percentage = false
 
-[node name="XPLabel" type="Label" parent="Panel/Margin/VBox/XPBar" unique_id=977365221]
+[node name="XPLabel" type="Label" parent="Panel/Margin/VBox/XPBar" unique_id=644501478]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -122,7 +96,7 @@ theme_override_font_sizes/font_size = 11
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox" unique_id=543755383]
+[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1834365022]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 13

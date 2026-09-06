@@ -42,7 +42,7 @@ func _initialize() -> void:
 	print("Panel is the narrow 320px (was 440): ", is_equal_approx(hud_panel.size.x, 320.0))
 	print("Bars span the panel's inner width: ", is_equal_approx(hp_rect.size.x, hud_panel.size.x - 16.0))
 	print("Effects line reads 'No effects' when nothing is active: ", combat.player_status.is_empty() and hud.status_label.text == "No effects")
-	print("Counters still present above the bars: ", hud.has_node("Panel/Margin/VBox/HBox/WoodLabel") and hud.has_node("Panel/Margin/VBox/HBox/GoldLabel"))
+	print("Gold counter above the bars, wood/stone counters gone: ", hud.has_node("Panel/Margin/VBox/HBox/GoldLabel") and not hud.has_node("Panel/Margin/VBox/HBox/WoodLabel") and not hud.has_node("Panel/Margin/VBox/HBox/StoneLabel"))
 	print("Old 'World N' label is gone: ", not hud.has_node("Panel/Margin/VBox/HBox/WorldLabel"))
 	print("Battle panel no longer has its own player HP/MP bars or status row: ", not battle.has_node("Panel/Margin/VBox/PlayerRow"))
 
@@ -61,9 +61,9 @@ func _initialize() -> void:
 	for i in range(4):
 		await process_frame
 	print("Location updates as the player moves biome: ", hud.location_label.text == "Emberfall Badlands", " -> '", hud.location_label.text, "'")
-	print("Long biome name wraps onto two lines instead of widening the panel: ", hud.location_label.get_line_count() == 2 and is_equal_approx(hud_panel.size.x, 320.0))
+	print("Longest biome name fits on one line beside the gold counter (wood/stone gone), panel still 320: ", hud.location_label.get_line_count() == 1 and is_equal_approx(hud_panel.size.x, 320.0))
 	var hud_rect_long: Rect2 = hud_panel.get_global_rect()
-	print("Panel grew to fit the wrapped name but still ends above the fight screen (y<164): ", hud_rect_long.size.y > fitted_short and hud_rect_long.end.y < 164.0, " (ends y=", hud_rect_long.end.y, ")")
+	print("Panel keeps its height with the long name and ends above the fight screen (y<164): ", is_equal_approx(hud_rect_long.size.y, fitted_short) and hud_rect_long.end.y < 164.0, " (ends y=", hud_rect_long.end.y, ")")
 
 	# --- Fight screen up (with the tall/long-name HUD): HUD must stay
 	# visible AND uncovered. ---
