@@ -14,7 +14,11 @@ const ROOM_SHELL := "res://assets/interiors/house_shell.png"
 const BED_SCENE := preload("res://scenes/props/Bed.tscn")
 # Where Oliver comes to after a nap (a lost fight): the floor tile right of
 # his bed (the bed stands at (2, 4)).
-const NAP_SPAWN_TILE := Vector2i(3, 4)
+const NAP_SPAWN_TILE := Vector2i(3, 6) # the floor tile beside the bed's foot
+# The painted back wall (beam, windows, skirting) is three tile rows deep;
+# they're all solid, so the hard stop is the bottom of the skirting and
+# nothing walks up "onto" the wall (or under the HUD in the top-left).
+const WALL_ROWS := 3
 const CHAIR_SCENE := preload("res://scenes/props/Chair.tscn")
 const TABLE_SCENE := preload("res://scenes/props/Table.tscn")
 const STOVE_SCENE := preload("res://scenes/props/Stove.tscn")
@@ -36,7 +40,7 @@ func _spawn_prop(scene: PackedScene, tile_pos: Vector2i) -> void:
 func _ready() -> void:
 	for y in range(HEIGHT):
 		for x in range(WIDTH):
-			var on_border: bool = x == 0 or x == WIDTH - 1 or y == 0 or y == HEIGHT - 1
+			var on_border: bool = x == 0 or x == WIDTH - 1 or y < WALL_ROWS or y == HEIGHT - 1
 			terrain.set_cell(Vector2i(x, y), 0 if on_border else 1, Vector2i(0, 0)) # 0=wall,1=floor
 
 	terrain.set_cell(Vector2i(0, 6), 2, Vector2i(0, 0)) # window, west wall
@@ -69,12 +73,14 @@ func _ready() -> void:
 	door_blocker.add_child(blocker_shape)
 	add_child(door_blocker)
 
-	_spawn_prop(BED_SCENE, Vector2i(2, 4))
-	_spawn_prop(STOVE_SCENE, Vector2i(8, 2)) # standing on the painted skirting under the right window
+	# Props stand on the floor rows (3..7): the bed's head meets the wall
+	# base, the stove sits under the right window, the chest at the bed's foot.
+	_spawn_prop(BED_SCENE, Vector2i(2, 6))
+	_spawn_prop(STOVE_SCENE, Vector2i(8, 3))
 	_spawn_prop(TABLE_SCENE, Vector2i(8, 5))
 	_spawn_prop(CHAIR_SCENE, Vector2i(8, 4))
 	_spawn_prop(CHAIR_SCENE, Vector2i(8, 6))
-	_spawn_prop(CHEST_SCENE, Vector2i(2, 6))
+	_spawn_prop(CHEST_SCENE, Vector2i(2, 7))
 
 	if not GameState.consume_next_spawn(player):
 		player.position = _tile_center(DOOR_TILE + Vector2i(0, -1))

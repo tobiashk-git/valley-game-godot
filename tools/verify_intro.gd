@@ -23,7 +23,7 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	var player: CharacterBody2D = current_scene.get_node("YSort/Player")
-	print("New Game opens in Oliver's house beside the bed, intro pending: ", current_scene.name == "House" and player.position == Vector2(3 * 32 + 16, 4 * 32 + 16) and game_state.intro_pending and intro.is_playing())
+	print("New Game opens in Oliver's house beside the bed, intro pending: ", current_scene.name == "House" and player.position == Vector2(current_scene.NAP_SPAWN_TILE.x * 32 + 16, current_scene.NAP_SPAWN_TILE.y * 32 + 16) and game_state.intro_pending and intro.is_playing())
 	print("Screen is black, Oliver faces the bed with a z z Z, no dialogue yet: ", intro._black.visible and intro._black.modulate.a == 1.0 and player.facing == "left" and player.has_node("SleepMarker") and player.get_node("SleepMarker").visible and not dialogue.is_open())
 	var before: Vector2 = player.position
 	Input.action_press("move_right")
