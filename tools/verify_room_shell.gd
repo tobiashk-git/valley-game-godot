@@ -37,6 +37,7 @@ func _initialize() -> void:
 	print("Saved verify_room_shell.png")
 	await _verify_elder()
 	await _verify_trader()
+	await _verify_smithy()
 	quit()
 
 # --- Elder's house: the 9x7 village room with its own shell (2-row wall). ---
@@ -76,3 +77,23 @@ func _verify_trader() -> void:
 	print("Trader stands on the first floor row (4,3), the table beside it (2,3): ", npc != null and npc.position == Vector2(4 * 32 + 16, 3 * 32 + 16) and table != null and table.position == Vector2(2 * 32 + 16, 3 * 32 + 16))
 	root.get_texture().get_image().save_png("res://verify_room_shell_trader.png")
 	print("Saved verify_room_shell_trader.png")
+
+# --- Smithy: three-row stone wall, forge and workbench on the floor rows. ---
+func _verify_smithy() -> void:
+	change_scene_to_packed(load("res://scenes/BlacksmithHouse.tscn"))
+	for i in range(8):
+		await process_frame
+	var b: Node2D = current_scene
+	var shell: Sprite2D = b.get_node_or_null("RoomShell")
+	var terrain: TileMapLayer = b.get_node("TerrainLayer")
+	print("Smithy has its shell (288x224) and a three-row solid wall band: ", shell != null and shell.texture.get_size() == Vector2(288, 224) and b.wall_rows == 3 and terrain.get_cell_source_id(Vector2i(4, 2)) == 0 and terrain.get_cell_source_id(Vector2i(4, 3)) == 1)
+	var forge: Node2D = null
+	var bench: Node2D = null
+	for child in b.get_node("YSort").get_children():
+		if child.scene_file_path == "res://scenes/props/Forge.tscn":
+			forge = child
+		elif child.scene_file_path == "res://scenes/props/Workbench.tscn":
+			bench = child
+	print("Forge (6,3) and workbench (2,3) stand on the first floor row: ", forge != null and forge.position == Vector2(6 * 32 + 16, 3 * 32 + 16) and bench != null and bench.position == Vector2(2 * 32 + 16, 3 * 32 + 16))
+	root.get_texture().get_image().save_png("res://verify_room_shell_smithy.png")
+	print("Saved verify_room_shell_smithy.png")

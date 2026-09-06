@@ -9,7 +9,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jcpg3"]
 size = Vector2(28, 28)
 
-[node name="BlacksmithHouse" type="Node2D" unique_id=1711751284]
+[node name="BlacksmithHouse" type="Node2D" unique_id=1136655566]
 script = ExtResource("1_s1vax")
 has_npc = true
 npc_sprite_path = "res://assets/trader.png"
@@ -25,32 +25,34 @@ furniture_layout = Array[Dictionary]([{
 }, {
 "kind": "Forge",
 "x": 6,
-"y": 2
+"y": 3
 }, {
 "kind": "Barrel",
-"x": 6,
-"y": 4
+"x": 7,
+"y": 5
 }])
 window_tiles = Array[Vector2i]([Vector2i(8, 1), Vector2i(8, 2)])
+room_shell = "res://assets/interiors/smithy_shell.png"
+wall_rows = 3
 overworld_return_tile = Vector2i(105, 103)
 
-[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=1637236181]
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=963152613]
 tile_set = ExtResource("2_pfm20")
 
-[node name="YSort" type="Node2D" parent="." unique_id=235200659]
+[node name="YSort" type="Node2D" parent="." unique_id=680575542]
 y_sort_enabled = true
 
 [node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("3_lw5a3")]
 z_index = 1
 script = ExtResource("4_83ib1")
 
-[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=944036997]
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=859091871]
 zoom = Vector2(2, 2)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
-[node name="OutPortal" type="Area2D" parent="." unique_id=27408540]
+[node name="OutPortal" type="Area2D" parent="." unique_id=1393936245]
 script = ExtResource("5_anjel")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=184638430]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=516998188]
 shape = SubResource("RectangleShape2D_jcpg3")

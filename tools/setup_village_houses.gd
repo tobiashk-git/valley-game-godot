@@ -113,15 +113,15 @@ func _initialize() -> void:
 		"BlacksmithHouse", true, "res://assets/trader.png", "Village Blacksmith",
 		"Need something made? The bench in the corner is yours - bring the makings and I'll keep the forge hot. Old gear you don't want, I'll break down for parts.",
 		[
-			{"kind": "Workbench", "x": 2, "y": 3},
-			{"kind": "Forge", "x": 6, "y": 2},
-			{"kind": "Barrel", "x": 6, "y": 4},
+			{"kind": "Workbench", "x": 2, "y": 3}, # first floor row under the painted stone wall
+			{"kind": "Forge", "x": 6, "y": 3}, # its chimney runs up the painted wall
+			{"kind": "Barrel", "x": 7, "y": 5},
 		],
 		[Vector2i(8, 1), Vector2i(8, 2)],
 		World.BLACKSMITH_HOUSE_ENTRANCE,
 		"", false, "village_blacksmith",
 		"Hah, the new arrival. I'm the Blacksmith - anything that needs hammering, forging or breaking down, that's my bench in the corner. Walk up to it and press E.",
-		Color(0.62, 0.6, 0.68, 1.0)
+		Color(0.62, 0.6, 0.68, 1.0), "res://assets/interiors/smithy_shell.png", 3
 	)
 
 	print("=== Village houses setup complete ===")
