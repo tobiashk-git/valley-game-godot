@@ -1,5 +1,5 @@
 extends CanvasLayer
-# Autoload — always-visible top-left HUD: the gold counter with the player's current location
+# Autoload — always-visible top-left HUD: the player's current location
 # (biome name on the overworld, e.g. "Frostpeak Ridge", wrapping onto a
 # second line when long; a fixed name inside interiors) beside them, then -
 # stacked underneath as a left-hand column - the HP bar, MP bar, a gold XP
@@ -13,7 +13,6 @@ extends CanvasLayer
 @onready var margin: MarginContainer = $Panel/Margin
 @onready var vbox: VBoxContainer = $Panel/Margin/VBox
 @onready var hbox: HBoxContainer = $Panel/Margin/VBox/HBox
-@onready var gold_label: Label = $Panel/Margin/VBox/HBox/GoldLabel
 @onready var location_label: Label = $Panel/Margin/VBox/HBox/LocationLabel
 @onready var hp_bar: ProgressBar = $Panel/Margin/VBox/HPBar
 @onready var hp_label: Label = $Panel/Margin/VBox/HPBar/HPLabel
@@ -89,10 +88,7 @@ func _connect_stats() -> void:
 	_refresh_stats()
 
 func _refresh() -> void:
-	# The icon carries identity (see setup_hud_inventory.gd's GoldIcon), so
-	# the label just needs the count. Wood/stone counters are gone - the
-	# backpack lists every material.
-	gold_label.text = str(Inventory.get_count("gold"))
+	pass # no counters left on the HUD (wood/stone/gold live in the backpack)
 
 func _refresh_stats() -> void:
 	var stats: Dictionary = Character.stats

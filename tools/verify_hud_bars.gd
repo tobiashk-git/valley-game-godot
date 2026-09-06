@@ -42,7 +42,7 @@ func _initialize() -> void:
 	print("Panel is the narrow 320px (was 440): ", is_equal_approx(hud_panel.size.x, 320.0))
 	print("Bars span the panel's inner width: ", is_equal_approx(hp_rect.size.x, hud_panel.size.x - 16.0))
 	print("Effects line reads 'No effects' when nothing is active: ", combat.player_status.is_empty() and hud.status_label.text == "No effects")
-	print("Gold counter above the bars, wood/stone counters gone: ", hud.has_node("Panel/Margin/VBox/HBox/GoldLabel") and not hud.has_node("Panel/Margin/VBox/HBox/WoodLabel") and not hud.has_node("Panel/Margin/VBox/HBox/StoneLabel"))
+	print("Only the location above the bars - wood/stone/gold counters gone: ", hud.has_node("Panel/Margin/VBox/HBox/LocationLabel") and not hud.has_node("Panel/Margin/VBox/HBox/GoldLabel") and not hud.has_node("Panel/Margin/VBox/HBox/WoodLabel") and not hud.has_node("Panel/Margin/VBox/HBox/StoneLabel"))
 	print("Old 'World N' label is gone: ", not hud.has_node("Panel/Margin/VBox/HBox/WorldLabel"))
 	print("Battle panel no longer has its own player HP/MP bars or status row: ", not battle.has_node("Panel/Margin/VBox/PlayerRow"))
 

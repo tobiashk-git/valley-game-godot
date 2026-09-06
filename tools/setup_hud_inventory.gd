@@ -55,31 +55,8 @@ func _build_hud() -> void:
 	vbox.add_child(hbox)
 	hbox.owner = layer
 
-	# Gold only (the wood/stone counters went 2026-09-06: with many more
-	# gatherable materials coming, two of them on the HUD meant little - the
-	# backpack has them all).
-	for entry in [["gold", "GoldLabel"]]:
-		var item_id: String = entry[0]
-		var label_name: String = entry[1]
-
-		var icon := TextureRect.new()
-		icon.name = label_name.replace("Label", "Icon")
-		icon.texture = load("res://assets/icons/%s.png" % item_id)
-		icon.custom_minimum_size = Vector2(28, 28) # was 18x18
-		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		# Centred against the location label, which can be two lines tall.
-		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		hbox.add_child(icon)
-		icon.owner = layer
-
-		var label := Label.new()
-		label.name = label_name
-		label.add_theme_font_size_override("font_size", 18) # was 14, then 20
-		label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		hbox.add_child(label)
-		label.owner = layer
-
+	# No resource counters any more (wood/stone, then gold, went 2026-09-06 -
+	# "just keep location": the backpack lists every material and the gold).
 	# Current location (replaced the old "World N" indicator, per user
 	# feedback): the biome under the player on the overworld, a fixed name
 	# inside interiors - set by hud.gd. Takes whatever width the counters
