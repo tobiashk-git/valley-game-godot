@@ -101,13 +101,13 @@ func _initialize() -> void:
 
 	# The Blacksmith's: the village's crafting station. The Workbench prop
 	# (workbench.gd) is the only place crafting, enhancing and salvaging
-	# work; the stove stands in for the forge until the smithy gets art.
+	# work; the forge stands against the back wall.
 	_build(
 		"BlacksmithHouse", true, "res://assets/trader.png", "Village Blacksmith",
 		"Need something made? The bench in the corner is yours - bring the makings and I'll keep the forge hot. Old gear you don't want, I'll break down for parts.",
 		[
 			{"kind": "Workbench", "x": 2, "y": 3},
-			{"kind": "Stove", "x": 6, "y": 2},
+			{"kind": "Forge", "x": 6, "y": 2},
 			{"kind": "Barrel", "x": 6, "y": 4},
 		],
 		[Vector2i(8, 1), Vector2i(8, 2)],

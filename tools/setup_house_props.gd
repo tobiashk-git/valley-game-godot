@@ -6,7 +6,7 @@ extends SceneTree
 const TILE := 32.0
 const HALF := TILE / 2.0
 
-func _build(scene_name: String, tex_path: String, src_w: float, src_h: float) -> void:
+func _build(scene_name: String, tex_path: String, src_w: float, src_h: float, col_w: float = TILE - 4) -> void:
 	var body := StaticBody2D.new()
 	body.name = scene_name
 
@@ -20,7 +20,7 @@ func _build(scene_name: String, tex_path: String, src_w: float, src_h: float) ->
 	var collision := CollisionShape2D.new()
 	collision.name = "CollisionShape2D"
 	var shape := RectangleShape2D.new()
-	shape.size = Vector2(TILE - 4, TILE - 4)
+	shape.size = Vector2(col_w, TILE - 4)
 	collision.shape = shape
 	body.add_child(collision)
 	collision.owner = body
@@ -37,5 +37,8 @@ func _initialize() -> void:
 	_build("Table", "res://assets/furniture/table.png", 66.0, 45.0)
 	_build("Stove", "res://assets/furniture/stove.png", 32.0, 36.0)
 	_build("Chest", "res://assets/chest.png", 32.0, 32.0)
+	# The smithy's forge (Leonardo pixel prop, keyed): two tiles wide, so its
+	# collider spans both.
+	_build("Forge", "res://assets/furniture/forge.png", 64.0, 93.0, 2.0 * TILE - 4)
 	print("=== House props setup complete ===")
 	quit()
