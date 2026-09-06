@@ -127,9 +127,18 @@ func _initialize() -> void:
 	# --- Turn in: wood deducted, reward granted, quest completed. ---
 	var gold_before: int = inventory.get_count("gold")
 	var potions_before: int = inventory.get_count("healing_potion")
+	var character: Node = root.get_node("Character")
+	var xp_before: int = character.stats.xp + (character.stats.level - 1) * 1000
 	ready_actions[0].pressed.emit()
 	await process_frame
 	print("Wood deducted after turn-in: ", inventory.get_count("wood") == 0)
+	var xp_after: int = character.stats.xp + (character.stats.level - 1) * 1000
+	print("Quest XP granted (40 - more than a fight's worth; a level may have turned): ", xp_after - xp_before == 40 or (character.stats.level == 2 and character.stats.xp + 60 - xp_before == 40))
+	var rewards_have_xp := true
+	for qid in quests.QUEST_DEFS.keys():
+		if quests.QUEST_DEFS[qid].get("reward", {}).get("xp", 0) <= 0:
+			rewards_have_xp = false
+	print("Every quest pays XP, the ford quests 120-210, the tutorial 20: ", rewards_have_xp and quests.QUEST_DEFS.cross_frostpeak.reward.xp == 120 and quests.QUEST_DEFS.cross_gloomfen.reward.xp == 210 and quests.QUEST_DEFS.meet_villagers.reward.xp == 20)
 	print("Gold granted: ", inventory.get_count("gold") == gold_before + 20)
 	print("Healing potion granted: ", inventory.get_count("healing_potion") == potions_before + 1)
 	print("Quest marked completed: ", quests.quest_state.get("gather_wood", "") == "completed")

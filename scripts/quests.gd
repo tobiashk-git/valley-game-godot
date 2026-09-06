@@ -13,7 +13,7 @@ const QUEST_DEFS := {
 		"giver_name": "Village Elder",
 		"name": "A Village in Need",
 		"objective": {"type": "gather", "item_id": "wood", "amount": 5},
-		"reward": {"gold": 20, "item_id": "healing_potion", "item_amount": 1},
+		"reward": {"xp": 40, "gold": 20, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "Traveler! Our village could use some wood for repairs. Could you bring me 5 Wood?",
 			"in_progress": "I still need 5 Wood - do you have any to spare?",
@@ -26,12 +26,14 @@ const QUEST_DEFS := {
 	# to go to him to receive it) - accepting it counts as meeting him, so
 	# the objective is the one other villager. Completes silently the moment
 	# the Trader's intro plays (see mark_npc_met()), or on the spot if the
-	# player met the Trader first (see _accept_quest()). No reward entry:
-	# the gates opening IS the reward.
+	# player met the Trader first (see _accept_quest()). Its reward is a
+	# little XP - the gates opening is the real reward (npc.gd's "?" marker
+	# keys off a gold reward, so a silent completion never shows one).
 	"meet_villagers": {
 		"giver_name": "Village Elder",
 		"name": "Meet the Village",
 		"objective": {"type": "talk_to_npcs", "npc_ids": ["village_trader"], "goal": "Introduce yourself to the Village Trader in the south-west house."},
+		"reward": {"xp": 20},
 		"dialogue": {
 			"offer": "Welcome to the valley, traveler! Before you go wandering, meet the rest of us - the Trader keeps the house in the south-west corner. Once you've said hello, I'll have the gates opened for you.",
 			"in_progress": "The Trader's in the south-west house - go and say hello, and the gates are yours.",
@@ -46,7 +48,7 @@ const QUEST_DEFS := {
 			{"item_id": "wood", "amount": 8},
 			{"item_id": "stone", "amount": 8},
 		]},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 1},
+		"reward": {"xp": 120, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "The ford north of here washed out ages ago - Frostpeak's been cut off ever since. Bring me 8 Wood and 8 Stone and I'll get it shored up.",
 			"in_progress": "Still need more Wood and Stone for the ford - can you spare any?",
@@ -58,7 +60,7 @@ const QUEST_DEFS := {
 		"giver_name": "Forest Druid",
 		"name": "Clearing the Crossing",
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 1},
+		"reward": {"xp": 150, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "The ford into Verdantwood is choked with fallen branches - bring me 12 Wood and I'll see it cleared.",
 			"in_progress": "Still need more wood to clear the crossing - what have you got?",
@@ -70,7 +72,7 @@ const QUEST_DEFS := {
 		"giver_name": "Badlands Prospector",
 		"name": "Shoring Up the Crossing",
 		"objective": {"type": "gather", "item_id": "stone", "amount": 12},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 1},
+		"reward": {"xp": 180, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "The ford into Emberfall's crumbling at the edges - bring me 12 Stone and I'll get it packed solid again.",
 			"in_progress": "Still need more stone for the crossing - what have you got?",
@@ -82,7 +84,7 @@ const QUEST_DEFS := {
 		"giver_name": "Marsh Guide",
 		"name": "Laying the Boardwalk",
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 1},
+		"reward": {"xp": 210, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "The old boardwalk into Gloomfen rotted through long ago - bring me 12 Wood and I'll lay a new one.",
 			"in_progress": "Still need more wood for the boardwalk - what have you got?",
@@ -99,7 +101,7 @@ const QUEST_DEFS := {
 		"giver_name": "Village Trader",
 		"name": "What Lies Beneath",
 		"objective": {"type": "gather", "item_id": "stone", "amount": 6},
-		"reward": {"gold": 25, "item_id": "healing_potion", "item_amount": 1},
+		"reward": {"xp": 90, "gold": 25, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "There's an old barrow at the edge of the valley - sealed for as long as anyone can remember. Bring me 6 Stone to clear the collapsed entrance and I'll show you where it lies.",
 			"in_progress": "Still need more stone to clear the barrow's entrance - what have you got?",
@@ -233,6 +235,12 @@ func _complete_quest(quest_id: String) -> void:
 	elif objective.has("item_id"):
 		Inventory.remove_item(objective.item_id, objective.amount)
 	var reward: Dictionary = def.get("reward", {})
+	# Quest XP pays well above a fight's worth (user: "quest returns tend to
+	# be much larger than combat xp") - shown as a HUD popup; a level-up
+	# announces itself through Character.levelled_up as usual.
+	if reward.get("xp", 0) > 0:
+		HUD._spawn_text_popup("+%d XP" % reward.xp, Color(1.0, 0.85, 0.3))
+		Character.gain_xp(reward.xp)
 	if reward.has("gold"):
 		Inventory.add_item("gold", reward.gold)
 	if reward.has("item_id"):

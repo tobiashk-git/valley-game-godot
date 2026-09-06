@@ -66,7 +66,7 @@ func _initialize() -> void:
 	wood_row = _find_row(list, "gather_wood")
 	wood_row.pressed.emit()
 	await process_frame
-	print("Pane shows the selected quest's giver, goal, progress and reward: ", journal.quest_name.text == "A Village in Need" and journal.quest_giver.text == "From the Village Elder" and journal.quest_goal.text.begins_with("Gather 5") and journal.quest_progress.text.begins_with("Progress: 0/5") and journal.quest_reward.text == "Reward: 20 gold, 1 Healing Potion")
+	print("Pane shows the selected quest's giver, goal, progress and reward: ", journal.quest_name.text == "A Village in Need" and journal.quest_giver.text == "From the Village Elder" and journal.quest_goal.text.begins_with("Gather 5") and journal.quest_progress.text.begins_with("Progress: 0/5") and journal.quest_reward.text == "Reward: 40 XP, 20 gold, 1 Healing Potion")
 	root.get_texture().get_image().save_png("res://verify_quest_journal.png")
 	print("Saved verify_quest_journal.png")
 

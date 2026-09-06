@@ -78,7 +78,7 @@ func _initialize() -> void:
 	character.stats.hp = 3
 	character.stats.mp = 1
 	var player: CharacterBody2D = house.get_node("YSort/Player")
-	player.position = Vector2(house.NAP_SPAWN_TILE.x * 32 + 16, house.NAP_SPAWN_TILE.y * 32 + 16)
+	player.position = Vector2(3 * 32 + 16, 5 * 32 + 16) # beside the bed (the spawn itself is now mid-room)
 	for i in range(8):
 		await physics_frame
 	await process_frame

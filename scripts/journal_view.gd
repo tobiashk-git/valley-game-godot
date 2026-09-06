@@ -106,9 +106,11 @@ func goal_text(quest_id: String) -> String:
 
 func reward_text(quest_id: String) -> String:
 	var reward: Dictionary = Quests.QUEST_DEFS[quest_id].get("reward", {})
-	if reward.is_empty():
-		return "Reward: the village gates open."
 	var parts: Array = []
+	if reward.get("xp", 0) > 0:
+		parts.append("%d XP" % reward.xp)
+	if quest_id == "meet_villagers":
+		parts.append("the village gates open")
 	if reward.get("gold", 0) > 0:
 		parts.append("%d gold" % reward.gold)
 	if reward.has("item_id"):
