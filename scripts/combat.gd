@@ -500,8 +500,10 @@ func _defeat_enemy(index: int) -> void:
 		Inventory.add_item(drop_item_id, 1)
 		fight_items.append(Items.get_item_name(drop_item_id))
 		msg += " Obtained %s!" % Items.get_item_name(drop_item_id)
-	# Any wild monster may drop an Angel Feather (the way home).
-	if current_boss_id == "" and randf() < FEATHER_DROP_CHANCE and Inventory.can_add("angel_feather"):
+	# The way home: a boss ALWAYS drops an Angel Feather (in case you left
+	# home without one); any wild monster may.
+	var feather: bool = current_boss_id != "" or randf() < FEATHER_DROP_CHANCE
+	if feather and Inventory.can_add("angel_feather"):
 		Inventory.add_item("angel_feather", 1)
 		fight_items.append(Items.get_item_name("angel_feather"))
 		msg += " Obtained Angel Feather!"

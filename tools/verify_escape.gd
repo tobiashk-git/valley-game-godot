@@ -22,6 +22,19 @@ func _initialize() -> void:
 
 	print("Angel Feather: consumable, 25 gold, in the Trader's stock, stacks to 5: ", items.ITEMS.has("angel_feather") and items.ITEMS.angel_feather.effect.kind == "escape" and items.ITEMS.angel_feather.value == 25 and shop.SHOP_STOCK.has("angel_feather") and inventory.stack_cap("angel_feather") == 5)
 	print("Wild monsters drop one 3% of the time: ", combat.FEATHER_DROP_CHANCE == 0.03)
+	# A boss always drops one.
+	inventory.backpack.erase("angel_feather")
+	root.get_node("Character").stats.max_hp = 500
+	root.get_node("Character").stats.hp = 500
+	combat.start_combat("dungeon_rat")
+	await process_frame
+	combat.current_boss_id = "dungeon_boss"
+	combat.current_enemies[0].hp = 1
+	combat.player_attack()
+	for i in range(6):
+		await process_frame
+	print("A boss always drops an Angel Feather: ", inventory.get_count("angel_feather") == 1 and combat.fight_items.has("Angel Feather"))
+	root.get_node("Character").reset()
 
 	# --- Field use: from an interior straight home to the bed. ---
 	var dungeon: Node2D = load("res://scenes/FrostpeakInterior.tscn").instantiate()
