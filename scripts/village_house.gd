@@ -33,6 +33,7 @@ const FURNITURE_SCENES := {
 	"Bed": preload("res://scenes/props/Bed.tscn"),
 	"Table": preload("res://scenes/props/Table.tscn"),
 	"Chair": preload("res://scenes/props/Chair.tscn"),
+	"ChairBack": preload("res://scenes/props/ChairBack.tscn"),
 	"Bookshelf": preload("res://scenes/props/Bookshelf.tscn"),
 	"Barrel": preload("res://scenes/props/Barrel.tscn"),
 	"Cabinet": preload("res://scenes/props/Cabinet.tscn"),

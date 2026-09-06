@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/furniture/chair_back.png" id="1_4apga"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cv52u"]
+size = Vector2(28, 28)
+
+[node name="ChairBack" type="StaticBody2D" unique_id=2102755380]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=969799313]
+texture = ExtResource("1_4apga")
+offset = Vector2(0, -6.5)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=3727771]
+shape = SubResource("RectangleShape2D_cv52u")

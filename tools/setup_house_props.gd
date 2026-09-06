@@ -1,5 +1,5 @@
 extends SceneTree
-# Builds Bed/Chair/Table/Stove/Forge.tscn — same StaticBody2D +
+# Builds Bed/Chair/ChairBack/Table/Stove/Forge.tscn — same StaticBody2D +
 # bottom-anchored Sprite2D convention as tools/setup_props.gd (trees/rocks).
 # Run via: godot --headless --script res://tools/setup_house_props.gd
 
@@ -40,6 +40,7 @@ func _initialize() -> void:
 	# owns it (interact area + script) and a rebuild here clobbered that.
 	# The smithy's forge (Leonardo pixel prop, keyed): two tiles wide, so its
 	# collider spans both.
+	_build("ChairBack", "res://assets/furniture/chair_back.png", 30.0, 45.0) # the same chair seen from behind (faces up/away)
 	_build("Forge", "res://assets/furniture/forge.png", 64.0, 93.0, 2.0 * TILE - 4)
 	print("=== House props setup complete ===")
 	quit()

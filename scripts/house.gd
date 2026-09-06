@@ -19,7 +19,8 @@ const NAP_SPAWN_TILE := Vector2i(3, 5) # the floor tile beside the bed's foot
 # they're all solid, so the hard stop is the bottom of the skirting and
 # nothing walks up "onto" the wall (or under the HUD in the top-left).
 const WALL_ROWS := 3
-const CHAIR_SCENE := preload("res://scenes/props/Chair.tscn")
+const CHAIR_SCENE := preload("res://scenes/props/Chair.tscn") # front view: faces down
+const CHAIR_BACK_SCENE := preload("res://scenes/props/ChairBack.tscn") # back view: faces up
 const TABLE_SCENE := preload("res://scenes/props/Table.tscn")
 const STOVE_SCENE := preload("res://scenes/props/Stove.tscn")
 const CHEST_SCENE := preload("res://scenes/props/Chest.tscn")
@@ -78,8 +79,8 @@ func _ready() -> void:
 	_spawn_prop(BED_SCENE, Vector2i(2, 5)) # three tiles tall: head at the wall base
 	_spawn_prop(STOVE_SCENE, Vector2i(9, 3)) # clear of the taller chair's backrest below it
 	_spawn_prop(TABLE_SCENE, Vector2i(8, 5))
-	_spawn_prop(CHAIR_SCENE, Vector2i(8, 4))
-	_spawn_prop(CHAIR_SCENE, Vector2i(8, 6))
+	_spawn_prop(CHAIR_SCENE, Vector2i(8, 4)) # above the table, facing it
+	_spawn_prop(CHAIR_BACK_SCENE, Vector2i(8, 6)) # below the table, its back to us, facing it
 	_spawn_prop(CHEST_SCENE, Vector2i(2, 6))
 
 	if not GameState.consume_next_spawn(player):

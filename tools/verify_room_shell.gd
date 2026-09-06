@@ -36,6 +36,14 @@ func _initialize() -> void:
 		await physics_frame
 	Input.action_release("move_up")
 	print("Oliver cannot walk up onto the painted wall (stops in row 3): ", player.position.y >= 3 * 32 and player.position.y < 4 * 32 + 8, " y=", player.position.y)
+	var front: Node2D = null
+	var back: Node2D = null
+	for child in h.get_node("YSort").get_children():
+		if child.scene_file_path == "res://scenes/props/Chair.tscn":
+			front = child
+		elif child.scene_file_path == "res://scenes/props/ChairBack.tscn":
+			back = child
+	print("Both chairs face the table: front view above it (8,4), back view below it (8,6): ", front != null and front.position == Vector2(8 * 32 + 16, 4 * 32 + 16) and back != null and back.position == Vector2(8 * 32 + 16, 6 * 32 + 16) and back.get_node("Sprite2D").texture.resource_path.ends_with("chair_back.png"))
 	root.get_texture().get_image().save_png("res://verify_room_shell.png")
 	print("Saved verify_room_shell.png")
 	await _verify_elder()
