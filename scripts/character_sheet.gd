@@ -140,10 +140,18 @@ const SLOT_GROUP_NAMES := {"weapon": "Weapons", "armor": "Armour", "accessory": 
 func _ready() -> void:
 	window.visible = false
 	$Dim.visible = false
+	# The header portrait is the same painted bust the dialogue box uses
+	# (user: "the nicer one, like the NPC chat ones"), smoothed down from
+	# 192px; the pixel sprite frame is only the fallback.
 	var atlas := AtlasTexture.new()
 	atlas.atlas = load("res://assets/player_base.png")
 	atlas.region = Rect2(0, 128, 64, 64) # Player.tscn's down_idle frame
-	portrait.texture = atlas
+	var bust: Texture2D = DialogueUI.portrait_for("Oliver")
+	if bust != null:
+		portrait.texture = bust
+		portrait.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	else:
+		portrait.texture = atlas
 	if ResourceLoader.exists(PORTRAIT_ILLUSTRATION):
 		figure.texture = load(PORTRAIT_ILLUSTRATION)
 		# The illustration is stored at 2x its drawn height - smooth it down
