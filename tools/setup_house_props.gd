@@ -1,5 +1,5 @@
 extends SceneTree
-# Builds Bed/Chair/ChairBack/Table/Stove/Forge.tscn — same StaticBody2D +
+# Builds Bed/Chair/ChairBack/Table/Stove/Bookshelf/Barrel/Cabinet/Forge.tscn — same StaticBody2D +
 # bottom-anchored Sprite2D convention as tools/setup_props.gd (trees/rocks).
 # Run via: godot --headless --script res://tools/setup_house_props.gd
 
@@ -35,7 +35,10 @@ func _initialize() -> void:
 	_build("Bed", "res://assets/furniture/bed.png", 64.0, 86.0) # Leonardo pixel bed, keyed (was the 64x128 placeholder)
 	_build("Chair", "res://assets/furniture/chair.png", 30.0, 56.0) # Leonardo pixel chair (front view: faces down/toward the viewer)
 	_build("Table", "res://assets/furniture/table.png", 70.0, 33.0, 2.0 * TILE - 4) # Leonardo pixel table, keyed; two tiles wide
-	_build("Stove", "res://assets/furniture/stove.png", 32.0, 36.0)
+	_build("Stove", "res://assets/furniture/stove.png", 32.0, 55.0) # Leonardo pixel props, keyed (all of these)
+	_build("Bookshelf", "res://assets/furniture/bookshelf.png", 34.0, 72.0)
+	_build("Barrel", "res://assets/furniture/barrel.png", 32.0, 40.0)
+	_build("Cabinet", "res://assets/furniture/cabinet.png", 40.0, 58.0)
 	# Chest.tscn is NOT built here any more: tools/setup_chest_interactive.gd
 	# owns it (interact area + script) and a rebuild here clobbered that.
 	# The smithy's forge (Leonardo pixel prop, keyed): two tiles wide, so its

@@ -74,8 +74,7 @@ func _build_npc() -> void:
 func _initialize() -> void:
 	print("=== NPC + village furniture setup starting ===")
 	_build_npc()
-	_build_prop("Bookshelf", "res://assets/furniture/bookshelf.png", 32.0, 64.0)
-	_build_prop("Barrel", "res://assets/furniture/barrel.png", 32.0, 64.0)
-	_build_prop("Cabinet", "res://assets/furniture/cabinet.png", 32.0, 42.0)
+	# Bookshelf/Barrel/Cabinet moved to tools/setup_house_props.gd (which
+	# owns every furniture prop) - running this builder no longer touches them.
 	print("=== Setup complete ===")
 	quit()

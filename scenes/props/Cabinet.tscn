@@ -5,11 +5,11 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pvho0"]
 size = Vector2(28, 28)
 
-[node name="Cabinet" type="StaticBody2D" unique_id=1795320266]
+[node name="Cabinet" type="StaticBody2D" unique_id=217650265]
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=115442515]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1218701678]
 texture = ExtResource("1_ngcqg")
-offset = Vector2(0, -5)
+offset = Vector2(0, -13)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=547191520]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1749067320]
 shape = SubResource("RectangleShape2D_pvho0")
