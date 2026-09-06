@@ -159,6 +159,11 @@ func _initialize() -> void:
 			elif child.text == "Equip":
 				equip_btns.append(child)
 	print("Tapping the armour slot shows it worn: ", sheet.slot_pane_title.text == "Armor" and doll_armor.theme_type_variation == &"SlotButtonSelected" and unequip_btn != null and unequip_btn.get_meta("item_id") == "leather_armor" and equip_btns.is_empty())
+	var icons_fit := true
+	for icon in sheet.slot_list.find_children("*", "TextureRect", true, false):
+		if icon.visible and not icon.get_parent().get_global_rect().encloses(icon.get_global_rect()):
+			icons_fit = false
+	print("The pane's item icons sit inside their 48px boxes (used to spill out at 64px): ", icons_fit and sheet.slot_list.find_children("*", "TextureRect", true, false).size() >= 1)
 	root.get_texture().get_image().save_png("res://verify_sheet_character.png")
 	print("Saved verify_sheet_character.png")
 	unequip_btn.pressed.emit()

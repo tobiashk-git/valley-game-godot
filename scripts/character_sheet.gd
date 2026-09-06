@@ -795,11 +795,14 @@ func _pane_item(inst: Dictionary, action_text: String, action: Callable, variati
 	icon_panel.custom_minimum_size = Vector2(48, 48)
 	icon_panel.theme_type_variation = &"DetailPanel"
 	var icon := TextureRect.new()
+	# Modes BEFORE the size: with the default "keep size" the 64px texture
+	# is the minimum, and a size set then stays clamped at 64 even after
+	# the mode changes (the icon used to spill out of its 48px box).
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.texture = Items.get_item_icon(item_id)
 	icon.position = Vector2(6, 6)
 	icon.size = Vector2(36, 36)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon_panel.add_child(icon)
 	icon_box.add_child(icon_panel)
 	card.add_child(icon_box)
@@ -831,11 +834,11 @@ func _pane_row(inst: Dictionary, action_text: String, action: Callable, variatio
 	icon_panel.custom_minimum_size = Vector2(44, 44)
 	icon_panel.theme_type_variation = &"DetailPanel"
 	var icon := TextureRect.new()
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE # before the size (see _pane_item)
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.texture = Items.get_item_icon(item_id)
 	icon.position = Vector2(4, 4)
 	icon.size = Vector2(36, 36)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon_panel.add_child(icon)
 	row.add_child(icon_panel)
 	var text := VBoxContainer.new()
