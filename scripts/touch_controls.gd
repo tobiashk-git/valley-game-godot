@@ -8,7 +8,7 @@ extends CanvasLayer
 # input. Only visible/active when a touchscreen is actually present, so
 # desktop play (keyboard, mouse-clickable UI) is completely unaffected.
 
-const JOYSTICK_RADIUS := 50.0
+const JOYSTICK_RADIUS := 75.0 # the base's radius (150px base, 64px knob - bigger per phone feedback)
 const JOYSTICK_DEADZONE := 10.0
 const JOYSTICK_ANGLE_THRESHOLD := 0.35 # dot-product-ish threshold per axis, allows diagonals
 
@@ -99,9 +99,11 @@ func _input(event: InputEvent) -> void:
 
 func _update_joystick(touch_pos: Vector2) -> void:
 	var delta: Vector2 = touch_pos - _joystick_center()
-	var dist: float = min(delta.length(), JOYSTICK_RADIUS)
 	var dir: Vector2 = delta.normalized() if delta.length() > 0.0 else Vector2.ZERO
-	joystick_knob.position = dir * dist - joystick_knob.size / 2.0
+	# The knob's CENTRE travels at most to the base's edge minus the knob's
+	# own radius, so the knob never pokes out of the ring.
+	var travel: float = min(delta.length(), JOYSTICK_RADIUS - joystick_knob.size.x / 2.0)
+	joystick_knob.position = dir * travel - joystick_knob.size / 2.0
 
 	var new_directions: Array[String] = []
 	if delta.length() > JOYSTICK_DEADZONE:

@@ -176,4 +176,22 @@ func _initialize() -> void:
 	print("Completing untracked it: ", not quests.tracked_quests.has("gather_wood"))
 	root.get_texture().get_image().save_png("res://verify_quest_journal_done.png")
 
+	# --- E takes the highlighted choice (Accept / Turn In / Next). ---
+	var taken := [false]
+	dialogue_ui.show_dialogue("Village Elder", "One more thing?", [{"label": "Accept", "callback": func() -> void: taken[0] = true}, {"label": "Not now", "callback": Callable()}])
+	await process_frame
+	await process_frame
+	Input.action_press("interact")
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	print("E on a choice box presses the gold first choice and closes the box: ", taken[0] and not dialogue_ui.is_open())
+	dialogue_ui.show_dialogue("Village Elder", "Just a line.")
+	await process_frame
+	await process_frame
+	Input.action_press("interact")
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	print("E on a plain box still just closes it: ", not dialogue_ui.is_open())
 	quit()

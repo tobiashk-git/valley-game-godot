@@ -15,7 +15,7 @@ const BOTTOM_MARGIN := 20.0
 # On a phone (Layout.is_narrow()) the joystick (x 30..130) and interact
 # button (right 120px) leave no clear band between them at the bottom, so
 # the row lifts above both (their zones end 130px up).
-const NARROW_BOTTOM_MARGIN := 150.0
+const NARROW_BOTTOM_MARGIN := 194.0 # clears the 150px joystick (24px off the bottom) on a phone
 # Panels whose open state hides the bar - each has an is_open().
 const OVERLAY_AUTOLOADS := ["CharacterSheet", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel", "SettingsPanel"]
 

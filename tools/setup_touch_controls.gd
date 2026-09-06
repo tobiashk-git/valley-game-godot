@@ -24,8 +24,8 @@ func _make_circle_texture(radius: int, color: Color) -> ImageTexture:
 	return ImageTexture.create_from_image(img)
 
 func _build_touch_controls() -> void:
-	var base_tex := _make_circle_texture(50, Color(1, 1, 1, 0.25))
-	var knob_tex := _make_circle_texture(25, Color(1, 1, 1, 0.5))
+	var base_tex := _make_circle_texture(75, Color(1, 1, 1, 0.25))
+	var knob_tex := _make_circle_texture(32, Color(1, 1, 1, 0.5))
 	var interact_tex := _make_circle_texture(40, Color(0.9, 0.75, 0.35, 0.6))
 
 	var layer := CanvasLayer.new()
@@ -39,8 +39,8 @@ func _build_touch_controls() -> void:
 	joystick_base.name = "JoystickBase"
 	joystick_base.texture = base_tex
 	joystick_base.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	joystick_base.position = Vector2(30, -130)
-	joystick_base.size = Vector2(100, 100)
+	joystick_base.position = Vector2(24, -174)
+	joystick_base.size = Vector2(150, 150)
 	joystick_base.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(joystick_base)
 	joystick_base.owner = layer
@@ -48,8 +48,8 @@ func _build_touch_controls() -> void:
 	var joystick_knob := TextureRect.new()
 	joystick_knob.name = "Knob"
 	joystick_knob.texture = knob_tex
-	joystick_knob.position = Vector2(25, 25) # centered within the 100x100 base at rest
-	joystick_knob.size = Vector2(50, 50)
+	joystick_knob.position = Vector2(43, 43) # centered within the 150x150 base at rest
+	joystick_knob.size = Vector2(64, 64)
 	joystick_knob.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	joystick_base.add_child(joystick_knob)
 	joystick_knob.owner = layer

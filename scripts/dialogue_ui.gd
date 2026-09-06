@@ -128,6 +128,12 @@ func _process(_delta: float) -> void:
 	# must not close it; the guard lasts exactly one frame, so a box opened
 	# by a button or a script closes on the very next E rather than the
 	# second one.
+	# E on a box with choices takes the highlighted (first, gold) one -
+	# Accept / Turn In / Next - as the button itself would; on a plain box
+	# it closes.
 	if Input.is_action_just_pressed("interact") and not _ignore_close_this_frame:
-		hide_dialogue()
+		if actions_row.visible and actions_row.get_child_count() > 0:
+			actions_row.get_child(0).pressed.emit()
+		else:
+			hide_dialogue()
 	_ignore_close_this_frame = false

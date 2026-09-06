@@ -84,7 +84,7 @@ func _initialize() -> void:
 	touch._position_interact_button()
 	interact_rect = Rect2(touch.interact_button.position, Vector2(80, 80))
 	print("Quick bar centred, inside the width, and above both the joystick and the interact button: ", absf(bar_rect.get_center().x - 200.0) < 2.0 and bar_rect.position.x >= 0.0 and bar_rect.end.x <= 400.0 and bar_rect.end.y <= joystick_rect.position.y and bar_rect.end.y <= interact_rect.position.y, " bar=", bar_rect)
-	print("Touch controls keep their size (100px joystick, 80px button) - now 1:1 with screen px: ", joystick_rect.size == Vector2(100, 100) and interact_rect.end.x <= 400.0 and interact_rect.end.y <= 860.0)
+	print("Touch controls keep their size (150px joystick, 80px button) - now 1:1 with screen px: ", joystick_rect.size == Vector2(150, 150) and interact_rect.end.x <= 400.0 and interact_rect.end.y <= 860.0)
 
 	# Touch zoom keeps the tuned field of view.
 	touch.visible = true
