@@ -18,7 +18,7 @@ const ITEMS := {
 	"stone": {"name": "Stone", "icon": "🪨", "value": 1, "desc": "Rough grey fieldstone, chipped from the outcrops around the village."},
 	"gold": {"name": "Gold", "icon": "💰", "desc": "Coin of the realm. The Trader takes nothing else."},
 	"wooden_pickaxe": {"name": "Wooden Pickaxe", "icon": "⛏️", "slot": "weapon", "attack": 2, "value": 15, "desc": "Crude but hefty. Better than bare fists, and handy for prying at rock."},
-	"leather_armor": {"name": "Leather Armor", "icon": "🧥", "slot": "armor", "defense": 3, "value": 20, "desc": "Stiff boiled hide over a padded jerkin. Turns a claw or two."},
+	"leather_armor": {"name": "Leather Armor", "icon": "🧥", "slot": "armor", "layer": "res://assets/armour_layers/leather_armor.png", "defense": 3, "value": 20, "desc": "Stiff boiled hide over a padded jerkin. Turns a claw or two."},
 	"charm_of_warding": {"name": "Charm of Warding", "icon": "💍", "slot": "accessory", "bonus": {"status_resistance": 0.5}, "value": 25, "desc": "A ring of braided copper and bone. Poison and curses bite less often."},
 	"healing_potion": {"name": "Healing Potion", "icon": "🧪", "effect": {"kind": "heal", "amount": 8}, "value": 20, "desc": "A bitter red draught brewed from valley herbs. Restores 8 HP. You can carry five."},
 	"mana_potion": {"name": "Mana Potion", "icon": "🔮", "effect": {"kind": "restore_mp", "amount": 8}, "value": 12, "desc": "Cold blue and faintly humming. Restores 8 MP."},
@@ -31,7 +31,7 @@ const ITEMS := {
 	# Sellable for a nice payout (like the plan's boss-drop pricing), but
 	# never appears in Shop.SHOP_STOCK to buy.
 	"bone_greatsword": {"name": "Bone Greatsword", "icon": "🗡️", "slot": "weapon", "attack": 6, "value": 100, "desc": "Hewn from the Bone Lord's own femur. Unnervingly light for its size."},
-	"royal_plate": {"name": "Royal Plate", "icon": "🛡️", "slot": "armor", "defense": 8, "value": 130, "desc": "The Royal Wraith's ceremonial plate, still faintly cold to the touch."},
+	"royal_plate": {"name": "Royal Plate", "icon": "🛡️", "slot": "armor", "layer": "res://assets/armour_layers/royal_plate.png", "defense": 8, "value": 130, "desc": "The Royal Wraith's ceremonial plate, still faintly cold to the touch."},
 	# Quest item for the altar/world-advance loop - deliberately no "value"
 	# (not sellable), no "slot"/"effect" (not equippable or usable).
 	"magic_crystal": {"name": "Magic Crystal", "icon": "💎", "desc": "It hums against your palm. The village altar wants these."},
@@ -50,13 +50,13 @@ const ITEMS := {
 	"ironwood": {"name": "Ironwood", "icon": "🪵", "value": 8, "desc": "Heartwood from Verdantwood's corrupted growth. Dense as metal and just as hard to cut."},
 	"bog_iron": {"name": "Bog Iron", "icon": "⚙️", "value": 10, "desc": "Lumps of rust-black iron dredged from Gloomfen's things. Smelts dark and heavy."},
 	"frost_pick": {"name": "Frost Pick", "icon": "⛏️", "slot": "weapon", "attack": 4, "tier": 1, "value": 40, "desc": "A pick headed with frost shard. Bites deep and numbs what it hits."},
-	"frostweave_coat": {"name": "Frostweave Coat", "icon": "🧥", "slot": "armor", "defense": 5, "tier": 1, "value": 45, "desc": "Fur coat stitched through with frost shard thread. Stiff, warm, and hard to claw."},
+	"frostweave_coat": {"name": "Frostweave Coat", "icon": "🧥", "slot": "armor", "layer": "res://assets/armour_layers/frostweave_coat.png", "defense": 5, "tier": 1, "value": 45, "desc": "Fur coat stitched through with frost shard thread. Stiff, warm, and hard to claw."},
 	"ironwood_blade": {"name": "Ironwood Blade", "icon": "🗡️", "slot": "weapon", "attack": 6, "tier": 2, "value": 60, "desc": "A sword carved from a single ironwood bough and honed on stone."},
-	"ironwood_mail": {"name": "Ironwood Mail", "icon": "🛡️", "slot": "armor", "defense": 7, "tier": 2, "value": 65, "desc": "Ironwood scales sewn over fur. Lighter than it looks."},
+	"ironwood_mail": {"name": "Ironwood Mail", "icon": "🛡️", "slot": "armor", "layer": "res://assets/armour_layers/ironwood_mail.png", "defense": 7, "tier": 2, "value": 65, "desc": "Ironwood scales sewn over fur. Lighter than it looks."},
 	"ember_blade": {"name": "Ember Blade", "icon": "🔥", "slot": "weapon", "attack": 8, "tier": 3, "value": 85, "desc": "Ironwood forged around two ember cores. The edge never quite cools."},
-	"ember_plate": {"name": "Ember Plate", "icon": "🛡️", "slot": "armor", "defense": 9, "tier": 3, "value": 90, "desc": "Fur-backed plate quenched in ember core. Warm to wear, worse to bite."},
+	"ember_plate": {"name": "Ember Plate", "icon": "🛡️", "slot": "armor", "layer": "res://assets/armour_layers/ember_plate.png", "defense": 9, "tier": 3, "value": 90, "desc": "Fur-backed plate quenched in ember core. Warm to wear, worse to bite."},
 	"bogiron_cleaver": {"name": "Bog-iron Cleaver", "icon": "🪓", "slot": "weapon", "attack": 10, "tier": 4, "value": 110, "desc": "A brutal cleaver of Gloomfen bog iron, ember-tempered. Nothing in the valley shrugs it off."},
-	"bogiron_harness": {"name": "Bog-iron Harness", "icon": "🛡️", "slot": "armor", "defense": 11, "tier": 4, "value": 120, "desc": "Bog iron plates on a fur harness. Heavy, dark, and the best the valley makes."},
+	"bogiron_harness": {"name": "Bog-iron Harness", "icon": "🛡️", "slot": "armor", "layer": "res://assets/armour_layers/bogiron_harness.png", "defense": 11, "tier": 4, "value": 120, "desc": "Bog iron plates on a fur harness. Heavy, dark, and the best the valley makes."},
 	# Enhancement ingredient (Crafting.ENHANCEMENTS): a chance drop from the
 	# three Badlands species, so hunting a specific monster has a point.
 	"ember_core": {"name": "Ember Core", "icon": "🔥", "value": 15, "desc": "Still warm. Cut from the heart of a Badlands beast - temper a blade in it."},

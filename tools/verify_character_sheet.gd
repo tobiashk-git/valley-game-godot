@@ -81,17 +81,17 @@ func _initialize() -> void:
 	# --- Select a potion -> detail + Use. ---
 	potion_slot.pressed.emit()
 	await process_frame
-	print("Selecting shows the item's details: ", sheet.detail_name.text == "Healing Potion" and sheet.detail_type.text == "Consumable  -  you have 2" and sheet.detail_desc.text.contains("Restores 15 HP") and sheet.detail_value.text == "Sells for 12 gold")
+	print("Selecting shows the item's details: ", sheet.detail_name.text == "Healing Potion" and sheet.detail_type.text == "Consumable  -  you have 2" and sheet.detail_desc.text.contains("Restores 8 HP") and sheet.detail_value.text == "Sells for 20 gold")
 	print("Consumable offers Use: ", sheet.primary_action.visible and sheet.primary_action.text == "Use")
 	print("Selected slot is highlighted: ", sheet.grid.get_node("HealingPotionSlot").theme_type_variation == &"SlotButtonSelected")
 	root.get_texture().get_image().save_png("res://verify_sheet_inventory.png")
 	print("Saved verify_sheet_inventory.png")
-	character.stats.hp = character.stats.max_hp - 10
+	character.stats.hp = character.stats.max_hp - 6
 	character.changed.emit()
 	await process_frame
 	sheet.primary_action.pressed.emit()
 	await process_frame
-	print("Use heals (min(15, missing 10)) and consumes one: ", character.stats.hp == character.stats.max_hp and inventory.get_count("healing_potion") == 1)
+	print("Use heals (min(8, missing 6)) and consumes one: ", character.stats.hp == character.stats.max_hp and inventory.get_count("healing_potion") == 1)
 	print("Selection stays on the remaining potion, badge gone: ", sheet.selected_item == "healing_potion" and not sheet.grid.get_node("HealingPotionSlot").has_node("Count"))
 	sheet.primary_action.pressed.emit()
 	await process_frame

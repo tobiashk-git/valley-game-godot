@@ -17,3 +17,6 @@ Moonlit Moss Path, Ash Rift Pulse, Mire Clock, Basalt Catacombs, Lantern Map, Cr
 ## Art
 Creature, portrait and prop illustrations generated with Leonardo (Lucid Origin) by Tobias Keuneke.
 Character and NPC sprites: Liberated Pixel Cup (LPC) assets, CC-BY-SA 3.0 / GPL 3.0 - see assets_source/.
+Worn-armour layers on the player (assets/armour_layers/, from the Universal LPC Spritesheet Character Generator, OGA-BY 3.0):
+- torso/armour/leather (walk): Johannes Sjölund (wulax), bluecarrot16, JaidynReiman - used as Leather Armor and recoloured for Frostweave Coat
+- torso/armour/plate (walk): Napsio (Vitruvian Studio), JaidynReiman, bluecarrot16, Michael Whitlock (bigbeargames), Johannes Sjölund (wulax) - recoloured for Ironwood Mail, Ember Plate, Bog-iron Harness, Royal Plate
