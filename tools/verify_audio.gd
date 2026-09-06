@@ -165,15 +165,16 @@ func _initialize() -> void:
 	btn.queue_free()
 	AudioServer.set_bus_mute(AudioServer.get_bus_index("Sfx"), false)
 
-	# Sliders on the Hero tab set the buses and persist.
+	# Sliders in the Settings window (system bar) set the buses and persist.
 	change_scene_to_packed(load("res://scenes/Overworld.tscn"))
 	await process_frame
 	await process_frame
-	sheet.open("character")
+	var settings: CanvasLayer = root.get_node("SettingsPanel")
+	root.get_node("PanelButtons").settings_btn.pressed.emit()
 	await process_frame
-	var slider: HSlider = sheet.stats_list.find_child("MusicSlider", true, false)
-	var sfx_slider: HSlider = sheet.stats_list.find_child("SfxSlider", true, false)
-	print("Hero tab has Music and Sounds sliders showing the current volumes: ", slider != null and sfx_slider != null and slider.value == round(audio.music_volume * 100.0))
+	var slider: HSlider = settings.music_slider
+	var sfx_slider: HSlider = settings.sfx_slider
+	print("Settings window (system bar) has Music and Sounds sliders showing the current volumes; the Hero tab has none: ", settings.is_open() and slider.value == round(audio.music_volume * 100.0) and sfx_slider.value == round(audio.sfx_volume * 100.0) and sheet.stats_list.find_child("MusicSlider", true, false) == null)
 	slider.value = 40
 	await process_frame
 	print("Dragging Music to 40 sets the bus to ~-8 dB and the setting: ", absf(AudioServer.get_bus_volume_db(music_bus) - linear_to_db(0.4)) < 0.01 and absf(audio.music_volume - 0.4) < 0.001)
@@ -188,7 +189,7 @@ func _initialize() -> void:
 	# Restore the defaults so the next real session isn't muted.
 	audio.set_music_volume(0.8)
 	audio.set_sfx_volume(0.9)
-	sheet.close()
+	settings.close()
 	audio.enabled = false
 	AudioServer.set_bus_mute(music_bus, false)
 	quit()

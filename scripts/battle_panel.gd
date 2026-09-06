@@ -28,6 +28,10 @@ const HIT_FLASH := Color(1.0, 0.45, 0.45)
 @onready var defend_btn: Button = $Panel/Margin/VBox/Commands/DefendBtn
 @onready var run_btn: Button = $Panel/Margin/VBox/Commands/RunBtn
 @onready var submenu: VBoxContainer = $Panel/Margin/VBox/Submenu
+# Shown in the commands' place once the fight is won: the screen holds on
+# the victory summary until it's pressed (user feedback: the loot line used
+# to vanish with the panel before it could be read).
+var continue_btn: Button
 
 var narrow := false
 # Per-slot last known HP, to turn a change into a floating number.
@@ -57,8 +61,18 @@ func _ready() -> void:
 	item_btn.pressed.connect(Combat.open_item_menu)
 	defend_btn.pressed.connect(Combat.player_defend)
 	run_btn.pressed.connect(Combat.player_run)
+	continue_btn = Button.new()
+	continue_btn.name = "ContinueBtn"
+	continue_btn.text = "Continue"
+	continue_btn.theme_type_variation = &"PrimaryButton"
+	continue_btn.custom_minimum_size = Vector2(0, 48)
+	continue_btn.add_theme_font_size_override("font_size", 17)
+	continue_btn.visible = false
+	continue_btn.pressed.connect(Combat.finish_combat)
+	commands.get_parent().add_child(continue_btn)
+	commands.get_parent().move_child(continue_btn, commands.get_index() + 1)
 
-# 560x420 centred-anchored at y=148 on the 800x600 base; on a phone it
+# 560x420 centred-anchored at y=164 on the 800x600 base; on a phone it
 # spans the width minus a 12px margin, sprites shrink a step and the
 # command font drops so five buttons share the row.
 func _apply_layout() -> void:
@@ -66,8 +80,10 @@ func _apply_layout() -> void:
 	var w: float = Layout.width - 24.0 if narrow else 560.0
 	panel.offset_left = -w / 2.0
 	panel.offset_right = w / 2.0
-	panel.offset_top = -152.0
-	panel.offset_bottom = 268.0
+	# y=164..584 on the 800x600 base: under the HUD column (which ends by
+	# ~y=160 with a two-line biome name and the XP bar), inside the viewport.
+	panel.offset_top = -136.0
+	panel.offset_bottom = 284.0
 	for btn in [attack_btn, magic_btn, item_btn, defend_btn, run_btn]:
 		btn.add_theme_font_size_override("font_size", 13 if narrow else 16)
 		btn.custom_minimum_size = Vector2(0, 44 if narrow else 48)
@@ -83,8 +99,11 @@ func _on_log_gui_input(event: InputEvent) -> void:
 		Combat.skip_beat()
 
 func _process(_delta: float) -> void:
-	if Combat.in_combat and Combat.playing and Input.is_action_just_pressed("interact"):
-		Combat.skip_beat()
+	if Combat.in_combat and Input.is_action_just_pressed("interact"):
+		if Combat.playing:
+			Combat.skip_beat()
+		elif Combat.awaiting_exit:
+			Combat.finish_combat()
 
 func _on_slot_gui_input(event: InputEvent, index: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -195,7 +214,9 @@ func _refresh_submenu() -> void:
 	var targeting: bool = Combat.selecting_target != ""
 	var open: bool = Combat.active_submenu != "" and not targeting
 	# While beats play the commands are gone - you wait the enemy's turn out.
-	commands.visible = not open and not targeting and not Combat.playing
+	# Once the fight is won only Continue remains.
+	commands.visible = not open and not targeting and not Combat.playing and not Combat.awaiting_exit
+	continue_btn.visible = Combat.awaiting_exit
 	# The submenu takes the log's space while it's open (its rows are taller
 	# than the command row and would run out of the panel otherwise).
 	log_panel.visible = not open

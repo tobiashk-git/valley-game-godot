@@ -14,6 +14,9 @@ extends Node
 
 signal changed
 signal ended(victory: bool)
+# The last enemy has dropped: the fight is won (the victory sting plays
+# here). `ended(true)` follows once the player leaves the summary screen.
+signal won
 # Emitted after a lost fight, once the player has been sent home:
 # {"cause": enemy name | "poison" | "confusion", "gold_lost": int}. The
 # DefeatPanel autoload plays the death sequence from it.
@@ -39,6 +42,14 @@ var player_status: Dictionary = {} # status_id -> {"turns_left": N}
 var selecting_target := "" # "" | "attack" | "spell:<spell_id>"
 var current_boss_id := "" # set for the duration of a boss fight, "" otherwise
 var current_wild_monster_key := "" # set for the duration of a wild-monster fight (see start_wild_encounter()), "" otherwise
+# A won fight holds on its summary ("Victory! ...") with in_combat still
+# true until finish_combat() - the battle screen's Continue button or E -
+# so the loot can be read (user feedback: it vanished at once). Under a
+# verify script (`fast`) the fight ends immediately as it always did.
+var awaiting_exit := false
+var fight_gold := 0
+var fight_xp := 0
+var fight_items: Array[String] = []
 
 var _steps_since_encounter := ENCOUNTER_COOLDOWN_STEPS
 
@@ -162,6 +173,10 @@ func start_combat(enemy_ids) -> void:
 	player_status = {}
 	current_boss_id = ""
 	current_wild_monster_key = ""
+	awaiting_exit = false
+	fight_gold = 0
+	fight_xp = 0
+	fight_items = []
 	battle_log = ["%s %s!" % [_join_names(names), "appears" if names.size() == 1 else "appear"]]
 	changed.emit()
 
@@ -271,7 +286,7 @@ func _begin_player_turn() -> bool:
 # ---------------------------------------------------------------------------
 
 func player_attack() -> void:
-	if not in_combat or playing or alive_enemies().is_empty():
+	if not in_combat or playing or awaiting_exit or alive_enemies().is_empty():
 		return
 	active_submenu = ""
 	playing = true
@@ -329,7 +344,7 @@ func select_target(index: int) -> void:
 	_end_turn()
 
 func open_magic_menu() -> void:
-	if not in_combat or playing or alive_enemies().is_empty():
+	if not in_combat or playing or awaiting_exit or alive_enemies().is_empty():
 		return
 	if player_status.has("silence"):
 		_log("Oliver is silenced and cannot cast spells!")
@@ -339,7 +354,7 @@ func open_magic_menu() -> void:
 	changed.emit()
 
 func open_item_menu() -> void:
-	if not in_combat or playing or alive_enemies().is_empty():
+	if not in_combat or playing or awaiting_exit or alive_enemies().is_empty():
 		return
 	active_submenu = "item"
 	changed.emit()
@@ -349,7 +364,7 @@ func close_submenu() -> void:
 	changed.emit()
 
 func cast_spell(spell_id: String) -> void:
-	if not in_combat or playing or alive_enemies().is_empty():
+	if not in_combat or playing or awaiting_exit or alive_enemies().is_empty():
 		return
 	var spell: Dictionary = Spells.SPELLS.get(spell_id, {})
 	if spell.is_empty() or Character.stats.mp < spell.mp_cost:
@@ -390,7 +405,7 @@ func _resolve_spell_on_target(spell_id: String, index: int) -> void:
 		await _enemy_turn()
 
 func use_item(item_id: String) -> void:
-	if not in_combat or playing or alive_enemies().is_empty() or Inventory.get_count(item_id) <= 0:
+	if not in_combat or playing or awaiting_exit or alive_enemies().is_empty() or Inventory.get_count(item_id) <= 0:
 		return
 	var def: Dictionary = Items.ITEMS.get(item_id, {})
 	var effect: Dictionary = def.get("effect", {})
@@ -414,7 +429,7 @@ func use_item(item_id: String) -> void:
 	_end_turn()
 
 func player_defend() -> void:
-	if not in_combat or playing:
+	if not in_combat or playing or awaiting_exit:
 		return
 	active_submenu = ""
 	playing = true
@@ -428,7 +443,7 @@ func player_defend() -> void:
 	_end_turn()
 
 func player_run() -> void:
-	if not in_combat or playing:
+	if not in_combat or playing or awaiting_exit:
 		return
 	_log("Oliver flees the battle!")
 	in_combat = false
@@ -454,6 +469,7 @@ func _defeat_enemy(index: int) -> void:
 	var enemy: Dictionary = current_enemies[index]
 	var gold: int = enemy.gold_min + randi() % (enemy.gold_max - enemy.gold_min + 1)
 	Inventory.add_item("gold", gold)
+	fight_gold += gold
 	var msg := "%s dozes off! You pocket %d gold." % [enemy.name, gold]
 	# Drop entries are either a plain item id (always drops) or
 	# {"item": id, "chance": 0..1} for rarer ingredients (Ember Core).
@@ -464,9 +480,11 @@ func _defeat_enemy(index: int) -> void:
 		if randf() >= chance:
 			continue
 		Inventory.add_item(drop_item_id, 1)
+		fight_items.append(Items.get_item_name(drop_item_id))
 		msg += " Obtained %s!" % Items.get_item_name(drop_item_id)
 	# Experience: paid per enemy as it drops (a boss is worth double).
 	var xp: int = Enemies.xp_for(enemy, current_boss_id != "")
+	fight_xp += xp
 	msg += " +%d XP." % xp
 	Audio.play_sfx("coin")
 	await _beat(msg)
@@ -477,7 +495,6 @@ func _defeat_enemy(index: int) -> void:
 			await _beat("...and climbed %d levels at once!" % (Character.stats.level - level_before), BEAT_SECONDS_SHORT)
 	current_enemies[index] = null
 	if alive_enemies().is_empty():
-		in_combat = false
 		active_submenu = ""
 		selecting_target = ""
 		player_status = {}
@@ -487,11 +504,35 @@ func _defeat_enemy(index: int) -> void:
 		if current_wild_monster_key != "":
 			GameState.put_wild_monster_to_sleep(current_wild_monster_key)
 			current_wild_monster_key = ""
-		changed.emit()
-		ended.emit(true)
+		won.emit()
+		if fast:
+			in_combat = false
+			changed.emit()
+			ended.emit(true)
+		else:
+			_log(victory_summary())
+			awaiting_exit = true
+			changed.emit()
 	else:
 		changed.emit()
 		await _enemy_turn()
+
+# "Victory! You earned 12 gold and 19 XP. Loot: Monster Fur." - the whole
+# fight's takings, shown big while the screen waits for Continue.
+func victory_summary() -> String:
+	var text := "Victory! You earned %d gold and %d XP." % [fight_gold, fight_xp]
+	if not fight_items.is_empty():
+		text += " Loot: %s." % ", ".join(fight_items)
+	return text
+
+# Leaves the victory summary: the fight is over and the world resumes.
+func finish_combat() -> void:
+	if not awaiting_exit:
+		return
+	awaiting_exit = false
+	in_combat = false
+	changed.emit()
+	ended.emit(true)
 
 func _enemy_turn() -> void:
 	var was_asleep: bool = player_status.has("sleep")
@@ -570,4 +611,5 @@ func reset() -> void:
 	current_boss_id = ""
 	current_wild_monster_key = ""
 	playing = false
+	awaiting_exit = false
 	changed.emit()

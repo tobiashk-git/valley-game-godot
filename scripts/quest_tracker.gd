@@ -14,7 +14,7 @@ extends CanvasLayer
 # doesn't touch Quests.tracked_quests or anything else.
 
 const PANEL_AUTOLOADS: Array[String] = [
-	"CharacterSheet", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel",
+	"CharacterSheet", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel", "SettingsPanel",
 ]
 
 @onready var vbox: VBoxContainer = $VBox
@@ -31,14 +31,15 @@ func _ready() -> void:
 
 # Right-aligned strip: beside the HUD at 800 wide (the builder's y=64,
 # under the toolbar); on a phone the HUD spans most of the width, so the
-# strip drops below it (the HUD ends by y=143, see hud.gd) instead.
+# strip drops under the system bar's column on the right instead.
 func _apply_layout() -> void:
 	if Layout.is_narrow():
 		var w: float = minf(256.0, Layout.width - 24.0)
 		vbox.offset_left = -(w + 12.0)
 		vbox.offset_right = -12.0
-		vbox.offset_top = 152.0
-		vbox.offset_bottom = 152.0 + 400.0
+		# Below the system bar's column (Menu + Save/Settings/Quit end by y=182).
+		vbox.offset_top = 190.0
+		vbox.offset_bottom = 190.0 + 400.0
 	else:
 		vbox.offset_left = -268.0
 		vbox.offset_right = -12.0

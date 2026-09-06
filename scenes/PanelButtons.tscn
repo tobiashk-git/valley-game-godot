@@ -2,57 +2,44 @@
 
 [ext_resource type="Script" path="res://scripts/panel_buttons.gd" id="1_m36ys"]
 
-[node name="PanelButtons" type="CanvasLayer" unique_id=491867161]
+[node name="PanelButtons" type="CanvasLayer" unique_id=1005554879]
 script = ExtResource("1_m36ys")
 
-[node name="HBox" type="HBoxContainer" parent="." unique_id=935627013]
+[node name="Bar" type="BoxContainer" parent="." unique_id=2006586140]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -252.0
-offset_top = 12.0
-offset_right = -252.0
-offset_bottom = 12.0
-theme_override_constants/separation = 8
-
-[node name="InventoryBtn" type="Button" parent="HBox" unique_id=278210614]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "I"
-
-[node name="CharacterBtn" type="Button" parent="HBox" unique_id=221866833]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "C"
-
-[node name="CraftingBtn" type="Button" parent="HBox" unique_id=1174547281]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "R"
-
-[node name="QuestBtn" type="Button" parent="HBox" unique_id=1527092748]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Q"
-
-[node name="MapBtn" type="Button" parent="HBox" unique_id=1872504542]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "M"
-
-[node name="MenuBtn" type="Button" parent="." unique_id=1601375234]
-visible = false
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -80.0
+offset_left = -12.0
 offset_top = 12.0
 offset_right = -12.0
-offset_bottom = 56.0
-theme_override_font_sizes/font_size = 16
+offset_bottom = 12.0
+grow_horizontal = 0
+theme_override_constants/separation = 8
+
+[node name="MenuBtn" type="Button" parent="Bar" unique_id=611457939]
+custom_minimum_size = Vector2(68, 40)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+theme_override_font_sizes/font_size = 15
 text = "Menu"
+
+[node name="SaveBtn" type="Button" parent="Bar" unique_id=567108778]
+custom_minimum_size = Vector2(68, 40)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 15
+text = "Save"
+
+[node name="SettingsBtn" type="Button" parent="Bar" unique_id=273372321]
+custom_minimum_size = Vector2(68, 40)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 15
+text = "Settings"
+
+[node name="QuitBtn" type="Button" parent="Bar" unique_id=222348001]
+custom_minimum_size = Vector2(68, 40)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 15
+text = "Quit"

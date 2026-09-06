@@ -52,7 +52,8 @@ func _initialize() -> void:
 	print("Location shows the biome under the player at the village spawn: ", hud.location_label.text == "Golden Plains", " -> '", hud.location_label.text, "'")
 	var fitted_short: float = hud_panel.size.y
 	print("Panel height fits its content (no dead space under the effects line): ", is_equal_approx(fitted_short, hud.get_node("Panel/Margin").get_combined_minimum_size().y), " (", fitted_short, "px)")
-	print("Panel is shorter with a one-line location than the old fixed 124px: ", fitted_short < 124.0)
+	print("Panel fits under 140px with a one-line location (XP row included): ", fitted_short < 140.0)
+	print("Gold XP bar under the MP bar, tracking level progress: ", hud.has_node("Panel/Margin/VBox/XPBar") and hud.xp_bar.theme_type_variation == &"XPBar" and hud.xp_bar.get_global_rect().position.y >= mp_rect.end.y and hud.xp_bar.get_global_rect().end.y <= status_rect.position.y and hud.xp_bar.max_value == character.xp_to_next(stats.level) and hud.xp_bar.value == stats.xp and hud.xp_label.text == "Level %d   %d / %d XP" % [stats.level, stats.xp, character.xp_to_next(stats.level)])
 
 	var badlands_tile := Vector2i(world.WORLD_CENTER_X, world.WORLD_CENTER_Y + world.VALLEY_RADIUS + 12)
 	player.position = Vector2(badlands_tile.x * 32 + 16, badlands_tile.y * 32 + 16)
@@ -62,7 +63,7 @@ func _initialize() -> void:
 	print("Location updates as the player moves biome: ", hud.location_label.text == "Emberfall Badlands", " -> '", hud.location_label.text, "'")
 	print("Long biome name wraps onto two lines instead of widening the panel: ", hud.location_label.get_line_count() == 2 and is_equal_approx(hud_panel.size.x, 320.0))
 	var hud_rect_long: Rect2 = hud_panel.get_global_rect()
-	print("Panel grew to fit the wrapped name but still ends above the fight screen (y<148): ", hud_rect_long.size.y > fitted_short and hud_rect_long.end.y < 148.0, " (ends y=", hud_rect_long.end.y, ")")
+	print("Panel grew to fit the wrapped name but still ends above the fight screen (y<164): ", hud_rect_long.size.y > fitted_short and hud_rect_long.end.y < 164.0, " (ends y=", hud_rect_long.end.y, ")")
 
 	# --- Fight screen up (with the tall/long-name HUD): HUD must stay
 	# visible AND uncovered. ---
@@ -104,6 +105,10 @@ func _initialize() -> void:
 	character.changed.emit()
 	await process_frame
 	print("HUD MP bar updates on Character.changed: ", hud.mp_bar.value == character.stats.mp and hud.mp_bar.value != mp_before)
+	character.stats.xp = 7
+	character.changed.emit()
+	await process_frame
+	print("XP bar follows Character.stats.xp: ", hud.xp_bar.value == 7 and hud.xp_label.text.contains("7 / "))
 
 	# --- Back at the village for the resting-state screenshot. ---
 	player.position = Vector2(world.WORLD_CENTER_X * 32 + 16, (world.WORLD_CENTER_Y + 4) * 32 + 16)

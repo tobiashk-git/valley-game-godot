@@ -41,17 +41,22 @@ func _initialize() -> void:
 	await process_frame
 	print("New Game wakes Oliver at home with a clean state, overlays back: ", current_scene.name == "House" and root.get_node("Intro").is_playing() and inventory.backpack.is_empty() and hud.visible and root.get_node("PanelButtons").visible)
 
-	# --- Save and quit to title from the Hero tab. ---
+	# --- Quit to title from the system bar (asks first, then saves). ---
 	inventory.add_item("wood", 3)
 	save.enabled = true
+	var bar: CanvasLayer = root.get_node("PanelButtons")
 	sheet.open("character")
 	await process_frame
-	print("Hero tab: Game block sits at the top of the stats column; the sheet's own Save & Quit is beside the X: ", sheet.stats_list.get_child(0).text == "Game" and sheet.stats_list.find_child("SaveNowBtn", true, false) != null and sheet.quit_btn.visible and sheet.quit_btn.text == "Save & Quit")
-	sheet.quit_btn.pressed.emit()
+	print("Hero tab: the stats column starts with the Level block (no Game block, no Save & Quit on the sheet): ", sheet.stats_list.get_child(0).text.begins_with("Level") and sheet.stats_list.find_child("SaveNowBtn", true, false) == null and not sheet.window.has_node("QuitBtn"))
+	sheet.close()
+	bar.quit_btn.pressed.emit()
+	await process_frame
+	print("Quit asks 'Sure?' first and stays in the game: ", bar.confirm_quit and bar.quit_btn.text == "Sure?" and current_scene.name == "House")
+	bar.quit_btn.pressed.emit()
 	await process_frame
 	await process_frame
 	await process_frame
-	print("Save and quit returns to the title with Continue offered: ", current_scene.name == "Title" and save.has_save(save.AUTO_SLOT) and current_scene.continue_btn.visible and current_scene.save_line.text.contains("in your House") and not sheet.is_open())
+	print("Second press saves and returns to the title with Continue offered: ", current_scene.name == "Title" and save.has_save(save.AUTO_SLOT) and current_scene.continue_btn.visible and current_scene.save_line.text.contains("in your House") and not sheet.is_open() and not bar.confirm_quit and bar.quit_btn.text == "Quit")
 	save.enabled = false
 
 	# --- Phone layout. ---
@@ -61,7 +66,7 @@ func _initialize() -> void:
 	var t: Control = current_scene
 	sheet.open("character")
 	await process_frame
-	print("Phone: Hero tab carries Save and quit to title in its Game block (no room beside the X): ", sheet.stats_list.get_node_or_null("QuitBtn") != null and not sheet.quit_btn.visible)
+	print("Phone: Hero tab is stats only (Save / Quit live on the system bar): ", sheet.stats_list.get_node_or_null("QuitBtn") == null and sheet.stats_list.get_child(0).text.begins_with("Level"))
 	sheet.close()
 	change_scene_to_packed(load("res://scenes/Title.tscn"))
 	await process_frame

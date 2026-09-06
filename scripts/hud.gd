@@ -3,8 +3,8 @@ extends CanvasLayer
 # HUD's wood/stone counters, plus gold) with the player's current location
 # (biome name on the overworld, e.g. "Frostpeak Ridge", wrapping onto a
 # second line when long; a fixed name inside interiors) beside them, then -
-# stacked underneath as a left-hand column - the HP bar, MP bar and an
-# active-effects line. Those three used to live only on the battle screen
+# stacked underneath as a left-hand column - the HP bar, MP bar, a gold XP
+# bar (level + progress to the next) and an active-effects line. Those three used to live only on the battle screen
 # (moved here per user feedback so they're always in view, including
 # mid-fight: the battle panel starts at y=148 and this panel ends above it,
 # see setup_hud_inventory.gd / setup_battle_panel.gd). The panel's height
@@ -22,6 +22,8 @@ extends CanvasLayer
 @onready var hp_label: Label = $Panel/Margin/VBox/HPBar/HPLabel
 @onready var mp_bar: ProgressBar = $Panel/Margin/VBox/MPBar
 @onready var mp_label: Label = $Panel/Margin/VBox/MPBar/MPLabel
+@onready var xp_bar: ProgressBar = $Panel/Margin/VBox/XPBar
+@onready var xp_label: Label = $Panel/Margin/VBox/XPBar/XPLabel
 @onready var status_label: Label = $Panel/Margin/VBox/StatusLabel
 
 # Scenes that read the biome under the player's feet; everything else is
@@ -74,6 +76,9 @@ func _apply_layout() -> void:
 		panel.size.x = WIDE_WIDTH
 		if location_label.get_parent() != hbox:
 			location_label.reparent(hbox, false)
+	# The effects line's phone rule (see _refresh_stats) depends on the width.
+	var combat: Node = get_node_or_null("/root/Combat")
+	status_label.visible = not Layout.is_narrow() or (combat != null and not combat.player_status.is_empty())
 
 func _connect_stats() -> void:
 	Character.changed.connect(_refresh_stats)
@@ -107,6 +112,15 @@ func _refresh_stats() -> void:
 	mp_bar.max_value = stats.max_mp
 	mp_bar.value = stats.mp
 	mp_label.text = "MP %d / %d" % [stats.mp, stats.max_mp]
+	# Gold experience bar: progress through the current level.
+	if stats.level >= Character.MAX_LEVEL:
+		xp_bar.max_value = 1
+		xp_bar.value = 1
+		xp_label.text = "Level %d  -  max" % stats.level
+	else:
+		xp_bar.max_value = Character.xp_to_next(stats.level)
+		xp_bar.value = stats.xp
+		xp_label.text = "Level %d   %d / %d XP" % [stats.level, stats.xp, Character.xp_to_next(stats.level)]
 
 	# Same "<Name> (<turns left>)" wording the battle screen's badges used.
 	var effects: Array = []
@@ -119,6 +133,11 @@ func _refresh_stats() -> void:
 	else:
 		status_label.text = ", ".join(effects)
 		status_label.theme_type_variation = &""
+	# Phone: the column is a row taller (location on its own line, now the
+	# XP bar too) and must end above the dialogue box / tracker at y=152 -
+	# the effects line only appears when something is active (statuses
+	# only exist mid-fight, when neither of those is shown).
+	status_label.visible = not Layout.is_narrow() or not effects.is_empty()
 
 func _spawn_popup(delta: int) -> void:
 	if delta < 0:

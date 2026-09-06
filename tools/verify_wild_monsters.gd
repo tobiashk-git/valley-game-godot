@@ -106,7 +106,7 @@ func _initialize() -> void:
 	var def: Dictionary = Enemies.ENEMIES[sample.enemy_id]
 	print("Sprite texture matches its species: ", monster.sprite.texture.resource_path == def.sprite)
 	print("Alive tint matches its species: ", monster.sprite.modulate.is_equal_approx(def.get("tint", Color(1, 1, 1, 1))))
-	print("Sprite drawn at half the boss scale (0.8): ", monster.sprite.scale.is_equal_approx(Vector2(0.8, 0.8)))
+	print("Painted art scaled to its species' art_height: ", monster.sprite.scale.is_equal_approx(Vector2.ONE * (float(def.art_height) / monster.sprite.texture.get_size().y)))
 	var sample_visual_size: Vector2 = monster.sprite.texture.get_size() * monster.sprite.scale
 	var sample_visual_center: Vector2 = monster.sprite.offset * monster.sprite.scale
 	var sample_feet_y: float = sample_visual_center.y + sample_visual_size.y / 2.0

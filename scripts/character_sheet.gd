@@ -45,7 +45,6 @@ const FLASH_SECONDS := 1.4
 @onready var window: Panel = $Window
 @onready var tabs: HBoxContainer = $Window/Tabs
 @onready var close_btn: Button = $Window/CloseBtn
-@onready var quit_btn: Button = $Window/QuitBtn
 @onready var header: Control = $Window/Header
 @onready var portrait: TextureRect = $Window/Header/PortraitFrame/Portrait
 @onready var name_label: Label = $Window/Header/NameLabel
@@ -133,6 +132,8 @@ var grid_columns := 6
 var craft_columns := 6
 # Craft mode sections, in display order, by what the recipe makes.
 const CRAFT_GROUPS := ["Potions & Food", "Equipment", "Materials"]
+# Phone Hero tab: where the slot pane starts under the doll block.
+const PHONE_PANE_Y := 284.0
 # Enhance mode sections: one per equipment slot (Character.SLOTS order).
 const SLOT_GROUP_NAMES := {"weapon": "Weapons", "armor": "Armour", "accessory": "Accessories"}
 
@@ -156,7 +157,6 @@ func _ready() -> void:
 	for tab in TAB_BUTTONS:
 		tabs.get_node(TAB_BUTTONS[tab]).pressed.connect(_on_tab_pressed.bind(tab))
 	close_btn.pressed.connect(close)
-	quit_btn.pressed.connect(_on_quit_to_title)
 	for slot in Character.SLOTS:
 		_header_slot_button(slot).pressed.connect(select_equipped.bind(slot))
 	primary_action.pressed.connect(_on_primary_action)
@@ -222,11 +222,9 @@ func _apply_layout() -> void:
 		for tab in TAB_BUTTONS:
 			var b: Button = tabs.get_node(TAB_BUTTONS[tab])
 			b.text = TAB_LABELS[tab][0]
-			b.custom_minimum_size = Vector2(108, 32)
+			b.custom_minimum_size = Vector2(118, 32)
 			b.add_theme_font_size_override("font_size", 14)
 		close_btn.position = Vector2(676, 10)
-		quit_btn.visible = true
-		quit_btn.position = Vector2(576, 10)
 		header.position = Vector2(0, 54)
 		header.size = Vector2(720, 92)
 		_place(hp_bar, Vector2(112, 42), Vector2(220, 16))
@@ -260,7 +258,6 @@ func _apply_layout() -> void:
 		b.custom_minimum_size = Vector2(tab_w, 36)
 		b.add_theme_font_size_override("font_size", 12)
 	close_btn.position = Vector2(iw - 44.0, 10)
-	quit_btn.visible = false # the Hero tab's Game block (at its top) has it
 	# Header grows downwards: bars beside the portrait, stats + bonus lines
 	# under them, then the equipment slot row - which the Hero tab hides (the
 	# doll shows the slots), so that tab's header stops above it.
@@ -358,7 +355,9 @@ func _layout_character(pos: Vector2, size: Vector2) -> void:
 		slot_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 		slot_list.vertical = true
 	else:
-		# Stacked: doll block (0..284) / slot cards in a horizontal strip /
+		# Stacked: doll block (0..284) / the slot pane as a list of full-width
+		# rows (it grows to fit them - _refresh_character sets the height; a
+		# sideways strip used to cut the far card off at the pane's edge) /
 		# the stats column; the view scrolls when that is taller than the tab.
 		var iw: float = size.x
 		var fig_x: float = floorf((iw - 204.0) / 2.0)
@@ -369,14 +368,14 @@ func _layout_character(pos: Vector2, size: Vector2) -> void:
 		figure_shadow.position = Vector2(fig_x + 52.0, 248)
 		_place_doll(fig_x)
 		_place(doll_hint, Vector2(0, 262), Vector2(iw, 20))
-		_place(slot_pane, Vector2(20, 284), Vector2(iw - 40.0, 160))
+		_place(slot_pane, Vector2(20, PHONE_PANE_Y), Vector2(iw - 40.0, 160))
 		_place(slot_pane_title, Vector2(0, 6), Vector2(iw - 40.0, 20))
 		_place(slot_scroll, Vector2(6, 30), Vector2(iw - 52.0, 124))
-		slot_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		slot_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		slot_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		slot_list.vertical = false
-		_place(stats_list, Vector2(20, 456), Vector2(iw - 40.0, 0))
-		character_view.custom_minimum_size = Vector2(iw, 456.0 + 460.0)
+		slot_list.vertical = true
+		_place(stats_list, Vector2(20, PHONE_PANE_Y + 172.0), Vector2(iw - 40.0, 0))
+		character_view.custom_minimum_size = Vector2(iw, PHONE_PANE_Y + 172.0 + 460.0)
 
 # Doll slots / labels / connector lines from the Character.SLOTS table. The
 # table's positions are for the figure at x=300 (wide); a figure elsewhere
@@ -666,41 +665,9 @@ func _refresh_character() -> void:
 	# --- Left: stats column ---
 	_clear(stats_list)
 	var stats: Dictionary = Character.stats
-	# --- Game: save / quit first, so it's found without scrolling (New Game
-	# lives on the title screen). ---
-	_stats_title("Game")
-	_stats_line(SaveSystem.saved_ago_text(), true)
-	if narrow:
-		# Phone: stacked full-width buttons (the view scrolls); Save & Quit
-		# lives here since the tab strip has no room for it.
-		_game_button("SaveNowBtn", "Save now", &"PrimaryButton", _on_save_now)
-		_game_button("QuitBtn", "Save and quit to title", &"SecondaryButton", _on_quit_to_title)
-		var load_btn: Button = _game_button("LoadBtn", "Load last save", &"SecondaryButton", _on_load_save)
-		load_btn.disabled = not SaveSystem.has_save()
-		_volume_row("MusicSlider", "Music", Audio.music_volume, Audio.set_music_volume)
-		_volume_row("SfxSlider", "Sounds", Audio.sfx_volume, Audio.set_sfx_volume)
-		_stats_line(Audio.debug_state(), true)
-	else:
-		# Wide: one compact row so the 200px column keeps its height for the
-		# stats (Save & Quit is beside the X).
-		var row := HBoxContainer.new()
-		row.name = "GameRow"
-		row.add_theme_constant_override("separation", 6)
-		stats_list.add_child(row)
-		for entry in [["SaveNowBtn", "Save now", &"PrimaryButton", _on_save_now], ["LoadBtn", "Load", &"SecondaryButton", _on_load_save]]:
-			var b := Button.new()
-			b.name = entry[0]
-			b.text = entry[1]
-			b.theme_type_variation = entry[2]
-			b.custom_minimum_size = Vector2(0, 30)
-			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			b.add_theme_font_size_override("font_size", 12)
-			b.pressed.connect(entry[3])
-			row.add_child(b)
-		row.get_node("LoadBtn").disabled = not SaveSystem.has_save()
-		_volume_row("MusicSlider", "Music", Audio.music_volume, Audio.set_music_volume)
-		_volume_row("SfxSlider", "Sounds", Audio.sfx_volume, Audio.set_sfx_volume)
-		_stats_line(Audio.debug_state(), true)
+	# (Save / Load / volume used to head this column as a "Game" block; they
+	# live on the system bar and its Settings window now - the column is
+	# stats only.)
 	_stats_title("Level %d" % stats.level)
 	if stats.level >= Character.MAX_LEVEL:
 		_stat_row("Experience", "max level")
@@ -749,56 +716,16 @@ func _refresh_character() -> void:
 			_pane_item(inst, "Equip", Callable(Character, "equip").bind(doll_slot, inst.uid), &"PrimaryButton")
 	if not any_fit:
 		_pane_label("- nothing fits -", true)
-	# Phone: the view scrolls, so its extent must cover the stats column's
-	# real height (the Game block made it taller) - nothing gets clipped.
+	# Phone: the pane grows to fit its rows (every row is a fixed height, so
+	# the list's minimum is known at once), the stats column follows it, and
+	# the view's scroll extent covers the column's real height.
 	if narrow:
+		var list_h: float = slot_list.get_combined_minimum_size().y
+		var pane_h: float = 30.0 + list_h + 10.0
+		slot_pane.size.y = pane_h
+		slot_scroll.size.y = list_h + 2.0
+		stats_list.position.y = PHONE_PANE_Y + pane_h + 12.0
 		character_view.custom_minimum_size.y = stats_list.position.y + stats_list.get_combined_minimum_size().y + 16.0
-
-# "Music  [=====----]" - a labelled 0..100 slider feeding the Audio buses.
-func _volume_row(node_name: String, label_text: String, value: float, on_change: Callable) -> HSlider:
-	var row := HBoxContainer.new()
-	row.name = node_name + "Row"
-	row.add_theme_constant_override("separation", 8)
-	var l := Label.new()
-	l.text = label_text
-	l.add_theme_font_size_override("font_size", 13)
-	l.custom_minimum_size = Vector2(52, 0)
-	row.add_child(l)
-	var slider := HSlider.new()
-	slider.name = node_name
-	slider.min_value = 0
-	slider.max_value = 100
-	slider.step = 5
-	slider.value = round(value * 100.0)
-	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	slider.custom_minimum_size = Vector2(0, 26)
-	slider.value_changed.connect(func(v: float) -> void: on_change.call(v / 100.0))
-	row.add_child(slider)
-	stats_list.add_child(row)
-	return slider
-
-func _game_button(node_name: String, text: String, variation: StringName, on_pressed: Callable) -> Button:
-	var b := Button.new()
-	b.name = node_name
-	b.text = text
-	b.theme_type_variation = variation
-	b.custom_minimum_size = Vector2(0, 34)
-	b.add_theme_font_size_override("font_size", 13)
-	b.pressed.connect(on_pressed)
-	stats_list.add_child(b)
-	return b
-
-func _on_save_now() -> void:
-	if SaveSystem.save_game():
-		_refresh()
-
-func _on_load_save() -> void:
-	close()
-	SaveSystem.load_game()
-
-func _on_quit_to_title() -> void:
-	close()
-	SaveSystem.quit_to_title()
 
 func _clear(container: Node) -> void:
 	var dying := 0
@@ -843,18 +770,22 @@ func _pane_label(text: String, dim: bool) -> void:
 	l.text = text
 	l.add_theme_font_size_override("font_size", 11)
 	l.custom_minimum_size = Vector2(94, 0)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if narrow else HORIZONTAL_ALIGNMENT_CENTER
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	if dim:
 		l.theme_type_variation = &"DimLabel"
 	slot_list.add_child(l)
 
-# One 94px-wide card per item: icon + "name / stat" + one action button,
-# stacked compactly so a worn item plus one carried alternative fit the
-# wide layout's 94px-wide pane without scrolling (a clipped Equip button
-# read as broken). Cards flow vertically there and sideways on a phone.
+# Wide: one 94px-wide card per item - icon + "name / stat" + one action
+# button, stacked compactly so a worn item plus one carried alternative fit
+# the 94px-wide pane without scrolling (a clipped Equip button read as
+# broken). Phone: one full-width ROW per item (icon | name + stat | button),
+# a fixed 44px tall, so the pane can size itself to the list.
 func _pane_item(inst: Dictionary, action_text: String, action: Callable, variation: StringName) -> void:
 	var item_id: String = inst.base
+	if narrow:
+		_pane_row(inst, action_text, action, variation)
+		return
 	var card := VBoxContainer.new()
 	card.custom_minimum_size = Vector2(94, 0)
 	card.add_theme_constant_override("separation", 4)
@@ -890,6 +821,52 @@ func _pane_item(inst: Dictionary, action_text: String, action: Callable, variati
 	btn.pressed.connect(action)
 	card.add_child(btn)
 	slot_list.add_child(card)
+
+func _pane_row(inst: Dictionary, action_text: String, action: Callable, variation: StringName) -> void:
+	var item_id: String = inst.base
+	var row := HBoxContainer.new()
+	row.custom_minimum_size = Vector2(0, 44)
+	row.add_theme_constant_override("separation", 8)
+	var icon_panel := Panel.new()
+	icon_panel.custom_minimum_size = Vector2(44, 44)
+	icon_panel.theme_type_variation = &"DetailPanel"
+	var icon := TextureRect.new()
+	icon.texture = Items.get_item_icon(item_id)
+	icon.position = Vector2(4, 4)
+	icon.size = Vector2(36, 36)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_panel.add_child(icon)
+	row.add_child(icon_panel)
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	text.add_theme_constant_override("separation", 0)
+	var name_label := Label.new()
+	name_label.text = Items.instance_name(inst)
+	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	text.add_child(name_label)
+	var stat_text: String = Items.describe_instance(inst)
+	if stat_text != "":
+		var stat_label := Label.new()
+		stat_label.text = stat_text
+		stat_label.add_theme_font_size_override("font_size", 11)
+		stat_label.theme_type_variation = &"DimLabel"
+		stat_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		text.add_child(stat_label)
+	row.add_child(text)
+	var btn := Button.new()
+	btn.text = action_text
+	btn.custom_minimum_size = Vector2(86, 36)
+	btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	btn.theme_type_variation = variation
+	btn.add_theme_font_size_override("font_size", 13)
+	btn.set_meta("item_id", item_id)
+	btn.set_meta("uid", inst.uid)
+	btn.pressed.connect(action)
+	row.add_child(btn)
+	slot_list.add_child(row)
 
 # --- Crafting tab ---
 

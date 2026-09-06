@@ -158,9 +158,10 @@ func _on_node_added(node: Node) -> void:
 		node.pressed.connect(func() -> void: play_sfx("tap"))
 
 func _connect_combat() -> void:
-	Combat.ended.connect(func(victory: bool) -> void:
-		if victory:
-			play_sting("victory"))
+	# The sting goes with the win itself; the screen may hold on its summary
+	# a while before ended(true) (Combat.awaiting_exit).
+	Combat.won.connect(func() -> void:
+		play_sting("victory"))
 
 func play_sting(id: String) -> void:
 	last_sting = id
@@ -198,8 +199,8 @@ func _process(_delta: float) -> void:
 func wanted_music() -> String:
 	if sting_playing():
 		return ""
-	if Combat.in_combat:
-		return "battle"
+	if Combat.in_combat and not Combat.awaiting_exit:
+		return "battle" # the victory screen gets the scene's track back
 	var scene: Node = get_tree().current_scene
 	if scene == null:
 		return _current # mid scene change: hold whatever plays

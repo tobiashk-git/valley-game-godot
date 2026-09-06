@@ -98,11 +98,14 @@ func _build_hud() -> void:
 	# visible, so the battle screen no longer needs its own copies (see
 	# setup_battle_panel.gd). Same HPBar/MPBar theme variations +
 	# centred-label-in-bar shape the Character panel and enemy slots use.
-	for entry in [["HP", &"HPBar"], ["MP", &"MPBar"]]:
+	# The XP bar (gold, slimmer, "Level 2  4 / 60 XP") sits under the MP bar;
+	# the battle panel starts at y=164 to leave it room with a two-line
+	# biome name.
+	for entry in [["HP", &"HPBar", 18, 13], ["MP", &"MPBar", 18, 13], ["XP", &"XPBar", 14, 11]]:
 		var prefix: String = entry[0]
 		var bar := ProgressBar.new()
 		bar.name = prefix + "Bar"
-		bar.custom_minimum_size = Vector2(0, 18)
+		bar.custom_minimum_size = Vector2(0, entry[2])
 		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bar.show_percentage = false
 		bar.theme_type_variation = entry[1]
@@ -115,7 +118,7 @@ func _build_hud() -> void:
 		bar_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 		bar_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		bar_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		bar_label.add_theme_font_size_override("font_size", 13)
+		bar_label.add_theme_font_size_override("font_size", entry[3])
 		bar_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bar.add_child(bar_label)
 		bar_label.owner = layer

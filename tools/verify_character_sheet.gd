@@ -193,9 +193,12 @@ func _initialize() -> void:
 	sheet.tabs.get_node("CraftingTab").pressed.emit()
 	await process_frame
 	print("Crafting tab switches within the sheet (no standalone panel any more): ", sheet.is_open() and sheet.current_tab == "crafting" and sheet.crafting_view.visible and not root.has_node("CraftingPanel"))
-	panel_buttons.inventory_btn.pressed.emit()
+	panel_buttons.menu_btn.pressed.emit()
 	await process_frame
-	print("Toolbar I from the Crafting tab switches back to Inventory: ", sheet.is_open() and sheet.current_tab == "inventory")
+	print("Menu from the Crafting tab closes the sheet: ", not sheet.is_open())
+	panel_buttons.menu_btn.pressed.emit()
+	await process_frame
+	print("Menu again reopens it on its last tab (Crafting): ", sheet.is_open() and sheet.current_tab == "crafting")
 	sheet.tabs.get_node("CloseBtn".replace("CloseBtn", "CharacterTab")).pressed.emit()
 	await process_frame
 	print("In-window Character tab switches: ", sheet.current_tab == "character")
@@ -250,7 +253,12 @@ func _initialize() -> void:
 	var doll_a: Button = sheet.get_node("Window/CharacterScroll/CharacterView/DollArmorSlot")
 	var fig_rect: Rect2 = sheet.figure.get_global_rect()
 	print("Doll re-centred on the phone (weapon left of the figure, armour right, all inside): ", doll_w.get_global_rect().position.x < fig_rect.position.x and doll_a.get_global_rect().position.x >= fig_rect.end.x - 1.0 and doll_w.get_global_rect().position.x >= 12.0 and doll_a.get_global_rect().end.x <= 388.0)
-	print("Slot cards flow sideways under the doll and the stats stack below (view scrolls): ", not sheet.slot_list.vertical and sheet.slot_pane.position.y >= 284.0 and sheet.stats_list.position.y > sheet.slot_pane.position.y and sheet.character_view.custom_minimum_size.y > sheet.character_scroll.size.y)
+	var slot_pane_rect: Rect2 = sheet.slot_pane.get_global_rect()
+	var rows_inside := true
+	for child in sheet.slot_list.get_children():
+		if child is Control and not slot_pane_rect.encloses(child.get_global_rect()):
+			rows_inside = false
+	print("Slot pane under the doll lists full-width rows (nothing cut off sideways), the pane sized to them, stats below (view scrolls): ", sheet.slot_list.vertical and sheet.slot_scroll.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED and rows_inside and sheet.slot_pane.position.y >= 284.0 and sheet.stats_list.position.y >= sheet.slot_pane.position.y + sheet.slot_pane.size.y and sheet.character_view.custom_minimum_size.y > sheet.character_scroll.size.y)
 	root.get_texture().get_image().save_png("res://verify_sheet_phone_character.png")
 	print("Saved verify_sheet_phone_character.png")
 	sheet.open("crafting")
@@ -268,6 +276,6 @@ func _initialize() -> void:
 		await process_frame
 	sheet.open("inventory")
 	await process_frame
-	print("Back at 800 wide: wide layout restored (720px window at x=40, 6 columns, full tab names, Save & Quit beside the X): ", layout.width == 800 and not sheet.narrow and sheet.window.position == Vector2(40, 56) and sheet.window.size == Vector2(720, 530) and sheet.grid.columns == 6 and sheet.tabs.get_node("InventoryTab").text == "Inventory" and sheet.quit_btn.visible and sheet.tabs.get_global_rect().end.x <= sheet.quit_btn.global_position.x and sheet.quit_btn.get_global_rect().end.x <= sheet.close_btn.global_position.x)
+	print("Back at 800 wide: wide layout restored (720px window at x=40, 6 columns, full tab names, tabs clear of the X): ", layout.width == 800 and not sheet.narrow and sheet.window.position == Vector2(40, 56) and sheet.window.size == Vector2(720, 530) and sheet.grid.columns == 6 and sheet.tabs.get_node("InventoryTab").text == "Inventory" and sheet.tabs.get_global_rect().end.x <= sheet.close_btn.global_position.x and not sheet.window.has_node("QuitBtn"))
 	sheet.close()
 	quit()

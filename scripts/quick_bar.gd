@@ -17,7 +17,7 @@ const BOTTOM_MARGIN := 20.0
 # the row lifts above both (their zones end 130px up).
 const NARROW_BOTTOM_MARGIN := 150.0
 # Panels whose open state hides the bar - each has an is_open().
-const OVERLAY_AUTOLOADS := ["CharacterSheet", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel"]
+const OVERLAY_AUTOLOADS := ["CharacterSheet", "QuestPanel", "WorldMapPanel", "ShopPanel", "StoragePanel", "SettingsPanel"]
 
 @onready var hbox: HBoxContainer = $HBox
 @onready var feedback_label: Label = $FeedbackLabel

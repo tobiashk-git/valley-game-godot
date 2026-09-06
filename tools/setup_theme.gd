@@ -73,6 +73,11 @@ func _initialize() -> void:
 	theme.set_stylebox("fill", "MPBar", _bar_style(Color(0.15, 0.35, 0.75, 1.0)))
 	theme.set_stylebox("background", "MPBar", _bar_style(Color(0.05, 0.1, 0.2, 1.0)))
 
+	# Experience bar (HUD, under the MP bar) - gold.
+	theme.set_type_variation("XPBar", "ProgressBar")
+	theme.set_stylebox("fill", "XPBar", _bar_style(Color(0.85, 0.65, 0.2, 1.0)))
+	theme.set_stylebox("background", "XPBar", _bar_style(Color(0.2, 0.15, 0.05, 1.0)))
+
 	# --- Character-sheet kit (UI redesign Phase 1) - the slot / tab / detail
 	# pane language every redesigned screen shares. Buttons need all four
 	# states or Godot's default grey shows through on hover/press. ---

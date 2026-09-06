@@ -32,7 +32,7 @@ func _initialize() -> void:
 	await process_frame
 	var rect: Rect2 = battle.panel.get_global_rect()
 	var hud_rect: Rect2 = hud.panel.get_global_rect()
-	print("Panel is the 560x420 kit window starting below the HUD (y=148), inside the viewport: ", rect.size == Vector2(560, 420) and rect.position.y == 148.0 and rect.end.y <= 600.0 and not rect.intersects(hud_rect))
+	print("Panel is the 560x420 kit window starting below the HUD (y=164, room for the XP bar), inside the viewport: ", rect.size == Vector2(560, 420) and rect.position.y == 164.0 and rect.end.y <= 600.0 and not rect.intersects(hud_rect))
 	print("Stage, log, commands and submenu keep their paths: ", battle.has_node("Panel/Margin/VBox/Stage") and battle.has_node("Panel/Margin/VBox/LogPanel/LogMargin/LogLabel") and battle.has_node("Panel/Margin/VBox/Commands") and battle.has_node("Panel/Margin/VBox/Submenu"))
 	var slot0: PanelContainer = battle.enemy_slots[0]
 	var slot1: PanelContainer = battle.enemy_slots[1]

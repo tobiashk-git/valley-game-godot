@@ -360,6 +360,20 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lt47f"]
+bg_color = Color(0.2, 0.15, 0.05, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d34kf"]
+bg_color = Color(0.85, 0.65, 0.2, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
 [resource]
 DetailPanel/base_type = &"Panel"
 DetailPanel/styles/panel = SubResource("StyleBoxFlat_fgeqy")
@@ -435,3 +449,6 @@ TabButtonActive/styles/focus = SubResource("StyleBoxEmpty_cnkhx")
 TabButtonActive/styles/hover = SubResource("StyleBoxFlat_ldeph")
 TabButtonActive/styles/normal = SubResource("StyleBoxFlat_vcu45")
 TabButtonActive/styles/pressed = SubResource("StyleBoxFlat_o6qr5")
+XPBar/base_type = &"ProgressBar"
+XPBar/styles/background = SubResource("StyleBoxFlat_lt47f")
+XPBar/styles/fill = SubResource("StyleBoxFlat_d34kf")

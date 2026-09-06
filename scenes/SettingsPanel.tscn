@@ -1,0 +1,125 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/settings_panel.gd" id="1_f62ks"]
+
+[node name="SettingsPanel" type="CanvasLayer" unique_id=1651685809]
+script = ExtResource("1_f62ks")
+
+[node name="Dim" type="ColorRect" parent="." unique_id=1623829185]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.45)
+
+[node name="Window" type="Panel" parent="." unique_id=1770675256]
+offset_left = 220.0
+offset_top = 130.0
+offset_right = 580.0
+offset_bottom = 460.0
+
+[node name="TitleLabel" type="Label" parent="Window" unique_id=1046434995]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 14.0
+offset_right = 220.0
+offset_bottom = 44.0
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 20
+text = "Settings"
+
+[node name="CloseBtn" type="Button" parent="Window" unique_id=823843384]
+layout_mode = 0
+offset_left = 316.0
+offset_top = 10.0
+offset_right = 348.0
+offset_bottom = 42.0
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 15
+text = "X"
+
+[node name="Rows" type="VBoxContainer" parent="Window" unique_id=144570656]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 58.0
+offset_right = 340.0
+offset_bottom = 308.0
+theme_override_constants/separation = 8
+
+[node name="MusicRow" type="HBoxContainer" parent="Window/Rows" unique_id=1258977412]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MusicLabel" type="Label" parent="Window/Rows/MusicRow" unique_id=1139677787]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Music"
+
+[node name="MusicSlider" type="HSlider" parent="Window/Rows/MusicRow" unique_id=488059520]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+step = 5.0
+
+[node name="MusicValue" type="Label" parent="Window/Rows/MusicRow" unique_id=706888629]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 13
+text = "100"
+horizontal_alignment = 2
+
+[node name="SfxRow" type="HBoxContainer" parent="Window/Rows" unique_id=1549668579]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SfxLabel" type="Label" parent="Window/Rows/SfxRow" unique_id=1500579422]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Sounds"
+
+[node name="SfxSlider" type="HSlider" parent="Window/Rows/SfxRow" unique_id=284512651]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+step = 5.0
+
+[node name="SfxValue" type="Label" parent="Window/Rows/SfxRow" unique_id=1937921730]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 13
+text = "100"
+horizontal_alignment = 2
+
+[node name="AudioLine" type="Label" parent="Window/Rows" unique_id=42685028]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 11
+autowrap_mode = 2
+
+[node name="Separator" type="ColorRect" parent="Window/Rows" unique_id=449139023]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(0.7, 0.55, 0.2, 0.5)
+
+[node name="SaveTitle" type="Label" parent="Window/Rows" unique_id=395019712]
+layout_mode = 2
+theme_type_variation = &"PanelTitle"
+theme_override_font_sizes/font_size = 15
+text = "Game"
+
+[node name="SaveLine" type="Label" parent="Window/Rows" unique_id=26644351]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 13
+
+[node name="LoadBtn" type="Button" parent="Window/Rows" unique_id=1321776294]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 14
+text = "Load last save"

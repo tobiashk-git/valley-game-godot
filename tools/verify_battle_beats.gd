@@ -106,7 +106,35 @@ func _initialize() -> void:
 		combat.skip_beat()
 		await process_frame
 	await process_frame
-	print("After the last beat the fight ends and the screen closes: ", not combat.in_combat and not battle.panel.visible)
+	var audio: Node = root.get_node("Audio")
+	print("After the last beat the screen HOLDS on the victory summary (loot readable), commands gone, Continue shown, sting asked for: ", combat.in_combat and combat.awaiting_exit and battle.panel.visible and not battle.commands.visible and battle.continue_btn.visible and combat.battle_log.back().begins_with("Victory! You earned") and combat.battle_log.back().contains("XP") and audio.last_sting == "victory")
+	root.get_texture().get_image().save_png("res://verify_beats_summary.png")
+	print("Saved verify_beats_summary.png")
+	print("The summary carries the fight's gold and XP: ", combat.fight_xp > 0 and combat.battle_log.back() == "Victory! You earned %d gold and %d XP.%s" % [combat.fight_gold, combat.fight_xp, "" if combat.fight_items.is_empty() else " Loot: %s." % ", ".join(combat.fight_items)])
+	combat.player_attack()
+	await process_frame
+	print("Commands are ignored on the summary screen: ", combat.awaiting_exit and not combat.playing)
+	var ended_victory := [false]
+	combat.ended.connect(func(v: bool) -> void: ended_victory[0] = v, CONNECT_ONE_SHOT)
+	battle.continue_btn.pressed.emit()
+	await process_frame
+	print("Continue ends the fight and closes the screen (ended(true) only now): ", not combat.in_combat and not combat.awaiting_exit and not battle.panel.visible and ended_victory[0])
+	# E also leaves the summary.
+	combat.start_combat(["bandit"])
+	await process_frame
+	combat.current_enemies[0].hp = 1
+	combat.player_attack()
+	await process_frame
+	while combat.playing:
+		combat.skip_beat()
+		await process_frame
+	await process_frame
+	Input.action_press("interact")
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	await process_frame
+	print("E on the summary screen leaves it too: ", not combat.in_combat and not battle.panel.visible)
 
 	# Phone.
 	root.size = Vector2i(400, 660)
