@@ -71,13 +71,13 @@ func _initialize() -> void:
 	print("Defaults to the Buy tab (active tab styling): ", shop_panel.tab == 0 and shop_panel.buy_tab_btn.theme_type_variation == &"TabButtonActive" and shop_panel.sell_tab_btn.theme_type_variation == &"TabButton")
 	print("Title row shows gold on hand: ", shop_panel.subtitle_label.text == "Gold on hand: 0")
 	print("Quest tracker hidden while the shop is open: ", not tracker.visible)
-	print("One slot per stock item, badged with its price: ", shop_panel.grid.get_child_count() == shop.SHOP_STOCK.size() and shop_panel.grid.get_node("HealingPotionSlot").get_node("Count").text == "12g")
+	print("One slot per stock item, badged with its price: ", shop_panel.grid.get_child_count() == shop.SHOP_STOCK.size() and shop_panel.grid.get_node("HealingPotionSlot").get_node("Count").text == "20g")
 	print("Nothing selected -> pane prompts: ", shop_panel.detail_name.text == "Select an item" and not shop_panel.primary_action.visible)
 
 	# --- Select the potion: details + Buy disabled while broke. ---
 	shop_panel.grid.get_node("HealingPotionSlot").pressed.emit()
 	await process_frame
-	print("Selecting shows the item: ", shop_panel.detail_name.text == "Healing Potion" and shop_panel.detail_type.text == "Consumable" and shop_panel.detail_desc.text.contains("Restores 15 HP") and shop_panel.detail_value.text == "Costs 12 gold  -  you have 0")
+	print("Selecting shows the item: ", shop_panel.detail_name.text == "Healing Potion" and shop_panel.detail_type.text == "Consumable" and shop_panel.detail_desc.text.contains("Restores 8 HP") and shop_panel.detail_value.text == "Costs 20 gold  -  you have 0")
 	print("Buy offered but disabled while broke: ", shop_panel.primary_action.visible and shop_panel.primary_action.text == "Buy" and shop_panel.primary_action.disabled and not shop_panel.secondary_action.visible)
 	root.get_texture().get_image().save_png("res://verify_shop_buy_broke.png")
 	print("Saved verify_shop_buy_broke.png")
@@ -89,8 +89,8 @@ func _initialize() -> void:
 	var gold_before: int = inventory.get_count("gold")
 	shop_panel.primary_action.pressed.emit()
 	await process_frame
-	print("Potion bought, gold deducted (12): ", inventory.get_count("healing_potion") == 1 and inventory.get_count("gold") == gold_before - 12)
-	print("Selection kept, pane counts the new one: ", shop_panel.selected_item == "healing_potion" and shop_panel.detail_value.text == "Costs 12 gold  -  you have 1")
+	print("Potion bought, gold deducted (20): ", inventory.get_count("healing_potion") == 1 and inventory.get_count("gold") == gold_before - 20)
+	print("Selection kept, pane counts the new one: ", shop_panel.selected_item == "healing_potion" and shop_panel.detail_value.text == "Costs 20 gold  -  you have 1")
 	root.get_texture().get_image().save_png("res://verify_shop_after_buy.png")
 	print("Saved verify_shop_after_buy.png")
 

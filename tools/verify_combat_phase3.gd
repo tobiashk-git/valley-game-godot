@@ -49,10 +49,14 @@ func _initialize() -> void:
 	print("Sleep cleared after taking a hit (wake-on-hit): ", not combat.player_status.has("sleep"))
 
 	# --- Paralysis: forced-fail roll skips the turn (checked via many trials since chance is 50/50). ---
+	# (Skeletons hit harder since the balance pass: keep Oliver topped up so a
+	# run of skipped turns can't send him home mid-trial.)
 	combat.start_combat("skeleton")
-	character.stats.hp = 20
+	character.stats.max_hp = 200
+	character.stats.hp = 200
 	var paralysis_skipped_at_least_once := false
 	for i in range(20):
+		character.stats.hp = 200
 		combat.player_status["paralysis"] = {"turns_left": 2}
 		var enemy_hp_before: int = combat.current_enemies[0].hp
 		combat.player_attack()
@@ -62,17 +66,18 @@ func _initialize() -> void:
 			break
 		if not combat.in_combat:
 			combat.start_combat("skeleton")
-			character.stats.hp = 20
+			character.stats.hp = 200
 	print("Paralysis skipped the player's turn at least once over 20 trials: ", paralysis_skipped_at_least_once)
 
 	# --- Confusion: forced trials until the self-hit branch fires. ---
 	combat.start_combat("cave_bat")
-	character.stats.hp = 20
+	character.stats.hp = 200
 	var confusion_self_hit := false
 	for i in range(20):
+		character.stats.hp = 200
 		if not combat.in_combat:
 			combat.start_combat("cave_bat")
-			character.stats.hp = 20
+			character.stats.hp = 200
 		combat.player_status["confusion"] = {"turns_left": 2}
 		var hp_before: int = character.stats.hp
 		combat.player_attack()

@@ -28,9 +28,12 @@ const TRIPS := 300
 const POTION_AT := 0.35 # the sim drinks below 35% HP (a cautious player)
 const BED_AT := 0.25    # a trip ends when HP is under 25% (walk home)
 
+# "live" mirrors the shipped game (combat.gd ARMOUR_K, the ladder baked into
+# enemies.gd, potion/Heal values in items.gd/spells.gd). "old_subtract" is
+# the pre-balance-pass rule, kept for comparison.
 const MODELS := {
-	"current": {"kind": "subtract", "k": 0.0, "enemy_atk_mult": 1.0, "potion_heal": 15, "heal_spell": 15, "heal_cost": 4},
-	"mitigation": {"kind": "mitigate", "k": 8.0, "enemy_atk_mult": 2.0, "potion_heal": 8, "heal_spell": 10, "heal_cost": 5},
+	"live": {"kind": "mitigate", "k": 8.0, "enemy_atk_mult": 1.0, "boss_atk_mult": 1.0, "potion_heal": 8, "heal_spell": 10, "heal_cost": 5},
+	"old_subtract": {"kind": "subtract", "k": 0.0, "enemy_atk_mult": 1.0, "boss_atk_mult": 1.0, "potion_heal": 15, "heal_spell": 15, "heal_cost": 4},
 }
 
 const PROFILES := [
@@ -265,11 +268,14 @@ func _win_rate(model: Dictionary, profile: Dictionary, defs: Array, potions: int
 # hit or two. The sweep scales each zone's HP and attack by steepness^tier
 # (dungeon 0, Frostpeak 1, Verdantwood 2, Badlands 3, Gloomfen 4) and each
 # boss by its tier too, and tries a few steepness values.
-const BOSS_TIER := {"dungeon_boss": 0, "golden_plains_boss": 0, "frostpeak_boss": 1, "verdantwood_boss": 2, "verdantwood_maze_guardian_1": 2, "castle_boss": 3, "badlands_boss": 3, "gloomfen_boss": 4, "final_boss": 5}
-const SWEEP_WILD := [1.3]
+const BOSS_TIER := {"dungeon_boss": 0, "golden_plains_boss": 0, "frostpeak_boss": 1, "verdantwood_boss": 2, "verdantwood_maze_guardian_1": 2, "castle_boss": 3, "badlands_boss": 3, "gloomfen_boss": 4, "final_boss": 2}
+# The chosen ladder (wild x1.3 then 1.2^tier, bosses 1.25^tier) is BAKED into
+# enemies.gd now, so the sweep's multipliers default to 1.0 = the live game;
+# raise them to try a further retune on top.
+const SWEEP_WILD := [1.0]
 const SWEEP_BOSS := [1.0]
-const SWEEP_STEEP := [1.2] # wild ladder
-const SWEEP_BOSS_STEEP := [1.25, 1.3, 1.35] # bosses climb faster than the wilds
+const SWEEP_STEEP := [1.0] # extra wild ladder on top of the data
+const SWEEP_BOSS_STEEP := [1.0] # extra boss ladder on top of the data
 const SWEEP_FINAL_TIER := [0, 1, 2] # the Ancient Warden already has end-game stats; try it with little or no ladder
 
 func _scaled(def: Dictionary, m: float) -> Dictionary:

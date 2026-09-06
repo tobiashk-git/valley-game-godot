@@ -4,7 +4,7 @@ extends Node
 
 const SPELLS := {
 	"fireball": {"name": "Fireball", "icon": "🔥", "kind": "damage", "mp_cost": 3, "power": 10},
-	"heal": {"name": "Heal", "icon": "✨", "kind": "heal", "mp_cost": 4, "power": 15},
+	"heal": {"name": "Heal", "icon": "✨", "kind": "heal", "mp_cost": 5, "power": 10},
 }
 
 # Real generated texture (res://assets/icons/, see tools/setup_item_icons.gd)

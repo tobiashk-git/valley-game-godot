@@ -46,7 +46,7 @@ const QUEST_DEFS := {
 			{"item_id": "wood", "amount": 8},
 			{"item_id": "stone", "amount": 8},
 		]},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
+		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "The ford north of here washed out ages ago - Frostpeak's been cut off ever since. Bring me 8 Wood and 8 Stone and I'll get it shored up.",
 			"in_progress": "Still need more Wood and Stone for the ford - can you spare any?",
@@ -58,7 +58,7 @@ const QUEST_DEFS := {
 		"giver_name": "Forest Druid",
 		"name": "Clearing the Crossing",
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
+		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "The ford into Verdantwood is choked with fallen branches - bring me 12 Wood and I'll see it cleared.",
 			"in_progress": "Still need more wood to clear the crossing - what have you got?",
@@ -70,7 +70,7 @@ const QUEST_DEFS := {
 		"giver_name": "Badlands Prospector",
 		"name": "Shoring Up the Crossing",
 		"objective": {"type": "gather", "item_id": "stone", "amount": 12},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
+		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "The ford into Emberfall's crumbling at the edges - bring me 12 Stone and I'll get it packed solid again.",
 			"in_progress": "Still need more stone for the crossing - what have you got?",
@@ -82,7 +82,7 @@ const QUEST_DEFS := {
 		"giver_name": "Marsh Guide",
 		"name": "Laying the Boardwalk",
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
-		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 2},
+		"reward": {"gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
 			"offer": "The old boardwalk into Gloomfen rotted through long ago - bring me 12 Wood and I'll lay a new one.",
 			"in_progress": "Still need more wood for the boardwalk - what have you got?",

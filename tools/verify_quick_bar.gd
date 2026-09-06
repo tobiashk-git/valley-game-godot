@@ -57,14 +57,14 @@ func _initialize() -> void:
 	inventory.add_item("healing_potion", 2)
 	await process_frame
 	print("Slot enables and counts up once potions are owned: ", not heal_slot.disabled and heal_count.text == "2")
-	character.stats.hp = character.stats.max_hp - 10
+	character.stats.hp = character.stats.max_hp - 6
 	character.changed.emit()
 	var hp_before: int = character.stats.hp
 	heal_slot.pressed.emit()
 	await process_frame
-	print("Tapping the slot heals in the field (min(15, missing 10)): ", character.stats.hp == hp_before + 10)
+	print("Tapping the slot heals in the field (min(8, missing 6)): ", character.stats.hp == hp_before + 6)
 	print("One potion consumed, count updated: ", inventory.get_count("healing_potion") == 1 and heal_count.text == "1")
-	print("Feedback toast shown: ", quick_bar.feedback_label.modulate.a > 0.9 and quick_bar.feedback_label.text.contains("recovers 10 HP"))
+	print("Feedback toast shown: ", quick_bar.feedback_label.modulate.a > 0.9 and quick_bar.feedback_label.text.contains("recovers 6 HP"))
 	root.get_texture().get_image().save_png("res://verify_quick_bar.png")
 	print("Saved verify_quick_bar.png")
 

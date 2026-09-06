@@ -228,8 +228,14 @@ func _player_defense_bonus() -> int:
 func _accessory_bonus(field: String) -> float:
 	return Character.gear_bonus(field)
 
+# Percentage mitigation (balance pass, 2026-09-06): every point of defence
+# shaves a share off the hit rather than a flat amount, so armour tiers are
+# visible steps and none makes you immune - leather (3) blocks ~27%,
+# Bog-iron Harness (11) ~58%. Tuned with tools/sim_balance.gd.
+const ARMOUR_K := 8.0
+
 func _physical_damage(power: int, defense: int) -> int:
-	var base: float = power - defense
+	var base: float = power * ARMOUR_K / (ARMOUR_K + defense)
 	var variance: float = base * (randf() * 0.3 - 0.15)
 	return max(1, int(round(base + variance)))
 

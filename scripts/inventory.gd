@@ -22,12 +22,26 @@ func new_instance(base: String) -> Dictionary:
 	_next_uid += 1
 	return inst
 
+# Consumables (anything with an "effect": potions, antidotes) stack to a
+# cap - the balance pass made potions a small buffer, not the fight's
+# engine. Materials and gold are uncapped.
+const CONSUMABLE_CAP := 5
+
+func stack_cap(item_id: String) -> int:
+	return CONSUMABLE_CAP if Items.is_usable(item_id) else 0
+
+func can_add(item_id: String, amount: int = 1) -> bool:
+	var cap: int = stack_cap(item_id)
+	return cap == 0 or backpack.get(item_id, 0) + amount <= cap
+
 func add_item(item_id: String, amount: int = 1) -> void:
 	if Items.is_equippable(item_id):
 		for i in range(amount):
 			gear.append(new_instance(item_id))
 	else:
-		backpack[item_id] = backpack.get(item_id, 0) + amount
+		var total: int = backpack.get(item_id, 0) + amount
+		var cap: int = stack_cap(item_id)
+		backpack[item_id] = mini(total, cap) if cap > 0 else total
 	changed.emit()
 
 func add_gear_instance(inst: Dictionary) -> void:

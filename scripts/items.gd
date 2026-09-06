@@ -20,7 +20,7 @@ const ITEMS := {
 	"wooden_pickaxe": {"name": "Wooden Pickaxe", "icon": "⛏️", "slot": "weapon", "attack": 2, "value": 15, "desc": "Crude but hefty. Better than bare fists, and handy for prying at rock."},
 	"leather_armor": {"name": "Leather Armor", "icon": "🧥", "slot": "armor", "defense": 3, "value": 20, "desc": "Stiff boiled hide over a padded jerkin. Turns a claw or two."},
 	"charm_of_warding": {"name": "Charm of Warding", "icon": "💍", "slot": "accessory", "bonus": {"status_resistance": 0.5}, "value": 25, "desc": "A ring of braided copper and bone. Poison and curses bite less often."},
-	"healing_potion": {"name": "Healing Potion", "icon": "🧪", "effect": {"kind": "heal", "amount": 15}, "value": 12, "desc": "A bitter red draught brewed from valley herbs. Restores 15 HP."},
+	"healing_potion": {"name": "Healing Potion", "icon": "🧪", "effect": {"kind": "heal", "amount": 8}, "value": 20, "desc": "A bitter red draught brewed from valley herbs. Restores 8 HP. You can carry five."},
 	"mana_potion": {"name": "Mana Potion", "icon": "🔮", "effect": {"kind": "restore_mp", "amount": 8}, "value": 12, "desc": "Cold blue and faintly humming. Restores 8 MP."},
 	"antidote": {"name": "Antidote", "icon": "🌿", "effect": {"kind": "cure", "status": "poison"}, "value": 10, "desc": "Crushed marsh-leaf in spirit. Cures poison."},
 	# Boss-exclusive - no recipe in crafting.gd, only obtainable as a drop.

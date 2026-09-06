@@ -44,10 +44,11 @@ func _detail_actions(entry: Dictionary) -> void:
 	var owned: int = Inventory.get_count(entry.id)
 	if tab == 0:
 		var price: int = Shop.buy_price(entry.id)
-		detail_value.text = "Costs %d gold  -  you have %d" % [price, owned]
+		var full: bool = not Inventory.can_add(entry.id)
+		detail_value.text = "Costs %d gold  -  you have %d%s" % [price, owned, "  (can't carry more)" if full else ""]
 		primary_action.visible = true
 		primary_action.text = "Buy"
-		primary_action.disabled = Inventory.get_count("gold") < price
+		primary_action.disabled = Inventory.get_count("gold") < price or full
 		return
 	var price: int = Shop.sell_price(entry.id)
 	detail_value.text = "Sells for %d gold  -  you have %d" % [price, owned]

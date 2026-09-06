@@ -178,7 +178,7 @@ func can_craft(recipe_id: String) -> bool:
 	for item_id in cost.keys():
 		if Inventory.get_count(item_id) < cost[item_id]:
 			return false
-	return true
+	return Inventory.can_add(recipe.result, recipe.amount)
 
 func craft(recipe_id: String) -> bool:
 	if not can_craft(recipe_id):

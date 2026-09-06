@@ -19,7 +19,7 @@ func sell_price(item_id: String) -> int:
 
 func buy_item(item_id: String) -> bool:
 	var price := buy_price(item_id)
-	if price <= 0 or Inventory.get_count("gold") < price:
+	if price <= 0 or Inventory.get_count("gold") < price or not Inventory.can_add(item_id):
 		return false
 	Inventory.remove_item("gold", price)
 	Inventory.add_item(item_id, 1)
