@@ -41,12 +41,24 @@ const RECIPES := {
 	# this order within its Equipment section. ---
 	"frost_pick": {"result": "frost_pick", "amount": 1, "cost": {"frost_shard": 3, "wood": 2}},
 	"frostweave_coat": {"result": "frostweave_coat", "amount": 1, "cost": {"frost_shard": 3, "monster_fur": 2}},
+	"frost_helm": {"result": "frost_helm", "amount": 1, "cost": {"frost_shard": 2, "monster_fur": 1}},
+	"frost_greaves": {"result": "frost_greaves", "amount": 1, "cost": {"frost_shard": 2, "monster_fur": 1}},
+	"frost_boots": {"result": "frost_boots", "amount": 1, "cost": {"frost_shard": 1, "monster_fur": 1}},
 	"ironwood_blade": {"result": "ironwood_blade", "amount": 1, "cost": {"ironwood": 3, "stone": 2}},
 	"ironwood_mail": {"result": "ironwood_mail", "amount": 1, "cost": {"ironwood": 3, "monster_fur": 2}},
+	"ironwood_helm": {"result": "ironwood_helm", "amount": 1, "cost": {"ironwood": 2, "monster_fur": 1}},
+	"ironwood_greaves": {"result": "ironwood_greaves", "amount": 1, "cost": {"ironwood": 2, "monster_fur": 1}},
+	"ironwood_boots": {"result": "ironwood_boots", "amount": 1, "cost": {"ironwood": 2, "stone": 1}},
 	"ember_blade": {"result": "ember_blade", "amount": 1, "cost": {"ember_core": 2, "ironwood": 2}},
 	"ember_plate": {"result": "ember_plate", "amount": 1, "cost": {"ember_core": 2, "monster_fur": 3}},
+	"ember_helm": {"result": "ember_helm", "amount": 1, "cost": {"ember_core": 1, "ironwood": 2}},
+	"ember_greaves": {"result": "ember_greaves", "amount": 1, "cost": {"ember_core": 1, "ironwood": 2}},
+	"ember_boots": {"result": "ember_boots", "amount": 1, "cost": {"ember_core": 1, "ironwood": 1}},
 	"bogiron_cleaver": {"result": "bogiron_cleaver", "amount": 1, "cost": {"bog_iron": 3, "ember_core": 1}},
 	"bogiron_harness": {"result": "bogiron_harness", "amount": 1, "cost": {"bog_iron": 3, "monster_fur": 3}},
+	"bogiron_helm": {"result": "bogiron_helm", "amount": 1, "cost": {"bog_iron": 2, "monster_fur": 1}},
+	"bogiron_greaves": {"result": "bogiron_greaves", "amount": 1, "cost": {"bog_iron": 2, "monster_fur": 1}},
+	"bogiron_boots": {"result": "bogiron_boots", "amount": 1, "cost": {"bog_iron": 2, "stone": 1}},
 }
 
 # --- Enhancements (UI redesign Phase 2): a special ingredient applied to an

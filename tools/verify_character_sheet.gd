@@ -244,7 +244,7 @@ func _initialize() -> void:
 	var tabs_end: float = sheet.tabs.get_global_rect().end.x
 	print("Short tab names fit the strip beside the X (", sheet.tabs.get_node("InventoryTab").text, "...): ", sheet.tabs.get_node("InventoryTab").text == "Items" and sheet.tabs.get_node("JournalTab").text == "Quests" and tabs_end <= sheet.close_btn.global_position.x)
 	var slot_rect: Rect2 = sheet.get_node("Window/Header/WeaponSlot").get_global_rect()
-	print("Header slot row sits under the bars (64px slots, inside the window): ", slot_rect.position.y > sheet.mp_bar.get_global_rect().end.y and slot_rect.size == Vector2(64, 64) and sheet.get_node("Window/Header/AccessorySlot").get_global_rect().end.x <= sheet.window.get_global_rect().end.x)
+	print("Header slot row sits under the bars (48px slots, six inside the window): ", slot_rect.position.y > sheet.mp_bar.get_global_rect().end.y and slot_rect.size == Vector2(48, 48) and sheet.get_node("Window/Header/FeetSlot").get_global_rect().end.x <= sheet.window.get_global_rect().end.x)
 	var grid_rect: Rect2 = sheet.grid_scroll.get_global_rect()
 	var pane_rect: Rect2 = sheet.detail_pane.get_global_rect()
 	print("Grid drops to 4 columns (64px slots in 336px) and the detail pane sits below it, full width: ", sheet.grid.columns == 4 and pane_rect.position.y >= grid_rect.end.y and pane_rect.size.x == grid_rect.size.x and pane_rect.end.y <= sheet.window.get_global_rect().end.y, " cols=", sheet.grid.columns, " grid=", grid_rect, " pane=", pane_rect, " window=", sheet.window.get_global_rect())

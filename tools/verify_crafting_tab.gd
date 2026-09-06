@@ -54,7 +54,7 @@ func _initialize() -> void:
 	var potion_section: Node = sheet.craft_slot("RecipeHealingPotionSlot").get_parent()
 	var armor_section: Node = sheet.craft_slot("RecipeLeatherArmorSlot").get_parent()
 	print("Craft mode grouped into Potions & Food then Equipment: ", titles == ["Potions & Food", "Equipment"] and potion_section.name == "PotionsAndFoodGrid" and armor_section.name == "EquipmentGrid" and potion_section != armor_section)
-	print("All three potions in the first section, every gear recipe (3 starters + 8 biome tiers) in the second: ", potion_section.get_child_count() == 3 and armor_section.get_child_count() == 11)
+	print("All three potions in the first section, every gear recipe (3 starters + 8 biome tier pieces + 12 set pieces) in the second: ", potion_section.get_child_count() == 3 and armor_section.get_child_count() == 23)
 
 	# --- Craft a potion: checklist red -> green, button disabled -> enabled. ---
 	sheet.craft_slot("RecipeHealingPotionSlot").pressed.emit()

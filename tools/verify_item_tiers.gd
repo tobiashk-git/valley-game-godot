@@ -104,7 +104,11 @@ func _initialize() -> void:
 	for t in TIERS:
 		expected.append("Recipe" + t[0].to_pascal_case() + "Slot")
 		expected.append("Recipe" + t[1].to_pascal_case() + "Slot")
-	print("Equipment section: the three starters then the eight tier recipes in tier order: ", order == expected)
+		# ...then that tier's set pieces (helm, greaves, boots).
+		var prefix: String = t[0].split("_")[0]
+		for piece in ["helm", "greaves", "boots"]:
+			expected.append("Recipe" + (prefix + "_" + piece).to_pascal_case() + "Slot")
+	print("Equipment section: the three starters then each tier's weapon, body piece and set pieces in tier order: ", order == expected)
 	sheet._select_recipe("ember_blade")
 	await process_frame
 	print("Selecting the Ember Blade shows its slot, stat and ingredients: ", sheet.craft_name.text == "Ember Blade" and sheet.craft_type.text.begins_with("Weapon") and sheet.craft_type.text.contains("8"))

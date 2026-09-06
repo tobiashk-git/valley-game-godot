@@ -42,8 +42,12 @@ const PROFILES := [
 	{"name": "L5 ironwood", "level": 5, "gear": ["ironwood_blade", "ironwood_mail"], "potions": 3, "extra_defense": 0},
 	{"name": "L8 ember", "level": 8, "gear": ["ember_blade", "ember_plate"], "potions": 3, "extra_defense": 0},
 	{"name": "L12 bog-iron", "level": 12, "gear": ["bogiron_cleaver", "bogiron_harness"], "potions": 3, "extra_defense": 0},
-	# A hypothetical full set (helmet + boots + trousers worth +6 on top of the mail).
-	{"name": "L5 ironwood +set", "level": 5, "gear": ["ironwood_blade", "ironwood_mail"], "potions": 3, "extra_defense": 6},
+	# Full armour sets: helm + greaves + boots on top of the body piece
+	# (frost 2/2/1, ironwood 3/2/2, ember 3/3/2, bog-iron 4/4/3).
+	{"name": "L3 frost full", "level": 3, "gear": ["frost_pick", "frostweave_coat"], "potions": 3, "extra_defense": 5},
+	{"name": "L5 ironwood full", "level": 5, "gear": ["ironwood_blade", "ironwood_mail"], "potions": 3, "extra_defense": 7},
+	{"name": "L8 ember full", "level": 8, "gear": ["ember_blade", "ember_plate"], "potions": 3, "extra_defense": 8},
+	{"name": "L12 bog-iron full", "level": 12, "gear": ["bogiron_cleaver", "bogiron_harness"], "potions": 3, "extra_defense": 11},
 ]
 
 # --sweep: instead of the full report, try variants of the mitigation model

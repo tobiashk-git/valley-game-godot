@@ -7,7 +7,7 @@ extends Node
 # Deliberately excludes raw materials (meant to be gathered, not bought) and
 # bone_greatsword (boss-exclusive) - both still have a "value" and remain
 # sellable, just never buyable here.
-const SHOP_STOCK := ["healing_potion", "mana_potion", "antidote", "angel_feather", "leather_armor", "charm_of_warding"]
+const SHOP_STOCK := ["healing_potion", "mana_potion", "antidote", "angel_feather", "leather_armor", "leather_cap", "leather_boots", "charm_of_warding"]
 
 signal changed
 

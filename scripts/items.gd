@@ -57,6 +57,23 @@ const ITEMS := {
 	"ember_plate": {"name": "Ember Plate", "icon": "🛡️", "slot": "armor", "layer": "res://assets/armour_layers/ember_plate.png", "defense": 9, "tier": 3, "value": 90, "desc": "Fur-backed plate quenched in ember core. Warm to wear, worse to bite."},
 	"bogiron_cleaver": {"name": "Bog-iron Cleaver", "icon": "🪓", "slot": "weapon", "attack": 10, "tier": 4, "value": 110, "desc": "A brutal cleaver of Gloomfen bog iron, ember-tempered. Nothing in the valley shrugs it off."},
 	"bogiron_harness": {"name": "Bog-iron Harness", "icon": "🛡️", "slot": "armor", "layer": "res://assets/armour_layers/bogiron_harness.png", "defense": 11, "tier": 4, "value": 120, "desc": "Bog iron plates on a fur harness. Heavy, dark, and the best the valley makes."},
+
+	# --- Armour sets: head / legs / feet per tier (helm, greaves, boots),
+	# starter cap and boots at the Trader. Each carries an LPC walk layer.
+	"leather_cap": {"name": "Leather Cap", "icon": "🛡️", "slot": "head", "layer": "res://assets/armour_layers/leather_cap.png", "defense": 1, "value": 15, "desc": "A stiff hide cap. Better than hair."},
+	"leather_boots": {"name": "Leather Boots", "icon": "🛡️", "slot": "feet", "layer": "res://assets/armour_layers/leather_boots.png", "defense": 1, "value": 15, "desc": "Soft boots with a hard sole. Keeps the thorns out."},
+	"frost_helm": {"name": "Frost Helm", "icon": "🛡️", "slot": "head", "layer": "res://assets/armour_layers/frost_helm.png", "defense": 2, "tier": 1, "value": 30, "desc": "A kettle helm rimmed with frost shard. Cold on the brow, colder on a claw."},
+	"frost_greaves": {"name": "Frost Greaves", "icon": "🛡️", "slot": "legs", "layer": "res://assets/armour_layers/frost_greaves.png", "defense": 2, "tier": 1, "value": 30, "desc": "Fur leggings stiffened with frost shard plates."},
+	"frost_boots": {"name": "Frost Boots", "icon": "🛡️", "slot": "feet", "layer": "res://assets/armour_layers/frost_boots.png", "defense": 1, "tier": 1, "value": 20, "desc": "Fur boots with frost shard toes. Sure-footed on ice."},
+	"ironwood_helm": {"name": "Ironwood Helm", "icon": "🛡️", "slot": "head", "layer": "res://assets/armour_layers/ironwood_helm.png", "defense": 3, "tier": 2, "value": 45, "desc": "A close helm carved from ironwood. Light as a hat, hard as iron."},
+	"ironwood_greaves": {"name": "Ironwood Greaves", "icon": "🛡️", "slot": "legs", "layer": "res://assets/armour_layers/ironwood_greaves.png", "defense": 2, "tier": 2, "value": 45, "desc": "Ironwood scales over fur leggings."},
+	"ironwood_boots": {"name": "Ironwood Boots", "icon": "🛡️", "slot": "feet", "layer": "res://assets/armour_layers/ironwood_boots.png", "defense": 2, "tier": 2, "value": 35, "desc": "Ironwood-shod boots. The bark never wears through."},
+	"ember_helm": {"name": "Ember Helm", "icon": "🛡️", "slot": "head", "layer": "res://assets/armour_layers/ember_helm.png", "defense": 3, "tier": 3, "value": 60, "desc": "A dark helm with ember seams that never cool."},
+	"ember_greaves": {"name": "Ember Greaves", "icon": "🛡️", "slot": "legs", "layer": "res://assets/armour_layers/ember_greaves.png", "defense": 3, "tier": 3, "value": 60, "desc": "Ember-quenched plates over fur. Warm to wear."},
+	"ember_boots": {"name": "Ember Boots", "icon": "🛡️", "slot": "feet", "layer": "res://assets/armour_layers/ember_boots.png", "defense": 2, "tier": 3, "value": 50, "desc": "Plate boots quenched in ember core. Leave faint scorch marks."},
+	"bogiron_helm": {"name": "Bog-iron Helm", "icon": "🛡️", "slot": "head", "layer": "res://assets/armour_layers/bogiron_helm.png", "defense": 4, "tier": 4, "value": 80, "desc": "A rust-black helm of Gloomfen iron. Nothing gets through."},
+	"bogiron_greaves": {"name": "Bog-iron Greaves", "icon": "🛡️", "slot": "legs", "layer": "res://assets/armour_layers/bogiron_greaves.png", "defense": 4, "tier": 4, "value": 80, "desc": "Bog iron plates strapped over fur. Heavy and dark."},
+	"bogiron_boots": {"name": "Bog-iron Boots", "icon": "🛡️", "slot": "feet", "layer": "res://assets/armour_layers/bogiron_boots.png", "defense": 3, "tier": 4, "value": 70, "desc": "Bog iron boots. The best the valley makes."},
 	# Enhancement ingredient (Crafting.ENHANCEMENTS): a chance drop from the
 	# three Badlands species, so hunting a specific monster has a point.
 	"ember_core": {"name": "Ember Core", "icon": "🔥", "value": 15, "desc": "Still warm. Cut from the heart of a Badlands beast - temper a blade in it."},

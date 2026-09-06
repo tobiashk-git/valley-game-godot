@@ -19,7 +19,7 @@ func _initialize() -> void:
 	var layer: AnimatedSprite2D = player.get_node_or_null("ArmorLayer")
 	character.unequip("armor")
 	await process_frame
-	print("Player has an ArmorLayer overlay right after its base sprite, hidden with nothing worn: ", layer != null and layer.get_index() == player.sprite.get_index() + 1 and not layer.visible)
+	print("Player has an ArmorLayer overlay above its base sprite (third of four layers: legs, feet, body, head), hidden with nothing worn: ", layer != null and layer.get_index() == player.sprite.get_index() + 3 and not layer.visible)
 	var all_ok := true
 	for item_id in items.ITEMS.keys():
 		var def: Dictionary = items.ITEMS[item_id]

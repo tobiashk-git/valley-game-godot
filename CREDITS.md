@@ -20,3 +20,8 @@ Character and NPC sprites: Liberated Pixel Cup (LPC) assets, CC-BY-SA 3.0 / GPL 
 Worn-armour layers on the player (assets/armour_layers/, from the Universal LPC Spritesheet Character Generator, OGA-BY 3.0):
 - torso/armour/leather (walk): Johannes Sjölund (wulax), bluecarrot16, JaidynReiman - used as Leather Armor and recoloured for Frostweave Coat
 - torso/armour/plate (walk): Napsio (Vitruvian Studio), JaidynReiman, bluecarrot16, Michael Whitlock (bigbeargames), Johannes Sjölund (wulax) - recoloured for Ironwood Mail, Ember Plate, Bog-iron Harness, Royal Plate
+- hat/helmet/kettle (walk): Johannes Sjölund (wulax), JaidynReiman, Napsio (Vitruvian Studio) - recoloured for Leather Cap and Frost Helm
+- hat/helmet/bascinet (walk): bluecarrot16, ElizaWy, Sander Frenken (castelonia) - recoloured for Ironwood, Ember and Bog-iron Helms
+- legs/armour/plate (walk): bluecarrot16, JaidynReiman, Michael Whitlock (bigbeargames), Matthew Krohn (makrohn), Johannes Sjölund (wulax) - recoloured for the four Greaves
+- feet/armour/plate (walk): Matthew Krohn (makrohn), Johannes Sjölund (wulax) - recoloured for Ironwood, Ember and Bog-iron Boots
+- feet/boots/basic (walk): JaidynReiman, bluecarrot16, Nila122 - Leather Boots as drawn, recoloured for Frost Boots

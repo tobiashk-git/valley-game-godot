@@ -133,9 +133,11 @@ var craft_columns := 6
 # Craft mode sections, in display order, by what the recipe makes.
 const CRAFT_GROUPS := ["Potions & Food", "Equipment", "Materials"]
 # Phone Hero tab: where the slot pane starts under the doll block.
-const PHONE_PANE_Y := 284.0
+const PHONE_PANE_Y := 314.0 # below the doll block (six slots: the lower row's labels reach ~290)
 # Enhance mode sections: one per equipment slot (Character.SLOTS order).
-const SLOT_GROUP_NAMES := {"weapon": "Weapons", "armor": "Armour", "accessory": "Accessories"}
+const SLOT_GROUP_NAMES := {"weapon": "Weapons", "armor": "Armour", "accessory": "Accessories", "head": "Helms", "legs": "Greaves", "feet": "Boots"}
+# Header equipment slots: 48px so six fit beside the bars (wide) and across a phone.
+const HEADER_SLOT := 48.0
 
 func _ready() -> void:
 	window.visible = false
@@ -234,20 +236,23 @@ func _apply_layout() -> void:
 			b.add_theme_font_size_override("font_size", 14)
 		close_btn.position = Vector2(676, 10)
 		header.position = Vector2(0, 54)
-		header.size = Vector2(720, 92)
+		header.size = Vector2(720, 100)
 		_place(hp_bar, Vector2(112, 42), Vector2(220, 16))
 		_place(mp_bar, Vector2(112, 62), Vector2(220, 16))
-		stats_label.position = Vector2(350, 45)
-		_place(bonus_label, Vector2(350, 64), Vector2(165, 16))
-		var x := 712.0 - slots.size() * 64.0
+		# Six equipment slots need the header's right half, so the stat line
+		# sits under the bars (the bonus line is phone-only; the doll and
+		# the Hero tab show the weapon name).
+		stats_label.position = Vector2(112, 84)
+		bonus_label.visible = false
+		var x := 712.0 - slots.size() * (HEADER_SLOT + 8.0) + 8.0
 		for slot_id in slots:
-			_place(_header_slot_button(slot_id), Vector2(x, 0), Vector2(56, 56))
-			_place(_header_slot_label(slot_id), Vector2(x, 60), Vector2(56, 14))
-			x += 64.0
-		_place(separator, Vector2(20, 150), Vector2(680, 1))
-		_layout_inventory(Vector2(0, 158), Vector2(720, 360))
-		_layout_character(Vector2(0, 158), Vector2(720, 360))
-		_layout_crafting(Vector2(0, 158), Vector2(720, 360))
+			_place(_header_slot_button(slot_id), Vector2(x, 2), Vector2(HEADER_SLOT, HEADER_SLOT))
+			_place(_header_slot_label(slot_id), Vector2(x, 2 + HEADER_SLOT + 4), Vector2(HEADER_SLOT, 14))
+			x += HEADER_SLOT + 8.0
+		_place(separator, Vector2(20, 156), Vector2(680, 1))
+		_layout_inventory(Vector2(0, 164), Vector2(720, 354))
+		_layout_character(Vector2(0, 164), Vector2(720, 354))
+		_layout_crafting(Vector2(0, 164), Vector2(720, 354))
 		_place(map_view, Vector2(0, 66), Vector2(720, 452))
 		map_view.apply_layout(false, map_view.size)
 		_place(journal_view, Vector2(0, 66), Vector2(720, 452))
@@ -280,12 +285,14 @@ func _apply_layout() -> void:
 	_place(hp_bar, Vector2(112, 42), Vector2(iw - 132.0, 16))
 	_place(mp_bar, Vector2(112, 62), Vector2(iw - 132.0, 16))
 	stats_label.position = Vector2(112, 84)
+	bonus_label.visible = true
 	_place(bonus_label, Vector2(112, 102), Vector2(iw - 124.0, 16))
+	# Six 48px slots with 8px gaps = 328px, inside a 376px phone window.
 	var sx := 20.0
 	for slot_id in slots:
-		_place(_header_slot_button(slot_id), Vector2(sx, 126), Vector2(SLOT_SIZE, SLOT_SIZE))
-		_place(_header_slot_label(slot_id), Vector2(sx, 126 + SLOT_SIZE + 2), Vector2(SLOT_SIZE, 14))
-		sx += SLOT_SIZE + 8.0
+		_place(_header_slot_button(slot_id), Vector2(sx, 126), Vector2(HEADER_SLOT, HEADER_SLOT))
+		_place(_header_slot_label(slot_id), Vector2(sx, 126 + HEADER_SLOT + 2), Vector2(HEADER_SLOT, 14))
+		sx += HEADER_SLOT + 8.0
 	_place(separator, Vector2(20, 54.0 + header_h + 4.0), Vector2(iw - 40.0, 1))
 	var view_pos := Vector2(0, 54.0 + header_h + 12.0)
 	var view_size := Vector2(iw, wh - view_pos.y - 12.0)
@@ -355,7 +362,7 @@ func _layout_character(pos: Vector2, size: Vector2) -> void:
 		figure.position = Vector2(300, 22)
 		figure_shadow.position = Vector2(352, 248)
 		_place_doll(300.0)
-		_place(doll_hint, Vector2(250, 262), Vector2(300, 20))
+		_place(doll_hint, Vector2(250, 292), Vector2(300, 20))
 		_place(slot_pane, Vector2(594, 0), Vector2(106, 342))
 		_place(slot_pane_title, Vector2(0, 6), Vector2(106, 20))
 		_place(slot_scroll, Vector2(6, 30), Vector2(94, 306))
@@ -375,7 +382,7 @@ func _layout_character(pos: Vector2, size: Vector2) -> void:
 		figure.position = Vector2(fig_x, 22)
 		figure_shadow.position = Vector2(fig_x + 52.0, 248)
 		_place_doll(fig_x)
-		_place(doll_hint, Vector2(0, 262), Vector2(iw, 20))
+		_place(doll_hint, Vector2(0, 292), Vector2(iw, 20))
 		_place(slot_pane, Vector2(20, PHONE_PANE_Y), Vector2(iw - 40.0, 160))
 		_place(slot_pane_title, Vector2(0, 6), Vector2(iw - 40.0, 20))
 		_place(slot_scroll, Vector2(6, 30), Vector2(iw - 52.0, 124))

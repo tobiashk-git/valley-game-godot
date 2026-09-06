@@ -13,7 +13,7 @@ var facing := "down"
 # in with a "layer" sheet path in Items.ITEMS; the overlay mirrors the
 # base's animation, frame and offset every frame. Step 1 = the body slot;
 # the armour-set slots (head/legs/feet) plug in here as they arrive.
-const LAYER_SLOTS: Array[String] = ["armor"]
+const LAYER_SLOTS: Array[String] = ["legs", "feet", "armor", "head"] # draw order: greaves, boots, body, helm on top
 var _layers: Dictionary = {} # slot -> AnimatedSprite2D
 
 func _ready() -> void:
@@ -26,7 +26,7 @@ func _ready() -> void:
 		layer.texture_filter = sprite.texture_filter
 		layer.visible = false
 		add_child(layer)
-		move_child(layer, sprite.get_index() + 1)
+		move_child(layer, sprite.get_index() + 1 + _layers.size())
 		_layers[slot] = layer
 	# Character is a later autoload than some scenes' _ready() under a verify
 	# script; defer the hook-up to the end of the frame.

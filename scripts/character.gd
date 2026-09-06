@@ -90,6 +90,11 @@ const SLOTS := {
 	"weapon": {"label": "Weapon", "doll": Vector2(250, 120), "line_to": Vector2(348, 150), "stat": "attack"},
 	"armor": {"label": "Armor", "doll": Vector2(504, 108), "line_to": Vector2(452, 142), "stat": "defense"},
 	"accessory": {"label": "Accessory", "doll": Vector2(504, 14), "line_to": Vector2(420, 84), "stat": "bonus"},
+	# Armour sets (2026-09-06): a helm, greaves and boots per biome tier,
+	# each with its own LPC layer on the walking sprite (player.gd).
+	"head": {"label": "Head", "doll": Vector2(250, 30), "line_to": Vector2(360, 66), "stat": "defense"},
+	"legs": {"label": "Legs", "doll": Vector2(250, 210), "line_to": Vector2(366, 205), "stat": "defense"},
+	"feet": {"label": "Feet", "doll": Vector2(504, 202), "line_to": Vector2(440, 236), "stat": "defense"},
 }
 
 # slot -> gear INSTANCE ({"uid", "base", "mods"}, see inventory.gd) or {}
