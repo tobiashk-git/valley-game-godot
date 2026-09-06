@@ -23,10 +23,10 @@ signal won
 signal defeated(info: Dictionary)
 const DEFEAT_GOLD_FRACTION := 0.1
 # Where a nap ends: the floor tile beside Oliver's bed in House.tscn (the
-# bed stands at (2, 6)) - mirrors house.gd's NAP_SPAWN_TILE (not preloaded
+# bed stands at (2, 5)) - mirrors house.gd's NAP_SPAWN_TILE (not preloaded
 # from there: pulling house.gd into a --script compile drags chest.gd in,
 # where autoload names don't resolve).
-const NAP_SPAWN_TILE := Vector2i(3, 6)
+const NAP_SPAWN_TILE := Vector2i(3, 5)
 var last_defeat: Dictionary = {}
 
 const ENCOUNTER_CHANCE := 0.12

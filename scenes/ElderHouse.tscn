@@ -9,12 +9,12 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_d1kqy"]
 size = Vector2(28, 28)
 
-[node name="ElderHouse" type="Node2D" unique_id=1839880293]
+[node name="ElderHouse" type="Node2D" unique_id=1434583778]
 script = ExtResource("1_7rir1")
 furniture_layout = Array[Dictionary]([{
 "kind": "Bed",
 "x": 2,
-"y": 5
+"y": 4
 }, {
 "kind": "Bookshelf",
 "x": 6,
@@ -25,23 +25,23 @@ room_shell = "res://assets/interiors/elder_shell.png"
 wall_rows = 2
 overworld_return_tile = Vector2i(105, 97)
 
-[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=716809385]
+[node name="TerrainLayer" type="TileMapLayer" parent="." unique_id=780847683]
 tile_set = ExtResource("2_6mxax")
 
-[node name="YSort" type="Node2D" parent="." unique_id=23623660]
+[node name="YSort" type="Node2D" parent="." unique_id=1079901256]
 y_sort_enabled = true
 
 [node name="Player" type="CharacterBody2D" parent="YSort" unique_id=1494915939 instance=ExtResource("3_kic0o")]
 z_index = 1
 script = ExtResource("4_n8t84")
 
-[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=58779401]
+[node name="Camera2D" type="Camera2D" parent="YSort/Player" unique_id=675352110]
 zoom = Vector2(2, 2)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
-[node name="OutPortal" type="Area2D" parent="." unique_id=1247076839]
+[node name="OutPortal" type="Area2D" parent="." unique_id=1459335971]
 script = ExtResource("5_ieo61")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=1967388789]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OutPortal" unique_id=589722967]
 shape = SubResource("RectangleShape2D_d1kqy")

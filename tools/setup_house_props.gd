@@ -1,5 +1,5 @@
 extends SceneTree
-# Builds Bed/Chair/Table/Stove/Chest.tscn — same StaticBody2D +
+# Builds Bed/Chair/Table/Stove/Forge.tscn — same StaticBody2D +
 # bottom-anchored Sprite2D convention as tools/setup_props.gd (trees/rocks).
 # Run via: godot --headless --script res://tools/setup_house_props.gd
 
@@ -32,11 +32,12 @@ func _build(scene_name: String, tex_path: String, src_w: float, src_h: float, co
 
 func _initialize() -> void:
 	print("=== House props setup starting ===")
-	_build("Bed", "res://assets/furniture/bed.png", 64.0, 128.0)
+	_build("Bed", "res://assets/furniture/bed.png", 64.0, 86.0) # Leonardo pixel bed, keyed (was the 64x128 placeholder)
 	_build("Chair", "res://assets/furniture/chair.png", 32.0, 32.0)
 	_build("Table", "res://assets/furniture/table.png", 66.0, 45.0)
 	_build("Stove", "res://assets/furniture/stove.png", 32.0, 36.0)
-	_build("Chest", "res://assets/chest.png", 32.0, 32.0)
+	# Chest.tscn is NOT built here any more: tools/setup_chest_interactive.gd
+	# owns it (interact area + script) and a rebuild here clobbered that.
 	# The smithy's forge (Leonardo pixel prop, keyed): two tiles wide, so its
 	# collider spans both.
 	_build("Forge", "res://assets/furniture/forge.png", 64.0, 93.0, 2.0 * TILE - 4)

@@ -82,7 +82,7 @@ func _initialize() -> void:
 		"ElderHouse", false, "", "",
 		"",
 		[
-			{"kind": "Bed", "x": 2, "y": 5}, # head meets the painted wall base
+			{"kind": "Bed", "x": 2, "y": 4}, # three tiles tall: head meets the painted wall base
 			{"kind": "Bookshelf", "x": 6, "y": 2},
 		],
 		[Vector2i(0, 3), Vector2i(0, 4)],
