@@ -314,12 +314,15 @@ func _ready() -> void:
 		ground.position = Vector2((World.VILLAGE_BOUNDS.x0 + 1) * 32, (World.VILLAGE_BOUNDS.y0 + 1) * 32)
 		add_child(ground)
 		move_child(ground, tilemap.get_index() + 1)
+		# The altar prop lives in the YSort (sorted by its foot, the tile's
+		# bottom edge) so Oliver walks behind it from the north and in front
+		# from the south, like any other prop.
 		var altar_sprite := Sprite2D.new()
 		altar_sprite.name = "AltarSprite"
 		altar_sprite.texture = load("res://assets/altar.png")
-		altar_sprite.position = _tile_center(World.ALTAR_POS) + Vector2(0, 16.0 - altar_sprite.texture.get_height() / 2.0)
-		add_child(altar_sprite)
-		move_child(altar_sprite, ground.get_index() + 1)
+		altar_sprite.position = _tile_center(World.ALTAR_POS) + Vector2(0, 16.0)
+		altar_sprite.offset = Vector2(0, -altar_sprite.texture.get_height() / 2.0)
+		ysort.add_child(altar_sprite)
 
 	# The altar tile (painted solid by build_overworld_map()) just needs an
 	# interact trigger on top of it - it isn't a separate prop/scene like
