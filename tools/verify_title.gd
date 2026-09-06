@@ -41,23 +41,35 @@ func _initialize() -> void:
 	await process_frame
 	print("New Game wakes Oliver at home with a clean state, overlays back: ", current_scene.name == "House" and root.get_node("Intro").is_playing() and inventory.backpack.is_empty() and hud.visible and root.get_node("PanelButtons").visible)
 
-	# --- Quit to title from the system bar (asks first, then saves). ---
+	# --- Quit to title from the cog's Settings window (asks first, then saves). ---
 	inventory.add_item("wood", 3)
 	save.enabled = true
 	var bar: CanvasLayer = root.get_node("PanelButtons")
+	var settings: CanvasLayer = root.get_node("SettingsPanel")
 	sheet.open("character")
 	await process_frame
 	print("Hero tab: the stats column starts with the Level block (no Game block, no Save & Quit on the sheet): ", sheet.stats_list.get_child(0).text.begins_with("Level") and sheet.stats_list.find_child("SaveNowBtn", true, false) == null and not sheet.window.has_node("QuitBtn"))
 	sheet.close()
-	bar.quit_btn.pressed.emit()
+	bar.settings_btn.pressed.emit()
 	await process_frame
-	print("Quit asks 'Sure?' first and stays in the game: ", bar.confirm_quit and bar.quit_btn.text == "Sure?" and current_scene.name == "House")
-	bar.quit_btn.pressed.emit()
+	print("In play the cog's window shows the Game section (Save now / Load / Quit to title): ", settings.is_open() and settings.game_section.visible and settings.quit_btn.visible and settings.save_btn.text == "Save now")
+	settings.quit_btn.pressed.emit()
+	await process_frame
+	print("Quit asks 'Sure?' first and stays in the game: ", settings.confirm_quit and settings.quit_btn.text.begins_with("Sure?") and current_scene.name == "House")
+	settings.quit_btn.pressed.emit()
 	await process_frame
 	await process_frame
 	await process_frame
-	print("Second press saves and returns to the title with Continue offered: ", current_scene.name == "Title" and save.has_save(save.AUTO_SLOT) and current_scene.continue_btn.visible and current_scene.save_line.text.contains("in your House") and not sheet.is_open() and not bar.confirm_quit and bar.quit_btn.text == "Quit")
+	print("Second press saves and returns to the title with Continue offered: ", current_scene.name == "Title" and save.has_save(save.AUTO_SLOT) and current_scene.continue_btn.visible and current_scene.save_line.text.contains("in your House") and not sheet.is_open() and not settings.is_open() and not settings.confirm_quit)
 	save.enabled = false
+	# The title has the same cog; its window hides the Game section there.
+	var t0: Control = current_scene
+	t0.settings_btn.pressed.emit()
+	await process_frame
+	print("Title cog opens Settings with the sliders but no Game section (no game running): ", settings.is_open() and not settings.game_section.visible and settings.music_slider.visible and t0.settings_btn.get_global_rect().end.x <= 800.0 - 8.0)
+	root.get_texture().get_image().save_png("res://verify_title_settings.png")
+	print("Saved verify_title_settings.png")
+	settings.close()
 
 	# --- Phone layout. ---
 	root.size = Vector2i(400, 660)

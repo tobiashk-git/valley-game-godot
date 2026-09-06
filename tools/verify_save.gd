@@ -89,22 +89,21 @@ func _initialize() -> void:
 	print("World progress restored (gates, ford, dungeon discovered, boss + wild monster defeated): ", game_state.village_gates_open and game_state.biome_paths_open.frostpeak and game_state.discovered_pois.dungeon and game_state.boss_defeated.dungeon_boss and game_state.wild_monsters_defeated.get("100_80", false))
 	print("HUD and sheet see the restored state: ", root.get_node("HUD").hp_label.text == "HP 13 / 20")
 
-	# --- System bar: Save says "Saved!" for a moment; Settings holds Load. ---
+	# --- The cog's Settings window: Save now says "Saved!" for a moment, Load
+	# beside it. ---
 	var bar: CanvasLayer = root.get_node("PanelButtons")
 	var settings: CanvasLayer = root.get_node("SettingsPanel")
 	save.delete_save(save.AUTO_SLOT)
-	bar.save_btn.pressed.emit()
-	await process_frame
-	print("System bar Save writes the auto slot and the button reads 'Saved!' (disabled) meanwhile: ", save.has_save(save.AUTO_SLOT) and bar.save_btn.text == "Saved!" and bar.save_btn.disabled)
-	root.get_texture().get_image().save_png("res://verify_save_system_bar.png")
-	print("Saved verify_save_system_bar.png")
-	await create_timer(bar.FEEDBACK_SECONDS + 0.3).timeout
-	print("...and reads 'Save' again after a moment: ", bar.save_btn.text == "Save" and not bar.save_btn.disabled)
 	bar.settings_btn.pressed.emit()
 	await process_frame
-	print("Settings window opens with Load last save enabled and the save's age: ", settings.is_open() and not settings.load_btn.disabled and settings.save_line.text == "Saved just now")
+	print("The cog opens Settings with the Game section; Load disabled without a save: ", settings.is_open() and settings.game_section.visible and settings.load_btn.disabled)
+	settings.save_btn.pressed.emit()
+	await process_frame
+	print("Save now writes the auto slot, the button reads 'Saved!' (disabled) meanwhile, Load enables, the age line updates: ", save.has_save(save.AUTO_SLOT) and settings.save_btn.text == "Saved!" and settings.save_btn.disabled and not settings.load_btn.disabled and settings.save_line.text == "Saved just now")
 	root.get_texture().get_image().save_png("res://verify_save_settings.png")
 	print("Saved verify_save_settings.png")
+	await create_timer(settings.FEEDBACK_SECONDS + 0.3).timeout
+	print("...and reads 'Save now' again after a moment: ", settings.save_btn.text == "Save now" and not settings.save_btn.disabled)
 	settings.close()
 	sheet.open("character")
 	await process_frame

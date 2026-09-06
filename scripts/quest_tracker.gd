@@ -37,9 +37,9 @@ func _apply_layout() -> void:
 		var w: float = minf(256.0, Layout.width - 24.0)
 		vbox.offset_left = -(w + 12.0)
 		vbox.offset_right = -12.0
-		# Below the system bar's column (Menu + Save/Settings/Quit end by y=182).
-		vbox.offset_top = 190.0
-		vbox.offset_bottom = 190.0 + 400.0
+		# Below the HUD (ends by y=152) and the system bar's column (Menu + cog).
+		vbox.offset_top = 152.0
+		vbox.offset_bottom = 152.0 + 400.0
 	else:
 		vbox.offset_left = -268.0
 		vbox.offset_right = -12.0

@@ -21,9 +21,21 @@ extends Control
 @onready var version_label: Label = $VersionLabel
 
 var _confirm_new := false
+# Cog at the top-right corner: the same Settings window as in play (volume
+# sliders; the Game section stays hidden here since no game is running).
+var settings_btn: Button
 
 func _ready() -> void:
 	map_bg.texture = WorldMap.render_map(Rect2i(World.WORLD_CENTER_X - 60, World.WORLD_CENTER_Y - 60, 120, 120))
+	settings_btn = Button.new()
+	settings_btn.name = "SettingsBtn"
+	settings_btn.icon = load("res://assets/ui/cog.png")
+	settings_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	settings_btn.add_theme_constant_override("icon_max_width", 22)
+	settings_btn.theme_type_variation = &"SecondaryButton"
+	settings_btn.tooltip_text = "Settings"
+	settings_btn.pressed.connect(func() -> void: get_node("/root/SettingsPanel").toggle())
+	add_child(settings_btn)
 	var version: String = str(ProjectSettings.get_setting("application/config/version", ""))
 	version_label.text = "build %s" % version
 	version_label.visible = version != ""
@@ -59,6 +71,7 @@ func _apply_layout() -> void:
 	_place(buttons, Vector2((menu.size.x - 280.0) / 2.0, 132), Vector2(280, 124))
 	_place(save_line, Vector2(16, 268), Vector2(menu.size.x - 32.0, 60))
 	_place(version_label, Vector2(w - 160.0, h - 24.0), Vector2(148, 16))
+	_place(settings_btn, Vector2(w - 56.0, 12), Vector2(44, 40))
 
 # Button states from the auto save (Continue first when one exists).
 func refresh() -> void:

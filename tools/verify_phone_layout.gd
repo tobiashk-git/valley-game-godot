@@ -56,7 +56,7 @@ func _initialize() -> void:
 	# HUD + toolbar share the top row.
 	var hud_rect: Rect2 = _rect(hud.panel)
 	var menu_rect: Rect2 = _rect(panel_buttons.menu_btn)
-	print("System bar stacks into a column under Menu (Save / Settings / Quit), inside the right edge: ", panel_buttons.bar.vertical and menu_rect.end.x <= 400.0 - 12.0 + 0.5 and _rect(panel_buttons.quit_btn).position.y > _rect(panel_buttons.settings_btn).position.y and _rect(panel_buttons.settings_btn).position.y > menu_rect.end.y and _rect(panel_buttons.quit_btn).end.y <= 190.0)
+	print("System bar stacks into a column: the cog under Menu, inside the right edge, above the tracker top: ", panel_buttons.bar.vertical and menu_rect.end.x <= 400.0 - 12.0 + 0.5 and _rect(panel_buttons.settings_btn).position.y > menu_rect.end.y and _rect(panel_buttons.settings_btn).end.y <= 152.0)
 	print("HUD narrows to leave the Menu button room, no overlap: ", hud_rect.size.x <= 400.0 - 24.0 - 92.0 + 0.5 and hud_rect.end.x <= menu_rect.position.x and not hud_rect.intersects(menu_rect))
 	print("Location label moves onto its own line under the counters: ", hud.location_label.get_parent() == hud.vbox and _rect(hud.location_label).position.y >= _rect(hud.hbox).end.y)
 	# Longest biome name on the narrow HUD.
@@ -204,7 +204,7 @@ func _initialize() -> void:
 		await process_frame
 	print("800x600 again -> wide layout restored: ", layout.width == 800 and not layout.is_narrow() and root.get_visible_rect().size == Vector2(800, 600))
 	print("HUD back to 320 with the location beside the counters: ", is_equal_approx(hud.panel.size.x, 320.0) and hud.location_label.get_parent() == hud.hbox)
-	print("System bar back to a row: ", not panel_buttons.bar.vertical and _rect(panel_buttons.quit_btn).position.y == _rect(panel_buttons.menu_btn).position.y)
+	print("System bar back to a row: ", not panel_buttons.bar.vertical and _rect(panel_buttons.settings_btn).position.y == _rect(panel_buttons.menu_btn).position.y)
 	print("Tracker back beside the HUD (y=64): ", tracker.vbox.offset_top == 64.0 and tracker.vbox.offset_left == -268.0)
 	bar_rect = _rect(quick_bar.hbox)
 	print("Quick bar back at the bottom edge: ", 600.0 - bar_rect.end.y <= 24.0)

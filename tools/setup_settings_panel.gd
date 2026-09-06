@@ -1,9 +1,10 @@
 extends SceneTree
-# Builds SettingsPanel.tscn - the Settings window opened from the system
-# bar (see scripts/settings_panel.gd): a dim over the world, a kit panel
-# with a title and X, then rows - Music slider, Sounds slider, the audio
-# engine's status line, the last save's age and Load last save. Positions
-# are placeholders; the script lays out wide/phone at runtime.
+# Builds SettingsPanel.tscn - the window behind the cog (see
+# scripts/settings_panel.gd): a dim over the world, a kit panel with a
+# title and X, then rows - Music slider, Sounds slider, the audio engine's
+# status line, and a Game section (in play only): the last save's age,
+# Save now / Load last save, Quit to title. Positions are placeholders;
+# the script lays out wide/phone at runtime.
 # Run via: godot --headless --script res://tools/setup_settings_panel.gd
 
 func _slider_row(parent: Node, prefix: String, label_text: String) -> void:
@@ -35,6 +36,17 @@ func _slider_row(parent: Node, prefix: String, label_text: String) -> void:
 	row.add_child(value)
 	parent.add_child(row)
 
+func _button(parent: Node, node_name: String, text: String, variation: StringName) -> Button:
+	var b := Button.new()
+	b.name = node_name
+	b.text = text
+	b.theme_type_variation = variation
+	b.add_theme_font_size_override("font_size", 14)
+	b.custom_minimum_size = Vector2(0, 38)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	parent.add_child(b)
+	return b
+
 func _initialize() -> void:
 	print("=== Settings panel setup starting ===")
 	var layer := CanvasLayer.new()
@@ -50,8 +62,8 @@ func _initialize() -> void:
 
 	var window := Panel.new()
 	window.name = "Window"
-	window.position = Vector2(220, 130)
-	window.size = Vector2(360, 330)
+	window.position = Vector2(220, 110)
+	window.size = Vector2(360, 380)
 	layer.add_child(window)
 
 	var title := Label.new()
@@ -75,7 +87,7 @@ func _initialize() -> void:
 	var rows := VBoxContainer.new()
 	rows.name = "Rows"
 	rows.position = Vector2(20, 58)
-	rows.size = Vector2(320, 250)
+	rows.size = Vector2(320, 300)
 	rows.add_theme_constant_override("separation", 8)
 	window.add_child(rows)
 
@@ -89,32 +101,38 @@ func _initialize() -> void:
 	audio_line.autowrap_mode = TextServer.AUTOWRAP_WORD
 	rows.add_child(audio_line)
 
+	# --- Game section: only while a game is running (hidden on the title). ---
+	var game := VBoxContainer.new()
+	game.name = "Game"
+	game.add_theme_constant_override("separation", 8)
+	rows.add_child(game)
+
 	var sep := ColorRect.new()
 	sep.name = "Separator"
 	sep.color = Color(0.7, 0.55, 0.2, 0.5)
 	sep.custom_minimum_size = Vector2(0, 1)
-	rows.add_child(sep)
+	game.add_child(sep)
 
 	var save_title := Label.new()
 	save_title.name = "SaveTitle"
 	save_title.text = "Game"
 	save_title.theme_type_variation = &"PanelTitle"
 	save_title.add_theme_font_size_override("font_size", 15)
-	rows.add_child(save_title)
+	game.add_child(save_title)
 
 	var save_line := Label.new()
 	save_line.name = "SaveLine"
 	save_line.theme_type_variation = &"DimLabel"
 	save_line.add_theme_font_size_override("font_size", 13)
-	rows.add_child(save_line)
+	game.add_child(save_line)
 
-	var load_btn := Button.new()
-	load_btn.name = "LoadBtn"
-	load_btn.text = "Load last save"
-	load_btn.theme_type_variation = &"SecondaryButton"
-	load_btn.add_theme_font_size_override("font_size", 14)
-	load_btn.custom_minimum_size = Vector2(0, 38)
-	rows.add_child(load_btn)
+	var save_row := HBoxContainer.new()
+	save_row.name = "SaveRow"
+	save_row.add_theme_constant_override("separation", 8)
+	game.add_child(save_row)
+	_button(save_row, "SaveBtn", "Save now", &"PrimaryButton")
+	_button(save_row, "LoadBtn", "Load last save", &"SecondaryButton")
+	_button(game, "QuitBtn", "Quit to title", &"SecondaryButton")
 
 	var own := func(node: Node, f: Callable) -> void:
 		for child in node.get_children():
