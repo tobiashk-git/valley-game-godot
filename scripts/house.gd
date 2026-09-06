@@ -7,6 +7,10 @@ const WIDTH := 11
 const HEIGHT := 9
 const DOOR_TILE := Vector2i(5, 8)
 
+# Painted room shell (Leonardo, Stardew-style straight-on interior): walls,
+# windows, skirting and floor as one picture laid over the tile map, which
+# keeps providing the collision. Props stay separate, y-sorted nodes.
+const ROOM_SHELL := "res://assets/interiors/house_shell.png"
 const BED_SCENE := preload("res://scenes/props/Bed.tscn")
 # Where Oliver comes to after a nap (a lost fight): the floor tile right of
 # his bed (the bed stands at (2, 4)).
@@ -40,6 +44,13 @@ func _ready() -> void:
 	terrain.set_cell(Vector2i(10, 3), 2, Vector2i(0, 0)) # window, east wall
 	terrain.set_cell(Vector2i(10, 4), 2, Vector2i(0, 0))
 	terrain.set_cell(DOOR_TILE, 1, Vector2i(0, 0)) # door is walkable floor
+	if ResourceLoader.exists(ROOM_SHELL):
+		var shell := Sprite2D.new()
+		shell.name = "RoomShell"
+		shell.texture = load(ROOM_SHELL)
+		shell.centered = false
+		add_child(shell)
+		move_child(shell, terrain.get_index() + 1) # over the tiles, under the props
 
 	# The door is a hole carved into the border wall, with nothing at all
 	# beyond it (no wall, no floor) - without a blocker here the player can
@@ -59,7 +70,7 @@ func _ready() -> void:
 	add_child(door_blocker)
 
 	_spawn_prop(BED_SCENE, Vector2i(2, 4))
-	_spawn_prop(STOVE_SCENE, Vector2i(8, 1))
+	_spawn_prop(STOVE_SCENE, Vector2i(8, 2)) # standing on the painted skirting under the right window
 	_spawn_prop(TABLE_SCENE, Vector2i(8, 5))
 	_spawn_prop(CHAIR_SCENE, Vector2i(8, 4))
 	_spawn_prop(CHAIR_SCENE, Vector2i(8, 6))
