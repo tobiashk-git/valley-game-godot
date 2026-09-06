@@ -36,9 +36,9 @@ func _initialize() -> void:
 	# --- enemy ladder baked into the table ---
 	var e: Dictionary = enemies.ENEMIES
 	print("Dungeon pool got the flat x1.3 attack only (rat 12 HP / 4 ATK): ", e.dungeon_rat.max_hp == 12 and e.dungeon_rat.attack == 4)
-	print("Frostpeak is one ladder step (frost wolf 17 HP / 9 ATK), Gloomfen four (spectral undead 39 / 16): ", e.frost_wolf.max_hp == 17 and e.frost_wolf.attack == 9 and e.spectral_undead.max_hp == 39 and e.spectral_undead.attack == 16)
+	print("Frostpeak is one ladder step (frost wolf 17 HP / 9 ATK), Gloomfen four plus the set-rule x1.4 (spectral undead 55 / 22): ", e.frost_wolf.max_hp == 17 and e.frost_wolf.attack == 9 and e.spectral_undead.max_hp == 55 and e.spectral_undead.attack == 22)
 	var b: Dictionary = enemies.BOSSES
-	print("Bosses climb x1.25 a tier (Bone Lord unchanged 60/8, Revenant 88/10, Bogmaw 195/22), the Ancient Warden held at tier 2 (234/27): ", b.dungeon_boss.max_hp == 60 and b.dungeon_boss.attack == 8 and b.frostpeak_boss.max_hp == 88 and b.frostpeak_boss.attack == 10 and b.gloomfen_boss.max_hp == 195 and b.gloomfen_boss.attack == 22 and b.final_boss.max_hp == 234 and b.final_boss.attack == 27)
+	print("Bosses climb x1.25 a tier in HP with the set-rule attacks (Bone Lord unchanged 60/8, Revenant 88/12, Bogmaw 195/29), the Ancient Warden held at tier 2 (234/27): ", b.dungeon_boss.max_hp == 60 and b.dungeon_boss.attack == 8 and b.frostpeak_boss.max_hp == 88 and b.frostpeak_boss.attack == 12 and b.gloomfen_boss.max_hp == 195 and b.gloomfen_boss.attack == 29 and b.final_boss.max_hp == 234 and b.final_boss.attack == 27)
 
 	# --- potions ---
 	print("Healing potion restores 8 and costs 20; Heal spell 10 HP for 5 MP: ", items.ITEMS.healing_potion.effect.amount == 8 and items.ITEMS.healing_potion.value == 20 and spells.SPELLS.heal.power == 10 and spells.SPELLS.heal.mp_cost == 5)
