@@ -426,7 +426,7 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 	_reserve_entrance_clearance(occupied, place("ranger_camp"))
 	_reserve_entrance_clearance(occupied, place("prospector_camp"))
 	_reserve_entrance_clearance(occupied, place("marsh_guide"))
-	_reserve_entrance_clearance(occupied, place("golden_plains_interior"))
+	_reserve_entrance_clearance(occupied, place("golden_plains_interior"), 3)
 
 	# Was 70/40 - scaled ~2.15x with the valley's new area (radius 15->22,
 	# area grows with radius²) so the enlarged valley doesn't end up feeling

@@ -96,11 +96,11 @@ func _initialize() -> void:
 	# Phase 7b - real cropped-sprite entrance props (LPC Cavern & Ruin Tiles /
 	# LPC Base Assets, see assets_source/lpc/CREDITS.md), replacing the
 	# hand-drawn _draw() placeholders these 5 used through Phase 6.
-	_build_sprite_prop("WatchtowerRuinEntrance", "res://assets/watchtower_ruin.png", 192.0, 96.0, 0.35)
-	_build_sprite_prop("DruidCircleEntrance", "res://assets/druid_circle.png", 96.0, 64.0, 0.55)
-	_build_sprite_prop("VolcanoEntrance", "res://assets/volcano.png", 192.0, 78.0, 0.4)
-	_build_sprite_prop("SubmergedTempleEntrance", "res://assets/submerged_temple.png", 192.0, 96.0, 0.35)
-	_build_sprite_prop("AncientBarrowEntrance", "res://assets/ancient_barrow.png", 26.0, 61.0, 1.1)
+	_build_sprite_prop("WatchtowerRuinEntrance", "res://assets/entrance_ice_caves.png", 176.0, 145.0, 1.0, Rect2(), 1, true) # big painted entrance since 2026-09-07
+	_build_sprite_prop("DruidCircleEntrance", "res://assets/entrance_grove.png", 192.0, 223.0, 1.0, Rect2(), 1, true) # big painted entrance since 2026-09-07
+	_build_sprite_prop("VolcanoEntrance", "res://assets/entrance_caldera.png", 192.0, 147.0, 1.0, Rect2(), 1, true) # big painted entrance since 2026-09-07
+	_build_sprite_prop("SubmergedTempleEntrance", "res://assets/entrance_temple.png", 176.0, 169.0, 1.0, Rect2(), 1, true) # big painted entrance since 2026-09-07
+	_build_sprite_prop("AncientBarrowEntrance", "res://assets/entrance_barrow.png", 160.0, 111.0, 1.0, Rect2(), 1, true) # big painted entrance since 2026-09-07
 	# Outer-biome obstacles (AI-generated, color-keyed + auto-cropped from a
 	# 1024x1024 isolated-object generation) - MightyOak scatters into
 	# Zone.VERDANTWOOD via World.scatter_biome_obstacles(), same single-tile

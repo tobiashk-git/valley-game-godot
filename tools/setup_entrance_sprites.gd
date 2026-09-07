@@ -1,5 +1,5 @@
 extends SceneTree
-# Rebuilds the painted entrance scenes (DungeonEntrance, CastleEntrance) with
+# Rebuilds every painted entrance scene (gates and the five interiors) with
 # their Leonardo art and a solid footprint from the sprite's top down to the
 # tile's bottom edge - the same rule as the houses, so the 56x56 entrance
 # portal stays reachable from below. Run via:
@@ -11,6 +11,11 @@ const HALF := TILE / 2.0
 const ENTRANCES := [
 	{"scene": "DungeonEntrance", "tex": "res://assets/dungeon_entrance.png", "w": 176.0, "h": 134.0},
 	{"scene": "CastleEntrance", "tex": "res://assets/castle_entrance.png", "w": 192.0, "h": 177.0},
+	{"scene": "WatchtowerRuinEntrance", "tex": "res://assets/entrance_ice_caves.png", "w": 176.0, "h": 145.0},
+	{"scene": "DruidCircleEntrance", "tex": "res://assets/entrance_grove.png", "w": 192.0, "h": 223.0},
+	{"scene": "VolcanoEntrance", "tex": "res://assets/entrance_caldera.png", "w": 192.0, "h": 147.0},
+	{"scene": "SubmergedTempleEntrance", "tex": "res://assets/entrance_temple.png", "w": 176.0, "h": 169.0},
+	{"scene": "AncientBarrowEntrance", "tex": "res://assets/entrance_barrow.png", "w": 160.0, "h": 111.0},
 ]
 
 func _initialize() -> void:
