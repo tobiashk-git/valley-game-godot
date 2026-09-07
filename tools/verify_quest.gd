@@ -165,11 +165,13 @@ func _initialize() -> void:
 	Input.action_release("toggle_quests")
 	await process_frame
 	var done_row: Button = journal.quest_list.get_node("GatherWoodRow")
-	var completed_header_index := -1
+	# The Story sub-tab groups by chapter (quest lines revamp): the row stays
+	# under Chapter 1, whose header now reads complete.
+	var chapter_header_index := -1
 	for child in journal.quest_list.get_children():
-		if child is Label and child.text.begins_with("Completed"):
-			completed_header_index = child.get_index()
-	print("Journal shows it under Completed (status 'Completed', not tracked): ", done_row.get_node("Status").text == "Completed" and completed_header_index >= 0 and done_row.get_index() > completed_header_index and not done_row.get_node("Name").text.ends_with("(tracked)"))
+		if child is Label and child.text.begins_with("Chapter 1") and child.text.ends_with("complete"):
+			chapter_header_index = child.get_index()
+	print("Journal shows it Completed under a complete Chapter 1 (not tracked): ", done_row.get_node("Status").text == "Completed" and chapter_header_index >= 0 and done_row.get_index() > chapter_header_index and not done_row.get_node("Name").text.ends_with("(tracked)"))
 	done_row.pressed.emit()
 	await process_frame
 	print("Completed quest has no Track button in the pane: ", journal.selected_quest == "gather_wood" and not journal.track_btn.visible and journal.quest_progress.text.contains("Completed"))
