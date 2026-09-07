@@ -26,8 +26,8 @@ const TOOL_HELP := {
 	"tile": "Paints the chosen ground over the generated map (brush [ ]).",
 	"prop": "Puts the chosen prop on the tile; anything generated there is dropped.",
 	"monster": "Puts a wild monster of the chosen species on the tile.",
-	"remove": "Drops whatever the generator put on the tile (tree, rock, obstacle, monster).",
-	"erase": "Takes the recipe's entries off the tile; the generated content returns.",
+	"remove": "Drops whatever the GENERATOR put on the tile (its tree, rock, obstacle or monster). Not for things you placed - use Erase.",
+	"erase": "Takes YOUR recipe entries off the tile (placed props and monsters, painted tiles, notes); the generated content returns. Uses the brush size.",
 	"pick": "Reads the tile into the palette.",
 	"note": "Pins a design note to the tile (shown only here).",
 	"move": "Click a dungeon door, an interior entrance or an NPC camp to pick it up, then click open ground to drop it (Esc cancels). Camps and doors move separately.",
@@ -79,6 +79,11 @@ var readout_label: Label
 var zoom_label: Label
 var help_label: Label
 var palette_box: VBoxContainer
+# The palette only serves Paint tile / Place prop / Place monster - it is
+# hidden for every other tool (user: an idle list "was confusing").
+const PALETTE_TOOLS := ["tile", "prop", "monster"]
+var palette_title: Label
+var palette_scroll: ScrollContainer
 var brush_label: Label
 var notes_box: VBoxContainer
 var grid_btn: CheckButton
@@ -667,22 +672,23 @@ func _build_ui() -> void:
 	brush_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	brush_row.add_child(brush_label)
 	_button("]", brush_row, func() -> void: set_brush(brush + 2))
-	var palette_title := Label.new()
+	palette_title = Label.new()
 	palette_title.name = "PaletteTitle"
 	palette_title.text = "Palette"
 	palette_title.theme_type_variation = &"PanelTitle"
 	palette_title.add_theme_font_size_override("font_size", 14)
 	col.add_child(palette_title)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.custom_minimum_size = Vector2(0, 160)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	col.add_child(scroll)
+	palette_scroll = ScrollContainer.new()
+	palette_scroll.name = "PaletteScroll"
+	palette_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	palette_scroll.custom_minimum_size = Vector2(0, 160)
+	palette_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	col.add_child(palette_scroll)
 	palette_box = VBoxContainer.new()
 	palette_box.name = "Palette"
 	palette_box.add_theme_constant_override("separation", 2)
 	palette_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(palette_box)
+	palette_scroll.add_child(palette_box)
 	var notes_title := Label.new()
 	notes_title.text = "Notes"
 	notes_title.theme_type_variation = &"PanelTitle"
@@ -716,6 +722,10 @@ func _set_tool(t: String) -> void:
 	for id in _tool_buttons.keys():
 		_tool_buttons[id].theme_type_variation = &"TabButtonActive" if id == t else &"TabButton"
 	help_label.text = TOOL_HELP[t]
+	var uses_palette: bool = PALETTE_TOOLS.has(t)
+	if palette_title != null:
+		palette_title.visible = uses_palette
+		palette_scroll.visible = uses_palette
 	_build_palette()
 
 func set_brush(b: int) -> void:
@@ -724,13 +734,13 @@ func set_brush(b: int) -> void:
 
 func _palette_entries() -> Array:
 	match tool:
-		"pan", "tile", "erase", "pick", "remove", "note", "move":
+		"tile":
 			return MapRecipe.tile_names().keys()
 		"prop":
 			return prop_scenes.keys()
 		"monster":
 			return Enemies.ENEMIES.keys()
-	return []
+	return [] # the other tools do not use the palette (and it is hidden)
 
 func _palette_kind() -> String:
 	return "prop" if tool == "prop" else ("monster" if tool == "monster" else "tile")

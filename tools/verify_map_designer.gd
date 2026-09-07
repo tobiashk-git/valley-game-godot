@@ -29,7 +29,11 @@ func _initialize() -> void:
 
 	print("The canvas is the real overworld with the player parked and the game overlays hidden: ", designer.overworld != null and designer.overworld.has_node("YSort/ParkedPlayer") and not designer.overworld.has_node("YSort/Player") and not root.get_node("GameState").is_gameplay() and not root.get_node("HUD").visible)
 	print("Camera starts on the altar at 100% with the Pan tool open (a first drag moves the map, paints nothing): ", designer.camera.position == Vector2(cx * 32 + 16, cy * 32 + 16) and designer.camera.zoom == Vector2.ONE and designer.camera.is_current() and designer.tool == "pan" and not designer.apply_at(Vector2i(cx - 8, cy + 8)) and designer.recipe.tiles.is_empty())
-	print("Tools, palette and notes panels exist; tile palette lists every recipe tile name: ", designer.ui.has_node("LeftPanel") and designer.palette_box.get_child_count() == MapRecipe.tile_names().size() and designer.ui.has_node("TopBar") and designer.ui.has_node("BottomBar"))
+	print("Tools, palette and notes panels exist; with the Pan tool the palette is hidden and empty (only Paint / Place tools use it): ", designer.ui.has_node("LeftPanel") and designer.palette_box.get_child_count() == 0 and not designer.palette_title.visible and not designer.palette_scroll.visible and designer.ui.has_node("TopBar") and designer.ui.has_node("BottomBar"))
+	designer._set_tool("erase")
+	var erase_hidden: bool = not designer.palette_scroll.visible and designer.palette_box.get_child_count() == 0
+	designer._set_tool("tile")
+	print("Erase keeps it hidden; Paint tile shows it, listing every recipe tile name: ", erase_hidden and designer.palette_title.visible and designer.palette_scroll.visible and designer.palette_box.get_child_count() == MapRecipe.tile_names().size())
 
 	# --- paint ---
 	var t1 := Vector2i(cx - 8, cy + 8)
