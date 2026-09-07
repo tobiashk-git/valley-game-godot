@@ -62,16 +62,28 @@ var _steps_since_encounter := ENCOUNTER_COOLDOWN_STEPS
 # the normal armour maths. Scream (Eden) is the mob answer: every enemy takes
 # 0.4x Oliver's attack power with no armour to soak it, and each regular
 # survivor may be left reeling (it skips its next strike); a boss only
-# flinches. One charge each per fight, both usable in the same fight,
-# refilled every fight (nothing to save); unlocked once Meet the Village is
-# turned in. The strengths come from tools/sim_balance.gd --companions: a
-# player opens every fight with both, and at 2x / 1x the next biome's boss
-# fell to the previous set 65% of the time (the set rule wants <= 25%);
-# 1.5x / 0.4x keeps every band. Phase 2: Guard / Shimmer as second moves
-# and charges that grow with level.
+# flinches. The companion then STAYS on stage as a tank (user, after the
+# phone test: "when a companion is active it draws the attacks from the
+# enemies instead of Oliver"): it has a small pool of hit points -
+# COMPANION_HP_FACTOR of Oliver's maximum, no armour - and every enemy blow
+# lands on it until the pool is gone and it limps out (nobody dies). Calling
+# the other companion sends the first back. One charge each per fight, both
+# usable in the same fight, refilled every fight (nothing to save); unlocked
+# once Meet the Village is turned in.
+# WHO COMES ALONG follows the story (user, 2026-09-07): Oliver starts on his
+# own (village, dungeon, plains, castle), Luigi joins for Frostpeak, Eden
+# alone for Verdantwood, both from the Badlands on and for the finale. A
+# fight's roster comes from its zone (random and wild encounters carry one)
+# or, for a boss, from the boss itself - see roster_for_zone / ROSTER_BY_BOSS. The strengths come from
+# tools/sim_balance.gd --companions: a player opens every fight with both,
+# and at 2x / 1x the next biome's boss fell to the previous set 65% of the
+# time (the set rule wants <= 25%); the live numbers keep every band.
+# Phase 2: second moves and charges that grow with level.
 # ---------------------------------------------------------------------------
 signal companion_called(id: String)
 signal companion_struck(id: String)
+signal companion_hit(id: String, damage: int) # an enemy blow landed on the tank
+signal companion_left(id: String) # knocked back, or stepped aside for the other
 const COMPANIONS := {
 	"luigi": {"name": "Luigi the Fearless", "move": "Bite", "portrait": "res://assets/portraits/luigi.png", "sprite": "res://assets/npc_luigi.png"},
 	"eden": {"name": "Eden", "move": "Scream", "portrait": "res://assets/portraits/eden.png", "sprite": "res://assets/npc_eden.png"},
@@ -79,7 +91,18 @@ const COMPANIONS := {
 const BITE_MULT := 1.5
 const SCREAM_MULT := 0.4
 const SCREAM_STUN_CHANCE := 0.5
+const COMPANION_HP_FACTOR := 0.35 # the tank's pool as a share of Oliver's max HP
+const ROSTER_BY_BOSS := {
+	"frostpeak_boss": ["luigi"],
+	"verdantwood_boss": ["eden"], "verdantwood_maze_guardian_1": ["eden"],
+	"castle_boss": ["luigi", "eden"], "badlands_boss": ["luigi", "eden"],
+	"gloomfen_boss": ["luigi", "eden"], "final_boss": ["luigi", "eden"],
+}
 var companion_charges: Dictionary = {} # id -> charges left this fight; {} while locked
+var fight_zone := -1 # the World.Zone the current fight is in (-1: village, dungeon, plains, castle)
+var companion_active := "" # the companion on stage drawing the blows, "" for none
+var companion_hp := 0
+var companion_max_hp := 0
 
 func companions_unlocked() -> bool:
 	return Quests.quest_state.get("meet_villagers", "") == "completed"
@@ -87,10 +110,23 @@ func companions_unlocked() -> bool:
 func companion_ready(id: String) -> bool:
 	return in_combat and companion_charges.get(id, 0) > 0
 
-func _refill_companions() -> void:
+# The companions who come along in a zone (see the roster note above).
+func roster_for_zone(zone: int) -> Array:
+	if zone == World.Zone.FROSTPEAK:
+		return ["luigi"]
+	if zone == World.Zone.VERDANTWOOD:
+		return ["eden"]
+	if zone == World.Zone.BADLANDS or zone == World.Zone.GLOOMFEN:
+		return ["luigi", "eden"]
+	return []
+
+func _refill_companions(roster: Array) -> void:
 	companion_charges = {}
+	companion_active = ""
+	companion_hp = 0
+	companion_max_hp = 0
 	if companions_unlocked():
-		for id in COMPANIONS.keys():
+		for id in roster:
 			companion_charges[id] = 1
 
 # ---------------------------------------------------------------------------
@@ -185,7 +221,7 @@ func check_random_encounter(zone: int = -1) -> void:
 		return
 	if randf() < ENCOUNTER_CHANCE:
 		_steps_since_encounter = 0
-		start_combat(_pick_encounter_group(zone))
+		start_combat(_pick_encounter_group(zone), zone)
 
 func _build_enemy_entry(def: Dictionary) -> Dictionary:
 	return {
@@ -203,8 +239,10 @@ func _build_enemy_entry(def: Dictionary) -> Dictionary:
 	}
 
 # Accepts either a single enemy id (String) or a group (Array of Strings).
-func start_combat(enemy_ids) -> void:
+# `zone` (a World.Zone value) decides which companions come along.
+func start_combat(enemy_ids, zone: int = -1) -> void:
 	var ids: Array = enemy_ids if enemy_ids is Array else [enemy_ids]
+	fight_zone = zone
 	current_enemies = []
 	var names: Array = []
 	for id in ids:
@@ -223,7 +261,7 @@ func start_combat(enemy_ids) -> void:
 	fight_gold = 0
 	fight_xp = 0
 	fight_items = []
-	_refill_companions()
+	_refill_companions(roster_for_zone(zone))
 	battle_log = ["%s %s!" % [_join_names(names), "appears" if names.size() == 1 else "appear"]]
 	changed.emit()
 
@@ -242,7 +280,7 @@ func start_wild_encounter(anchor_enemy_id: String, zone: int, placement_key: Str
 		return
 	var group: Array = _pick_encounter_group(zone)
 	group[0] = anchor_enemy_id
-	start_combat(group)
+	start_combat(group, zone)
 	current_wild_monster_key = placement_key
 
 # Fixed boss fight: the player already deliberately walked up and pressed E
@@ -260,7 +298,8 @@ func start_boss_fight(boss_id: String) -> void:
 	player_status = {}
 	current_boss_id = boss_id
 	current_wild_monster_key = ""
-	_refill_companions()
+	fight_zone = -1
+	_refill_companions(ROSTER_BY_BOSS.get(boss_id, []))
 	battle_log = ["%s blocks your path!" % def.name]
 	changed.emit()
 
@@ -412,6 +451,14 @@ func companion_act(id: String) -> void:
 		return
 	player_defending = false
 	companion_charges[id] -= 1
+	if companion_active != "" and companion_active != id:
+		var other: String = companion_active
+		companion_active = ""
+		await _beat("%s steps back." % COMPANIONS[other].name, BEAT_SECONDS_SHORT)
+		companion_left.emit(other)
+	companion_active = id
+	companion_max_hp = max(1, int(round(Character.stats.max_hp * COMPANION_HP_FACTOR)))
+	companion_hp = companion_max_hp
 	companion_called.emit(id)
 	if id == "luigi":
 		await _beat("Luigi the Fearless bounds in!", BEAT_SECONDS_SHORT)
@@ -587,6 +634,7 @@ func _flee() -> void:
 	current_boss_id = "" # fleeing a boss leaves it undefeated, re-challengeable
 	current_wild_monster_key = "" # same - fleeing a wild monster leaves it re-challengeable
 	companion_charges = {}
+	companion_active = ""
 	changed.emit()
 	ended.emit(false)
 
@@ -647,6 +695,10 @@ func _defeat_enemy(index: int, then_enemy_turn: bool = true) -> void:
 		if current_wild_monster_key != "":
 			GameState.put_wild_monster_to_sleep(current_wild_monster_key)
 			current_wild_monster_key = ""
+		if companion_active != "":
+			var home: String = companion_active
+			companion_active = ""
+			companion_left.emit(home)
 		won.emit()
 		if fast:
 			in_combat = false
@@ -695,6 +747,19 @@ func _enemy_turn() -> void:
 		# The wind-up: a beat of nothing you can do about it.
 		enemy_turn_started.emit(index)
 		await _beat("%s prepares to strike..." % enemy.name, BEAT_SECONDS_SHORT)
+		# A companion on stage draws the blow onto its own pool (no armour).
+		if companion_active != "":
+			var cid: String = companion_active
+			var cdmg := _physical_damage(enemy.attack, 0)
+			companion_hp = max(0, companion_hp - cdmg)
+			enemy_struck.emit(index)
+			companion_hit.emit(cid, cdmg)
+			await _beat("%s attacks %s for %d damage!" % [enemy.name, COMPANIONS[cid].name, cdmg])
+			if companion_hp <= 0:
+				companion_active = ""
+				await _beat("%s is knocked back and limps out of the fight!" % COMPANIONS[cid].name)
+				companion_left.emit(cid)
+			continue
 		# Agility above its starting value lets Oliver slip a blow entirely.
 		if randf() < Character.dodge_chance():
 			enemy_struck.emit(index)
@@ -786,4 +851,5 @@ func reset() -> void:
 	awaiting_exit = false
 	_nap_pending = false
 	companion_charges = {}
+	companion_active = ""
 	changed.emit()

@@ -31,6 +31,14 @@ const ENEMIES := {
 	# (Verdantwood), x1.1 (Badlands) and x1.4 (Gloomfen) on HP and attack on
 	# top of the ladder below; chain bosses hit harder (Revenant 12,
 	# Bramblewood 16, Cinderjaw 21, Bogmaw 29), HP unchanged.
+	# Companions pass (2026-09-07, --sets --companions): Luigi comes along in
+	# Frostpeak, Eden in Verdantwood, both from the Badlands on, each opening
+	# a fight with its move and then tanking a couple of blows - so the same
+	# rule needs the Revenant at 14, Cinderjaw 27 and the Bogmaw 38 attack
+	# (Bramblewood and the Warden unchanged) and the Badlands and Gloomfen
+	# wilds another x1.2 on HP and attack (93% / 90% next-biome win rate, 4-5
+	# fights a trip, from a 97-99% stroll; Verdantwood with Eden alone already
+	# sat at 91%).
 	"dungeon_rat": {
 		"name": "Dungeon Rat", "sprite": "res://assets/enemies/art/dungeon_rat.png", "art_height": 40,
 		"max_hp": 12, "attack": 4, "defense": 0, "gold_min": 3, "gold_max": 6,
@@ -98,7 +106,7 @@ const ENEMIES := {
 	# --- Emberfall Badlands (south) ---
 	"magma_slime": {
 		"name": "Magma Slime", "sprite": "res://assets/enemies/art/magma_slime.png", "art_height": 40,
-		"max_hp": 31, "attack": 12, "defense": 0, "gold_min": 6, "gold_max": 10,
+		"max_hp": 37, "attack": 14, "defense": 0, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "poison", "chance": 0.2}, "zones": [World.Zone.BADLANDS],
 		# Ember Core (Crafting's Ember-forged enhancement) is a Badlands-only
 		# chance drop - the Fire Drake is the best source, so it's worth
@@ -107,31 +115,31 @@ const ENEMIES := {
 	},
 	"fire_drake": {
 		"name": "Fire Drake", "sprite": "res://assets/enemies/art/fire_drake.png", "art_height": 44,
-		"max_hp": 34, "attack": 18, "defense": 1, "gold_min": 9, "gold_max": 15, "zones": [World.Zone.BADLANDS],
+		"max_hp": 41, "attack": 22, "defense": 1, "gold_min": 9, "gold_max": 15, "zones": [World.Zone.BADLANDS],
 		"drop_item_ids": ["monster_fur", {"item": "ember_core", "chance": 0.5}],
 	},
 	"ash_golem": {
 		"name": "Ash Golem", "sprite": "res://assets/enemies/art/ash_golem.png", "art_height": 56,
-		"max_hp": 45, "attack": 14, "defense": 4, "gold_min": 10, "gold_max": 16, "zones": [World.Zone.BADLANDS],
+		"max_hp": 54, "attack": 17, "defense": 4, "gold_min": 10, "gold_max": 16, "zones": [World.Zone.BADLANDS],
 		"drop_item_ids": ["monster_fur", {"item": "ember_core", "chance": 0.3}],
 	},
 
 	# --- Gloomfen Marsh (west) ---
 	"swamp_hag": {
 		"name": "Swamp Hag", "sprite": "res://assets/enemies/art/swamp_hag.png", "art_height": 52,
-		"max_hp": 49, "attack": 18, "defense": 2, "gold_min": 7, "gold_max": 12,
+		"max_hp": 59, "attack": 22, "defense": 2, "gold_min": 7, "gold_max": 12,
 		"status_attack": {"status": "silence", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
 		"drop_item_ids": ["monster_fur", {"item": "bog_iron", "chance": 0.5}],
 	},
 	"giant_insect": {
 		"name": "Giant Insect", "sprite": "res://assets/enemies/art/giant_insect.png", "art_height": 52,
-		"max_hp": 43, "attack": 18, "defense": 1, "gold_min": 6, "gold_max": 10,
+		"max_hp": 52, "attack": 22, "defense": 1, "gold_min": 6, "gold_max": 10,
 		"status_attack": {"status": "poison", "chance": 0.3}, "zones": [World.Zone.GLOOMFEN],
 		"drop_item_ids": ["monster_fur", {"item": "bog_iron", "chance": 0.5}],
 	},
 	"spectral_undead": {
 		"name": "Spectral Undead", "sprite": "res://assets/enemies/art/spectral_undead.png", "art_height": 50,
-		"max_hp": 55, "attack": 22, "defense": 1, "gold_min": 8, "gold_max": 13,
+		"max_hp": 66, "attack": 26, "defense": 1, "gold_min": 8, "gold_max": 13,
 		"status_attack": {"status": "sleep", "chance": 0.25}, "zones": [World.Zone.GLOOMFEN],
 		"drop_item_ids": ["monster_fur", {"item": "bog_iron", "chance": 0.5}],
 	},
@@ -177,7 +185,7 @@ const BOSSES := {
 	# tinted pale icy blue.
 	"frostpeak_boss": {
 		"name": "Glacial Revenant", "sprite": "res://assets/enemies/art/frostpeak_boss.png", "art_height": 96,
-		"max_hp": 88, "attack": 12, "defense": 4, "gold_min": 45, "gold_max": 65,
+		"max_hp": 88, "attack": 14, "defense": 4, "gold_min": 45, "gold_max": 65,
 		"status_attack": {"status": "paralysis", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
 	},
@@ -208,7 +216,7 @@ const BOSSES := {
 	# sprite (not yet used for a biome boss), tinted volcanic orange/red.
 	"badlands_boss": {
 		"name": "Cinderjaw", "sprite": "res://assets/enemies/art/badlands_boss.png", "art_height": 84,
-		"max_hp": 152, "attack": 21, "defense": 3, "gold_min": 45, "gold_max": 65,
+		"max_hp": 152, "attack": 27, "defense": 3, "gold_min": 45, "gold_max": 65,
 		"status_attack": {"status": "poison", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
 	},
@@ -217,7 +225,7 @@ const BOSSES := {
 	# the Bat sprite (not yet used for a biome boss), tinted murky purple-green.
 	"gloomfen_boss": {
 		"name": "The Bogmaw", "sprite": "res://assets/enemies/art/gloomfen_boss.png", "art_height": 80,
-		"max_hp": 195, "attack": 29, "defense": 4, "gold_min": 45, "gold_max": 65,
+		"max_hp": 195, "attack": 38, "defense": 4, "gold_min": 45, "gold_max": 65,
 		"status_attack": {"status": "silence", "chance": 0.25},
 		"drop_item_ids": ["healing_potion"],
 	},

@@ -5,8 +5,11 @@ extends SceneTree
 # Luigi and Eden are once-per-fight boosters: locked until Meet the Village
 # is turned in, then one charge each per fight. Bite = one target, twice
 # Oliver's attack power; Scream = every enemy, no armour, regular survivors
-# may be left reeling and skip a strike, a boss only flinches. The battle
-# panel shows bust buttons above the commands and a cameo on the stage.
+# may be left reeling and skip a strike, a boss only flinches. The called
+# companion then tanks: enemy blows land on its own small pool (a share of
+# Oliver's max HP, no armour) until it limps out; calling the other sends it
+# back. The battle panel shows bust buttons above the commands and a cameo
+# with an HP bar beside the message box.
 
 func _initialize() -> void:
 	var combat: Node = root.get_node("Combat")
@@ -42,11 +45,45 @@ func _initialize() -> void:
 	combat.player_run()
 	await process_frame
 
-	# --- unlocked ---
+	# --- unlocked: who comes along follows the story ---
 	quests.quest_state.meet_villagers = "completed"
+	var world: Node = root.get_node("World")
 	combat.start_combat(["bandit"])
 	await process_frame
-	print("After the gateway: one charge each, the row shows both busts enabled: ", combat.companion_charges == {"luigi": 1, "eden": 1} and panel.companion_row.visible and panel.companion_btns.luigi.icon != null and panel.companion_btns.eden.icon != null and not panel.companion_btns.luigi.disabled and not panel.companion_btns.eden.disabled)
+	var alone: bool = combat.companion_charges.is_empty() and not panel.companion_row.visible
+	combat.player_run()
+	await process_frame
+	combat.start_boss_fight("dungeon_boss")
+	await process_frame
+	alone = alone and combat.companion_charges.is_empty()
+	combat.player_run()
+	await process_frame
+	combat.start_combat(["bandit"], world.Zone.FROSTPEAK)
+	await process_frame
+	var frost_luigi: bool = combat.companion_charges == {"luigi": 1} and panel.companion_row.visible and panel.companion_btns.luigi.visible and not panel.companion_btns.eden.visible
+	combat.player_run()
+	await process_frame
+	combat.start_combat(["bandit"], world.Zone.VERDANTWOOD)
+	await process_frame
+	var verdant_eden: bool = combat.companion_charges == {"eden": 1} and not panel.companion_btns.luigi.visible and panel.companion_btns.eden.visible
+	combat.player_run()
+	await process_frame
+	combat.start_boss_fight("verdantwood_boss")
+	await process_frame
+	verdant_eden = verdant_eden and combat.companion_charges == {"eden": 1}
+	combat.player_run()
+	await process_frame
+	combat.start_boss_fight("frostpeak_boss")
+	await process_frame
+	frost_luigi = frost_luigi and combat.companion_charges == {"luigi": 1}
+	combat.player_run()
+	await process_frame
+	print("Oliver is on his own in the village and the dungeon (no charges, no row): ", alone)
+	print("Luigi comes along in Frostpeak (wilds and the Revenant), Eden stays home: ", frost_luigi)
+	print("Eden alone in Verdantwood (wilds and the Bramblewood): ", verdant_eden)
+	combat.start_combat(["bandit"], world.Zone.BADLANDS)
+	await process_frame
+	print("From the Badlands on both come: one charge each, the row shows both busts enabled: ", combat.companion_charges == {"luigi": 1, "eden": 1} and panel.companion_row.visible and panel.companion_btns.luigi.icon != null and panel.companion_btns.eden.icon != null and not panel.companion_btns.luigi.disabled and not panel.companion_btns.eden.disabled)
 	print("The companion row sits inside the panel above the commands: ", panel.companion_row.get_global_rect().end.y <= panel.commands.get_global_rect().position.y and panel.commands.get_global_rect().end.y <= panel.panel.get_global_rect().end.y + 0.5)
 	root.get_texture().get_image().save_png("res://verify_companions.png")
 	print("Saved verify_companions.png")
@@ -66,17 +103,27 @@ func _initialize() -> void:
 	var bite: int = 1000 - combat.current_enemies[0].hp
 	print("Luigi's bite lands at 1.5x a plain attack (", bite, ", expected ", bite_lo, "-", bite_hi, " around a plain ", int(round(base)), "): ", bite >= bite_lo and bite <= bite_hi)
 	print("The cameo popped onto the stage when Luigi was called: ", cameo_seen[0])
+	print("Luigi stays on as the tank with a pool of %d%% of Oliver's max HP, shown on the cameo's bar: " % int(combat.COMPANION_HP_FACTOR * 100), combat.companion_active == "luigi" and combat.companion_max_hp == int(round(2000 * combat.COMPANION_HP_FACTOR)) and panel.cameo.visible and panel.cameo_bar.visible and panel.cameo_bar.max_value == combat.companion_max_hp)
+	print("The bandit's blow landed on Luigi, not Oliver: ", character.stats.hp == 2000 and combat.companion_hp < combat.companion_max_hp and combat.battle_log.any(func(l: String) -> bool: return l.contains("attacks Luigi the Fearless")))
 	print("The charge is spent: the bust dims and a second call is ignored: ", combat.companion_charges.luigi == 0 and panel.companion_btns.luigi.disabled and panel.companion_btns.luigi.modulate.r < 0.6 and not panel.companion_btns.eden.disabled)
 	var hp_now: int = combat.current_enemies[0].hp
 	combat.companion_act("luigi")
 	await process_frame
 	print("...really ignored (no damage, no beat): ", combat.current_enemies[0].hp == hp_now)
-	print("The enemy turn followed the bite (the bandit struck or Oliver dodged): ", combat.battle_log.any(func(l: String) -> bool: return l.contains("attacks")))
+	# Down to his last point: the next blow knocks him out, and does not carry over.
+	combat.companion_hp = 1
+	beats.clear()
+	combat.player_defend()
+	await process_frame
+	print("With one point left the next blow knocks Luigi back out of the fight (Oliver untouched): ", combat.companion_active == "" and character.stats.hp == 2000 and beats.any(func(l: String) -> bool: return l.contains("limps out")) and panel.cameo_id == "")
+	combat.player_defend()
+	await process_frame
+	print("The round after, the bandit hits Oliver again: ", character.stats.hp < 2000)
 	combat.player_run()
 	await process_frame
 
 	# --- Bite with three enemies asks for a target ---
-	combat.start_combat(["bandit", "bandit", "bandit"])
+	combat.start_combat(["bandit", "bandit", "bandit"], world.Zone.GLOOMFEN)
 	await process_frame
 	print("A new fight refills both charges: ", combat.companion_charges == {"luigi": 1, "eden": 1})
 	for e in combat.current_enemies:
@@ -98,6 +145,7 @@ func _initialize() -> void:
 	beats.clear()
 	combat.companion_act("eden")
 	await process_frame
+	print("Calling Eden while Luigi tanks sends him back and puts her on stage: ", beats.any(func(l: String) -> bool: return l.contains("steps back")) and combat.companion_active == "eden" and panel.cameo_id == "eden" and combat.companion_hp > 0)
 	var all_hit := true
 	var stunned := 0
 	for e in combat.current_enemies:
@@ -117,20 +165,21 @@ func _initialize() -> void:
 	await process_frame
 	print("Reeling bandits skip their strike (Oliver untouched, three reeling beats) and shake it off after: ", character.stats.hp == 2000 and beats.filter(func(l: String) -> bool: return l.contains("still reeling")).size() == 3 and not combat.current_enemies.any(func(e) -> bool: return e != null and e.get("stunned", false)))
 	combat.player_status = {}
+	combat.companion_hp = combat.companion_max_hp
 	combat.player_defend()
 	await process_frame
-	print("The next round they strike again: ", character.stats.hp < 2000)
+	print("The next round they strike again - at Eden, who is tanking: ", character.stats.hp == 2000 and combat.companion_hp < combat.companion_max_hp)
 	combat.player_run()
 	await process_frame
 
 	# --- a boss only flinches ---
-	combat.start_boss_fight("dungeon_boss")
+	combat.start_boss_fight("gloomfen_boss")
 	await process_frame
 	combat.current_enemies[0].hp = 1000
 	combat.current_enemies[0].max_hp = 1000
 	combat.companion_act("eden")
 	await process_frame
-	print("Against the Bone Lord the scream hurts but never stuns: ", combat.current_enemies[0].hp < 1000 and not combat.current_enemies[0].get("stunned", false) and combat.battle_log.any(func(l: String) -> bool: return l.contains("only flinches")))
+	print("Against the Bogmaw the scream hurts but never stuns: ", combat.current_enemies[0].hp < 1000 and not combat.current_enemies[0].get("stunned", false) and combat.battle_log.any(func(l: String) -> bool: return l.contains("only flinches")))
 	combat.player_run()
 	await process_frame
 	print("Out of combat the row and cameo are gone: ", not combat.in_combat and not panel.companion_row.visible)

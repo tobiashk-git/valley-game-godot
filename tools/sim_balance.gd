@@ -74,8 +74,8 @@ const BAND_NEXT_WILD := [75, 97] # full set in the next biome: headway, not a st
 const BAND_NEXT_BOSS_MAX := 25 # full set vs the next boss: needs the next set
 const BAND_FINAL_MIN := 90     # bog-iron full vs the Ancient Warden
 # Boss HP / attack multipliers under test (applied on top of enemies.gd).
-const SETS_HP := [1.0, 1.15, 1.3, 1.45, 1.6, 1.8, 2.0]
-const SETS_ATK := [1.0, 1.15, 1.3, 1.45, 1.6, 1.8, 2.0]
+const SETS_HP := [1.0, 1.15, 1.3, 1.45, 1.6, 1.8, 2.0, 2.3, 2.6, 3.0]
+const SETS_ATK := [1.0, 1.15, 1.3, 1.45, 1.6, 1.8, 2.0, 2.3, 2.6, 3.0]
 # Wild multipliers tried on a next biome the previous set strolls through.
 const SETS_WILD := [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
 
@@ -152,12 +152,14 @@ func _initialize() -> void:
 			_out("")
 			_out("### Set rule (each biome's full set beats its boss, the body piece alone does not; the set reaches into the next biome but not its boss)")
 			_out("")
-			for line in _rule_table(model, {}):
-				_out(line)
-			_out("")
-			_out("### Set rule with companions (Bite 1.5x then Scream 0.4x opening every fight)")
+			_out("The live rule: the companions who come along open each fight (Bite 1.5x / Scream 0.4x, then a tank pool of %d%% of max HP each) - Luigi in Frostpeak, Eden in Verdantwood, both from the Badlands on, nobody before. Bosses and outer wilds were retuned for this on 2026-09-07 (--sets --companions)." % int(root.get_node("Combat").COMPANION_HP_FACTOR * 100))
 			_out("")
 			for line in _rule_table(_with_companions(model), {}):
+				_out(line)
+			_out("")
+			_out("### Without companions (informational - a player who never calls them)")
+			_out("")
+			for line in _rule_table(model, {}):
 				_out(line)
 	var f := FileAccess.open("res://balance_report.md", FileAccess.WRITE)
 	f.store_string("\n".join(_lines) + "\n")
@@ -167,14 +169,15 @@ func _initialize() -> void:
 
 # --companions: the rule table for a few Bite / Scream strengths (the live
 # pair first), to find the strongest opening that keeps the boss bands.
-const COMPANION_PAIRS := [[1.5, 0.4, 1.0], [2.0, 1.0, 1.0], [1.5, 0.5, 1.0], [1.25, 0.5, 1.0], [1.0, 0.5, 1.0]]
+const COMPANION_PAIRS := [[1.5, 0.4, 1.0, 0.35], [1.5, 0.4, 1.0, 0.25], [1.5, 0.4, 1.0, 0.5], [1.25, 0.4, 1.0, 0.35], [1.0, 0.4, 1.0, 0.35], [1.0, 0.3, 1.0, 0.25]]
 func _companions_sweep() -> void:
 	for pair in COMPANION_PAIRS:
 		var m: Dictionary = _with_companions(MODELS.live)
 		m.bite_mult = pair[0]
 		m.scream_mult = pair[1]
 		m.scream_boss_mult = pair[2]
-		print("## Bite x%.2f, Scream x%.2f (x%.2f on a boss)" % [pair[0], pair[1], pair[2]])
+		m.pool_factor = pair[3]
+		print("## Bite x%.2f, Scream x%.2f (x%.2f on a boss), tank pool %.2f of max HP" % [pair[0], pair[1], pair[2], pair[3]])
 		for line in _rule_table(m, {}):
 			print(line)
 		print("")
@@ -266,16 +269,29 @@ func _fight(model: Dictionary, stats: Dictionary, player: Dictionary, defs: Arra
 	var bite_mult: float = model.get("bite_mult", 1.5) # combat.gd BITE_MULT
 	var scream_mult: float = model.get("scream_mult", 0.4) # combat.gd SCREAM_MULT
 	var scream_boss_mult: float = model.get("scream_boss_mult", 1.0) # (tried: a boss's hide vs the scream; not needed)
+	var pool_factor: float = model.get("pool_factor", 0.35) # combat.gd COMPANION_HP_FACTOR
+	# The tank: the called companion draws every blow onto its pool (no
+	# armour) until it is gone. Luigi first; Eden once Luigi has limped out.
+	# Who comes along is the model's roster (combat.gd: Luigi in Frostpeak,
+	# Eden in Verdantwood, both from the Badlands on, nobody before that).
+	var roster: Array = model.get("roster", ["luigi", "eden"])
+	var pool: float = 0.0
+	var luigi_used: bool = not roster.has("luigi")
+	var eden_used: bool = not roster.has("eden")
 	while turns < 200:
 		turns += 1
 		# Player turn: drink / heal when low, else hit the weakest.
-		if companions and turns == 1:
+		if companions and not luigi_used:
+			luigi_used = true
+			pool = stats.max_hp * pool_factor
 			var big: Dictionary = {}
 			for e in enemies:
 				if e.hp > 0 and (big.is_empty() or e.hp > big.hp):
 					big = e
 			big.hp -= _damage(model, stats.power * bite_mult, big.defense)
-		elif companions and turns == 2:
+		elif companions and not eden_used and pool <= 0.0:
+			eden_used = true
+			pool = stats.max_hp * pool_factor
 			for e in enemies:
 				if e.hp > 0:
 					e.hp -= _damage(model, stats.power * scream_mult * (scream_boss_mult if e.boss else 1.0), 0.0)
@@ -305,6 +321,9 @@ func _fight(model: Dictionary, stats: Dictionary, player: Dictionary, defs: Arra
 				continue
 			if e.stunned:
 				e.stunned = false
+				continue
+			if pool > 0.0:
+				pool -= _damage(model, e.attack, 0.0)
 				continue
 			if _rng.randf() < stats.dodge:
 				continue
@@ -404,7 +423,18 @@ func _boss_def(boss_id: String, overrides: Dictionary) -> Dictionary:
 	return {"name": def.name, "max_hp": int(round(def.max_hp * o.hp)), "attack": def.attack * o.atk, "defense": def.defense, "zones": [], "boss": true}
 
 func _boss_win(model: Dictionary, profile: Dictionary, boss_id: String, overrides: Dictionary) -> int:
-	return _win_rate(model, profile, [_boss_def(boss_id, overrides)], profile.potions)
+	return _win_rate(_roster_model(model, ROSTER_BY_BOSS.get(boss_id, [])), profile, [_boss_def(boss_id, overrides)], profile.potions)
+
+# combat.gd's roster rule, by boss id and by zone name.
+const ROSTER_BY_BOSS := {"frostpeak_boss": ["luigi"], "verdantwood_boss": ["eden"], "verdantwood_maze_guardian_1": ["eden"], "castle_boss": ["luigi", "eden"], "badlands_boss": ["luigi", "eden"], "gloomfen_boss": ["luigi", "eden"], "final_boss": ["luigi", "eden"]}
+const ROSTER_BY_ZONE := {"FROSTPEAK": ["luigi"], "VERDANTWOOD": ["eden"], "BADLANDS": ["luigi", "eden"], "GLOOMFEN": ["luigi", "eden"]}
+
+func _roster_model(model: Dictionary, roster: Array) -> Dictionary:
+	if not model.get("companions", false):
+		return model
+	var m: Dictionary = model.duplicate()
+	m.roster = roster
+	return m
 
 func _tier_profiles(i: int) -> Dictionary:
 	var t: Dictionary = TIERS[i]
@@ -439,7 +469,7 @@ func _rule_rows(model: Dictionary, overrides: Dictionary, wild: Dictionary = {})
 			r.next_wild = -1
 			r.next_trip = -1.0
 		else:
-			var cell: Dictionary = _run_cell(model, p.full, _wild_pool(t.next_zone, wild))
+			var cell: Dictionary = _run_cell(_roster_model(model, ROSTER_BY_ZONE.get(t.next_zone, [])), p.full, _wild_pool(t.next_zone, wild))
 			r.next_wild = cell.win_pct
 			r.next_trip = cell.trip
 		r.ok_body = r.body_own <= BAND_BODY_MAX
@@ -476,7 +506,9 @@ func _rule_table(model: Dictionary, overrides: Dictionary, wild: Dictionary = {}
 # ember full loses. Prints every passing (hp, atk) pair with its margin and
 # keeps the best per boss, then the rule table with all of them applied.
 func _sets_sweep() -> void:
-	var model: Dictionary = MODELS.live
+	# `--sets --companions`: tune the bosses for a player who opens with both
+	# companions (Bite, Scream, and their tank pools) - the live rule.
+	var model: Dictionary = _with_companions(MODELS.live) if "--companions" in OS.get_cmdline_user_args() else MODELS.live
 	var overrides: Dictionary = {}
 	print("Live data first:")
 	for line in _rule_table(model, {}):
@@ -550,7 +582,7 @@ func _sets_sweep() -> void:
 		print("| wild x | win % | fights / trip |")
 		print("|---|---|---|")
 		for m in SETS_WILD:
-			var cell: Dictionary = _run_cell(model, full, _wild_pool(t.next_zone, {t.next_zone: m}))
+			var cell: Dictionary = _run_cell(_roster_model(model, ROSTER_BY_ZONE.get(t.next_zone, [])), full, _wild_pool(t.next_zone, {t.next_zone: m}))
 			print("| %.1f | %d | %.1f |" % [m, cell.win_pct, cell.trip])
 			var in_band: bool = cell.win_pct >= BAND_NEXT_WILD[0] and cell.win_pct <= BAND_NEXT_WILD[1]
 			var dist: float = absf(cell.win_pct - centre)

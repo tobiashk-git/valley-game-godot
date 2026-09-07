@@ -34,12 +34,14 @@ const HIT_FLASH := Color(1.0, 0.45, 0.45)
 var continue_btn: Button
 # Companions (Combat.COMPANIONS): a row of bust buttons above the commands,
 # hidden until they are unlocked, each dimmed once its charge is spent. The
-# called companion's figure pops in at the right end of the message box for
-# its round (the cameo - beside its own lines, clear of the enemy slots) and
-# shakes on the blow, like an enemy's strike cue.
+# called companion's figure pops in at the right end of the message box
+# (the cameo - beside its own lines, clear of the enemy slots), shakes on
+# its blow like an enemy's strike cue, and stays while it tanks: a small HP
+# bar above it drains as the enemies hit it, then it pops out.
 var companion_row: HBoxContainer
 var companion_btns: Dictionary = {} # id -> Button (bust icon)
 var cameo: TextureRect
+var cameo_bar: ProgressBar
 var cameo_id := ""
 var _cameo_tween: Tween
 
@@ -125,8 +127,28 @@ func _build_companions() -> void:
 	cameo.z_index = 5
 	cameo.visible = false
 	panel.add_child(cameo)
+	cameo_bar = ProgressBar.new()
+	cameo_bar.name = "CameoBar"
+	cameo_bar.theme_type_variation = &"HPBar"
+	cameo_bar.show_percentage = false
+	cameo_bar.custom_minimum_size = Vector2(64, 14)
+	cameo_bar.size = Vector2(64, 14)
+	cameo_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cameo_bar.z_index = 6
+	cameo_bar.visible = false
+	var bar_label := Label.new()
+	bar_label.name = "HPLabel"
+	bar_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bar_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	bar_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	bar_label.add_theme_font_size_override("font_size", 11)
+	bar_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cameo_bar.add_child(bar_label)
+	panel.add_child(cameo_bar)
 	Combat.companion_called.connect(_on_companion_called)
 	Combat.companion_struck.connect(_on_companion_struck)
+	Combat.companion_hit.connect(_on_companion_hit)
+	Combat.companion_left.connect(_on_companion_left)
 
 func _refresh_companions() -> void:
 	companion_row.visible = Combat.in_combat and commands.visible and not Combat.companion_charges.is_empty()
@@ -135,12 +157,18 @@ func _refresh_companions() -> void:
 		cameo.visible = false
 	for id in companion_btns.keys():
 		var btn: Button = companion_btns[id]
+		btn.visible = Combat.companion_charges.has(id) # only those who came along
 		var ready: bool = Combat.companion_ready(id)
 		btn.disabled = not ready
 		btn.modulate = Color.WHITE if ready else Color(0.45, 0.45, 0.45, 1.0)
-	# The cameo stays through the companion's round (and a bite's target pick).
-	if cameo_id != "" and not Combat.playing and Combat.selecting_target != "bite":
+	# The cameo stays while its companion tanks, and through its own round
+	# (and a bite's target pick) in any case.
+	if cameo_id != "" and Combat.companion_active != cameo_id and not Combat.playing and Combat.selecting_target != "bite":
 		_cameo_out()
+	if cameo_id != "":
+		cameo_bar.max_value = max(1, Combat.companion_max_hp)
+		cameo_bar.value = Combat.companion_hp
+		cameo_bar.get_node("HPLabel").text = "%d / %d" % [Combat.companion_hp, Combat.companion_max_hp]
 
 # The called companion springs onto the stage.
 func _on_companion_called(id: String) -> void:
@@ -162,6 +190,9 @@ func _on_companion_called(id: String) -> void:
 	cameo.self_modulate = Color.WHITE
 	cameo.scale = Vector2(0.2, 0.2)
 	cameo.visible = true
+	cameo_bar.global_position = Vector2(cameo.global_position.x + (w - cameo_bar.size.x) / 2.0, cameo.global_position.y - cameo_bar.size.y - 2.0)
+	cameo_bar.visible = true
+	_refresh_companions()
 	_cameo_tween = create_tween()
 	_cameo_tween.tween_property(cameo, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
@@ -181,8 +212,20 @@ func _on_companion_struck(id: String) -> void:
 	_cameo_tween.tween_property(cameo, "rotation", 0.0, 0.06)
 	_cameo_tween.parallel().tween_property(cameo, "self_modulate", Color.WHITE, 0.45)
 
+# An enemy blow on the tank: the number floats up and the figure flashes.
+func _on_companion_hit(id: String, damage: int) -> void:
+	if cameo_id != id or not cameo.visible:
+		return
+	_spawn_popup(cameo, -damage)
+	_flash(cameo)
+
+func _on_companion_left(id: String) -> void:
+	if cameo_id == id:
+		_cameo_out()
+
 func _cameo_out() -> void:
 	cameo_id = ""
+	cameo_bar.visible = false
 	if _cameo_tween != null and _cameo_tween.is_valid():
 		_cameo_tween.kill()
 	_cameo_tween = create_tween()
