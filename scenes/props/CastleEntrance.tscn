@@ -1,13 +1,17 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/castle_entrance.gd" id="1_i6sm1"]
+[ext_resource type="Texture2D" path="res://assets/castle_entrance.png" id="1_i6sm1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bsb3r"]
-size = Vector2(28, 28)
+size = Vector2(190, 177)
 
-[node name="CastleEntrance" type="StaticBody2D" unique_id=1724388589]
+[node name="CastleEntrance" type="StaticBody2D" unique_id=1250889162]
 z_index = 1
-script = ExtResource("1_i6sm1")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2137868973]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1682507752]
+texture = ExtResource("1_i6sm1")
+offset = Vector2(0, -72.5)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=692181893]
+position = Vector2(0, -72.5)
 shape = SubResource("RectangleShape2D_bsb3r")
