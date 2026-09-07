@@ -93,6 +93,7 @@ const SFX := {
 	"nap": "res://assets/sfx/nap.wav", # Freesound 423144 "magic spell sleeping spell 1" by ogsoundfx
 	"quest": "res://assets/sfx/quest.wav", # Freesound 864469 "QUEST_COMPLETE" by thekindles
 	"coin": "res://assets/sfx/coin.wav", # jsfxr pickupCoin
+	"swing": "res://assets/sfx/swing.mp3", # Freesound 840716 "sword swing 1" by nomagician - an enemy's blow (Godot plays MP3 natively)
 }
 # One-shot pieces of music: played once over silence, then the scene's
 # track resumes (a won fight plays "victory" between the battle track

@@ -234,6 +234,7 @@ func _on_enemy_struck(index: int) -> void:
 		_settle_acting()
 		acting_index = index
 	last_struck = index
+	Audio.play_sfx("swing") # the enemy's swing; the HUD adds the thud if it lands
 	var sprite: TextureRect = _acting_sprite(index)
 	if sprite == null:
 		return
