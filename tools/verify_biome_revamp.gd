@@ -163,15 +163,10 @@ func _initialize() -> void:
 			break
 	Input.action_release("move_up")
 	await physics_frame
-	print("Encounter fired once inside Frostpeak Ridge: ", got_frostpeak_encounter)
-	if got_frostpeak_encounter:
-		var names := {"Ice Wraith": true, "Frost Wolf": true, "Stone Sentinel": true}
-		for enemy in combat.current_enemies:
-			if enemy != null and not names.has(enemy.name):
-				wrong_enemy_seen = true
-		print("Every enemy in the fight is one of the 3 Frostpeak monsters: ", not wrong_enemy_seen)
-		root.get_texture().get_image().save_png("res://verify_biome_frostpeak_encounter.png")
-		combat.player_run()
-		await process_frame
+	# Random overworld encounters are switched off (static farmable wild
+	# monsters replaced them - see overworld.gd OVERWORLD_ENCOUNTERS_ENABLED),
+	# so a long walk through Frostpeak must NOT start a fight on its own.
+	print("No random encounter on a long Frostpeak walk (static wild monsters replaced them): ", not got_frostpeak_encounter and not wrong_enemy_seen)
+	root.get_texture().get_image().save_png("res://verify_biome_frostpeak_walk.png")
 
 	quit()

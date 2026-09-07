@@ -119,7 +119,7 @@ func reveal_final_boss_entrance() -> void:
 	if _final_boss_entrance_spawned:
 		return
 	_final_boss_entrance_spawned = true
-	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.FINAL_BOSS_ENTRANCE, "res://scenes/FinalBoss.tscn", Vector2.ZERO)
+	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.place("final_boss"), "res://scenes/FinalBoss.tscn", Vector2.ZERO)
 
 # Same reveal-on-completion pattern as reveal_final_boss_entrance() above -
 # called once from _ready() below if GameState.world_progress already has it
@@ -132,7 +132,7 @@ func reveal_golden_plains_entrance() -> void:
 	if _golden_plains_entrance_spawned:
 		return
 	_golden_plains_entrance_spawned = true
-	_add_entrance(ANCIENT_BARROW_ENTRANCE_SCENE, World.GOLDEN_PLAINS_INTERIOR_ENTRANCE, "res://scenes/GoldenPlainsInterior.tscn", Vector2.ZERO)
+	_add_entrance(ANCIENT_BARROW_ENTRANCE_SCENE, World.place("golden_plains_interior"), "res://scenes/GoldenPlainsInterior.tscn", Vector2.ZERO)
 
 # Repaints every ford whose GameState flag is already true - safe to call
 # repeatedly (repainting an already-open tile is a harmless no-op). Called
@@ -156,6 +156,7 @@ func _on_quests_changed() -> void:
 	_repaint_open_paths()
 
 func _ready() -> void:
+	World.reload_places() # the recipe may have moved doors and camps
 	World.build_overworld_map(tilemap)
 	# Phase 1 "overland dungeon" prototype - carved before add_world_boundary/
 	# obstacle scatter so the maze's WALL cells are already painted (and thus
@@ -270,15 +271,15 @@ func _ready() -> void:
 	# Dungeon.tscn/Castle.tscn/FinalBoss.tscn all regenerate their maze fresh
 	# every visit and always spawn the player at their own entrance, so the
 	# target_spawn passed here is unused.
-	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.DUNGEON_ENTRANCE, "res://scenes/Dungeon.tscn", Vector2.ZERO)
-	_add_entrance(CASTLE_ENTRANCE_SCENE, World.CASTLE_ENTRANCE, "res://scenes/Castle.tscn", Vector2.ZERO)
+	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.place("dungeon"), "res://scenes/Dungeon.tscn", Vector2.ZERO)
+	_add_entrance(CASTLE_ENTRANCE_SCENE, World.place("castle"), "res://scenes/Castle.tscn", Vector2.ZERO)
 	# No conditional gating needed here - the closed ford (see biome_paths_open
 	# above) already physically blocks reaching this entrance until the
 	# cross_frostpeak quest opens it.
-	_add_entrance(WATCHTOWER_RUIN_ENTRANCE_SCENE, World.FROSTPEAK_INTERIOR_ENTRANCE, "res://scenes/FrostpeakInterior.tscn", Vector2.ZERO)
-	_add_entrance(DRUID_CIRCLE_ENTRANCE_SCENE, World.VERDANTWOOD_INTERIOR_ENTRANCE, "res://scenes/VerdantwoodInterior.tscn", Vector2.ZERO)
-	_add_entrance(VOLCANO_ENTRANCE_SCENE, World.BADLANDS_INTERIOR_ENTRANCE, "res://scenes/BadlandsInterior.tscn", Vector2.ZERO)
-	_add_entrance(SUBMERGED_TEMPLE_ENTRANCE_SCENE, World.GLOOMFEN_INTERIOR_ENTRANCE, "res://scenes/GloomfenInterior.tscn", Vector2.ZERO)
+	_add_entrance(WATCHTOWER_RUIN_ENTRANCE_SCENE, World.place("frostpeak_interior"), "res://scenes/FrostpeakInterior.tscn", Vector2.ZERO)
+	_add_entrance(DRUID_CIRCLE_ENTRANCE_SCENE, World.place("verdantwood_interior"), "res://scenes/VerdantwoodInterior.tscn", Vector2.ZERO)
+	_add_entrance(VOLCANO_ENTRANCE_SCENE, World.place("badlands_interior"), "res://scenes/BadlandsInterior.tscn", Vector2.ZERO)
+	_add_entrance(SUBMERGED_TEMPLE_ENTRANCE_SCENE, World.place("gloomfen_interior"), "res://scenes/GloomfenInterior.tscn", Vector2.ZERO)
 	if GameState.world_progress.final_boss_revealed:
 		reveal_final_boss_entrance()
 	if GameState.world_progress.golden_plains_revealed:
@@ -303,7 +304,7 @@ func _ready() -> void:
 	# northern ford (moved out of the village's bottom-right house, which is
 	# the Blacksmith's now).
 	var ranger: StaticBody2D = NPC_SCENE.instantiate()
-	ranger.position = _tile_center(World.RANGER_CAMP_POS)
+	ranger.position = _tile_center(World.place("ranger_camp"))
 	ranger.sprite_path = "res://assets/trader.png"
 	ranger.sprite_tint = Color(0.75, 0.88, 1.0, 1.0)
 	ranger.npc_name = "Frostpeak Ranger"
@@ -316,7 +317,7 @@ func _ready() -> void:
 	# the ford itself, a few tiles off the direct crossing line so it
 	# doesn't block the path.
 	var druid: StaticBody2D = NPC_SCENE.instantiate()
-	druid.position = _tile_center(World.DRUID_GLADE_POS)
+	druid.position = _tile_center(World.place("druid_glade"))
 	druid.sprite_path = "res://assets/elder.png"
 	druid.sprite_tint = Color(0.55, 0.75, 0.4, 1.0)
 	druid.npc_name = "Forest Druid"
@@ -328,7 +329,7 @@ func _ready() -> void:
 
 	# The Badlands ford-crossing quest giver - same standalone pattern as the Druid.
 	var prospector: StaticBody2D = NPC_SCENE.instantiate()
-	prospector.position = _tile_center(World.PROSPECTOR_CAMP_POS)
+	prospector.position = _tile_center(World.place("prospector_camp"))
 	prospector.sprite_path = "res://assets/trader.png"
 	prospector.sprite_tint = Color(0.75, 0.45, 0.25, 1.0)
 	prospector.npc_name = "Badlands Prospector"
@@ -339,7 +340,7 @@ func _ready() -> void:
 
 	# The Gloomfen ford-crossing quest giver - same standalone pattern as the Druid/Prospector.
 	var guide: StaticBody2D = NPC_SCENE.instantiate()
-	guide.position = _tile_center(World.MARSH_GUIDE_POS)
+	guide.position = _tile_center(World.place("marsh_guide"))
 	guide.sprite_path = "res://assets/elder.png"
 	guide.sprite_tint = Color(0.35, 0.42, 0.32, 1.0)
 	guide.npc_name = "Marsh Guide"

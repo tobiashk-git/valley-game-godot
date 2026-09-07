@@ -100,7 +100,7 @@ func _initialize() -> void:
 
 	# --- Walk to the dungeon entrance and enter through the real portal. ---
 	combat._steps_since_encounter = -100000 # no random encounter mid-walk
-	var approach: Vector2i = world.DUNGEON_ENTRANCE + Vector2i(0, 2)
+	var approach: Vector2i = world.place("dungeon") + Vector2i(0, 2)
 	player.position = Vector2(approach.x * 32 + 16, approach.y * 32 + 16)
 	var cam: Camera2D = player.get_node("Camera2D")
 	cam.reset_smoothing()

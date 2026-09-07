@@ -13,6 +13,7 @@ extends RefCounted
 #     "props": [{"scene": "MightyOak", "x": 90, "y": 108}],  prop scenes by name
 #     "monsters": [{"enemy_id": "frost_wolf", "x": 88, "y": 108}],
 #     "removed": ["x,y"],  a generated prop / wild monster on that tile is dropped
+#     "places": {"dungeon": [100, 81]},  moved entrances / camps (World.PLACE_DEFAULTS ids)
 #     "notes": [{"x": 100, "y": 100, "text": "..."}]  design notes (tool only)
 #   }
 # Every tile a recipe prop or monster stands on is treated as removed too,
@@ -131,6 +132,29 @@ static func notes(recipe: Dictionary) -> Array:
 	for entry in recipe.get("notes", []):
 		if typeof(entry) == TYPE_DICTIONARY and entry.has("text"):
 			out.append({"pos": _entry_pos(entry), "text": String(entry.text)})
+	return out
+
+# {place id: Vector2i} of the entrances and camps the recipe moved. Values
+# are [x, y] or {"x", "y"}; unknown ids and off-map tiles are skipped.
+static func places(recipe: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	var section: Variant = recipe.get("places", {})
+	if typeof(section) != TYPE_DICTIONARY:
+		return out
+	for id in section.keys():
+		if not World.PLACE_DEFAULTS.has(String(id)):
+			push_warning("MapRecipe: unknown place '%s'" % str(id))
+			continue
+		var v: Variant = section[id]
+		var pos := Vector2i(-1, -1)
+		if typeof(v) == TYPE_ARRAY and v.size() == 2:
+			pos = Vector2i(int(v[0]), int(v[1]))
+		elif typeof(v) == TYPE_DICTIONARY:
+			pos = _entry_pos(v)
+		if in_world(pos):
+			out[String(id)] = pos
+		else:
+			push_warning("MapRecipe: bad place %s -> %s" % [str(id), str(v)])
 	return out
 
 # Every tile the generator must leave alone: the "removed" list plus every

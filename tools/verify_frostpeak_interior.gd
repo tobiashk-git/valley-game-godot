@@ -183,9 +183,9 @@ func _initialize() -> void:
 	# Phase 1's verify_biome_revamp.gd).
 	await _clear_combat(combat)
 
-	var entrance_world_pos: Vector2 = Vector2(world.FROSTPEAK_INTERIOR_ENTRANCE.x * 32 + 16, world.FROSTPEAK_INTERIOR_ENTRANCE.y * 32 + 16)
+	var entrance_world_pos: Vector2 = Vector2(world.place("frostpeak_interior").x * 32 + 16, world.place("frostpeak_interior").y * 32 + 16)
 	await _clear_point(overworld, player, entrance_world_pos, 200.0)
-	var approach: Vector2i = world.FROSTPEAK_INTERIOR_ENTRANCE + Vector2i(0, 2)
+	var approach: Vector2i = world.place("frostpeak_interior") + Vector2i(0, 2)
 	player.position = Vector2(approach.x * 32 + 16, approach.y * 32 + 16)
 	cam.reset_smoothing()
 	for i in range(3):
@@ -205,7 +205,7 @@ func _initialize() -> void:
 	# own target_spawn convention) sits right at the trigger's edge (32px
 	# from center vs. a 28px half-width) - knife-edge, so bias a bit closer
 	# to guarantee overlap for this entry attempt specifically.
-	var entrance_center: Vector2 = Vector2(world.FROSTPEAK_INTERIOR_ENTRANCE.x * 32 + 16, world.FROSTPEAK_INTERIOR_ENTRANCE.y * 32 + 16)
+	var entrance_center: Vector2 = Vector2(world.place("frostpeak_interior").x * 32 + 16, world.place("frostpeak_interior").y * 32 + 16)
 	player.position = entrance_center + Vector2(0, 20)
 	await process_frame
 	await _clear_combat(combat)
@@ -389,7 +389,7 @@ func _initialize() -> void:
 	await process_frame
 	print("Left FrostpeakInterior via the real portal: ", current_scene.name == "Overworld")
 	var back_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Landed just outside the watchtower entrance: ", back_tile == world.FROSTPEAK_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Landed just outside the watchtower entrance: ", back_tile == world.place("frostpeak_interior") + Vector2i(0, 1))
 
 	# --- 11. Fast travel. ---
 	Input.action_press("toggle_map")
@@ -411,6 +411,6 @@ func _initialize() -> void:
 	await process_frame
 	print("Fast travel lands on Overworld: ", current_scene.name == "Overworld")
 	var travel_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Fast travel landed at the watchtower entrance: ", travel_tile == world.FROSTPEAK_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Fast travel landed at the watchtower entrance: ", travel_tile == world.place("frostpeak_interior") + Vector2i(0, 1))
 
 	quit()

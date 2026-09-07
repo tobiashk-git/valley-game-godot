@@ -86,26 +86,16 @@ const LOCATION_NAMES := {
 # Computed lazily (not a const dict) since it reads World.VILLAGE_GATES,
 # which is a `var` there, not a compile-time constant.
 func poi_target(poi_id: String) -> Vector2:
+	# Movable places (dungeons, interiors, the barrow): wherever the recipe put them.
+	if World.PLACE_DEFAULTS.has(poi_id):
+		var t: Vector2i = World.place(poi_id)
+		return Vector2(t.x * 32 + 16, (t.y + 1) * 32 + 16)
 	match poi_id:
 		"house":
 			return Vector2(World.HOUSE_ENTRANCE.x * 32 + 16, (World.HOUSE_ENTRANCE.y + 1) * 32 + 16)
 		"village":
 			var t: Vector2i = World.VILLAGE_GATES.south + Vector2i(0, -2)
 			return Vector2(t.x * 32 + 16, t.y * 32 + 16)
-		"dungeon":
-			return Vector2(World.DUNGEON_ENTRANCE.x * 32 + 16, (World.DUNGEON_ENTRANCE.y + 1) * 32 + 16)
-		"castle":
-			return Vector2(World.CASTLE_ENTRANCE.x * 32 + 16, (World.CASTLE_ENTRANCE.y + 1) * 32 + 16)
-		"frostpeak_interior":
-			return Vector2(World.FROSTPEAK_INTERIOR_ENTRANCE.x * 32 + 16, (World.FROSTPEAK_INTERIOR_ENTRANCE.y + 1) * 32 + 16)
-		"verdantwood_interior":
-			return Vector2(World.VERDANTWOOD_INTERIOR_ENTRANCE.x * 32 + 16, (World.VERDANTWOOD_INTERIOR_ENTRANCE.y + 1) * 32 + 16)
-		"badlands_interior":
-			return Vector2(World.BADLANDS_INTERIOR_ENTRANCE.x * 32 + 16, (World.BADLANDS_INTERIOR_ENTRANCE.y + 1) * 32 + 16)
-		"gloomfen_interior":
-			return Vector2(World.GLOOMFEN_INTERIOR_ENTRANCE.x * 32 + 16, (World.GLOOMFEN_INTERIOR_ENTRANCE.y + 1) * 32 + 16)
-		"golden_plains_interior":
-			return Vector2(World.GOLDEN_PLAINS_INTERIOR_ENTRANCE.x * 32 + 16, (World.GOLDEN_PLAINS_INTERIOR_ENTRANCE.y + 1) * 32 + 16)
 		_:
 			return Vector2.ZERO
 

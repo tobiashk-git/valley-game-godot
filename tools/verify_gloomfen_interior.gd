@@ -160,7 +160,7 @@ func _initialize() -> void:
 		walk_attempts += 1
 	print("Crossed the now-open ford into Gloomfen territory: ", player2.position.x < river_x)
 
-	var entrance_center: Vector2 = Vector2(world.GLOOMFEN_INTERIOR_ENTRANCE.x * 32 + 16, world.GLOOMFEN_INTERIOR_ENTRANCE.y * 32 + 16)
+	var entrance_center: Vector2 = Vector2(world.place("gloomfen_interior").x * 32 + 16, world.place("gloomfen_interior").y * 32 + 16)
 	player2.position = entrance_center + Vector2(20, 0) # real margin inside the 56x56 trigger, not right at its edge
 	cam2.reset_smoothing()
 	for i in range(3):
@@ -352,7 +352,7 @@ func _initialize() -> void:
 	await process_frame
 	print("Left GloomfenInterior via the real portal: ", current_scene.name == "Overworld")
 	var back_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Landed just outside the submerged temple entrance: ", back_tile == world.GLOOMFEN_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Landed just outside the submerged temple entrance: ", back_tile == world.place("gloomfen_interior") + Vector2i(0, 1))
 
 	# --- 10. Fast travel. ---
 	Input.action_press("toggle_map")
@@ -374,6 +374,6 @@ func _initialize() -> void:
 	await process_frame
 	print("Fast travel lands on Overworld: ", current_scene.name == "Overworld")
 	var travel_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Fast travel landed at the submerged temple entrance: ", travel_tile == world.GLOOMFEN_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Fast travel landed at the submerged temple entrance: ", travel_tile == world.place("gloomfen_interior") + Vector2i(0, 1))
 
 	quit()

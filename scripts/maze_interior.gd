@@ -146,7 +146,10 @@ func _ready() -> void:
 	out_portal.position = _tile_center(Vector2i(gen.door_x, gen.door_y))
 	out_portal.get_node("CollisionShape2D").shape.size = Vector2(56, 56)
 	out_portal.target_scene = "res://scenes/Overworld.tscn"
-	out_portal.target_spawn = Vector2(entrance_tile.x * 32 + 16, (entrance_tile.y + 1) * 32 + 16)
+	# The door's overworld tile: the recipe may have moved it (World.place),
+	# else the scene's own entrance_tile.
+	var door: Vector2i = World.place(poi_id) if World.PLACE_DEFAULTS.has(poi_id) else entrance_tile
+	out_portal.target_spawn = Vector2(door.x * 32 + 16, (door.y + 1) * 32 + 16)
 	add_child(out_portal)
 
 	# The door sits on the very last painted row (HEIGHT-1) with nothing at

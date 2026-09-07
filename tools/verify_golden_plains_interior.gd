@@ -44,7 +44,7 @@ func _initialize() -> void:
 
 	var player0: CharacterBody2D = overworld0.get_node("YSort/Player")
 	var cam0: Camera2D = player0.get_node("Camera2D")
-	var entrance_center: Vector2 = Vector2(world.GOLDEN_PLAINS_INTERIOR_ENTRANCE.x * 32 + 16, world.GOLDEN_PLAINS_INTERIOR_ENTRANCE.y * 32 + 16)
+	var entrance_center: Vector2 = Vector2(world.place("golden_plains_interior").x * 32 + 16, world.place("golden_plains_interior").y * 32 + 16)
 	player0.position = entrance_center
 	cam0.reset_smoothing()
 	for i in range(3):
@@ -249,7 +249,7 @@ func _initialize() -> void:
 	await process_frame
 	print("Left GoldenPlainsInterior via the real portal: ", current_scene.name == "Overworld")
 	var back_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Landed just outside the barrow entrance: ", back_tile == world.GOLDEN_PLAINS_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Landed just outside the barrow entrance: ", back_tile == world.place("golden_plains_interior") + Vector2i(0, 1))
 
 	# --- 8. Fast travel. ---
 	Input.action_press("toggle_map")
@@ -271,6 +271,6 @@ func _initialize() -> void:
 	await process_frame
 	print("Fast travel lands on Overworld: ", current_scene.name == "Overworld")
 	var travel_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Fast travel landed at the barrow entrance: ", travel_tile == world.GOLDEN_PLAINS_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Fast travel landed at the barrow entrance: ", travel_tile == world.place("golden_plains_interior") + Vector2i(0, 1))
 
 	quit()

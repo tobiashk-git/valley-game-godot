@@ -16,8 +16,8 @@ func _initialize() -> void:
 	var dialogue_ui: Node = root.get_node("DialogueUI")
 	var hud: Node = root.get_node("HUD")
 
-	character.stats.max_hp = 500
-	character.stats.hp = 500
+	character.stats.max_hp = 2000 # the Warden hits ~27 a round under percentage mitigation; 500 fell in 19 rounds
+	character.stats.hp = 2000
 	character.stats.mp = 999
 
 	var overworld_scene: PackedScene = load("res://scenes/Overworld.tscn")
@@ -73,7 +73,7 @@ func _initialize() -> void:
 	await process_frame
 
 	# --- Walk to the final boss entrance, confirm it's real and enterable. ---
-	var approach: Vector2i = world.FINAL_BOSS_ENTRANCE + Vector2i(0, 2)
+	var approach: Vector2i = world.place("final_boss") + Vector2i(0, 2)
 	player.position = Vector2(approach.x * 32 + 16, approach.y * 32 + 16)
 	cam.reset_smoothing()
 	for i in range(3):

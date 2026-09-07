@@ -95,6 +95,49 @@ const GOLDEN_PLAINS_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X - 13, WORLD_CEN
 # TileSet source ids — must match the order sources were added in
 # tools/setup_phase1.gd when the TileSet resource was built (0-8), plus 2
 # more added later by tools/setup_biome_revamp.gd (9-10, the river/ford).
+# --- Movable places (map design tool, 2026-09-07) ---
+# The entrance and camp constants above are DEFAULTS; the recipe's "places"
+# section (maps/overworld.json, see map_recipe.gd) moves any of them.
+# Everything that needs a place's tile goes through place(id), so a design
+# moves the door, its portal, the interior's way back, the World Map marker,
+# fast travel and the scatter clearance together. Camps and entrances move
+# independently (an NPC may follow the story to a dungeon door later). The
+# village houses stay fixed - they are baked into the painted village plate.
+const PLACE_DEFAULTS := {
+	"dungeon": DUNGEON_ENTRANCE, "castle": CASTLE_ENTRANCE, "final_boss": FINAL_BOSS_ENTRANCE,
+	"frostpeak_interior": FROSTPEAK_INTERIOR_ENTRANCE, "verdantwood_interior": VERDANTWOOD_INTERIOR_ENTRANCE,
+	"badlands_interior": BADLANDS_INTERIOR_ENTRANCE, "gloomfen_interior": GLOOMFEN_INTERIOR_ENTRANCE,
+	"golden_plains_interior": GOLDEN_PLAINS_INTERIOR_ENTRANCE,
+	"ranger_camp": RANGER_CAMP_POS, "druid_glade": DRUID_GLADE_POS, "prospector_camp": PROSPECTOR_CAMP_POS, "marsh_guide": MARSH_GUIDE_POS,
+}
+const PLACE_LABELS := {
+	"dungeon": "Dungeon", "castle": "Castle", "final_boss": "Ancient Warden's lair",
+	"frostpeak_interior": "Ice Caves", "verdantwood_interior": "Verdantwood Grove", "badlands_interior": "Caldera",
+	"gloomfen_interior": "Sunken Temple", "golden_plains_interior": "Ancient Barrow",
+	"ranger_camp": "Frostpeak Ranger", "druid_glade": "Forest Druid", "prospector_camp": "Badlands Prospector", "marsh_guide": "Marsh Guide",
+}
+var _places: Dictionary = {}
+var _places_loaded := false
+
+# The tile a place stands on: the recipe's if it moved it, else the default.
+func place(id: String) -> Vector2i:
+	if not _places_loaded:
+		reload_places()
+	return _places.get(id, PLACE_DEFAULTS[id])
+
+# Re-reads the active recipe's places (the Overworld does this as it builds,
+# the designer's regenerate feeds its unsaved recipe through MapRecipe.override).
+func reload_places() -> void:
+	_places = MapRecipe.places(MapRecipe.load_active())
+	_places_loaded = true
+
+# The place standing on a tile, or "".
+func place_at(tile: Vector2i) -> String:
+	for id in PLACE_DEFAULTS.keys():
+		if place(id) == tile:
+			return id
+	return ""
+
 const SRC_GRASS := 0
 const SRC_FROSTPEAK := 1   # was SRC_SNOW - same texture, same compass position (north)
 const SRC_BADLANDS := 2    # was SRC_SAND - same texture, same compass position (south)
@@ -373,15 +416,15 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 	# entrance markers are placed separately (not painted onto the tilemap),
 	# so they need to be reserved here the same way the JS version deletes
 	# any resource that landed on a POI after the fact.
-	_reserve_entrance_clearance(occupied, DUNGEON_ENTRANCE)
-	_reserve_entrance_clearance(occupied, CASTLE_ENTRANCE)
+	_reserve_entrance_clearance(occupied, place("dungeon"))
+	_reserve_entrance_clearance(occupied, place("castle"))
 	_reserve_entrance_clearance(occupied, HOUSE_ENTRANCE)
-	_reserve_entrance_clearance(occupied, FINAL_BOSS_ENTRANCE)
-	_reserve_entrance_clearance(occupied, DRUID_GLADE_POS)
-	_reserve_entrance_clearance(occupied, RANGER_CAMP_POS)
-	_reserve_entrance_clearance(occupied, PROSPECTOR_CAMP_POS)
-	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS)
-	_reserve_entrance_clearance(occupied, GOLDEN_PLAINS_INTERIOR_ENTRANCE)
+	_reserve_entrance_clearance(occupied, place("final_boss"))
+	_reserve_entrance_clearance(occupied, place("druid_glade"))
+	_reserve_entrance_clearance(occupied, place("ranger_camp"))
+	_reserve_entrance_clearance(occupied, place("prospector_camp"))
+	_reserve_entrance_clearance(occupied, place("marsh_guide"))
+	_reserve_entrance_clearance(occupied, place("golden_plains_interior"))
 
 	# Was 70/40 - scaled ~2.15x with the valley's new area (radius 15->22,
 	# area grows with radius²) so the enlarged valley doesn't end up feeling
@@ -447,16 +490,16 @@ func scatter_biome_obstacles(tilemap: TileMapLayer, extra_occupied: Dictionary =
 		occupied[pos] = true
 	var elevated_buffer := {}
 	var flush_buffer := {}
-	_reserve_entrance_clearance(occupied, VERDANTWOOD_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, place("verdantwood_interior"), 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.VERDANTWOOD])
-	_reserve_entrance_clearance(occupied, FROSTPEAK_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, place("frostpeak_interior"), 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.FROSTPEAK])
-	_reserve_entrance_clearance(occupied, GLOOMFEN_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, place("gloomfen_interior"), 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.GLOOMFEN])
-	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS, 3)
-	_reserve_entrance_clearance(occupied, BADLANDS_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, place("marsh_guide"), 3)
+	_reserve_entrance_clearance(occupied, place("badlands_interior"), 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.BADLANDS])
-	_reserve_entrance_clearance(occupied, PROSPECTOR_CAMP_POS, 3)
+	_reserve_entrance_clearance(occupied, place("prospector_camp"), 3)
 	_reserve_verdantwood_maze_clearance(occupied)
 
 	# A tight box around the wedge instead of the full 200x200 map - outer
@@ -539,16 +582,16 @@ const WILD_MONSTER_COUNT_PER_SPECIES := 8
 
 func scatter_wild_monsters(tilemap: TileMapLayer) -> Array:
 	var occupied := {}
-	_reserve_entrance_clearance(occupied, VERDANTWOOD_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, place("verdantwood_interior"), 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.VERDANTWOOD])
-	_reserve_entrance_clearance(occupied, FROSTPEAK_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, place("frostpeak_interior"), 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.FROSTPEAK])
-	_reserve_entrance_clearance(occupied, GLOOMFEN_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, place("gloomfen_interior"), 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.GLOOMFEN])
-	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS, 3)
-	_reserve_entrance_clearance(occupied, BADLANDS_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, place("marsh_guide"), 3)
+	_reserve_entrance_clearance(occupied, place("badlands_interior"), 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.BADLANDS])
-	_reserve_entrance_clearance(occupied, PROSPECTOR_CAMP_POS, 3)
+	_reserve_entrance_clearance(occupied, place("prospector_camp"), 3)
 	_reserve_verdantwood_maze_clearance(occupied)
 	var bounds := Rect2i(WORLD_CENTER_X - OBSTACLE_SCATTER_REACH, WORLD_CENTER_Y - OBSTACLE_SCATTER_REACH, OBSTACLE_SCATTER_REACH * 2, OBSTACLE_SCATTER_REACH * 2)
 
@@ -873,9 +916,9 @@ func scatter_biome_lakes(tilemap: TileMapLayer, extra_occupied: Dictionary = {})
 	# source tile a monster scatter call would have seen at that position.
 	for pos in extra_occupied:
 		occupied[pos] = true
-	_reserve_entrance_clearance(occupied, GLOOMFEN_INTERIOR_ENTRANCE, 3)
+	_reserve_entrance_clearance(occupied, place("gloomfen_interior"), 3)
 	_reserve_entrance_clearance(occupied, BIOME_FORDS[Zone.GLOOMFEN])
-	_reserve_entrance_clearance(occupied, MARSH_GUIDE_POS, 3)
+	_reserve_entrance_clearance(occupied, place("marsh_guide"), 3)
 	var bounds := Rect2i(WORLD_CENTER_X - OBSTACLE_SCATTER_REACH, WORLD_CENTER_Y - OBSTACLE_SCATTER_REACH, OBSTACLE_SCATTER_REACH * 2, OBSTACLE_SCATTER_REACH * 2)
 	_paint_lakes(tilemap, GLOOMFEN_LAKE_COUNT, Zone.GLOOMFEN, SRC_GLOOMFEN, SRC_GLOOMFEN_WATER, occupied, bounds)
 

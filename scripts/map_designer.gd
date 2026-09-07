@@ -12,15 +12,15 @@ extends Control
 #
 # Mouse: left = use the tool (the Pan tool, open by default, drags the
 # map; Space + left drag pans in any tool), right / middle drag = pan,
-# wheel = zoom. Keys: WASD / arrows pan, H pan tool, 1-7 tools, [ ] brush,
+# wheel = zoom. Keys: WASD / arrows pan, H pan tool, 1-8 tools, [ ] brush,
 # G grid, M marks, N notes, Ctrl+Z / Ctrl+Y undo / redo, Ctrl+S save,
-# R regenerate.
+# R regenerate, Esc drops a carried place back where it was.
 
 const OVERWORLD_SCENE := preload("res://scenes/Overworld.tscn")
 const WILD_MONSTER_SCENE := preload("res://scenes/props/WildMonster.tscn")
-const TOOLS := ["pan", "tile", "prop", "monster", "remove", "erase", "pick", "note"]
-const EDIT_TOOLS := ["tile", "prop", "monster", "remove", "erase", "pick", "note"] # keys 1-7
-const TOOL_LABELS := {"pan": "H  Pan (drag the map)", "tile": "1  Paint tile", "prop": "2  Place prop", "monster": "3  Place monster", "remove": "4  Remove generated", "erase": "5  Erase recipe", "pick": "6  Pick", "note": "7  Note"}
+const TOOLS := ["pan", "tile", "prop", "monster", "remove", "erase", "pick", "note", "move"]
+const EDIT_TOOLS := ["tile", "prop", "monster", "remove", "erase", "pick", "note", "move"] # keys 1-8
+const TOOL_LABELS := {"pan": "H  Pan (drag the map)", "tile": "1  Paint tile", "prop": "2  Place prop", "monster": "3  Place monster", "remove": "4  Remove generated", "erase": "5  Erase recipe", "pick": "6  Pick", "note": "7  Note", "move": "8  Move place"}
 const TOOL_HELP := {
 	"pan": "Drag the map with the left mouse button. In any tool, hold Space to drag, or use the right / middle button.",
 	"tile": "Paints the chosen ground over the generated map (brush [ ]).",
@@ -30,7 +30,10 @@ const TOOL_HELP := {
 	"erase": "Takes the recipe's entries off the tile; the generated content returns.",
 	"pick": "Reads the tile into the palette.",
 	"note": "Pins a design note to the tile (shown only here).",
+	"move": "Click a dungeon door, an interior entrance or an NPC camp to pick it up, then click open ground to drop it (Esc cancels). Camps and doors move separately.",
 }
+const MARK_PLACE := Color(1.0, 0.5, 1.0, 0.95)
+const SOLID_SOURCES := [World.SRC_RIVER, World.SRC_MOUNTAIN, World.SRC_GLOOMFEN_WATER, World.SRC_FOREST_WALL, World.SRC_FENCE, World.SRC_GATE, World.SRC_ALTAR]
 const TILE_COLOURS := {"grass": Color(0.42, 0.66, 0.3), "frostpeak": Color(0.85, 0.9, 0.95), "badlands": Color(0.8, 0.62, 0.35), "verdantwood": Color(0.25, 0.5, 0.25), "gloomfen": Color(0.4, 0.5, 0.35), "path": Color(0.72, 0.6, 0.42), "river": Color(0.3, 0.5, 0.85), "ford": Color(0.55, 0.7, 0.85), "mountain": Color(0.5, 0.48, 0.5), "gloomfen_water": Color(0.25, 0.4, 0.45), "forest_wall": Color(0.15, 0.35, 0.15)}
 const MARK_TILE := Color(0.3, 0.9, 1.0, 0.9)
 const MARK_PROP := Color(0.4, 1.0, 0.4, 0.95)
@@ -67,6 +70,7 @@ var _palette_buttons: Dictionary = {}
 var _note_dialog: AcceptDialog
 var _note_edit: LineEdit
 var _note_tile := Vector2i(-1, -1)
+var carrying := "" # the place picked up by the Move tool
 
 # UI
 var ui: CanvasLayer
@@ -121,6 +125,8 @@ func _fresh(r: Dictionary) -> Dictionary:
 	for k in ["props", "monsters", "removed", "notes"]:
 		if not out.has(k) or typeof(out[k]) != TYPE_ARRAY:
 			out[k] = []
+	if not out.has("places") or typeof(out["places"]) != TYPE_DICTIONARY:
+		out["places"] = {}
 	return out
 
 # --- the world under the tools ---
@@ -203,6 +209,9 @@ func recipe_at(pos: Vector2i) -> Array:
 	for e in recipe.notes:
 		if int(e.x) == pos.x and int(e.y) == pos.y:
 			out.append("note: %s" % e.text)
+	var pid: String = World.place_at(pos)
+	if pid != "":
+		out.append("place %s%s" % [pid, " (moved)" if recipe.places.has(pid) else ""])
 	return out
 
 # --- tools (all edit the recipe; the world follows) ---
@@ -287,9 +296,37 @@ func apply_at(pos: Vector2i) -> bool:
 					recipe.props = _strip_entries(recipe.props, t)
 					recipe.monsters = _strip_entries(recipe.monsters, t)
 					recipe.notes = _strip_entries(recipe.notes, t)
+					var pid: String = World.place_at(t)
+					if pid != "" and recipe.places.has(pid):
+						recipe.places.erase(pid) # back to its default spot
 			if changed:
 				regenerate()
 			return changed
+		"move":
+			if carrying == "":
+				var pid: String = World.place_at(pos)
+				if pid == "":
+					set_status("Nothing to move here - click a door or a camp")
+					return false
+				carrying = pid
+				set_status("Carrying %s - click open ground to drop it, Esc to cancel" % World.PLACE_LABELS[pid])
+				return false
+			if overworld.tilemap.get_cell_source_id(pos) in SOLID_SOURCES:
+				set_status("Can't drop %s on solid ground" % World.PLACE_LABELS[carrying])
+				return false
+			var other: String = World.place_at(pos)
+			if other != "" and other != carrying:
+				set_status("%s already stands there" % World.PLACE_LABELS[other])
+				return false
+			_snapshot()
+			if pos == World.PLACE_DEFAULTS[carrying]:
+				recipe.places.erase(carrying)
+			else:
+				recipe.places[carrying] = [pos.x, pos.y]
+			set_status("%s moved to (%d, %d)" % [World.PLACE_LABELS[carrying], pos.x, pos.y])
+			carrying = ""
+			regenerate()
+			return true
 		"pick":
 			for e in recipe.monsters:
 				if int(e.x) == pos.x and int(e.y) == pos.y:
@@ -428,7 +465,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			set_brush(brush + 2)
 		elif k.keycode == KEY_H:
 			_set_tool("pan")
-		elif k.keycode >= KEY_1 and k.keycode <= KEY_7:
+		elif k.keycode == KEY_ESCAPE and carrying != "":
+			carrying = ""
+			set_status("Dropped back")
+		elif k.keycode >= KEY_1 and k.keycode <= KEY_8:
 			_set_tool(EDIT_TOOLS[k.keycode - KEY_1])
 
 func _process(delta: float) -> void:
@@ -496,6 +536,16 @@ func _draw_overlay() -> void:
 			var o := Vector2(p.x * 32, p.y * 32)
 			overlay.draw_line(o + Vector2(6, 6), o + Vector2(26, 26), MARK_REMOVED, 2.0)
 			overlay.draw_line(o + Vector2(26, 6), o + Vector2(6, 26), MARK_REMOVED, 2.0)
+		# Movable places: an outline and, zoomed in, the name; the carried one blinks.
+		var pfont: Font = ThemeDB.fallback_font
+		for pid in World.PLACE_DEFAULTS.keys():
+			var pp: Vector2i = World.place(pid)
+			var colour: Color = MARK_PLACE
+			if pid == carrying and int(Time.get_ticks_msec() / 250) % 2 == 0:
+				colour = Color(1, 1, 1, 1)
+			overlay.draw_rect(Rect2(pp.x * 32 - 2, pp.y * 32 - 2, 36, 36), colour, false, 2.0)
+			if camera.zoom.x >= 0.75:
+				overlay.draw_string(pfont, Vector2(pp.x * 32 - 2, pp.y * 32 - 6), World.PLACE_LABELS[pid], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, colour)
 	if show_notes:
 		var font: Font = ThemeDB.fallback_font
 		for e in recipe.notes:
@@ -674,7 +724,7 @@ func set_brush(b: int) -> void:
 
 func _palette_entries() -> Array:
 	match tool:
-		"pan", "tile", "erase", "pick", "remove", "note":
+		"pan", "tile", "erase", "pick", "remove", "note", "move":
 			return MapRecipe.tile_names().keys()
 		"prop":
 			return prop_scenes.keys()

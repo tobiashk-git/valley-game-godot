@@ -27,7 +27,7 @@ func _initialize() -> void:
 	await process_frame
 
 	var player: CharacterBody2D = overworld.get_node("YSort/Player")
-	var approach: Vector2i = world.CASTLE_ENTRANCE + Vector2i(0, 2)
+	var approach: Vector2i = world.place("castle") + Vector2i(0, 2)
 	player.position = Vector2(approach.x * 32 + 16, approach.y * 32 + 16)
 	var cam: Camera2D = player.get_node("Camera2D")
 	cam.reset_smoothing()
@@ -105,7 +105,7 @@ func _initialize() -> void:
 	await process_frame
 	print("Left the Castle via the real portal: ", current_scene.name == "Overworld")
 	var back_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Landed just outside the castle entrance: ", back_tile == world.CASTLE_ENTRANCE + Vector2i(0, 1))
+	print("Landed just outside the castle entrance: ", back_tile == world.place("castle") + Vector2i(0, 1))
 
 	# --- World Map now lists Castle; fast travel works. ---
 	Input.action_press("toggle_map")
@@ -127,6 +127,6 @@ func _initialize() -> void:
 	await process_frame
 	print("Fast travel to Castle lands on Overworld: ", current_scene.name == "Overworld")
 	var travel_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Fast travel landed at the castle entrance: ", travel_tile == world.CASTLE_ENTRANCE + Vector2i(0, 1))
+	print("Fast travel landed at the castle entrance: ", travel_tile == world.place("castle") + Vector2i(0, 1))
 
 	quit()

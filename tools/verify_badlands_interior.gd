@@ -159,7 +159,7 @@ func _initialize() -> void:
 		walk_attempts += 1
 	print("Crossed the now-open ford into Badlands territory: ", player2.position.y > river_y)
 
-	var entrance_center: Vector2 = Vector2(world.BADLANDS_INTERIOR_ENTRANCE.x * 32 + 16, world.BADLANDS_INTERIOR_ENTRANCE.y * 32 + 16)
+	var entrance_center: Vector2 = Vector2(world.place("badlands_interior").x * 32 + 16, world.place("badlands_interior").y * 32 + 16)
 	player2.position = entrance_center + Vector2(0, -20) # real margin inside the 56x56 trigger, not right at its edge
 	cam2.reset_smoothing()
 	for i in range(3):
@@ -334,7 +334,7 @@ func _initialize() -> void:
 	await process_frame
 	print("Left BadlandsInterior via the real portal: ", current_scene.name == "Overworld")
 	var back_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Landed just outside the volcano entrance: ", back_tile == world.BADLANDS_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Landed just outside the volcano entrance: ", back_tile == world.place("badlands_interior") + Vector2i(0, 1))
 
 	# --- 10. Fast travel. ---
 	Input.action_press("toggle_map")
@@ -356,6 +356,6 @@ func _initialize() -> void:
 	await process_frame
 	print("Fast travel lands on Overworld: ", current_scene.name == "Overworld")
 	var travel_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Fast travel landed at the volcano entrance: ", travel_tile == world.BADLANDS_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Fast travel landed at the volcano entrance: ", travel_tile == world.place("badlands_interior") + Vector2i(0, 1))
 
 	quit()

@@ -174,7 +174,7 @@ func _initialize() -> void:
 	print("Crossed the now-open ford into Verdantwood territory: ", player2.position.x > river_x)
 	await _clear_combat(combat)
 
-	var entrance_center: Vector2 = Vector2(world.VERDANTWOOD_INTERIOR_ENTRANCE.x * 32 + 16, world.VERDANTWOOD_INTERIOR_ENTRANCE.y * 32 + 16)
+	var entrance_center: Vector2 = Vector2(world.place("verdantwood_interior").x * 32 + 16, world.place("verdantwood_interior").y * 32 + 16)
 	await _clear_point(overworld2, player2, entrance_center, 200.0)
 	player2.position = entrance_center + Vector2(-20, 0) # real margin inside the 56x56 trigger, not right at its edge
 	cam2.reset_smoothing()
@@ -348,7 +348,7 @@ func _initialize() -> void:
 	await process_frame
 	print("Left VerdantwoodInterior via the real portal: ", current_scene.name == "Overworld")
 	var back_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Landed just outside the druid circle entrance: ", back_tile == world.VERDANTWOOD_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Landed just outside the druid circle entrance: ", back_tile == world.place("verdantwood_interior") + Vector2i(0, 1))
 
 	# --- 10. Fast travel. ---
 	Input.action_press("toggle_map")
@@ -370,6 +370,6 @@ func _initialize() -> void:
 	await process_frame
 	print("Fast travel lands on Overworld: ", current_scene.name == "Overworld")
 	var travel_tile := Vector2i(int(current_scene.get_node("YSort/Player").position.x / 32), int(current_scene.get_node("YSort/Player").position.y / 32))
-	print("Fast travel landed at the druid circle entrance: ", travel_tile == world.VERDANTWOOD_INTERIOR_ENTRANCE + Vector2i(0, 1))
+	print("Fast travel landed at the druid circle entrance: ", travel_tile == world.place("verdantwood_interior") + Vector2i(0, 1))
 
 	quit()
