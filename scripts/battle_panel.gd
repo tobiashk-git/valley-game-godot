@@ -32,6 +32,16 @@ const HIT_FLASH := Color(1.0, 0.45, 0.45)
 # the victory summary until it's pressed (user feedback: the loot line used
 # to vanish with the panel before it could be read).
 var continue_btn: Button
+# Companions (Combat.COMPANIONS): a row of bust buttons above the commands,
+# hidden until they are unlocked, each dimmed once its charge is spent. The
+# called companion's figure pops in at the right end of the message box for
+# its round (the cameo - beside its own lines, clear of the enemy slots) and
+# shakes on the blow, like an enemy's strike cue.
+var companion_row: HBoxContainer
+var companion_btns: Dictionary = {} # id -> Button (bust icon)
+var cameo: TextureRect
+var cameo_id := ""
+var _cameo_tween: Tween
 
 var narrow := false
 # Per-slot last known HP, to turn a change into a floating number.
@@ -73,6 +83,113 @@ func _ready() -> void:
 	continue_btn.pressed.connect(Combat.finish_combat)
 	commands.get_parent().add_child(continue_btn)
 	commands.get_parent().move_child(continue_btn, commands.get_index() + 1)
+	_build_companions()
+
+func _build_companions() -> void:
+	companion_row = HBoxContainer.new()
+	companion_row.name = "CompanionRow"
+	companion_row.add_theme_constant_override("separation", 8)
+	companion_row.visible = false
+	commands.get_parent().add_child(companion_row)
+	commands.get_parent().move_child(companion_row, commands.get_index())
+	var caption := Label.new()
+	caption.name = "Caption"
+	caption.text = "Companions"
+	caption.add_theme_font_size_override("font_size", 12)
+	caption.modulate = Color(1, 1, 1, 0.6)
+	caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	companion_row.add_child(caption)
+	for id in Combat.COMPANIONS.keys():
+		var def: Dictionary = Combat.COMPANIONS[id]
+		# A kit button carrying just the bust, so it reads as a command.
+		var btn := Button.new()
+		btn.name = "%sBtn" % id.capitalize()
+		btn.theme_type_variation = &"SecondaryButton"
+		btn.custom_minimum_size = Vector2(60, 44)
+		btn.expand_icon = true
+		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		btn.add_theme_constant_override("icon_max_width", 36)
+		if ResourceLoader.exists(def.portrait):
+			btn.icon = load(def.portrait)
+		btn.tooltip_text = "%s - %s" % [def.name, def.move]
+		btn.pressed.connect(Combat.companion_act.bind(id))
+		companion_row.add_child(btn)
+		companion_btns[id] = btn
+	cameo = TextureRect.new()
+	cameo.name = "Cameo"
+	cameo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	cameo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	cameo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	cameo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cameo.z_index = 5
+	cameo.visible = false
+	panel.add_child(cameo)
+	Combat.companion_called.connect(_on_companion_called)
+	Combat.companion_struck.connect(_on_companion_struck)
+
+func _refresh_companions() -> void:
+	companion_row.visible = Combat.in_combat and commands.visible and not Combat.companion_charges.is_empty()
+	if not Combat.in_combat and cameo_id != "":
+		cameo_id = ""
+		cameo.visible = false
+	for id in companion_btns.keys():
+		var btn: Button = companion_btns[id]
+		var ready: bool = Combat.companion_ready(id)
+		btn.disabled = not ready
+		btn.modulate = Color.WHITE if ready else Color(0.45, 0.45, 0.45, 1.0)
+	# The cameo stays through the companion's round (and a bite's target pick).
+	if cameo_id != "" and not Combat.playing and Combat.selecting_target != "bite":
+		_cameo_out()
+
+# The called companion springs onto the stage.
+func _on_companion_called(id: String) -> void:
+	var def: Dictionary = Combat.COMPANIONS[id]
+	if not ResourceLoader.exists(def.sprite):
+		return
+	if _cameo_tween != null and _cameo_tween.is_valid():
+		_cameo_tween.kill()
+	cameo_id = id
+	var tex: Texture2D = load(def.sprite)
+	cameo.texture = tex
+	var h: float = 72.0 if narrow else 84.0
+	var w: float = h * tex.get_width() / max(1.0, float(tex.get_height()))
+	cameo.size = Vector2(w, h)
+	cameo.pivot_offset = Vector2(w / 2.0, h)
+	var rect: Rect2 = log_panel.get_global_rect()
+	cameo.global_position = Vector2(rect.end.x - w - 10.0, rect.end.y - h - 6.0)
+	cameo.rotation = 0.0
+	cameo.self_modulate = Color.WHITE
+	cameo.scale = Vector2(0.2, 0.2)
+	cameo.visible = true
+	_cameo_tween = create_tween()
+	_cameo_tween.tween_property(cameo, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+# The blow: the same shake and flash an enemy gets.
+func _on_companion_struck(id: String) -> void:
+	if cameo_id != id or not cameo.visible:
+		return
+	if _cameo_tween != null and _cameo_tween.is_valid():
+		_cameo_tween.kill()
+	cameo.scale = Vector2.ONE
+	cameo.self_modulate = STRIKE_FLASH
+	_cameo_tween = create_tween()
+	_cameo_tween.tween_property(cameo, "rotation", -0.12, 0.05)
+	_cameo_tween.tween_property(cameo, "rotation", 0.12, 0.07)
+	_cameo_tween.tween_property(cameo, "rotation", -0.08, 0.06)
+	_cameo_tween.tween_property(cameo, "rotation", 0.06, 0.06)
+	_cameo_tween.tween_property(cameo, "rotation", 0.0, 0.06)
+	_cameo_tween.parallel().tween_property(cameo, "self_modulate", Color.WHITE, 0.45)
+
+func _cameo_out() -> void:
+	cameo_id = ""
+	if _cameo_tween != null and _cameo_tween.is_valid():
+		_cameo_tween.kill()
+	_cameo_tween = create_tween()
+	_cameo_tween.tween_property(cameo, "scale", Vector2(0.2, 0.2), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	_cameo_tween.tween_callback(func() -> void:
+		if cameo_id == "":
+			cameo.visible = false)
 
 # 560x420 centred-anchored at y=164 on the 800x600 base; on a phone it
 # spans the width minus a 12px margin, sprites shrink a step and the
@@ -117,6 +234,7 @@ func _refresh() -> void:
 	panel.visible = Combat.in_combat
 	if not Combat.in_combat:
 		_last_hp = []
+		_refresh_companions()
 		return
 
 	var targeting: bool = Combat.selecting_target != ""
@@ -280,6 +398,7 @@ func _refresh_submenu() -> void:
 	# Once the fight is won only Continue remains.
 	commands.visible = not open and not targeting and not Combat.playing and not Combat.awaiting_exit
 	continue_btn.visible = Combat.awaiting_exit
+	_refresh_companions()
 	# The submenu takes the log's space while it's open (its rows are taller
 	# than the command row and would run out of the panel otherwise).
 	log_panel.visible = not open

@@ -55,6 +55,45 @@ var fight_items: Array[String] = []
 var _steps_since_encounter := ENCOUNTER_COOLDOWN_STEPS
 
 # ---------------------------------------------------------------------------
+# Companions (2026-09-07, the user's idea): Luigi and Eden are once-per-fight
+# boosters. A bust button on the battle screen hands them the next round -
+# their move replaces Oliver's action, then the enemies act as usual. Bite
+# (Luigi) is the boss answer: one target, 1.5x Oliver's attack power through
+# the normal armour maths. Scream (Eden) is the mob answer: every enemy takes
+# 0.4x Oliver's attack power with no armour to soak it, and each regular
+# survivor may be left reeling (it skips its next strike); a boss only
+# flinches. One charge each per fight, both usable in the same fight,
+# refilled every fight (nothing to save); unlocked once Meet the Village is
+# turned in. The strengths come from tools/sim_balance.gd --companions: a
+# player opens every fight with both, and at 2x / 1x the next biome's boss
+# fell to the previous set 65% of the time (the set rule wants <= 25%);
+# 1.5x / 0.4x keeps every band. Phase 2: Guard / Shimmer as second moves
+# and charges that grow with level.
+# ---------------------------------------------------------------------------
+signal companion_called(id: String)
+signal companion_struck(id: String)
+const COMPANIONS := {
+	"luigi": {"name": "Luigi the Fearless", "move": "Bite", "portrait": "res://assets/portraits/luigi.png", "sprite": "res://assets/npc_luigi.png"},
+	"eden": {"name": "Eden", "move": "Scream", "portrait": "res://assets/portraits/eden.png", "sprite": "res://assets/npc_eden.png"},
+}
+const BITE_MULT := 1.5
+const SCREAM_MULT := 0.4
+const SCREAM_STUN_CHANCE := 0.5
+var companion_charges: Dictionary = {} # id -> charges left this fight; {} while locked
+
+func companions_unlocked() -> bool:
+	return Quests.quest_state.get("meet_villagers", "") == "completed"
+
+func companion_ready(id: String) -> bool:
+	return in_combat and companion_charges.get(id, 0) > 0
+
+func _refill_companions() -> void:
+	companion_charges = {}
+	if companions_unlocked():
+		for id in COMPANIONS.keys():
+			companion_charges[id] = 1
+
+# ---------------------------------------------------------------------------
 # Beats - the fight's rhythm (user's reference: Shining in the Darkness).
 # Every event is one BEAT: a message the battle screen shows big on its
 # own, with the command buttons hidden until the whole sequence has played,
@@ -184,6 +223,7 @@ func start_combat(enemy_ids) -> void:
 	fight_gold = 0
 	fight_xp = 0
 	fight_items = []
+	_refill_companions()
 	battle_log = ["%s %s!" % [_join_names(names), "appears" if names.size() == 1 else "appear"]]
 	changed.emit()
 
@@ -220,6 +260,7 @@ func start_boss_fight(boss_id: String) -> void:
 	player_status = {}
 	current_boss_id = boss_id
 	current_wild_monster_key = ""
+	_refill_companions()
 	battle_log = ["%s blocks your path!" % def.name]
 	changed.emit()
 
@@ -352,9 +393,76 @@ func select_target(index: int) -> void:
 	changed.emit()
 	if action == "attack":
 		await _resolve_attack_on_target(index)
+	elif action == "bite":
+		await _resolve_bite(index)
 	elif action.begins_with("spell:"):
 		await _resolve_spell_on_target(action.substr(6), index)
 	_end_turn()
+
+# --- companion rounds ---
+
+func companion_act(id: String) -> void:
+	if not in_combat or playing or awaiting_exit or alive_enemies().is_empty() or not companion_ready(id):
+		return
+	active_submenu = ""
+	playing = true
+	changed.emit()
+	if not await _begin_player_turn():
+		_end_turn()
+		return
+	player_defending = false
+	companion_charges[id] -= 1
+	companion_called.emit(id)
+	if id == "luigi":
+		await _beat("Luigi the Fearless bounds in!", BEAT_SECONDS_SHORT)
+		var alive := alive_enemies()
+		if alive.size() == 1:
+			await _resolve_bite(alive[0])
+		else:
+			selecting_target = "bite" # the sequence resumes in select_target()
+	else:
+		await _beat("Eden flits in and draws a deep breath...", BEAT_SECONDS_SHORT)
+		await _scream()
+	_end_turn()
+
+func _resolve_bite(index: int) -> void:
+	var enemy: Dictionary = current_enemies[index]
+	var power: int = int(round((Character.stats.strength * 2 + _weapon_attack_bonus()) * BITE_MULT))
+	var dmg := _physical_damage(power, enemy.defense)
+	enemy.hp = max(0, enemy.hp - dmg)
+	companion_struck.emit("luigi")
+	await _beat("Luigi bites %s for %d damage!" % [enemy.name, dmg])
+	if enemy.hp <= 0:
+		await _defeat_enemy(index)
+	else:
+		await _enemy_turn()
+
+func _scream() -> void:
+	var power: int = int(round((Character.stats.strength * 2 + _weapon_attack_bonus()) * SCREAM_MULT))
+	companion_struck.emit("eden")
+	Audio.play_sfx("scream") # an open slot until the user supplies a file
+	var first := true
+	var targets := alive_enemies()
+	for index in targets:
+		var enemy: Dictionary = current_enemies[index]
+		var dmg := _physical_damage(power, 0)
+		enemy.hp = max(0, enemy.hp - dmg)
+		await _beat("%s%s takes %d damage!" % ["Eden SCREAMS! " if first else "", enemy.name, dmg], BEAT_SECONDS if first else BEAT_SECONDS_SHORT)
+		first = false
+	# The fallen doze off in slot order (the enemy turn waits for all of them).
+	for index in targets:
+		if current_enemies[index] != null and current_enemies[index].hp <= 0:
+			await _defeat_enemy(index, false)
+	if alive_enemies().is_empty():
+		return
+	for index in alive_enemies():
+		var enemy: Dictionary = current_enemies[index]
+		if current_boss_id != "":
+			await _beat("%s only flinches." % enemy.name, BEAT_SECONDS_SHORT)
+		elif randf() < SCREAM_STUN_CHANCE:
+			enemy.stunned = true
+			await _beat("%s is left reeling!" % enemy.name, BEAT_SECONDS_SHORT)
+	await _enemy_turn()
 
 func open_magic_menu() -> void:
 	if not in_combat or playing or awaiting_exit or alive_enemies().is_empty():
@@ -478,6 +586,7 @@ func _flee() -> void:
 	player_status = {}
 	current_boss_id = "" # fleeing a boss leaves it undefeated, re-challengeable
 	current_wild_monster_key = "" # same - fleeing a wild monster leaves it re-challengeable
+	companion_charges = {}
 	changed.emit()
 	ended.emit(false)
 
@@ -490,7 +599,9 @@ func _flee() -> void:
 # slot. If that empties the whole group, ends combat in victory (marking a
 # boss's checkpoint permanently defeated); otherwise the survivors take
 # their turn.
-func _defeat_enemy(index: int) -> void:
+# `then_enemy_turn` = false while several fall at once (Eden's scream): the
+# caller runs the enemy turn after the last of them.
+func _defeat_enemy(index: int, then_enemy_turn: bool = true) -> void:
 	var enemy: Dictionary = current_enemies[index]
 	var gold: int = enemy.gold_min + randi() % (enemy.gold_max - enemy.gold_min + 1)
 	Inventory.add_item("gold", gold)
@@ -547,7 +658,8 @@ func _defeat_enemy(index: int) -> void:
 			changed.emit()
 	else:
 		changed.emit()
-		await _enemy_turn()
+		if then_enemy_turn:
+			await _enemy_turn()
 
 # "Victory! You earned 12 gold and 19 XP. Loot: Monster Fur." - the whole
 # fight's takings, shown big while the screen waits for Continue.
@@ -575,6 +687,11 @@ func _enemy_turn() -> void:
 	var woke_this_round := false
 	for index in alive_enemies():
 		var enemy: Dictionary = current_enemies[index]
+		# Left reeling by Eden's scream: this strike is skipped.
+		if enemy.get("stunned", false):
+			enemy.erase("stunned")
+			await _beat("%s is still reeling and can't attack!" % enemy.name, BEAT_SECONDS_SHORT)
+			continue
 		# The wind-up: a beat of nothing you can do about it.
 		enemy_turn_started.emit(index)
 		await _beat("%s prepares to strike..." % enemy.name, BEAT_SECONDS_SHORT)
@@ -668,4 +785,5 @@ func reset() -> void:
 	playing = false
 	awaiting_exit = false
 	_nap_pending = false
+	companion_charges = {}
 	changed.emit()

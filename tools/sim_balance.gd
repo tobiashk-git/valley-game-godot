@@ -101,6 +101,10 @@ func _initialize() -> void:
 		_sets_sweep()
 		quit()
 		return
+	if "--companions" in OS.get_cmdline_user_args():
+		_companions_sweep()
+		quit()
+		return
 	var world: Node = root.get_node("World")
 	var arenas: Array = [
 		{"name": "Dungeon", "zone": -1},
@@ -150,11 +154,35 @@ func _initialize() -> void:
 			_out("")
 			for line in _rule_table(model, {}):
 				_out(line)
+			_out("")
+			_out("### Set rule with companions (Bite 1.5x then Scream 0.4x opening every fight)")
+			_out("")
+			for line in _rule_table(_with_companions(model), {}):
+				_out(line)
 	var f := FileAccess.open("res://balance_report.md", FileAccess.WRITE)
 	f.store_string("\n".join(_lines) + "\n")
 	f.close()
 	print("wrote res://balance_report.md")
 	quit()
+
+# --companions: the rule table for a few Bite / Scream strengths (the live
+# pair first), to find the strongest opening that keeps the boss bands.
+const COMPANION_PAIRS := [[1.5, 0.4, 1.0], [2.0, 1.0, 1.0], [1.5, 0.5, 1.0], [1.25, 0.5, 1.0], [1.0, 0.5, 1.0]]
+func _companions_sweep() -> void:
+	for pair in COMPANION_PAIRS:
+		var m: Dictionary = _with_companions(MODELS.live)
+		m.bite_mult = pair[0]
+		m.scream_mult = pair[1]
+		m.scream_boss_mult = pair[2]
+		print("## Bite x%.2f, Scream x%.2f (x%.2f on a boss)" % [pair[0], pair[1], pair[2]])
+		for line in _rule_table(m, {}):
+			print(line)
+		print("")
+
+func _with_companions(model: Dictionary) -> Dictionary:
+	var m: Dictionary = model.duplicate()
+	m.companions = true
+	return m
 
 func _out(line: String) -> void:
 	_lines.append(line)
@@ -224,14 +252,36 @@ func _damage(model: Dictionary, power: float, defense: float) -> int:
 func _fight(model: Dictionary, stats: Dictionary, player: Dictionary, defs: Array) -> Dictionary:
 	var enemies: Array = []
 	for d in defs:
-		enemies.append({"hp": d.max_hp, "attack": int(round(d.attack * model.enemy_atk_mult)), "defense": d.defense})
+		enemies.append({"hp": d.max_hp, "attack": int(round(d.attack * model.enemy_atk_mult)), "defense": d.defense, "boss": d.get("boss", false), "stunned": false})
 	var hp_start: int = player.hp
 	var potions_start: int = player.potions
 	var turns := 0
+	# Companions (model.companions): the worst case for balance is a player
+	# who opens every fight with both - Bite (1.5x power on the biggest enemy)
+	# on turn 1, Scream (0.4x power, no armour, 50% skip for regular
+	# survivors) on turn 2. They refill every fight, so that is what a player
+	# will do. (2x / 1x broke the set rule: the next boss fell to the previous
+	# set 65% of the time and the next biome's wilds became a stroll.)
+	var companions: bool = model.get("companions", false)
+	var bite_mult: float = model.get("bite_mult", 1.5) # combat.gd BITE_MULT
+	var scream_mult: float = model.get("scream_mult", 0.4) # combat.gd SCREAM_MULT
+	var scream_boss_mult: float = model.get("scream_boss_mult", 1.0) # (tried: a boss's hide vs the scream; not needed)
 	while turns < 200:
 		turns += 1
 		# Player turn: drink / heal when low, else hit the weakest.
-		if player.hp < POTION_AT * stats.max_hp and player.potions > 0:
+		if companions and turns == 1:
+			var big: Dictionary = {}
+			for e in enemies:
+				if e.hp > 0 and (big.is_empty() or e.hp > big.hp):
+					big = e
+			big.hp -= _damage(model, stats.power * bite_mult, big.defense)
+		elif companions and turns == 2:
+			for e in enemies:
+				if e.hp > 0:
+					e.hp -= _damage(model, stats.power * scream_mult * (scream_boss_mult if e.boss else 1.0), 0.0)
+					if e.hp > 0 and not e.boss and _rng.randf() < 0.5:
+						e.stunned = true
+		elif player.hp < POTION_AT * stats.max_hp and player.potions > 0:
 			player.potions -= 1
 			player.hp = mini(stats.max_hp, player.hp + model.potion_heal)
 		elif player.hp < POTION_AT * stats.max_hp and player.mp >= model.heal_cost:
@@ -252,6 +302,9 @@ func _fight(model: Dictionary, stats: Dictionary, player: Dictionary, defs: Arra
 		# Enemy turns.
 		for e in enemies:
 			if e.hp <= 0:
+				continue
+			if e.stunned:
+				e.stunned = false
 				continue
 			if _rng.randf() < stats.dodge:
 				continue
@@ -348,7 +401,7 @@ func _profile(name: String, level: int, gear: Array, extra: int = 0) -> Dictiona
 func _boss_def(boss_id: String, overrides: Dictionary) -> Dictionary:
 	var def: Dictionary = root.get_node("Enemies").BOSSES[boss_id]
 	var o: Dictionary = overrides.get(boss_id, {"hp": 1.0, "atk": 1.0})
-	return {"name": def.name, "max_hp": int(round(def.max_hp * o.hp)), "attack": def.attack * o.atk, "defense": def.defense, "zones": []}
+	return {"name": def.name, "max_hp": int(round(def.max_hp * o.hp)), "attack": def.attack * o.atk, "defense": def.defense, "zones": [], "boss": true}
 
 func _boss_win(model: Dictionary, profile: Dictionary, boss_id: String, overrides: Dictionary) -> int:
 	return _win_rate(model, profile, [_boss_def(boss_id, overrides)], profile.potions)
@@ -427,6 +480,10 @@ func _sets_sweep() -> void:
 	var overrides: Dictionary = {}
 	print("Live data first:")
 	for line in _rule_table(model, {}):
+		print(line)
+	print("")
+	print("Live data with companions (Bite then Scream opening every fight; full-set and next-boss bands must hold, body-only is informational):")
+	for line in _rule_table(_with_companions(model), {}):
 		print(line)
 	print("")
 	for i in range(TIERS.size()):
