@@ -4,7 +4,7 @@ extends SceneTree
 # loop, where the same buildInterior() call is branched by index).
 # Run via: godot --headless --script res://tools/setup_village_houses.gd
 
-func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "", is_shop: bool = false, npc_id: String = "", intro: String = "", tint: Color = Color(1, 1, 1, 1), shell: String = "", shell_wall_rows: int = 2) -> void:
+func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: String, dialogue: String, furniture: Array[Dictionary], windows: Array[Vector2i], return_tile: Vector2i, quest_id: String = "", is_shop: bool = false, npc_id: String = "", intro: String = "", tint: Color = Color(1, 1, 1, 1), shell: String = "", shell_wall_rows: int = 2, quest_ids: Array[String] = []) -> void:
 	var house_tileset: TileSet = load("res://resources/house_tileset.tres")
 	var player_scene: PackedScene = load("res://scenes/Player.tscn")
 	var player_instance: CharacterBody2D = player_scene.instantiate()
@@ -18,6 +18,7 @@ func _build(scene_name: String, has_npc: bool, sprite_path: String, npc_name: St
 	root.npc_name_text = npc_name
 	root.npc_dialogue = dialogue
 	root.npc_quest_id = quest_id
+	root.npc_quest_ids = quest_ids
 	root.npc_is_shop = is_shop
 	root.npc_id_text = npc_id
 	root.npc_intro = intro
@@ -121,7 +122,8 @@ func _initialize() -> void:
 		World.BLACKSMITH_HOUSE_ENTRANCE,
 		"", false, "village_blacksmith",
 		"Hah, the new arrival. I'm the Blacksmith - anything that needs hammering, forging or breaking down, that's my bench in the corner. Walk up to it and press E.",
-		Color(0.62, 0.6, 0.68, 1.0), "res://assets/interiors/smithy_shell.png", 3
+		Color(0.62, 0.6, 0.68, 1.0), "res://assets/interiors/smithy_shell.png", 3,
+		["forge_whetstone", "forge_frost"] # a two-step side chain (quest lines revamp)
 	)
 
 	print("=== Village houses setup complete ===")

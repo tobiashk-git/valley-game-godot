@@ -247,7 +247,9 @@ func _ready() -> void:
 	elder.position = _tile_center(World.ELDER_POS)
 	elder.sprite_path = "res://assets/elder.png"
 	elder.npc_name = "Village Elder"
-	var elder_chain: Array[String] = ["meet_villagers", "gather_wood"] # typed: the export is Array[String]
+	# The story line in chapter order; locked chapters are skipped by
+	# npc.active_quest(), so the biome hunts come in whatever order the fords open.
+	var elder_chain: Array[String] = ["meet_villagers", "gather_wood", "hunt_frostpeak", "hunt_verdantwood", "hunt_badlands", "hunt_gloomfen", "two_guardians", "ancient_warden"]
 	elder.quest_ids = elder_chain
 	elder.npc_id = "village_elder"
 	elder.intro_text = "Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler."
@@ -274,7 +276,8 @@ func _ready() -> void:
 	druid.sprite_path = "res://assets/elder.png"
 	druid.sprite_tint = Color(0.55, 0.75, 0.4, 1.0)
 	druid.npc_name = "Forest Druid"
-	druid.quest_id = "cross_verdantwood"
+	var druid_chain: Array[String] = ["cross_verdantwood", "thornback_warden"] # the ford, then a side hunt
+	druid.quest_ids = druid_chain
 	druid.npc_id = "forest_druid"
 	druid.intro_text = "You've wandered far from the village. Verdantwood lies beyond that ford - if you can call it a ford anymore. The old crossing's overgrown; I could use a hand clearing it."
 	ysort.add_child(druid)

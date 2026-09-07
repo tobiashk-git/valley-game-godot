@@ -12,6 +12,7 @@ const QUEST_DEFS := {
 	"gather_wood": {
 		"giver_name": "Village Elder",
 		"name": "A Village in Need",
+		"line": "story", "chapter": "village", "requires": ["meet_villagers"],
 		"objective": {"type": "gather", "item_id": "wood", "amount": 5},
 		"reward": {"xp": 40, "gold": 20, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -32,6 +33,7 @@ const QUEST_DEFS := {
 	"meet_villagers": {
 		"giver_name": "Village Elder",
 		"name": "Meet the Village",
+		"line": "story", "chapter": "village", "requires": [],
 		"objective": {"type": "talk_to_npcs", "npc_ids": ["village_trader"], "goal": "Introduce yourself to the Village Trader in the south-west house."},
 		"reward": {"xp": 20},
 		"dialogue": {
@@ -44,6 +46,7 @@ const QUEST_DEFS := {
 	"cross_frostpeak": {
 		"giver_name": "Frostpeak Ranger",
 		"name": "Reinforcing the Ford",
+		"line": "story", "chapter": "frostpeak", "requires": [],
 		"objective": {"type": "gather_multi", "items": [
 			{"item_id": "wood", "amount": 8},
 			{"item_id": "stone", "amount": 8},
@@ -59,6 +62,7 @@ const QUEST_DEFS := {
 	"cross_verdantwood": {
 		"giver_name": "Forest Druid",
 		"name": "Clearing the Crossing",
+		"line": "story", "chapter": "verdantwood", "requires": [],
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
 		"reward": {"xp": 150, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -71,6 +75,7 @@ const QUEST_DEFS := {
 	"cross_badlands": {
 		"giver_name": "Badlands Prospector",
 		"name": "Shoring Up the Crossing",
+		"line": "story", "chapter": "badlands", "requires": [],
 		"objective": {"type": "gather", "item_id": "stone", "amount": 12},
 		"reward": {"xp": 180, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -83,6 +88,7 @@ const QUEST_DEFS := {
 	"cross_gloomfen": {
 		"giver_name": "Marsh Guide",
 		"name": "Laying the Boardwalk",
+		"line": "story", "chapter": "gloomfen", "requires": [],
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
 		"reward": {"xp": 210, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -100,6 +106,7 @@ const QUEST_DEFS := {
 	"open_ancient_barrow": {
 		"giver_name": "Village Trader",
 		"name": "What Lies Beneath",
+		"line": "side", "requires": [],
 		"objective": {"type": "gather", "item_id": "stone", "amount": 6},
 		"reward": {"xp": 90, "gold": 25, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -109,7 +116,237 @@ const QUEST_DEFS := {
 			"completed": "The old barrow's open now, thanks to you.",
 		},
 	},
+	# --- Story chapters (quest lines revamp, 2026-09-07). The Village Elder
+	# is the story voice: after each ford opens he sends Oliver after that
+	# biome's boss, and once all four sleep, after the two Guardians and the
+	# Ancient Warden. Fords stay open in any order (the hunts only require
+	# their own ford), so chapters 2-5 can be played in any order.
+	"hunt_frostpeak": {
+		"giver_name": "Village Elder",
+		"name": "The Glacial Revenant",
+		"line": "story", "chapter": "frostpeak", "requires": ["cross_frostpeak"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["frostpeak_boss"], "label": "Glacial Revenant asleep", "goal": "Find the ice caves beyond the northern ford and put the Glacial Revenant to sleep."},
+		"reward": {"xp": 180, "gold": 50, "item_id": "healing_potion", "item_amount": 1},
+		"dialogue": {
+			"offer": "The ford's open, but Frostpeak isn't safe yet - something haunts the ice caves up there. The Ranger calls it the Glacial Revenant. Put it to sleep and the ridge is ours again.",
+			"in_progress": "The Revenant still walks the ice caves. Take a Frost set if you can forge one - the cold up there bites.",
+			"ready": "The Revenant sleeps? Then Frostpeak breathes easy tonight. Well done, traveler.",
+			"completed": "Frostpeak's quiet now, thanks to you.",
+		},
+	},
+	"hunt_verdantwood": {
+		"giver_name": "Village Elder",
+		"name": "Elder Bramblewood",
+		"line": "story", "chapter": "verdantwood", "requires": ["cross_verdantwood"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["verdantwood_boss"], "label": "Elder Bramblewood asleep", "goal": "Go deep into Verdantwood's tangled interior and put Elder Bramblewood to sleep."},
+		"reward": {"xp": 220, "gold": 60, "item_id": "healing_potion", "item_amount": 1},
+		"dialogue": {
+			"offer": "With the eastern crossing clear, the forest's rot can be reached at last. Something old and thorned sits at its heart - the Druid calls it Elder Bramblewood. Put it to sleep and the wood will heal.",
+			"in_progress": "Bramblewood still chokes the forest's heart. Ironwood armour turns thorns, if the Blacksmith can make you some.",
+			"ready": "The old bramble sleeps? Then Verdantwood can grow green again. You have my thanks.",
+			"completed": "The forest's healing, thanks to you.",
+		},
+	},
+	"hunt_badlands": {
+		"giver_name": "Village Elder",
+		"name": "Cinderjaw",
+		"line": "story", "chapter": "badlands", "requires": ["cross_badlands"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["badlands_boss"], "label": "Cinderjaw asleep", "goal": "Brave the Emberfall interior and put Cinderjaw to sleep."},
+		"reward": {"xp": 260, "gold": 70, "item_id": "healing_potion", "item_amount": 1},
+		"dialogue": {
+			"offer": "The southern crossing holds, so Emberfall's open - and so is whatever's been setting the badlands alight. The Prospector calls it Cinderjaw. Put it to sleep before the fires spread.",
+			"in_progress": "Cinderjaw still burns in the badlands. Ember plate shrugs off the heat - worth the forge time.",
+			"ready": "Cinderjaw sleeps? The fires will die down now. Bravely done.",
+			"completed": "The badlands are cooling, thanks to you.",
+		},
+	},
+	"hunt_gloomfen": {
+		"giver_name": "Village Elder",
+		"name": "The Bogmaw",
+		"line": "story", "chapter": "gloomfen", "requires": ["cross_gloomfen"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["gloomfen_boss"], "label": "The Bogmaw asleep", "goal": "Cross the new boardwalk into Gloomfen's depths and put the Bogmaw to sleep."},
+		"reward": {"xp": 300, "gold": 80, "item_id": "healing_potion", "item_amount": 1},
+		"dialogue": {
+			"offer": "The boardwalk's laid, and the marsh has a mouth at the end of it - the Guide calls it the Bogmaw. It's the worst of the four. Put it to sleep and the whole valley sleeps easier.",
+			"in_progress": "The Bogmaw still lurks in the mire. Bog-iron is the only armour that keeps its teeth out.",
+			"ready": "The Bogmaw sleeps? Then the last of the four is done. The valley owes you, traveler.",
+			"completed": "Gloomfen's still now, thanks to you.",
+		},
+	},
+	"two_guardians": {
+		"giver_name": "Village Elder",
+		"name": "The Two Guardians",
+		"line": "story", "chapter": "finale", "requires": ["hunt_frostpeak", "hunt_verdantwood", "hunt_badlands", "hunt_gloomfen"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["dungeon_boss", "castle_boss"], "label": "Guardians asleep", "goal": "Put the Bone Lord in the old dungeon and the Royal Wraith in the castle to sleep, and bring their two crystals to the altar."},
+		"reward": {"xp": 300, "gold": 100},
+		"dialogue": {
+			"offer": "All four biomes sleep, but the valley's oldest trouble is still below us. Two Guardians keep the way to it - the Bone Lord in the dungeon and the Royal Wraith in the castle. Each holds a crystal. Bring both to the altar on the square.",
+			"in_progress": "The Guardians hold the crystals - the Bone Lord below the dungeon, the Royal Wraith in the castle. The altar needs both.",
+			"ready": "Both crystals? Then the altar will show you where the Ancient Warden hides. Steel yourself, traveler.",
+			"completed": "The Guardians sleep and the way is open.",
+		},
+	},
+	"ancient_warden": {
+		"giver_name": "Village Elder",
+		"name": "The Ancient Warden",
+		"line": "story", "chapter": "finale", "requires": ["two_guardians"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["final_boss"], "label": "Ancient Warden asleep", "goal": "Enter the hidden lair the altar revealed and put the Ancient Warden to sleep."},
+		"reward": {"xp": 500, "gold": 200},
+		"dialogue": {
+			"offer": "The altar has shown you the lair. The Ancient Warden has slept fitfully under this valley for longer than anyone remembers - it's time it slept properly. Go carefully. Come back to us.",
+			"in_progress": "The Warden waits in its lair. Everything you've forged, wear it.",
+			"ready": "It sleeps? Truly? Then the valley is free, and it's you we have to thank. Rest, traveler. You've earned it.",
+			"completed": "The valley is at peace, thanks to you. Enjoy it.",
+		},
+	},
+	# --- Side quests: single actions and short chains, from the villagers.
+	# A two-step chain for the Blacksmith (the second needs the first) and a
+	# single hunt for the Druid.
+	"forge_whetstone": {
+		"giver_name": "Village Blacksmith",
+		"name": "A Keen Edge",
+		"line": "side", "requires": [],
+		"objective": {"type": "gather", "item_id": "stone", "amount": 6},
+		"reward": {"xp": 30, "gold": 15},
+		"dialogue": {
+			"offer": "My whetstone's worn to a sliver. Bring me 6 Stone and I'll cut a new one - and keep your blades sharp for nothing.",
+			"in_progress": "Still need stone for that whetstone - got any?",
+			"ready": "Good, solid stone. That'll grind for years. Here - for your trouble.",
+			"completed": "Blades keeping sharp? Good.",
+		},
+	},
+	"forge_frost": {
+		"giver_name": "Village Blacksmith",
+		"name": "Cold Iron",
+		"line": "side", "requires": ["forge_whetstone"],
+		"objective": {"type": "gather", "item_id": "frost_shard", "amount": 2},
+		"reward": {"xp": 80, "gold": 40, "item_id": "healing_potion", "item_amount": 1},
+		"dialogue": {
+			"offer": "Now that the edge is keen, I want to try something. The Frostpeak creatures leave shards of ice that never melt - bring me 2 Frost Shard and I'll see if they take a temper.",
+			"in_progress": "Still after those Frost Shards - the ridge monsters drop them.",
+			"ready": "Look at that - it holds. Cold iron. Take this, and thank you.",
+			"completed": "Cold iron. Never thought I'd see it.",
+		},
+	},
+	"thornback_warden": {
+		"giver_name": "Forest Druid",
+		"name": "The Thornback",
+		"line": "side", "requires": ["cross_verdantwood"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["verdantwood_maze_guardian_1"], "label": "Thornback Warden asleep", "goal": "Find the walled glade in Verdantwood's maze and put the Thornback Warden to sleep."},
+		"reward": {"xp": 120, "gold": 30},
+		"dialogue": {
+			"offer": "There's a glade in the forest maze walled off by something with a shell of thorns - the Thornback Warden. It keeps the wood's paths from healing. Put it to sleep for me?",
+			"in_progress": "The Thornback still holds its glade in the maze.",
+			"ready": "The glade's open again? The paths will mend now. Thank you.",
+			"completed": "The maze breathes easier without the Thornback.",
+		},
+	},
 }
+
+# The story line's chapters, in order. Chapter 1 is the village, then one
+# per biome (playable in any order - the fords are independent), then the
+# finale. The Journal groups story quests under these.
+const CHAPTERS := [
+	{"id": "village", "title": "Chapter 1: The Valley", "blurb": "A new face in a small settlement."},
+	{"id": "frostpeak", "title": "Chapter 2: Frostpeak Ridge", "blurb": "The ice caves beyond the northern ford."},
+	{"id": "verdantwood", "title": "Chapter 3: Verdantwood Forest", "blurb": "The rot at the heart of the eastern wood."},
+	{"id": "badlands", "title": "Chapter 4: Emberfall Badlands", "blurb": "Fires in the south."},
+	{"id": "gloomfen", "title": "Chapter 5: Gloomfen Marsh", "blurb": "The mouth at the end of the boardwalk."},
+	{"id": "finale", "title": "Chapter 6: The Ancient Warden", "blurb": "Two Guardians, two crystals, and what sleeps beneath the valley."},
+]
+
+# --- lines, chapters and chains ---
+# Every quest has a "line" (story / side); story quests a "chapter"; any
+# quest may "require" others - it is only offered once they are completed.
+# Chains are derived from those links: prev = the first same-line
+# requirement, next = the same-line quests that require this one.
+
+func line_of(quest_id: String) -> String:
+	return QUEST_DEFS[quest_id].get("line", "side")
+
+func chapter_of(quest_id: String) -> String:
+	return QUEST_DEFS[quest_id].get("chapter", "")
+
+func requires_of(quest_id: String) -> Array:
+	return QUEST_DEFS[quest_id].get("requires", [])
+
+# Offerable: not yet handed out and every requirement completed.
+func is_available(quest_id: String) -> bool:
+	if quest_state.has(quest_id):
+		return false
+	for req in requires_of(quest_id):
+		if quest_state.get(req, "") != "completed":
+			return false
+	return true
+
+# Two quests are chain-linked when one requires the other on the same line
+# and, for story quests, in the same chapter (the finale requires all four
+# hunts but is its own chapter, not the tail of Frostpeak's chain).
+func _linked(a: String, b: String) -> bool:
+	if line_of(a) != line_of(b):
+		return false
+	return line_of(a) != "story" or chapter_of(a) == chapter_of(b)
+
+func prev_of(quest_id: String) -> String:
+	for req in requires_of(quest_id):
+		if _linked(req, quest_id):
+			return req
+	return ""
+
+func next_of(quest_id: String) -> Array:
+	var out: Array = []
+	for other in QUEST_DEFS.keys():
+		if other != quest_id and _linked(other, quest_id) and requires_of(other).has(quest_id):
+			out.append(other)
+	return out
+
+# The quest's chain from its first step to its last (following the first
+# "next" at each step) - a single-action quest is a chain of one.
+func chain_of(quest_id: String) -> Array:
+	var first: String = quest_id
+	var guard := 0
+	while prev_of(first) != "" and guard < 32:
+		first = prev_of(first)
+		guard += 1
+	var chain: Array = [first]
+	var cur: String = first
+	guard = 0
+	while guard < 32:
+		var nxt: Array = next_of(cur)
+		if nxt.is_empty():
+			break
+		cur = nxt[0]
+		chain.append(cur)
+		guard += 1
+	return chain
+
+# [step index (1-based), chain length].
+func step_of(quest_id: String) -> Array:
+	var chain: Array = chain_of(quest_id)
+	return [chain.find(quest_id) + 1, chain.size()]
+
+func chapter_quests(chapter_id: String) -> Array:
+	var out: Array = []
+	for id in QUEST_DEFS.keys():
+		if chapter_of(id) == chapter_id:
+			out.append(id)
+	return out
+
+# "complete" when every quest of the chapter is done, "in_progress" once any
+# of them has been handed out, else "not_started".
+func chapter_state(chapter_id: String) -> String:
+	var ids: Array = chapter_quests(chapter_id)
+	var all_done := not ids.is_empty()
+	var any_state := false
+	for id in ids:
+		var st: String = quest_state.get(id, "")
+		if st != "completed":
+			all_done = false
+		if st != "":
+			any_state = true
+	if all_done:
+		return "complete"
+	return "in_progress" if any_state else "not_started"
 
 # quest_id -> "accepted" | "completed" (absent = not yet offered).
 # Nothing is pre-accepted: even the tutorial (meet_villagers) is handed out
@@ -154,6 +391,11 @@ func objective_met(quest_id: String) -> bool:
 			if not npcs_met.get(npc_id, false):
 				return false
 		return true
+	if objective.type == "defeat_bosses":
+		for boss_id in objective.boss_ids:
+			if not GameState.boss_defeated.get(boss_id, false):
+				return false
+		return true
 	return false
 
 # e.g. "3/5 [icon] Wood" or "1/2 Villagers" - used by the offer-in-progress
@@ -178,6 +420,12 @@ func objective_progress_text(quest_id: String) -> String:
 			if npcs_met.get(npc_id, false):
 				have += 1
 		return "%d/%d Villagers" % [have, objective.npc_ids.size()]
+	if objective.type == "defeat_bosses":
+		var asleep := 0
+		for boss_id in objective.boss_ids:
+			if GameState.boss_defeated.get(boss_id, false):
+				asleep += 1
+		return "%d/%d %s" % [asleep, objective.boss_ids.size(), objective.get("label", "bosses asleep")]
 	return ""
 
 # Called by npc.gd when the player interacts with a quest-giving NPC. Picks

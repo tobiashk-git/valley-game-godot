@@ -62,15 +62,24 @@ func _ready() -> void:
 	Inventory.changed.connect(_refresh_marker)
 	_refresh_marker()
 
-# The quest this NPC currently deals in (see quest_ids).
+# The quest this NPC currently deals in (see quest_ids): the first one
+# accepted or offerable (its requirements met - see Quests.is_available;
+# a locked one is skipped, so the Elder can hand out chapter 3 before
+# chapter 2). With nothing live, the last completed one (its closing line).
 func active_quest() -> String:
 	var chain: Array = quest_ids if not quest_ids.is_empty() else ([quest_id] if quest_id != "" else [])
 	if chain.is_empty():
 		return ""
+	var last_completed := ""
 	for id in chain:
-		if quests.quest_state.get(id, "") != "completed":
+		var state: String = quests.quest_state.get(id, "")
+		if state == "accepted":
 			return id
-	return chain[chain.size() - 1]
+		if state == "completed":
+			last_completed = id
+		elif quests.is_available(id):
+			return id
+	return last_completed
 
 # "!" = a quest to offer, "?" = an accepted quest ready to turn in, else none.
 func marker_kind() -> String:

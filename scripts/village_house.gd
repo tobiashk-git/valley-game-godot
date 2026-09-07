@@ -15,6 +15,7 @@ const NPC_COLUMN := 4 # the NPC stands mid-room on the first floor row (under th
 @export var npc_name_text := ""
 @export var npc_dialogue := ""
 @export var npc_quest_id := ""
+@export var npc_quest_ids: Array[String] = [] # a chain handed out in order (wins over npc_quest_id)
 @export var npc_is_shop := false
 @export var npc_id_text := ""
 @export var npc_intro := ""
@@ -99,6 +100,8 @@ func _ready() -> void:
 		npc.npc_name = npc_name_text
 		npc.dialogue_text = npc_dialogue
 		npc.quest_id = npc_quest_id
+		if not npc_quest_ids.is_empty():
+			npc.quest_ids = npc_quest_ids
 		npc.shop = npc_is_shop
 		npc.npc_id = npc_id_text
 		npc.intro_text = npc_intro

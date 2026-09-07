@@ -14,6 +14,7 @@ script = ExtResource("1_s1vax")
 has_npc = true
 npc_sprite_path = "res://assets/trader.png"
 npc_name_text = "Village Blacksmith"
+npc_quest_ids = Array[String](["forge_whetstone", "forge_frost"])
 npc_dialogue = "Need something made? The bench in the corner is yours - bring the makings and I'll keep the forge hot. Old gear you don't want, I'll break down for parts."
 npc_id_text = "village_blacksmith"
 npc_intro = "Hah, the new arrival. I'm the Blacksmith - anything that needs hammering, forging or breaking down, that's my bench in the corner. Walk up to it and press E."
