@@ -111,5 +111,6 @@ func _initialize() -> void:
 
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_PATH))
 	MapRecipe.active_path = MapRecipe.DEFAULT_PATH
-	print("The shipped recipe is a valid version-1 file with no tiles yet: ", MapRecipe.load_active().get("version", 0) == 1 and MapRecipe.tiles(MapRecipe.load_active()).is_empty())
+	var shipped: Dictionary = MapRecipe.load_active()
+	print("The shipped recipe is a valid version-1 file (", MapRecipe.tiles(shipped).size(), " tiles, ", MapRecipe.props(shipped).size(), " props, ", MapRecipe.monsters(shipped).size(), " monsters): ", shipped.get("version", 0) == 1)
 	quit()
