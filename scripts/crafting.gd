@@ -96,7 +96,7 @@ func enhancements_for(inst: Dictionary) -> Array:
 
 func has_ingredients(cost: Dictionary) -> bool:
 	for item_id in cost.keys():
-		if Inventory.get_count(item_id) < cost[item_id]:
+		if Inventory.available(item_id) < cost[item_id]: # carried + banked in the house chest
 			return false
 	return true
 
@@ -121,7 +121,7 @@ func enhance(uid: int, enh_id: String) -> bool:
 		return false
 	var enh: Dictionary = ENHANCEMENTS[enh_id]
 	for item_id in enh.cost.keys():
-		Inventory.remove_item(item_id, enh.cost[item_id])
+		Inventory.consume(item_id, enh.cost[item_id])
 	inst.mods = [{"id": enh_id, "label": enh.name, "kind": enh.mod.kind, "value": enh.mod.value}]
 	Inventory.changed.emit()
 	Character.changed.emit()
@@ -192,8 +192,7 @@ func can_craft(recipe_id: String) -> bool:
 	var recipe: Dictionary = RECIPES[recipe_id]
 	var cost: Dictionary = recipe.cost
 	for item_id in cost.keys():
-		var have: int = Inventory.gold_available() if item_id == "gold" else Inventory.get_count(item_id)
-		if have < cost[item_id]:
+		if Inventory.available(item_id) < cost[item_id]: # carried + banked
 			return false
 	return Inventory.can_add(recipe.result, recipe.amount)
 
@@ -203,9 +202,6 @@ func craft(recipe_id: String) -> bool:
 	var recipe: Dictionary = RECIPES[recipe_id]
 	var cost: Dictionary = recipe.cost
 	for item_id in cost.keys():
-		if item_id == "gold":
-			Inventory.spend_gold(cost[item_id])
-		else:
-			Inventory.remove_item(item_id, cost[item_id])
+		Inventory.consume(item_id, cost[item_id]) # carried first, then the chest
 	Inventory.add_item(recipe.result, recipe.amount)
 	return true

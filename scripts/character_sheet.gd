@@ -1217,10 +1217,10 @@ func _ingredient_row(item_id: String, need: int) -> void:
 	name_label.add_theme_font_size_override("font_size", 13)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(name_label)
-	var have: int = Inventory.get_count(item_id)
+	var have: int = Inventory.available(item_id) # carried + banked in the house chest
 	var count := Label.new()
 	count.name = "Count"
-	count.text = "%d / %d" % [have, need]
+	count.text = "%d / %d" % [have, need] + ("  (%d banked)" % Inventory.banked(item_id) if Inventory.banked(item_id) > 0 else "")
 	count.add_theme_font_size_override("font_size", 13)
 	count.add_theme_color_override("font_color", Color(0.55, 0.9, 0.5) if have >= need else Color(0.95, 0.45, 0.4))
 	row.add_child(count)

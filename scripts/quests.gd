@@ -380,10 +380,10 @@ func toggle_track(quest_id: String) -> void:
 func objective_met(quest_id: String) -> bool:
 	var objective: Dictionary = QUEST_DEFS[quest_id].objective
 	if objective.type == "gather":
-		return Inventory.get_count(objective.item_id) >= objective.amount
+		return Inventory.available(objective.item_id) >= objective.amount # carried + banked
 	if objective.type == "gather_multi":
 		for entry in objective.items:
-			if Inventory.get_count(entry.item_id) < entry.amount:
+			if Inventory.available(entry.item_id) < entry.amount:
 				return false
 		return true
 	if objective.type == "talk_to_npcs":
@@ -406,12 +406,12 @@ func objective_met(quest_id: String) -> bool:
 func objective_progress_text(quest_id: String) -> String:
 	var objective: Dictionary = QUEST_DEFS[quest_id].objective
 	if objective.type == "gather":
-		var have: int = min(Inventory.get_count(objective.item_id), objective.amount)
+		var have: int = min(Inventory.available(objective.item_id), objective.amount)
 		return "%d/%d %s" % [have, objective.amount, Items.get_item_name_bbcode(objective.item_id)]
 	if objective.type == "gather_multi":
 		var parts: Array[String] = []
 		for entry in objective.items:
-			var have_entry: int = min(Inventory.get_count(entry.item_id), entry.amount)
+			var have_entry: int = min(Inventory.available(entry.item_id), entry.amount)
 			parts.append("%d/%d %s" % [have_entry, entry.amount, Items.get_item_name_bbcode(entry.item_id)])
 		return ", ".join(parts)
 	if objective.type == "talk_to_npcs":
@@ -472,9 +472,9 @@ func _complete_quest(quest_id: String) -> void:
 	var objective: Dictionary = def.objective
 	if objective.has("items"):
 		for entry in objective.items:
-			Inventory.remove_item(entry.item_id, entry.amount)
+			Inventory.consume(entry.item_id, entry.amount)
 	elif objective.has("item_id"):
-		Inventory.remove_item(objective.item_id, objective.amount)
+		Inventory.consume(objective.item_id, objective.amount) # carried first, then the chest
 	var reward: Dictionary = def.get("reward", {})
 	# Quest XP pays well above a fight's worth (user: "quest returns tend to
 	# be much larger than combat xp") - shown as a HUD popup; a level-up

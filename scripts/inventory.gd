@@ -32,18 +32,35 @@ const CONSUMABLE_CAP := 5
 # spendable). Carried gold is spent first.
 const BANK_CHEST := "house_chest"
 
+# The house chest is a BANK for every stackable, not just gold (2026-09-07,
+# user: dungeon runs store centrally, so the Blacksmith and the quest
+# givers should never make you work out what to carry). Crafting,
+# enhancing and quest turn-ins count carried + banked and spend the
+# carried part first. Gear stays per instance and per place.
+func banked(item_id: String) -> int:
+	return 0 if Items.is_equippable(item_id) else Storage.get_count(BANK_CHEST, item_id)
+
+func available(item_id: String) -> int:
+	return get_count(item_id) + banked(item_id)
+
+# Takes `amount` of a stackable, carried first, then from the chest.
+func consume(item_id: String, amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if available(item_id) < amount:
+		return false
+	var carried: int = mini(amount, get_count(item_id))
+	if carried > 0:
+		remove_item(item_id, carried)
+	if amount - carried > 0:
+		Storage.remove_item(BANK_CHEST, item_id, amount - carried)
+	return true
+
 func gold_available() -> int:
-	return get_count("gold") + Storage.get_count(BANK_CHEST, "gold")
+	return available("gold")
 
 func spend_gold(amount: int) -> bool:
-	if gold_available() < amount:
-		return false
-	var carried: int = mini(amount, get_count("gold"))
-	if carried > 0:
-		remove_item("gold", carried)
-	if amount - carried > 0:
-		Storage.remove_item(BANK_CHEST, "gold", amount - carried)
-	return true
+	return consume("gold", amount)
 
 # A nap costs the pack: every carried gold piece and every stackable that
 # has a value (materials, potions, feathers). Worn AND spare gear stays,
