@@ -1,13 +1,17 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/dungeon_entrance.gd" id="1_e5yki"]
+[ext_resource type="Texture2D" path="res://assets/dungeon_entrance.png" id="1_e5yki"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0bwrk"]
-size = Vector2(28, 28)
+size = Vector2(174, 134)
 
-[node name="DungeonEntrance" type="StaticBody2D" unique_id=2114259545]
+[node name="DungeonEntrance" type="StaticBody2D" unique_id=884143197]
 z_index = 1
-script = ExtResource("1_e5yki")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=831701189]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1308254275]
+texture = ExtResource("1_e5yki")
+offset = Vector2(0, -51)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1234602622]
+position = Vector2(0, -51)
 shape = SubResource("RectangleShape2D_0bwrk")

@@ -416,10 +416,10 @@ func scatter_trees_and_rocks(tilemap: TileMapLayer) -> Array:
 	# entrance markers are placed separately (not painted onto the tilemap),
 	# so they need to be reserved here the same way the JS version deletes
 	# any resource that landed on a POI after the fact.
-	_reserve_entrance_clearance(occupied, place("dungeon"))
+	_reserve_entrance_clearance(occupied, place("dungeon"), 3) # the gate sprite is 5.5 tiles wide
 	_reserve_entrance_clearance(occupied, place("castle"))
 	_reserve_entrance_clearance(occupied, HOUSE_ENTRANCE)
-	_reserve_entrance_clearance(occupied, place("final_boss"))
+	_reserve_entrance_clearance(occupied, place("final_boss"), 3)
 	_reserve_entrance_clearance(occupied, place("druid_glade"))
 	_reserve_entrance_clearance(occupied, place("ranger_camp"))
 	_reserve_entrance_clearance(occupied, place("prospector_camp"))

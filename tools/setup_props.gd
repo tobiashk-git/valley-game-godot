@@ -89,7 +89,8 @@ func _initialize() -> void:
 	# baked scale+offset kept working as a pure PNG swap (was the 69x123 LPC
 	# crop). Wider than before (117px) - the sprite is centred so that's free.
 	_build_sprite_prop("HouseEntrance", "res://assets/house.png", 117.0, 123.0, 0.75, Rect2(), 1, true)
-	_build_drawn_prop("DungeonEntrance", "res://scripts/dungeon_entrance.gd")
+	# Real gate art since 2026-09-07 (Leonardo, keyed): 176x134, solid from the rock top to the tile bottom.
+	_build_sprite_prop("DungeonEntrance", "res://assets/dungeon_entrance.png", 176.0, 134.0, 1.0, Rect2(), 1, true)
 	_build_drawn_prop("CastleEntrance", "res://scripts/castle_entrance.gd")
 	# Phase 7b - real cropped-sprite entrance props (LPC Cavern & Ruin Tiles /
 	# LPC Base Assets, see assets_source/lpc/CREDITS.md), replacing the
