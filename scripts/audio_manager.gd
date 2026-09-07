@@ -94,6 +94,7 @@ const SFX := {
 	"quest": "res://assets/sfx/quest.wav", # Freesound 864469 "QUEST_COMPLETE" by thekindles
 	"coin": "res://assets/sfx/coin.wav", # jsfxr pickupCoin
 	"swing": "res://assets/sfx/swing.mp3", # Freesound 840716 "sword swing 1" by nomagician - an enemy's blow (Godot plays MP3 natively)
+	"dodge": "res://assets/sfx/dodge.wav", # Freesound 847042 "basketball swish into net" by designerschoice - Oliver slips a blow
 }
 # One-shot pieces of music: played once over silence, then the scene's
 # track resumes (a won fight plays "victory" between the battle track

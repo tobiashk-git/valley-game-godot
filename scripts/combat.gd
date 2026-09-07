@@ -581,6 +581,7 @@ func _enemy_turn() -> void:
 		# Agility above its starting value lets Oliver slip a blow entirely.
 		if randf() < Character.dodge_chance():
 			enemy_struck.emit(index)
+			Audio.play_sfx("dodge")
 			await _beat("%s attacks - Oliver dodges!" % enemy.name)
 			if was_asleep and not woke_this_round:
 				player_status.erase("sleep")
