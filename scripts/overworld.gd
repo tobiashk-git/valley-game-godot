@@ -328,7 +328,7 @@ func _ready() -> void:
 		eden.sprite_tint = Color(0.75, 0.95, 0.7, 1.0)
 	eden.npc_name = "Eden"
 	eden.npc_id = "eden"
-	eden.intro_text = "Oh! A new face - and such big feet. I'm Eden. I live in the light over the altar, mostly. Don't stare, it's rude. Well... stare a little."
+	eden.intro_text = "Oh! A new face - and such big feet. I'm Eden. I live in the light over the altar, mostly. Small, yes, but I have a scream so mighty it can flatten any monster in this valley. Ask the Bogmaw. Well - you can't, it's still got its paws over its ears."
 	eden.dialogue_text = "Psst. The valley remembers everything, you know. Where the monsters sleep, where the old doors are - even where you hid your gold."
 	ysort.add_child(eden)
 
