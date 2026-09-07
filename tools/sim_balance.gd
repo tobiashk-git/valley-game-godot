@@ -152,7 +152,7 @@ func _initialize() -> void:
 			_out("")
 			_out("### Set rule (each biome's full set beats its boss, the body piece alone does not; the set reaches into the next biome but not its boss)")
 			_out("")
-			_out("The live rule: the companions who come along open each fight (Bite 1.5x / Scream 0.4x, then a tank pool of %d%% of max HP each) - Luigi in Frostpeak, Eden in Verdantwood, both from the Badlands on, nobody before. Bosses and outer wilds were retuned for this on 2026-09-07 (--sets --companions)." % int(root.get_node("Combat").COMPANION_HP_FACTOR * 100))
+			_out("The live rule: the companions who come along open each fight (Bite 1.5x / Scream 0.4x, then a tank pool of %d%% of max HP each; from level 5 a second move - Guard or Shimmer - and a third from level 10) - Luigi in Frostpeak, Eden in Verdantwood, both from the Badlands on, nobody before. Bosses and outer wilds were retuned for this on 2026-09-07 (--sets --companions)." % int(root.get_node("Combat").COMPANION_HP_FACTOR * 100))
 			_out("")
 			for line in _rule_table(_with_companions(model), {}):
 				_out(line)
@@ -210,6 +210,7 @@ func _stats(profile: Dictionary) -> Dictionary:
 	var strength: int = 5 + (level - 1)
 	var agility: int = 5 + int(level / 2)
 	return {
+		"level": level,
 		"max_hp": 20 + 4 * (level - 1),
 		"max_mp": 10 + 2 * (level - 1),
 		"power": strength * 2 + weapon,
@@ -271,32 +272,61 @@ func _fight(model: Dictionary, stats: Dictionary, player: Dictionary, defs: Arra
 	var scream_boss_mult: float = model.get("scream_boss_mult", 1.0) # (tried: a boss's hide vs the scream; not needed)
 	var pool_factor: float = model.get("pool_factor", 0.35) # combat.gd COMPANION_HP_FACTOR
 	# The tank: the called companion draws every blow onto its pool (no
-	# armour) until it is gone. Luigi first; Eden once Luigi has limped out.
-	# Who comes along is the model's roster (combat.gd: Luigi in Frostpeak,
-	# Eden in Verdantwood, both from the Badlands on, nobody before that).
+	# armour) until it is gone. Who comes along is the model's roster
+	# (combat.gd: Luigi in Frostpeak, Eden in Verdantwood, both from the
+	# Badlands on, nobody before that).
+	# PHASE 2: charges per level (1 / 2 at L5 / 3 at L10) are moves; the
+	# pool is granted once (doubled by a first-call Guard, topped up by a
+	# later one) and a knocked-out companion is out. The sim's player: Luigi
+	# first - Bite while his pool holds, Guard (top-up, halved round) once
+	# it is low; then Eden - Scream, then Shimmer (a round nothing lands).
 	var roster: Array = model.get("roster", ["luigi", "eden"])
-	var pool: float = 0.0
-	var luigi_used: bool = not roster.has("luigi")
-	var eden_used: bool = not roster.has("eden")
+	var charges: int = model.get("charges", 1 + (1 if stats.level >= 5 else 0) + (1 if stats.level >= 10 else 0))
+	var c_left: Dictionary = {"luigi": charges if roster.has("luigi") else 0, "eden": charges if roster.has("eden") else 0}
+	var c_pool: Dictionary = {"luigi": -1.0, "eden": -1.0} # -1 = not yet granted
+	var c_out: Dictionary = {"luigi": false, "eden": false}
+	var active := ""
+	var eden_screamed := false
 	while turns < 200:
 		turns += 1
-		# Player turn: drink / heal when low, else hit the weakest.
-		if companions and not luigi_used:
-			luigi_used = true
-			pool = stats.max_hp * pool_factor
-			var big: Dictionary = {}
-			for e in enemies:
-				if e.hp > 0 and (big.is_empty() or e.hp > big.hp):
-					big = e
-			big.hp -= _damage(model, stats.power * bite_mult, big.defense)
-		elif companions and not eden_used and pool <= 0.0:
-			eden_used = true
-			pool = stats.max_hp * pool_factor
-			for e in enemies:
-				if e.hp > 0:
-					e.hp -= _damage(model, stats.power * scream_mult * (scream_boss_mult if e.boss else 1.0), 0.0)
-					if e.hp > 0 and not e.boss and _rng.randf() < 0.5:
-						e.stunned = true
+		# Player turn: a companion move if one is left, else drink / heal
+		# when low, else hit the weakest.
+		var guard_now := false
+		var shimmer_now := false
+		var used_companion := false
+		if companions and c_left.luigi > 0 and not c_out.luigi:
+			c_left.luigi -= 1
+			used_companion = true
+			active = "luigi"
+			var low: bool = c_pool.luigi >= 0.0 and c_pool.luigi < 0.1 * stats.max_hp
+			if c_pool.luigi < 0.0:
+				c_pool.luigi = stats.max_hp * pool_factor
+			if low:
+				guard_now = true
+				c_pool.luigi = minf(stats.max_hp * pool_factor * 2.0, c_pool.luigi + stats.max_hp * pool_factor)
+			else:
+				var big: Dictionary = {}
+				for e in enemies:
+					if e.hp > 0 and (big.is_empty() or e.hp > big.hp):
+						big = e
+				big.hp -= _damage(model, stats.power * bite_mult, big.defense)
+		elif companions and c_left.eden > 0 and not c_out.eden:
+			c_left.eden -= 1
+			used_companion = true
+			active = "eden"
+			if c_pool.eden < 0.0:
+				c_pool.eden = stats.max_hp * pool_factor
+			if not eden_screamed:
+				eden_screamed = true
+				for e in enemies:
+					if e.hp > 0:
+						e.hp -= _damage(model, stats.power * scream_mult * (scream_boss_mult if e.boss else 1.0), 0.0)
+						if e.hp > 0 and not e.boss and _rng.randf() < 0.5:
+							e.stunned = true
+			else:
+				shimmer_now = true
+		if used_companion:
+			pass
 		elif player.hp < POTION_AT * stats.max_hp and player.potions > 0:
 			player.potions -= 1
 			player.hp = mini(stats.max_hp, player.hp + model.potion_heal)
@@ -322,8 +352,16 @@ func _fight(model: Dictionary, stats: Dictionary, player: Dictionary, defs: Arra
 			if e.stunned:
 				e.stunned = false
 				continue
-			if pool > 0.0:
-				pool -= _damage(model, e.attack, 0.0)
+			if shimmer_now:
+				continue
+			if active != "" and c_pool[active] > 0.0:
+				var blow: float = _damage(model, e.attack, 0.0)
+				if guard_now:
+					blow = maxf(1.0, blow / 2.0)
+				c_pool[active] -= blow
+				if c_pool[active] <= 0.0:
+					c_out[active] = true
+					active = ""
 				continue
 			if _rng.randf() < stats.dodge:
 				continue

@@ -121,6 +121,7 @@ func _initialize() -> void:
 	print("...really ignored (no damage, no beat): ", combat.current_enemies[0].hp == hp_now)
 	# Down to his last point: the next blow knocks him out, and does not carry over.
 	combat.companion_hp = 1
+	combat.companion_pools.luigi = 1
 	beats.clear()
 	combat.player_defend()
 	await process_frame
@@ -192,4 +193,62 @@ func _initialize() -> void:
 	combat.player_run()
 	await process_frame
 	print("Out of combat the row and cameo are gone: ", not combat.in_combat and not panel.companion_row.visible)
+
+	# --- phase 2: two moves each, charges by level, one pool per fight ---
+	print("Charges per fight grow with level: 1, then 2 at level 5, 3 at level 10: ", combat.charges_for_level(1) == 1 and combat.charges_for_level(4) == 1 and combat.charges_for_level(5) == 2 and combat.charges_for_level(9) == 2 and combat.charges_for_level(10) == 3)
+	character.stats.level = 5
+	combat.start_combat(["bandit", "bandit", "bandit"], world.Zone.GLOOMFEN)
+	await process_frame
+	for e in combat.current_enemies:
+		e.hp = 1000
+		e.max_hp = 1000
+	print("At level 5 both come with two charges, shown on the busts: ", combat.companion_charges == {"luigi": 2, "eden": 2} and panel.companion_btns.luigi.text == "x2")
+	panel.companion_btns.luigi.pressed.emit()
+	await process_frame
+	var rows: Array = panel.submenu.get_children().filter(func(c): return c is Button).map(func(b): return b.text)
+	await process_frame
+	root.get_texture().get_image().save_png("res://verify_companions_menu.png")
+	print("A bust opens the companion's move menu: Bite and Guard rows plus Back: ", combat.active_submenu == "companion:luigi" and panel.submenu.visible and rows.size() == 3 and rows[0].begins_with("Bite") and rows[1].begins_with("Guard") and rows[2] == "Back")
+	beats.clear()
+	character.stats.hp = 2000
+	combat.companion_act("luigi", "guard")
+	await process_frame
+	var guard_pool: int = int(round(2000 * combat.COMPANION_HP_FACTOR * combat.GUARD_POOL_MULT))
+	print("Guard on his first call: twice the pool, he braces, the blows landed on him halved (Oliver untouched): ", combat.companion_max_hp == guard_pool and combat.companion_hp < guard_pool and combat.companion_hp > guard_pool - 60 and character.stats.hp == 2000 and beats.any(func(l: String) -> bool: return l.contains("braces")) and combat.companion_charges.luigi == 1 and not combat.guard_round)
+	var pool_after_guard: int = combat.companion_hp
+	combat.companion_act("luigi", "bite")
+	await process_frame
+	print("His second charge while still standing: a bite, no fresh pool (the same pool, a little lower): ", combat.selecting_target == "bite" and combat.companion_charges.luigi == 0 and combat.companion_max_hp == guard_pool and combat.companion_hp == pool_after_guard)
+	combat.select_target(0)
+	await process_frame
+	print("Luigi is spent for the fight (no charges) but still on stage tanking: ", not combat.companion_ready("luigi") and combat.companion_active == "luigi" and combat.current_enemies[0].hp < 1000)
+	beats.clear()
+	var oliver_hp: int = character.stats.hp
+	var pool_at_step_back: int = combat.companion_hp # what Luigi steps back with
+	combat.companion_act("eden", "shimmer")
+	await process_frame
+	print("Eden's Shimmer: Luigi steps back, she comes on, and this round nothing lands on anyone: ", combat.companion_active == "eden" and combat.companion_max_hp == int(round(2000 * combat.COMPANION_HP_FACTOR)) and combat.companion_hp == combat.companion_max_hp and character.stats.hp == oliver_hp and beats.filter(func(l: String) -> bool: return l.contains("shimmer turns it aside")).size() == 3 and not combat.shimmer_round)
+	combat.companion_act("eden", "scream")
+	await process_frame
+	print("Her second charge: the scream, still on the same pool: ", combat.companion_charges.eden == 0 and combat.companion_max_hp == int(round(2000 * combat.COMPANION_HP_FACTOR)))
+	combat.companion_charges.luigi = 1 # (a level-10 third charge, say)
+	combat.companion_act("luigi", "bite")
+	await process_frame
+	print("Called back, Luigi returns with the pool he stepped back with, not a new one: ", combat.companion_active == "luigi" and combat.companion_max_hp == guard_pool and combat.companion_hp == pool_at_step_back and pool_at_step_back < pool_after_guard and combat.selecting_target == "bite")
+	combat.select_target(1)
+	await process_frame
+	combat.companion_hp = 1
+	combat.companion_pools.luigi = 1
+	combat.player_status = {}
+	combat.player_defend()
+	await process_frame
+	combat.companion_charges.luigi = 1
+	print("Knocked out, he is out for the fight even with a charge left: ", combat.companion_out.get("luigi", false) and not combat.companion_ready("luigi") and panel.companion_btns.luigi.disabled and combat.companion_active == "")
+	combat.player_run()
+	await process_frame
+	combat.start_combat(["bandit"], world.Zone.GLOOMFEN)
+	await process_frame
+	print("The next fight starts him fresh again: ", combat.companion_ready("luigi") and combat.companion_out.is_empty() and combat.companion_pools.is_empty())
+	combat.player_run()
+	await process_frame
 	quit()

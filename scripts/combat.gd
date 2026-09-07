@@ -80,7 +80,14 @@ var _steps_since_encounter := ENCOUNTER_COOLDOWN_STEPS
 # tools/sim_balance.gd --companions: a player opens every fight with both,
 # and at 2x / 1x the next biome's boss fell to the previous set 65% of the
 # time (the set rule wants <= 25%); the live numbers keep every band.
-# Phase 2: second moves and charges that grow with level.
+# PHASE 2 (2026-09-07): a bust opens a two-move menu. Luigi: Bite, or GUARD
+# (he braces: blows on him are halved this round, and his pool is doubled
+# on his first call or topped up after). Eden: Scream, or SHIMMER (nothing
+# lands on anyone this round). CHARGES grow with level (charges_for_level:
+# 1, 2 at level 5, 3 at level 10) and are the number of MOVES a companion
+# gets per fight; its POOL is granted once per fight on its first call and
+# carries over when it steps back for the other - and once knocked out it
+# is out for the fight, charges or not (the pool is what limits the tank).
 # ---------------------------------------------------------------------------
 signal companion_called(id: String)
 signal companion_struck(id: String)
@@ -103,6 +110,30 @@ const BOSS_EVENT := {
 	"gloomfen_boss": "join_pair", "final_boss": "join_pair",
 }
 const EVENT_ROSTER := {"join_luigi": ["luigi"], "join_eden": ["eden"], "join_pair": ["luigi", "eden"]}
+const COMPANION_MOVES := {
+	"luigi": [
+		{"id": "bite", "name": "Bite", "hint": "one hard bite, then he takes the blows"},
+		{"id": "guard", "name": "Guard", "hint": "braces - blows halved, pool topped up"},
+	],
+	"eden": [
+		{"id": "scream", "name": "Scream", "hint": "hits everyone, may leave them reeling"},
+		{"id": "shimmer", "name": "Shimmer", "hint": "nothing lands on anyone this round"},
+	],
+}
+const CHARGE_LEVELS := [5, 10] # one more charge per fight at each
+const GUARD_POOL_MULT := 2.0 # Guard on the first call: twice the pool; later: topped up to it
+var companion_pools: Dictionary = {} # id -> remaining pool this fight (granted on the first call)
+var companion_max_pools: Dictionary = {} # id -> that pool's size
+var companion_out: Dictionary = {} # id -> true once knocked out (out for the fight)
+var guard_round := false # Luigi braced this round: blows on him halved
+var shimmer_round := false # Eden shimmered this round: nothing lands on anyone
+
+static func charges_for_level(level: int) -> int:
+	var n := 1
+	for at in CHARGE_LEVELS:
+		if level >= at:
+			n += 1
+	return n
 var companion_charges: Dictionary = {} # id -> charges left this fight; {} while locked
 var fight_zone := -1 # the World.Zone the current fight is in (-1: village, dungeon, plains, castle)
 var companion_active := "" # the companion on stage drawing the blows, "" for none
@@ -113,7 +144,13 @@ func companions_unlocked() -> bool:
 	return Quests.quest_state.get("meet_villagers", "") == "completed"
 
 func companion_ready(id: String) -> bool:
-	return in_combat and companion_charges.get(id, 0) > 0
+	return in_combat and companion_charges.get(id, 0) > 0 and not companion_out.get(id, false)
+
+func open_companion_menu(id: String) -> void:
+	if not in_combat or playing or awaiting_exit or alive_enemies().is_empty() or not companion_ready(id):
+		return
+	active_submenu = "companion:" + id
+	changed.emit()
 
 # The companions who come along in a zone (see the roster note above):
 # the zone's event, if it has been done.
@@ -133,12 +170,17 @@ func roster_for_event(event_id: String) -> Array:
 
 func _refill_companions(roster: Array) -> void:
 	companion_charges = {}
+	companion_pools = {}
+	companion_max_pools = {}
+	companion_out = {}
 	companion_active = ""
 	companion_hp = 0
 	companion_max_hp = 0
+	guard_round = false
+	shimmer_round = false
 	if companions_unlocked():
 		for id in roster:
-			companion_charges[id] = 1
+			companion_charges[id] = charges_for_level(Character.stats.level)
 
 # ---------------------------------------------------------------------------
 # Beats - the fight's rhythm (user's reference: Shining in the Darkness).
@@ -451,9 +493,12 @@ func select_target(index: int) -> void:
 
 # --- companion rounds ---
 
-func companion_act(id: String) -> void:
+# `move` is one of COMPANION_MOVES[id] ids; "" = the companion's first move.
+func companion_act(id: String, move: String = "") -> void:
 	if not in_combat or playing or awaiting_exit or alive_enemies().is_empty() or not companion_ready(id):
 		return
+	if move == "":
+		move = COMPANION_MOVES[id][0].id
 	active_submenu = ""
 	playing = true
 	changed.emit()
@@ -467,21 +512,47 @@ func companion_act(id: String) -> void:
 		companion_active = ""
 		await _beat("%s steps back." % COMPANIONS[other].name, BEAT_SECONDS_SHORT)
 		companion_left.emit(other)
+	var was_on_stage: bool = companion_active == id
 	companion_active = id
-	companion_max_hp = max(1, int(round(Character.stats.max_hp * COMPANION_HP_FACTOR)))
-	companion_hp = companion_max_hp
-	companion_called.emit(id)
-	if id == "luigi":
-		await _beat("Luigi the Fearless bounds in!", BEAT_SECONDS_SHORT)
-		var alive := alive_enemies()
-		if alive.size() == 1:
-			await _resolve_bite(alive[0])
-		else:
-			selecting_target = "bite" # the sequence resumes in select_target()
-	else:
-		await _beat("Eden flits in and draws a deep breath...", BEAT_SECONDS_SHORT)
-		await _scream()
+	# The pool: granted once per fight on the first call (doubled for a
+	# Guard), kept across a step-back, topped up by a later Guard.
+	var base_pool: int = max(1, int(round(Character.stats.max_hp * COMPANION_HP_FACTOR)))
+	if not companion_pools.has(id):
+		var size: int = int(round(base_pool * GUARD_POOL_MULT)) if move == "guard" else base_pool
+		companion_pools[id] = size
+		companion_max_pools[id] = size
+	elif move == "guard":
+		companion_max_pools[id] = int(round(base_pool * GUARD_POOL_MULT))
+		companion_pools[id] = mini(companion_max_pools[id], companion_pools[id] + base_pool)
+	companion_hp = companion_pools[id]
+	companion_max_hp = companion_max_pools[id]
+	if not was_on_stage:
+		companion_called.emit(id)
+	match move:
+		"bite":
+			await _beat("Luigi the Fearless bounds in!" if not was_on_stage else "Luigi bares his teeth!", BEAT_SECONDS_SHORT)
+			var alive := alive_enemies()
+			if alive.size() == 1:
+				await _resolve_bite(alive[0])
+			else:
+				selecting_target = "bite" # the sequence resumes in select_target()
+		"guard":
+			guard_round = true
+			await _beat("Luigi plants his paws and braces - nothing gets past!", BEAT_SECONDS_SHORT)
+			await _enemy_turn()
+		"scream":
+			await _beat("Eden flits in and draws a deep breath..." if not was_on_stage else "Eden draws a deep breath...", BEAT_SECONDS_SHORT)
+			await _scream()
+		"shimmer":
+			shimmer_round = true
+			await _beat("Eden scatters a shimmer of light - nothing can find its mark!", BEAT_SECONDS_SHORT)
+			await _enemy_turn()
 	_end_turn()
+
+# The active companion took `damage`: its pool and the mirror the panel reads.
+func _hurt_companion(id: String, damage: int) -> void:
+	companion_pools[id] = max(0, companion_pools.get(id, 0) - damage)
+	companion_hp = companion_pools[id]
 
 func _resolve_bite(index: int) -> void:
 	var enemy: Dictionary = current_enemies[index]
@@ -498,7 +569,6 @@ func _resolve_bite(index: int) -> void:
 func _scream() -> void:
 	var power: int = int(round((Character.stats.strength * 2 + _weapon_attack_bonus()) * SCREAM_MULT))
 	companion_struck.emit("eden")
-	Audio.play_sfx("scream") # an open slot until the user supplies a file
 	var first := true
 	var targets := alive_enemies()
 	for index in targets:
@@ -758,16 +828,26 @@ func _enemy_turn() -> void:
 		# The wind-up: a beat of nothing you can do about it.
 		enemy_turn_started.emit(index)
 		await _beat("%s prepares to strike..." % enemy.name, BEAT_SECONDS_SHORT)
-		# A companion on stage draws the blow onto its own pool (no armour).
+		# Eden's shimmer: this round nothing lands on anyone.
+		if shimmer_round:
+			enemy_struck.emit(index)
+			Audio.play_sfx("dodge")
+			await _beat("%s attacks - the shimmer turns it aside!" % enemy.name)
+			continue
+		# A companion on stage draws the blow onto its own pool (no armour;
+		# halved while Luigi braces).
 		if companion_active != "":
 			var cid: String = companion_active
 			var cdmg := _physical_damage(enemy.attack, 0)
-			companion_hp = max(0, companion_hp - cdmg)
+			if guard_round:
+				cdmg = max(1, cdmg / 2)
+			_hurt_companion(cid, cdmg)
 			enemy_struck.emit(index)
 			companion_hit.emit(cid, cdmg)
 			await _beat("%s attacks %s for %d damage!" % [enemy.name, COMPANIONS[cid].name, cdmg])
 			if companion_hp <= 0:
 				companion_active = ""
+				companion_out[cid] = true
 				await _beat("%s is knocked back and limps out of the fight!" % COMPANIONS[cid].name)
 				companion_left.emit(cid)
 			continue
@@ -804,6 +884,8 @@ func _enemy_turn() -> void:
 			await _beat("Oliver wakes up!", BEAT_SECONDS_SHORT)
 			woke_this_round = true
 
+	guard_round = false
+	shimmer_round = false
 	await _tick_status_durations()
 	changed.emit()
 

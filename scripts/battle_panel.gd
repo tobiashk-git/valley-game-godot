@@ -115,7 +115,7 @@ func _build_companions() -> void:
 		if ResourceLoader.exists(def.portrait):
 			btn.icon = load(def.portrait)
 		btn.tooltip_text = "%s - %s" % [def.name, def.move]
-		btn.pressed.connect(Combat.companion_act.bind(id))
+		btn.pressed.connect(Combat.open_companion_menu.bind(id)) # the two-move menu
 		companion_row.add_child(btn)
 		companion_btns[id] = btn
 	cameo = TextureRect.new()
@@ -161,6 +161,8 @@ func _refresh_companions() -> void:
 		var ready: bool = Combat.companion_ready(id)
 		btn.disabled = not ready
 		btn.modulate = Color.WHITE if ready else Color(0.45, 0.45, 0.45, 1.0)
+		var charges: int = Combat.companion_charges.get(id, 0)
+		btn.text = "x%d" % charges if charges > 1 else "" # more than one call this fight
 	# The cameo stays while its companion tanks, and through its own round
 	# (and a bite's target pick) in any case.
 	if cameo_id != "" and Combat.companion_active != cameo_id and not Combat.playing and Combat.selecting_target != "bite":
@@ -446,6 +448,10 @@ func _refresh_submenu() -> void:
 	# than the command row and would run out of the panel otherwise).
 	log_panel.visible = not open
 	submenu.visible = open
+	# The cameo lives over the message box, which the submenu replaces.
+	if cameo_id != "":
+		cameo.visible = not open
+		cameo_bar.visible = not open
 	submenu.size_flags_vertical = Control.SIZE_EXPAND_FILL if open else Control.SIZE_FILL
 	if not open:
 		return
@@ -456,6 +462,12 @@ func _refresh_submenu() -> void:
 			var spell: Dictionary = Spells.SPELLS[spell_id]
 			var label := "%s (%d MP)" % [spell.name, spell.mp_cost]
 			_add_submenu_row(label, Character.stats.mp < spell.mp_cost, Combat.cast_spell.bind(spell_id), Spells.get_spell_icon(spell_id))
+	elif Combat.active_submenu.begins_with("companion:"):
+		# The companion's two moves (Combat.COMPANION_MOVES), its bust on each.
+		var cid: String = Combat.active_submenu.substr(10)
+		var icon: Texture2D = companion_btns[cid].icon if companion_btns.has(cid) else null
+		for move in Combat.COMPANION_MOVES[cid]:
+			_add_submenu_row("%s - %s" % [move.name, move.hint], not Combat.companion_ready(cid), Combat.companion_act.bind(cid, move.id), icon)
 	elif Combat.active_submenu == "item":
 		var usable := false
 		for item_id in Inventory.backpack.keys():
