@@ -156,6 +156,7 @@ func discovered_count() -> int:
 func render_map(region: Rect2i) -> ImageTexture:
 	var tilemap := TileMapLayer.new()
 	World.build_overworld_map(tilemap)
+	MapRecipe.apply_tiles(tilemap, MapRecipe.load_active()) # the chart shows designed tiles too
 	for zone in GameState.biome_paths_open.keys():
 		if GameState.biome_paths_open[zone]:
 			World.open_biome_path(tilemap, World.Zone[zone.to_upper()])

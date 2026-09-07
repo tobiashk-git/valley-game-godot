@@ -58,6 +58,34 @@ const ZONE_KEYS := {
 func _tile_center(pos: Vector2i) -> Vector2:
 	return Vector2(pos.x * 32 + 16, pos.y * 32 + 16)
 
+# The recipe's own props and wild monsters (see map_recipe.gd). Props by
+# scene name (the biome obstacles plus Tree / Rock); monsters by species,
+# fighting in the species' own biome pool (a dungeon species fights with
+# the dungeon pool) so a designed camp works anywhere on the map.
+func _spawn_recipe(recipe: Dictionary, obstacle_scenes: Dictionary) -> void:
+	var scenes: Dictionary = obstacle_scenes.duplicate()
+	scenes["Tree"] = TREE_SCENE
+	scenes["Rock"] = ROCK_SCENE
+	for entry in MapRecipe.props(recipe):
+		if scenes.has(entry.scene):
+			_spawn_prop(scenes[entry.scene], entry.pos)
+		else:
+			push_warning("MapRecipe: unknown prop scene '%s' at %s" % [entry.scene, str(entry.pos)])
+	for entry in MapRecipe.monsters(recipe):
+		var def: Dictionary = Enemies.ENEMIES.get(entry.enemy_id, {})
+		if def.is_empty():
+			push_warning("MapRecipe: unknown enemy '%s' at %s" % [entry.enemy_id, str(entry.pos)])
+			continue
+		var zones: Array = def.get("zones", [])
+		var placement := {"enemy_id": entry.enemy_id, "zone": int(zones[0]) if not zones.is_empty() else -1, "placement_key": "recipe:%d,%d" % [entry.pos.x, entry.pos.y], "pos": entry.pos}
+		var monster: StaticBody2D = WILD_MONSTER_SCENE.instantiate()
+		monster.enemy_id = placement.enemy_id
+		monster.zone = placement.zone
+		monster.placement_key = placement.placement_key
+		ysort.add_child(monster)
+		monster.position = _tile_center(entry.pos)
+		wild_monster_data.append(placement)
+
 func _spawn_prop(scene: PackedScene, tile_pos: Vector2i) -> Node2D:
 	var instance: Node2D = scene.instantiate()
 	instance.position = _tile_center(tile_pos)
@@ -137,6 +165,14 @@ func _ready() -> void:
 	# bringing it to Overworld2.tscn needs a distinct per-world boss_id first.
 	var verdantwood_maze: Dictionary = World.carve_verdantwood_maze(tilemap)
 	verdantwood_maze_data = verdantwood_maze
+	# The map design recipe (maps/overworld.json, see map_recipe.gd): its
+	# tiles go on before the scatters so they respect them (a scattered
+	# prop never lands on anything but its biome's plain ground), and the
+	# tiles it claims - removed ones plus every recipe prop / monster tile -
+	# filter everything the generator would have put there.
+	var recipe: Dictionary = MapRecipe.load_active()
+	MapRecipe.apply_tiles(tilemap, recipe)
+	var claimed: Dictionary = MapRecipe.claimed(recipe)
 	World.add_world_boundary(self)
 	if GameState.village_gates_open:
 		World.open_gates(tilemap)
@@ -144,6 +180,8 @@ func _ready() -> void:
 	Quests.changed.connect(_on_quests_changed)
 
 	for entry in World.scatter_trees_and_rocks(tilemap):
+		if claimed.has(entry.pos):
+			continue
 		var scene: PackedScene = TREE_SCENE if entry.scene == "Tree" else ROCK_SCENE
 		_spawn_prop(scene, entry.pos)
 
@@ -158,7 +196,7 @@ func _ready() -> void:
 	# monster scatter can't run after anything that does that). Lakes and
 	# obstacles are told about these positions instead, so neither can land
 	# on top of a monster.
-	wild_monster_data = World.scatter_wild_monsters(tilemap)
+	wild_monster_data = World.scatter_wild_monsters(tilemap).filter(func(e: Dictionary) -> bool: return not claimed.has(e.pos))
 	for entry in wild_monster_data:
 		var monster: StaticBody2D = WILD_MONSTER_SCENE.instantiate()
 		monster.enemy_id = entry.enemy_id
@@ -169,6 +207,8 @@ func _ready() -> void:
 	var monster_occupied := {}
 	for entry in wild_monster_data:
 		monster_occupied[entry.pos] = true
+	for pos in claimed.keys():
+		monster_occupied[pos] = true
 
 	# Lakes paint before obstacles scatter - a scattered prop's ground_source
 	# check (tilemap.get_cell_source_id(pos) != ground_source) automatically
@@ -192,6 +232,8 @@ func _ready() -> void:
 	}
 	var obstacle_entries: Array = World.scatter_biome_obstacles(tilemap, monster_occupied)
 	for entry in obstacle_entries:
+		if claimed.has(entry.pos):
+			continue
 		_spawn_prop(obstacle_scenes[entry.scene], entry.pos)
 
 	# Verdantwood overland maze's guardian + blocker - instanced directly
@@ -214,6 +256,8 @@ func _ready() -> void:
 	# sparsely.
 	for entry in verdantwood_maze.boundary_positions:
 		_spawn_prop(obstacle_scenes[entry.scene], entry.pos)
+
+	_spawn_recipe(recipe, obstacle_scenes)
 
 	# House.tscn/VillageHouse door tiles are at (5,8) and (4,6) respectively —
 	# target spawn is always the tile just inside the door (one row up).

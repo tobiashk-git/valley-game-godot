@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "tiles": {},
+  "props": [],
+  "monsters": [],
+  "removed": [],
+  "notes": [
+    {"x": 100, "y": 100, "text": "The altar on the village square. The valley is a 22-tile radius around it; the fords sit north, east, south and west on the river ring."}
+  ]
+}
