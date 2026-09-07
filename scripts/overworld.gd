@@ -154,6 +154,83 @@ func _repaint_open_paths() -> void:
 
 func _on_quests_changed() -> void:
 	_repaint_open_paths()
+	_place_companions()
+
+# --- Companions on the map (2026-09-07). Where Luigi and Eden stand follows
+# the story (quests.gd: the joining events). "With Oliver" = off the map.
+#   Luigi: the southern ford once it opens (blocking, with the pair's quest);
+#          else, after Eden's event, home on the square; else, after his own
+#          event, beside Eden at the eastern ford if that is open (waiting to
+#          be sent home) or with Oliver; else on the northern ford once it
+#          opens (blocking, with his quest); else the square.
+#   Eden:  beside Luigi at the pair's ford; else with Oliver after her event;
+#          else on the eastern ford once it opens (blocking, with her quest);
+#          else the square.
+# The one ON the ford blocks the single crossing tile (an NPC is solid); the
+# other stands on the valley bank beside it.
+var _luigi: StaticBody2D
+var _eden: StaticBody2D
+
+func _ford_spots(zone: int) -> Dictionary:
+	var ford: Vector2i = World.BIOME_FORDS[zone]
+	var inward := Vector2i(signi(World.WORLD_CENTER_X - ford.x), signi(World.WORLD_CENTER_Y - ford.y))
+	var perp := Vector2i(1, 0) if inward.y != 0 else Vector2i(0, 1)
+	# Two tiles along the bank: out of reach of a player standing before the
+	# crossing, so only the blocker answers E there.
+	return {"block": ford, "beside": ford + inward + perp * 2}
+
+# The pair's ford: the southern one, once it is open.
+func _pair_zone() -> int:
+	return World.Zone.BADLANDS if GameState.biome_paths_open.badlands else -1
+
+func _station(npc: StaticBody2D, tile: Vector2i, quest_ids: Array[String], idle: String) -> void:
+	npc.visible = true
+	npc.process_mode = Node.PROCESS_MODE_INHERIT
+	npc.position = _tile_center(tile)
+	npc.quest_ids = quest_ids
+	npc.dialogue_text = idle
+	npc._refresh_marker()
+
+func _with_oliver(npc: StaticBody2D) -> void:
+	npc.visible = false
+	npc.process_mode = Node.PROCESS_MODE_DISABLED
+	npc.position = Vector2(-4000, -4000)
+	npc.quest_ids.clear()
+
+func _place_companions() -> void:
+	if _luigi == null or _eden == null:
+		return
+	var done := func(id: String) -> bool: return Quests.quest_state.get(id, "") == "completed"
+	var pair_zone: int = _pair_zone()
+	var luigi_idle := "Stand tall, pup. The valley is full of things worth barking at, and I have barked at every one of them."
+	var eden_idle := "Psst. The valley remembers everything, you know. Where the monsters sleep, where the old doors are - even where you hid your gold."
+	# --- Luigi ---
+	if done.call("join_pair"):
+		_with_oliver(_luigi)
+	elif pair_zone != -1:
+		_station(_luigi, _ford_spots(pair_zone).block, ["join_pair"], luigi_idle)
+	elif done.call("join_eden"):
+		_station(_luigi, World.place("luigi"), [], "Woods, pup? Eden says the brambles don't like dogs. I say the brambles haven't met me. ...Fine. I'll guard the square. Again.")
+	elif done.call("join_luigi"):
+		if GameState.biome_paths_open.verdantwood:
+			_station(_luigi, _ford_spots(World.Zone.VERDANTWOOD).beside, [], "The woods next, pup? Eden's got opinions about that. Loud ones.")
+		else:
+			_with_oliver(_luigi)
+	elif GameState.biome_paths_open.frostpeak:
+		_station(_luigi, _ford_spots(World.Zone.FROSTPEAK).block, ["join_luigi"], luigi_idle)
+	else:
+		_station(_luigi, World.place("luigi"), [], luigi_idle)
+	# --- Eden ---
+	if done.call("join_pair"):
+		_with_oliver(_eden)
+	elif pair_zone != -1:
+		_station(_eden, _ford_spots(pair_zone).beside, [], "Talk to Luigi - he's rehearsed a speech. It has cats in it.")
+	elif done.call("join_eden"):
+		_with_oliver(_eden)
+	elif GameState.biome_paths_open.verdantwood:
+		_station(_eden, _ford_spots(World.Zone.VERDANTWOOD).block, ["join_eden"], eden_idle)
+	else:
+		_station(_eden, World.place("eden"), [], eden_idle)
 
 func _ready() -> void:
 	World.reload_places() # the recipe may have moved doors and camps
@@ -317,6 +394,7 @@ func _ready() -> void:
 	luigi.intro_text = "Woof! Ahem - hail, small human. Luigi the Fearless, at your service. Once I guarded the castle gate; now I guard this square, and nothing gets past me. Except cats. Cats are fast."
 	luigi.dialogue_text = "Stand tall, pup. The valley is full of things worth barking at, and I have barked at every one of them."
 	ysort.add_child(luigi)
+	_luigi = luigi
 
 	var eden: StaticBody2D = NPC_SCENE.instantiate()
 	eden.position = _tile_center(World.place("eden"))
@@ -331,6 +409,8 @@ func _ready() -> void:
 	eden.intro_text = "Oh! A new face - and such big feet. I'm Eden. I live in the light over the altar, mostly. Small, yes, but I have a scream so mighty it can flatten any monster in this valley. Ask the Bogmaw. Well - you can't, it's still got its paws over its ears."
 	eden.dialogue_text = "Psst. The valley remembers everything, you know. Where the monsters sleep, where the old doors are - even where you hid your gold."
 	ysort.add_child(eden)
+	_eden = eden
+	_place_companions() # where the story has them right now
 
 	# The Frostpeak ford-crossing quest giver, camped in the valley near the
 	# northern ford (moved out of the village's bottom-right house, which is

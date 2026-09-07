@@ -37,6 +37,7 @@ const INTERACT_MARGIN := 24.0
 @onready var quests: Node = get_node("/root/Quests")
 
 var _player_inside := false
+var _player: Node2D
 # The classic quest marker over the head: a gold "!" while this NPC has a
 # quest to offer, a gold "?" while an accepted one is ready to turn in.
 var _marker: Label
@@ -62,6 +63,7 @@ func _ready() -> void:
 		visual_top = visual_center.y - visual_size.y / 2.0
 	interact_area.body_entered.connect(_on_body_entered)
 	interact_area.body_exited.connect(_on_body_exited)
+	add_to_group("npc")
 	_marker = Label.new()
 	_marker.name = "QuestMarker"
 	_marker.size = Vector2(32, 34)
@@ -121,6 +123,19 @@ func _refresh_marker() -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		_player_inside = true
+		_player = body
+
+# With two NPCs in reach (Luigi waiting beside Eden at a ford), only the
+# nearer one answers E - otherwise the first in the tree would speak over
+# the one the player walked up to.
+func _is_nearest_in_reach() -> bool:
+	if _player == null:
+		return true
+	var mine: float = global_position.distance_squared_to(_player.global_position)
+	for other in get_tree().get_nodes_in_group("npc"):
+		if other != self and other.get("_player_inside") == true and other.global_position.distance_squared_to(_player.global_position) < mine:
+			return false
+	return true
 
 func _on_body_exited(body: Node2D) -> void:
 	if body.is_in_group("player"):
@@ -130,6 +145,8 @@ func _process(_delta: float) -> void:
 	if _marker.visible:
 		_marker.position.y = _marker_base_y + sin(Time.get_ticks_msec() / 1000.0 * 4.0) * 3.0
 	if not (_player_inside and not Combat.in_combat and not dialogue_ui.is_open() and not shop_panel.is_open() and Input.is_action_just_pressed("interact")):
+		return
+	if not _is_nearest_in_reach():
 		return
 	if npc_id != "" and not quests.npcs_met.get(npc_id, false):
 		var gates_opened: bool = quests.mark_npc_met(npc_id)

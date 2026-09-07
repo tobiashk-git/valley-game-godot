@@ -60,6 +60,15 @@ func _initialize() -> void:
 	await process_frame
 	combat.start_combat(["bandit"], world.Zone.FROSTPEAK)
 	await process_frame
+	var before_event: bool = combat.companion_charges.is_empty()
+	combat.player_run()
+	await process_frame
+	print("Before his joining event Luigi does not come along even in Frostpeak: ", before_event)
+	quests.quest_state.join_luigi = "completed"
+	quests.quest_state.join_eden = "completed"
+	quests.quest_state.join_pair = "completed"
+	combat.start_combat(["bandit"], world.Zone.FROSTPEAK)
+	await process_frame
 	var frost_luigi: bool = combat.companion_charges == {"luigi": 1} and panel.companion_row.visible and panel.companion_btns.luigi.visible and not panel.companion_btns.eden.visible
 	combat.player_run()
 	await process_frame

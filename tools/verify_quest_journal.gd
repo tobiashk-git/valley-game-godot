@@ -58,17 +58,17 @@ func _initialize() -> void:
 	var sections: Array = _sections(view)
 	print("Six chapter sections in order with their states (1 complete, 2 and 3 in progress, the rest untouched): ", sections.size() == 6 and sections[0] == "Chapter 1: The Valley  -  complete" and sections[1] == "Chapter 2: Frostpeak Ridge  -  in progress" and sections[2] == "Chapter 3: Verdantwood Forest  -  in progress" and sections[3] == "Chapter 4: Emberfall Badlands" and sections[5] == "Chapter 6: The Ancient Warden")
 	var rows: Array = _rows(view)
-	print("Rows in chapter and chain order, the Frostpeak hunt announced as the next step, no side quests here: ", rows == ["MeetVillagersRow", "GatherWoodRow", "CrossFrostpeakRow", "HuntFrostpeakRow", "CrossVerdantwoodRow"])
-	var hunt_row: Button = view.quest_list.get_node("HuntFrostpeakRow")
-	print("The announced step says where to get it and carries its step tag: ", hunt_row.get_node("Status").text == "See the Village Elder" and hunt_row.get_node("Step").text == "Step 2 of 2" and view.quest_list.get_node("CrossFrostpeakRow").get_node("Step").text == "Step 1 of 2")
+	print("Rows in chapter and chain order, Luigi's joining event announced as the next step, no side quests here: ", rows == ["MeetVillagersRow", "GatherWoodRow", "CrossFrostpeakRow", "JoinLuigiRow", "CrossVerdantwoodRow"])
+	var join_row: Button = view.quest_list.get_node("JoinLuigiRow")
+	print("The announced step says where to get it and carries its step tag: ", join_row.get_node("Status").text == "See Luigi the Fearless" and join_row.get_node("Step").text == "Step 2 of 3" and view.quest_list.get_node("CrossFrostpeakRow").get_node("Step").text == "Step 1 of 3")
 	print("Untouched chapters show their blurb line: ", view.quest_list.get_children().any(func(c): return c is Label and String(c.text).strip_edges() == "Fires in the south."))
 	print("The pane defaults to the active story quest (Clearing the Crossing), Track shown: ", view.selected_quest == "cross_verdantwood" and view.quest_name.text == "Clearing the Crossing" and view.track_btn.visible)
 	view.select_quest("cross_frostpeak")
 	await process_frame
-	print("A finished ford's pane: Step 1 of 2, leads on to the now-known hunt, no Track: ", view.quest_giver.text == "From the Frostpeak Ranger\nStep 1 of 2  -  leads on to The Glacial Revenant" and not view.track_btn.visible)
-	view.select_quest("hunt_frostpeak")
+	print("A finished ford's pane: Step 1 of 3, leads on to the now-known joining event, no Track: ", view.quest_giver.text == "From the Frostpeak Ranger\nStep 1 of 3  -  leads on to A Fearless Friend" and not view.track_btn.visible)
+	view.select_quest("join_luigi")
 	await process_frame
-	print("The announced hunt's pane: follows the ford, not yet accepted, goal from the Elder's brief: ", view.quest_giver.text.ends_with("Step 2 of 2  -  follows Reinforcing the Ford") and view.quest_progress.text.contains("Not yet accepted") and view.quest_goal.text.begins_with("Find the ice caves") and not view.track_btn.visible)
+	print("The announced event's pane: follows the ford, not yet accepted, goal says where Luigi waits: ", view.quest_giver.text.contains("Step 2 of 3  -  follows Reinforcing the Ford") and view.quest_progress.text.contains("Not yet accepted") and view.quest_goal.text.begins_with("Luigi waits on the northern ford") and not view.track_btn.visible)
 	view.select_quest("cross_verdantwood")
 	await process_frame
 	print("An open chain hides its next step's name until it can be picked up: ", view.quest_giver.text.ends_with("leads on to ..."))

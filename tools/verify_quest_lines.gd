@@ -39,14 +39,15 @@ func _initialize() -> void:
 		for req in quests.requires_of(id):
 			if not quests.QUEST_DEFS.has(req):
 				shape_ok = false
-	print("Six chapters in order (village, four biomes, finale); every quest is story or side, story quests in a chapter, requirements all real quests (", story_count, " story / ", side_count, " side): ", chapter_ids == ["village", "frostpeak", "verdantwood", "badlands", "gloomfen", "finale"] and shape_ok and story_count == 12 and side_count == 4)
+	print("Six chapters in order (village, four biomes, finale); every quest is story or side, story quests in a chapter, requirements all real quests (", story_count, " story / ", side_count, " side): ", chapter_ids == ["village", "frostpeak", "verdantwood", "badlands", "gloomfen", "finale"] and shape_ok and story_count == 15 and side_count == 4)
 	var chapter_ok := true
+	var joins: Dictionary = {"frostpeak": ["join_luigi"], "verdantwood": ["join_eden"], "badlands": ["join_pair"]}
 	for c in ["frostpeak", "verdantwood", "badlands", "gloomfen"]:
 		var ids: Array = quests.chapter_quests(c)
 		ids.sort()
-		if ids != ["cross_" + c, "hunt_" + c]:
+		if ids != ["cross_" + c, "hunt_" + c] + joins.get(c, []):
 			chapter_ok = false
-	print("Each biome chapter is its ford quest then its hunt; the finale is the Guardians then the Warden: ", chapter_ok and quests.chapter_quests("finale").size() == 2 and quests.chain_of("two_guardians") == ["two_guardians", "ancient_warden"])
+	print("Each biome chapter is its ford quest, its companion's joining event (none for Gloomfen) and its hunt; the finale is the Guardians then the Warden: ", chapter_ok and quests.chapter_quests("finale").size() == 2 and quests.chain_of("two_guardians") == ["two_guardians", "ancient_warden"])
 
 	# --- gating ---
 	print("Meet the Village is the gateway: before it is turned in no ford, barrow or Blacksmith quest is offerable: ", not quests.is_available("cross_frostpeak") and not quests.is_available("open_ancient_barrow") and not quests.is_available("forge_whetstone") and quests.is_available("meet_villagers"))
@@ -54,7 +55,9 @@ func _initialize() -> void:
 	print("After the tutorial the fords are open in any order (all four ford quests offerable) but no hunt is: ", quests.is_available("cross_frostpeak") and quests.is_available("cross_gloomfen") and not quests.is_available("hunt_frostpeak") and not quests.is_available("hunt_gloomfen") and not quests.is_available("two_guardians"))
 	quests.quest_state.erase("meet_villagers")
 	quests.quest_state.cross_verdantwood = "completed"
-	print("Completing a ford unlocks that biome's hunt only: ", quests.is_available("hunt_verdantwood") and not quests.is_available("hunt_frostpeak"))
+	print("Completing a ford unlocks that biome's joining event, and the event its hunt: ", quests.is_available("join_eden") and not quests.is_available("hunt_verdantwood") and not quests.is_available("join_luigi"))
+	quests.quest_state.join_eden = "completed"
+	print("...and the event its hunt only: ", quests.is_available("hunt_verdantwood") and not quests.is_available("hunt_frostpeak"))
 
 	# --- the Elder skips locked chapters ---
 	var overworld: Node2D = load("res://scenes/Overworld.tscn").instantiate()
@@ -74,9 +77,9 @@ func _initialize() -> void:
 	quests.quest_state.meet_villagers = "completed"
 	quests.quest_state.gather_wood = "completed"
 	print("Village done, Verdantwood ford open, Frostpeak not: the Elder skips chapter 2 and offers Elder Bramblewood: ", elder.active_quest() == "hunt_verdantwood" and elder.marker_kind() == "!")
-	quests.quest_state.erase("cross_verdantwood")
+	quests.quest_state.erase("join_eden")
 	print("With no chapter unlocked he has nothing to offer and repeats the last closing line (no marker): ", elder.active_quest() == "gather_wood" and elder.marker_kind() == "")
-	quests.quest_state.cross_verdantwood = "completed"
+	quests.quest_state.join_eden = "completed"
 
 	# --- accept a hunt through the Elder's dialogue, then beat the boss ---
 	var player: CharacterBody2D = overworld.get_node("YSort/Player")
@@ -107,13 +110,15 @@ func _initialize() -> void:
 	print("Turned in: completed, 60 gold and 220 XP paid, a potion granted, chapter 3 complete: ", quests.quest_state.hunt_verdantwood == "completed" and inventory.get_count("gold") == gold_before + 60 and xp_gained and inventory.get_count("healing_potion") == 1 and quests.chapter_state("verdantwood") == "complete" and quests.chapter_state("frostpeak") == "not_started")
 
 	# --- chains and steps ---
-	print("Chains derive from the requirements: ford -> hunt is a two-step chain, the hunt is step 2 of 2, a ford step 1 of 2: ", quests.chain_of("hunt_frostpeak") == ["cross_frostpeak", "hunt_frostpeak"] and quests.step_of("hunt_frostpeak") == [2, 2] and quests.step_of("cross_frostpeak") == [1, 2] and quests.prev_of("hunt_frostpeak") == "cross_frostpeak" and quests.next_of("cross_frostpeak") == ["hunt_frostpeak"])
+	print("Chains derive from the requirements: ford -> join -> hunt is a three-step chain, the hunt step 3 of 3, the ford step 1 of 3: ", quests.chain_of("hunt_frostpeak") == ["cross_frostpeak", "join_luigi", "hunt_frostpeak"] and quests.step_of("hunt_frostpeak") == [3, 3] and quests.step_of("cross_frostpeak") == [1, 3] and quests.prev_of("hunt_frostpeak") == "join_luigi" and quests.next_of("cross_frostpeak") == ["join_luigi"])
 	print("A single-action side quest is a chain of one: ", quests.chain_of("open_ancient_barrow") == ["open_ancient_barrow"] and quests.step_of("open_ancient_barrow") == [1, 1] and quests.line_of("open_ancient_barrow") == "side")
 
 	# --- the finale needs all four hunts ---
 	for c in ["frostpeak", "badlands", "gloomfen"]:
 		quests.quest_state["cross_" + c] = "completed"
 		quests.quest_state["hunt_" + c] = "completed"
+	quests.quest_state.join_luigi = "completed"
+	quests.quest_state.join_pair = "completed"
 	print("All four hunts done: the Guardians quest opens, 0/2 Guardians asleep: ", quests.is_available("two_guardians") and quests.objective_progress_text("two_guardians") == "0/2 Guardians asleep" and elder.active_quest() == "two_guardians")
 	quests.quest_state.two_guardians = "accepted"
 	game_state.boss_defeated.dungeon_boss = true

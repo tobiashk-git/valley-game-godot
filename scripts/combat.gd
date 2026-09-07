@@ -72,9 +72,11 @@ var _steps_since_encounter := ENCOUNTER_COOLDOWN_STEPS
 # once Meet the Village is turned in.
 # WHO COMES ALONG follows the story (user, 2026-09-07): Oliver starts on his
 # own (village, dungeon, plains, castle), Luigi joins for Frostpeak, Eden
-# alone for Verdantwood, both from the Badlands on and for the finale. A
-# fight's roster comes from its zone (random and wild encounters carry one)
-# or, for a boss, from the boss itself - see roster_for_zone / ROSTER_BY_BOSS. The strengths come from
+# alone for Verdantwood, both from the Badlands on and for the finale - and
+# only once that biome's JOINING EVENT is done (quests.gd join_luigi /
+# join_eden / join_pair: they wait on the ford). A fight's roster comes from
+# its zone (random and wild encounters carry one) or, for a boss, from the
+# boss itself - see roster_for_zone / BOSS_EVENT. The strengths come from
 # tools/sim_balance.gd --companions: a player opens every fight with both,
 # and at 2x / 1x the next biome's boss fell to the previous set 65% of the
 # time (the set rule wants <= 25%); the live numbers keep every band.
@@ -92,12 +94,15 @@ const BITE_MULT := 1.5
 const SCREAM_MULT := 0.4
 const SCREAM_STUN_CHANCE := 0.5
 const COMPANION_HP_FACTOR := 0.35 # the tank's pool as a share of Oliver's max HP
-const ROSTER_BY_BOSS := {
-	"frostpeak_boss": ["luigi"],
-	"verdantwood_boss": ["eden"], "verdantwood_maze_guardian_1": ["eden"],
-	"castle_boss": ["luigi", "eden"], "badlands_boss": ["luigi", "eden"],
-	"gloomfen_boss": ["luigi", "eden"], "final_boss": ["luigi", "eden"],
+# Which joining event a boss fight falls under; EVENT_ROSTER says who that
+# event brings.
+const BOSS_EVENT := {
+	"frostpeak_boss": "join_luigi",
+	"verdantwood_boss": "join_eden", "verdantwood_maze_guardian_1": "join_eden",
+	"castle_boss": "join_pair", "badlands_boss": "join_pair",
+	"gloomfen_boss": "join_pair", "final_boss": "join_pair",
 }
+const EVENT_ROSTER := {"join_luigi": ["luigi"], "join_eden": ["eden"], "join_pair": ["luigi", "eden"]}
 var companion_charges: Dictionary = {} # id -> charges left this fight; {} while locked
 var fight_zone := -1 # the World.Zone the current fight is in (-1: village, dungeon, plains, castle)
 var companion_active := "" # the companion on stage drawing the blows, "" for none
@@ -110,15 +115,21 @@ func companions_unlocked() -> bool:
 func companion_ready(id: String) -> bool:
 	return in_combat and companion_charges.get(id, 0) > 0
 
-# The companions who come along in a zone (see the roster note above).
+# The companions who come along in a zone (see the roster note above):
+# the zone's event, if it has been done.
 func roster_for_zone(zone: int) -> Array:
 	if zone == World.Zone.FROSTPEAK:
-		return ["luigi"]
+		return roster_for_event("join_luigi")
 	if zone == World.Zone.VERDANTWOOD:
-		return ["eden"]
+		return roster_for_event("join_eden")
 	if zone == World.Zone.BADLANDS or zone == World.Zone.GLOOMFEN:
-		return ["luigi", "eden"]
+		return roster_for_event("join_pair")
 	return []
+
+func roster_for_event(event_id: String) -> Array:
+	if event_id == "" or not Quests.companion_joined(event_id):
+		return []
+	return EVENT_ROSTER[event_id]
 
 func _refill_companions(roster: Array) -> void:
 	companion_charges = {}
@@ -299,7 +310,7 @@ func start_boss_fight(boss_id: String) -> void:
 	current_boss_id = boss_id
 	current_wild_monster_key = ""
 	fight_zone = -1
-	_refill_companions(ROSTER_BY_BOSS.get(boss_id, []))
+	_refill_companions(roster_for_event(BOSS_EVENT.get(boss_id, "")))
 	battle_log = ["%s blocks your path!" % def.name]
 	changed.emit()
 

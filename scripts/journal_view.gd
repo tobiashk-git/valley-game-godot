@@ -147,7 +147,7 @@ func _available_ids() -> Array:
 # Status line for a row: live progress, ready, done, or where to pick it up.
 func status_text(quest_id: String) -> String:
 	if _state(quest_id) == "":
-		return "See the %s" % Quests.QUEST_DEFS[quest_id].get("giver_name", "villagers")
+		return "See %s" % Quests.giver_label(quest_id)
 	if _state(quest_id) == "completed":
 		return "Completed"
 	if Quests.objective_met(quest_id):
@@ -183,7 +183,7 @@ func goal_text(quest_id: String) -> String:
 	if objective.has("goal"):
 		return objective.goal
 	var giver: String = def.get("giver_name", "")
-	var to_giver: String = " and bring it to the %s" % giver if giver != "" else ""
+	var to_giver: String = " and bring it to %s" % Quests.giver_label(quest_id) if giver != "" else ""
 	if objective.type == "gather":
 		return "Gather %d %s%s." % [objective.amount, Items.get_item_name_bbcode(objective.item_id), to_giver]
 	if objective.type == "gather_multi":
@@ -351,16 +351,16 @@ func refresh() -> void:
 	var state: String = _state(selected_quest)
 	var done: bool = state == "completed"
 	quest_name.text = def.name
-	var from: String = "From the %s" % def.giver_name if def.has("giver_name") else "Village tutorial"
+	var from: String = "From %s" % Quests.giver_label(selected_quest) if def.has("giver_name") else "Village tutorial"
 	var chain: String = chain_text(selected_quest)
 	quest_giver.text = from + ("\n" + chain if chain != "" else "")
 	quest_goal.text = goal_text(selected_quest)
 	if state == "":
-		quest_progress.text = "[color=#d8c890]Not yet accepted - see the %s.[/color]" % def.get("giver_name", "villagers")
+		quest_progress.text = "[color=#d8c890]Not yet accepted - see %s.[/color]" % Quests.giver_label(selected_quest)
 	elif done:
 		quest_progress.text = "[color=#8ee07f]Completed[/color]"
 	elif Quests.objective_met(selected_quest):
-		quest_progress.text = "[color=#8ee07f]Ready to turn in!%s[/color]" % (" Go back to the %s." % def.giver_name if def.has("giver_name") else "")
+		quest_progress.text = "[color=#8ee07f]Ready to turn in!%s[/color]" % (" Go back to %s." % Quests.giver_label(selected_quest) if def.has("giver_name") else "")
 	else:
 		quest_progress.text = "Progress: " + Quests.objective_progress_text(selected_quest)
 	quest_reward.text = reward_text(selected_quest)

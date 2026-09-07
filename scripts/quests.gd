@@ -121,10 +121,35 @@ const QUEST_DEFS := {
 	# biome's boss, and once all four sleep, after the two Guardians and the
 	# Ancient Warden. Fords stay open in any order (the hunts only require
 	# their own ford), so chapters 2-5 can be played in any order.
+	# --- Joining events (2026-09-07, user: "we would need a joining event").
+	# The companions follow the story: once a ford opens, the one who comes
+	# along for that biome waits ON the crossing (blocking it) with a "!";
+	# accepting completes the quest on the spot (objective type "join") and
+	# they walk with Oliver (Combat.roster_for_zone reads these states).
+	# Luigi for Frostpeak; Eden alone for Verdantwood (the Bramblewood hates
+	# dogs - Luigi goes home); both together from the Badlands on (the pair
+	# wait at the southern ford, and their event also settles the other two).
+	# Each is the middle step of its chapter's chain: ford -> join -> hunt
+	# (the hunt requires the join; Gloomfen's needs only its ford - its
+	# companions are the pair from the Badlands). See overworld.gd
+	# _place_companions() for where they stand.
+	"join_luigi": {
+		"giver_name": "Luigi the Fearless", "giver_is_name": true,
+		"name": "A Fearless Friend",
+		"line": "story", "chapter": "frostpeak", "requires": ["cross_frostpeak"],
+		"objective": {"type": "join", "companion": "luigi", "goal": "Luigi waits on the northern ford. Ask him along into Frostpeak."},
+		"reward": {"xp": 30},
+		"dialogue": {
+			"offer": "Woof - there you are, pup. The ford's open, and Frostpeak is no place to go alone. The wolves up there bite - but I bite harder. Say the word and I'll come along.",
+			"in_progress": "Say the word, pup.",
+			"ready": "Luigi the Fearless walks at your side! Call him in a fight and he'll bite first and take the blows after.",
+			"completed": "Frostpeak, pup. Stay behind me and mind the ice.",
+		},
+	},
 	"hunt_frostpeak": {
 		"giver_name": "Village Elder",
 		"name": "The Glacial Revenant",
-		"line": "story", "chapter": "frostpeak", "requires": ["cross_frostpeak"],
+		"line": "story", "chapter": "frostpeak", "requires": ["join_luigi"],
 		"objective": {"type": "defeat_bosses", "boss_ids": ["frostpeak_boss"], "label": "Glacial Revenant asleep", "goal": "Find the ice caves beyond the northern ford and put the Glacial Revenant to sleep."},
 		"reward": {"xp": 180, "gold": 50, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -134,10 +159,23 @@ const QUEST_DEFS := {
 			"completed": "Frostpeak's quiet now, thanks to you.",
 		},
 	},
+	"join_eden": {
+		"giver_name": "Eden", "giver_is_name": true,
+		"name": "A Small Loud Guide",
+		"line": "story", "chapter": "verdantwood", "requires": ["cross_verdantwood"],
+		"objective": {"type": "join", "companion": "eden", "goal": "Eden waits on the eastern ford. Ask her along into Verdantwood."},
+		"reward": {"xp": 30},
+		"dialogue": {
+			"offer": "Verdantwood, hm? The Bramblewood hates dogs - it would tangle poor Luigi in a heartbeat. He goes home. I come with you. I know every root in that wood, and I can be very, very loud.",
+			"in_progress": "Well? Do you want a guide or not?",
+			"ready": "Eden flits to your shoulder! Call her in a fight and she'll scream first and take the blows after.",
+			"completed": "Luigi's sulking on the square. He'll live. Into the trees!",
+		},
+	},
 	"hunt_verdantwood": {
 		"giver_name": "Village Elder",
 		"name": "Elder Bramblewood",
-		"line": "story", "chapter": "verdantwood", "requires": ["cross_verdantwood"],
+		"line": "story", "chapter": "verdantwood", "requires": ["join_eden"],
 		"objective": {"type": "defeat_bosses", "boss_ids": ["verdantwood_boss"], "label": "Elder Bramblewood asleep", "goal": "Go deep into Verdantwood's tangled interior and put Elder Bramblewood to sleep."},
 		"reward": {"xp": 220, "gold": 60, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -147,10 +185,23 @@ const QUEST_DEFS := {
 			"completed": "The forest's healing, thanks to you.",
 		},
 	},
+	"join_pair": {
+		"giver_name": "Luigi the Fearless", "giver_is_name": true,
+		"name": "The Fearless Pair",
+		"line": "story", "chapter": "badlands", "requires": ["cross_badlands"],
+		"objective": {"type": "join", "companion": "both", "goal": "Luigi and Eden wait on the southern ford. Ask them both along."},
+		"reward": {"xp": 40},
+		"dialogue": {
+			"offer": "Woof! We've talked it over, Eden and I. Emberfall and the fen are too much for one of us - so you get both. No arguments. Except from cats.",
+			"in_progress": "Both of us, pup. Say yes.",
+			"ready": "Luigi and Eden both walk with you now! Call either in a fight - and the other waits their turn.",
+			"completed": "Both of us, pup. Nothing gets past.",
+		},
+	},
 	"hunt_badlands": {
 		"giver_name": "Village Elder",
 		"name": "Cinderjaw",
-		"line": "story", "chapter": "badlands", "requires": ["cross_badlands"],
+		"line": "story", "chapter": "badlands", "requires": ["join_pair"],
 		"objective": {"type": "defeat_bosses", "boss_ids": ["badlands_boss"], "label": "Cinderjaw asleep", "goal": "Brave the Emberfall interior and put Cinderjaw to sleep."},
 		"reward": {"xp": 260, "gold": 70, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -396,6 +447,8 @@ func objective_met(quest_id: String) -> bool:
 			if not GameState.boss_defeated.get(boss_id, false):
 				return false
 		return true
+	if objective.type == "join":
+		return true # settled the moment it is accepted
 	return false
 
 # e.g. "3/5 [icon] Wood" or "1/2 Villagers" - used by the offer-in-progress
@@ -426,6 +479,8 @@ func objective_progress_text(quest_id: String) -> String:
 			if GameState.boss_defeated.get(boss_id, false):
 				asleep += 1
 		return "%d/%d %s" % [asleep, objective.boss_ids.size(), objective.get("label", "bosses asleep")]
+	if objective.type == "join":
+		return "Ready to join"
 	return ""
 
 # Called by npc.gd when the player interacts with a quest-giving NPC. Picks
@@ -455,12 +510,30 @@ func talk_to_giver(quest_id: String) -> void:
 
 func _accept_quest(quest_id: String) -> void:
 	quest_state[quest_id] = "accepted"
+	var def: Dictionary = QUEST_DEFS[quest_id]
+	# A joining event settles on the spot: the companion walks with Oliver
+	# and says so (the "ready" line stands in for a turn-in).
+	if def.objective.type == "join":
+		_complete_quest(quest_id)
+		get_node("/root/DialogueUI").call_deferred("show_dialogue", def.giver_name, def.dialogue.ready)
+		return
 	# Auto-track so it's immediately visible on the overlay without a trip
 	# to the Journal - silently skipped if the tracker is already full,
 	# same as a manual Track click at the cap.
 	if tracked_quests.size() < MAX_TRACKED:
 		tracked_quests.append(quest_id)
 	changed.emit()
+
+# "the Village Elder", but "Luigi the Fearless" / "Eden": a giver that is a
+# proper name (giver_is_name) takes no article in the Journal.
+func giver_label(quest_id: String) -> String:
+	var def: Dictionary = QUEST_DEFS[quest_id]
+	var giver: String = def.get("giver_name", "villagers")
+	return giver if def.get("giver_is_name", false) else "the " + giver
+
+# The joining event a companion (or the pair) needs before it comes along.
+func companion_joined(event_id: String) -> bool:
+	return quest_state.get(event_id, "") == "completed" or quest_state.get("join_pair", "") == "completed"
 
 func _mark_completed(quest_id: String) -> void:
 	quest_state[quest_id] = "completed"
@@ -499,6 +572,11 @@ func _complete_quest(quest_id: String) -> void:
 		GameState.world_progress.golden_plains_revealed = true
 	elif quest_id == "meet_villagers":
 		_open_village_gates() # the tutorial's real reward, paid on the turn-in
+	elif quest_id == "join_pair":
+		# Both walk with Oliver from here on - the single events are moot.
+		for event in ["join_luigi", "join_eden"]:
+			if quest_state.get(event, "") != "completed":
+				_mark_completed(event)
 	changed.emit()
 
 # Called by npc.gd the first time (and only the first time) the player
