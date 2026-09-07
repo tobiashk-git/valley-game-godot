@@ -22,6 +22,9 @@ extends RefCounted
 const VERSION := 1
 const DEFAULT_PATH := "res://maps/overworld.json"
 static var active_path: String = DEFAULT_PATH
+# The designer's unsaved recipe: when set, load_active() returns it instead
+# of reading the file, so a regenerated preview shows the live edits.
+static var override: Dictionary = {}
 
 # Tile names the recipe may use instead of raw source ids (the ground and
 # solid types; fence / gate / altar carry rotation flags and stay generated).
@@ -60,6 +63,8 @@ static func in_world(pos: Vector2i) -> bool:
 
 # The active recipe, or {} when the file is missing or not a version-1 recipe.
 static func load_active() -> Dictionary:
+	if not override.is_empty():
+		return override.duplicate(true)
 	return load_from(active_path)
 
 static func load_from(path: String) -> Dictionary:
