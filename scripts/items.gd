@@ -74,6 +74,13 @@ const ITEMS := {
 	"bogiron_helm": {"name": "Bog-iron Helm", "icon": "🛡️", "slot": "head", "layer": "res://assets/armour_layers/bogiron_helm.png", "defense": 4, "tier": 4, "value": 80, "desc": "A rust-black helm of Gloomfen iron. Nothing gets through."},
 	"bogiron_greaves": {"name": "Bog-iron Greaves", "icon": "🛡️", "slot": "legs", "layer": "res://assets/armour_layers/bogiron_greaves.png", "defense": 4, "tier": 4, "value": 80, "desc": "Bog iron plates strapped over fur. Heavy and dark."},
 	"bogiron_boots": {"name": "Bog-iron Boots", "icon": "🛡️", "slot": "feet", "layer": "res://assets/armour_layers/bogiron_boots.png", "defense": 3, "tier": 4, "value": 70, "desc": "Bog iron boots. The best the valley makes."},
+
+	# --- Gloves (2026-09-07): the hands slot, one pair per tier.
+	"leather_gloves": {"name": "Leather Gloves", "icon": "🧤", "slot": "hands", "layer": "res://assets/armour_layers/leather_gloves.png", "defense": 1, "value": 15, "desc": "Soft hide gloves. A better grip on everything."},
+	"frost_gloves": {"name": "Frost Gloves", "icon": "🧤", "slot": "hands", "layer": "res://assets/armour_layers/frost_gloves.png", "defense": 1, "tier": 1, "value": 20, "desc": "Fur mitts tipped with frost shard. Fingers stay warm; claws stay out."},
+	"ironwood_gloves": {"name": "Ironwood Gloves", "icon": "🧤", "slot": "hands", "layer": "res://assets/armour_layers/ironwood_gloves.png", "defense": 2, "tier": 2, "value": 35, "desc": "Bark-scale gauntlets over fur. Thorns slide off."},
+	"ember_gloves": {"name": "Ember Gloves", "icon": "🧤", "slot": "hands", "layer": "res://assets/armour_layers/ember_gloves.png", "defense": 2, "tier": 3, "value": 50, "desc": "Dark iron gauntlets with ember seams. Warm to the wrist."},
+	"bogiron_gloves": {"name": "Bog-iron Gloves", "icon": "🧤", "slot": "hands", "layer": "res://assets/armour_layers/bogiron_gloves.png", "defense": 3, "tier": 4, "value": 70, "desc": "Rust-black gauntlets of Gloomfen iron. Nothing bites through."},
 	# Enhancement ingredient (Crafting.ENHANCEMENTS): a chance drop from the
 	# three Badlands species, so hunting a specific monster has a point.
 	"ember_core": {"name": "Ember Core", "icon": "🔥", "value": 15, "desc": "Still warm. Cut from the heart of a Badlands beast - temper a blade in it."},

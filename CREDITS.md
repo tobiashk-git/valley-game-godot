@@ -25,3 +25,4 @@ Worn-armour layers on the player (assets/armour_layers/, from the Universal LPC 
 - legs/armour/plate (walk): bluecarrot16, JaidynReiman, Michael Whitlock (bigbeargames), Matthew Krohn (makrohn), Johannes Sjölund (wulax) - recoloured for the four Greaves
 - feet/armour/plate (walk): Matthew Krohn (makrohn), Johannes Sjölund (wulax) - recoloured for Ironwood, Ember and Bog-iron Boots
 - feet/boots/basic (walk): JaidynReiman, bluecarrot16, Nila122 - Leather Boots as drawn, recoloured for Frost Boots
+- arms/gloves (walk): Johannes Sjölund (wulax), Michael Whitlock (bigbeargames), Matthew Krohn (makrohn), bluecarrot16, JaidynReiman - brown as drawn for Leather Gloves, the steel sheet recoloured for Frost, Ironwood, Ember and Bog-iron Gloves

@@ -44,11 +44,11 @@ const PROFILES := [
 	{"name": "L12 bog-iron", "level": 12, "gear": ["bogiron_cleaver", "bogiron_harness"], "potions": 3, "extra_defense": 0},
 	# Full armour sets: helm + greaves + boots on top of the body piece
 	# (real items since 2026-09-06: frost 2/2/1, ironwood 3/2/2, ember 3/3/2,
-	# bog-iron 4/4/3).
-	{"name": "L3 frost full", "level": 3, "gear": ["frost_pick", "frostweave_coat", "frost_helm", "frost_greaves", "frost_boots"], "potions": 3, "extra_defense": 0},
-	{"name": "L5 ironwood full", "level": 5, "gear": ["ironwood_blade", "ironwood_mail", "ironwood_helm", "ironwood_greaves", "ironwood_boots"], "potions": 3, "extra_defense": 0},
-	{"name": "L8 ember full", "level": 8, "gear": ["ember_blade", "ember_plate", "ember_helm", "ember_greaves", "ember_boots"], "potions": 3, "extra_defense": 0},
-	{"name": "L12 bog-iron full", "level": 12, "gear": ["bogiron_cleaver", "bogiron_harness", "bogiron_helm", "bogiron_greaves", "bogiron_boots"], "potions": 3, "extra_defense": 0},
+	# bog-iron 4/4/3; gloves 1/2/2/3 since 2026-09-07).
+	{"name": "L3 frost full", "level": 3, "gear": ["frost_pick", "frostweave_coat", "frost_helm", "frost_greaves", "frost_boots", "frost_gloves"], "potions": 3, "extra_defense": 0},
+	{"name": "L5 ironwood full", "level": 5, "gear": ["ironwood_blade", "ironwood_mail", "ironwood_helm", "ironwood_greaves", "ironwood_boots", "ironwood_gloves"], "potions": 3, "extra_defense": 0},
+	{"name": "L8 ember full", "level": 8, "gear": ["ember_blade", "ember_plate", "ember_helm", "ember_greaves", "ember_boots", "ember_gloves"], "potions": 3, "extra_defense": 0},
+	{"name": "L12 bog-iron full", "level": 12, "gear": ["bogiron_cleaver", "bogiron_harness", "bogiron_helm", "bogiron_greaves", "bogiron_boots", "bogiron_gloves"], "potions": 3, "extra_defense": 0},
 ]
 
 # --- The set rule (user's design target, 2026-09-06) ---
@@ -59,13 +59,13 @@ const PROFILES := [
 # against the bands below; `--sets` sweeps boss HP/attack multipliers per
 # boss until each row passes and prints the winning multipliers.
 const TIERS := [
-	{"name": "Frost", "level": 3, "weapon": "frost_pick", "body": "frostweave_coat", "set": ["frost_helm", "frost_greaves", "frost_boots"], "boss": "frostpeak_boss", "next_zone": "VERDANTWOOD", "next_boss": "verdantwood_boss"},
-	{"name": "Ironwood", "level": 5, "weapon": "ironwood_blade", "body": "ironwood_mail", "set": ["ironwood_helm", "ironwood_greaves", "ironwood_boots"], "boss": "verdantwood_boss", "next_zone": "BADLANDS", "next_boss": "badlands_boss"},
-	{"name": "Ember", "level": 8, "weapon": "ember_blade", "body": "ember_plate", "set": ["ember_helm", "ember_greaves", "ember_boots"], "boss": "badlands_boss", "next_zone": "GLOOMFEN", "next_boss": "gloomfen_boss"},
-	{"name": "Bog-iron", "level": 12, "weapon": "bogiron_cleaver", "body": "bogiron_harness", "set": ["bogiron_helm", "bogiron_greaves", "bogiron_boots"], "boss": "gloomfen_boss", "next_zone": "", "next_boss": "final_boss"},
+	{"name": "Frost", "level": 3, "weapon": "frost_pick", "body": "frostweave_coat", "set": ["frost_helm", "frost_greaves", "frost_boots", "frost_gloves"], "boss": "frostpeak_boss", "next_zone": "VERDANTWOOD", "next_boss": "verdantwood_boss"},
+	{"name": "Ironwood", "level": 5, "weapon": "ironwood_blade", "body": "ironwood_mail", "set": ["ironwood_helm", "ironwood_greaves", "ironwood_boots", "ironwood_gloves"], "boss": "verdantwood_boss", "next_zone": "BADLANDS", "next_boss": "badlands_boss"},
+	{"name": "Ember", "level": 8, "weapon": "ember_blade", "body": "ember_plate", "set": ["ember_helm", "ember_greaves", "ember_boots", "ember_gloves"], "boss": "badlands_boss", "next_zone": "GLOOMFEN", "next_boss": "gloomfen_boss"},
+	{"name": "Bog-iron", "level": 12, "weapon": "bogiron_cleaver", "body": "bogiron_harness", "set": ["bogiron_helm", "bogiron_greaves", "bogiron_boots", "bogiron_gloves"], "boss": "gloomfen_boss", "next_zone": "", "next_boss": "final_boss"},
 ]
 # The leather "set" (Trader cap + boots) is the previous set for the Frost row.
-const LEATHER_FULL := ["wooden_pickaxe", "leather_armor", "leather_cap", "leather_boots"]
+const LEATHER_FULL := ["wooden_pickaxe", "leather_armor", "leather_cap", "leather_boots", "leather_gloves"]
 const BAND_BODY_MAX := 35      # body piece only vs own boss: should lose
 const BAND_OVERLEVEL_MAX := 50 # body only, two levels higher - INFORMATIONAL: two levels add more
                                # power and HP than a set adds mitigation, so no boss stat can gate this

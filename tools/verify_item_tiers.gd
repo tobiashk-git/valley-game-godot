@@ -104,9 +104,9 @@ func _initialize() -> void:
 	for t in TIERS:
 		expected.append("Recipe" + t[0].to_pascal_case() + "Slot")
 		expected.append("Recipe" + t[1].to_pascal_case() + "Slot")
-		# ...then that tier's set pieces (helm, greaves, boots).
+		# ...then that tier's set pieces (helm, greaves, boots, gloves).
 		var prefix: String = t[0].split("_")[0]
-		for piece in ["helm", "greaves", "boots"]:
+		for piece in ["helm", "greaves", "boots", "gloves"]:
 			expected.append("Recipe" + (prefix + "_" + piece).to_pascal_case() + "Slot")
 	print("Equipment section: the three starters then each tier's weapon, body piece and set pieces in tier order: ", order == expected)
 	sheet._select_recipe("ember_blade")

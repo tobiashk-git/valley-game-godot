@@ -13,7 +13,7 @@ var facing := "down"
 # in with a "layer" sheet path in Items.ITEMS; the overlay mirrors the
 # base's animation, frame and offset every frame. Step 1 = the body slot;
 # the armour-set slots (head/legs/feet) plug in here as they arrive.
-const LAYER_SLOTS: Array[String] = ["legs", "feet", "armor", "head"] # draw order: greaves, boots, body, helm on top
+const LAYER_SLOTS: Array[String] = ["legs", "feet", "armor", "hands", "head"] # draw order: greaves, boots, body, gloves, helm on top
 var _layers: Dictionary = {} # slot -> AnimatedSprite2D
 
 func _ready() -> void:
