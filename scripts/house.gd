@@ -33,10 +33,11 @@ const CHEST_SCENE := preload("res://scenes/props/Chest.tscn")
 func _tile_center(pos: Vector2i) -> Vector2:
 	return Vector2(pos.x * 32 + 16, pos.y * 32 + 16)
 
-func _spawn_prop(scene: PackedScene, tile_pos: Vector2i) -> void:
+func _spawn_prop(scene: PackedScene, tile_pos: Vector2i) -> Node2D:
 	var instance: Node2D = scene.instantiate()
 	instance.position = _tile_center(tile_pos)
 	ysort.add_child(instance)
+	return instance
 
 func _ready() -> void:
 	for y in range(HEIGHT):
@@ -81,7 +82,8 @@ func _ready() -> void:
 	_spawn_prop(TABLE_SCENE, Vector2i(8, 5))
 	_spawn_prop(CHAIR_SCENE, Vector2i(8, 4)) # above the table, facing it
 	_spawn_prop(CHAIR_BACK_SCENE, Vector2i(8, 6)) # below the table, its back to us, facing it
-	_spawn_prop(CHEST_SCENE, Vector2i(2, 6))
+	# The bank chest, a little right of centre so it covers the shell's floor mark beside it (user, 2026-09-07).
+	_spawn_prop(CHEST_SCENE, Vector2i(2, 6)).position += Vector2(6, 0)
 
 	if not GameState.consume_next_spawn(player):
 		player.position = _tile_center(DOOR_TILE + Vector2i(0, -1))
