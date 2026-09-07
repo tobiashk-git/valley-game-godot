@@ -343,6 +343,7 @@ func _initialize() -> void:
 		for fx in range(interior.WIDTH):
 			interior.fog.set_cell(Vector2i(fx, fy), interior.SRC_FOG, Vector2i(0, 0))
 	interior._last_revealed_tile = Vector2i(-9999, -9999)
+	interior._cleared.clear() # explored ground is per visit now (the fog itself is remembered)
 	combat._steps_since_encounter = 1000
 	var got_encounter := false
 	for corridor in interior._gen.corridors:

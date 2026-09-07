@@ -68,7 +68,11 @@ const CHESTS := {
 var _last_revealed_tile: Vector2i = Vector2i(-9999, -9999)
 var _boss: StaticBody2D
 var _boss_reveal_pending := true
-# Steps that uncovered new fog (the only ones that can roll an encounter).
+# Ground walked THIS visit (cells within FOG_REVEAL_RADIUS of a tile stood
+# on). A step that adds cells here is exploring and can roll an encounter;
+# the visual fog is separate and remembered across visits (GameState).
+var _cleared: Dictionary = {}
+# Steps that covered new ground this visit (the only ones that can roll an encounter).
 var explore_steps := 0
 var chests: Array = [] # the placed Chest nodes, in CHESTS order
 # The generated layout, kept around (not just a local in _ready()) so a
@@ -100,6 +104,14 @@ func _ready() -> void:
 	for y in range(-FOG_MARGIN, HEIGHT + FOG_MARGIN):
 		for x in range(-FOG_MARGIN, WIDTH + FOG_MARGIN):
 			fog.set_cell(Vector2i(x, y), SRC_FOG, Vector2i(0, 0))
+	# Ground revealed on earlier visits stays revealed (dungeon persistence).
+	for key in GameState.revealed_cells(poi_id).keys():
+		var parts: PackedStringArray = String(key).split(",")
+		if parts.size() == 2:
+			fog.erase_cell(Vector2i(int(parts[0]), int(parts[1])))
+	# The dramatic reveal plays once per save: skip it if the boss room was
+	# already uncovered on an earlier visit.
+	_boss_reveal_pending = not GameState.is_revealed(poi_id, gen.boss_room.center())
 
 	# Every other scene consumes GameState's pending spawn override to place
 	# the player; this one can't use it (the maze regenerates fresh on every
@@ -177,7 +189,8 @@ func _step(encounters: bool) -> void:
 	if current_tile == _last_revealed_tile:
 		return
 	_last_revealed_tile = current_tile
-	var uncovered: int = _reveal_around(current_tile)
+	_reveal_around(current_tile)
+	var uncovered: int = _clear_around(current_tile)
 	if _boss_reveal_pending and _in_room(_gen.boss_room, current_tile):
 		_reveal_boss_room(current_tile.x)
 		return
@@ -197,7 +210,8 @@ func _in_room(room: DungeonGen.Room, tile: Vector2i) -> bool:
 # radius defaults to FOG_REVEAL_RADIUS - a subclass can override this method
 # (e.g. Verdantwood's canopy-fog hazard) to pass a smaller radius for
 # specific tiles; _step()'s own call is unaffected either way. Returns how
-# many fogged cells this call uncovered.
+# many fogged cells this call uncovered; every uncovered cell is remembered
+# for the save.
 func _reveal_around(center: Vector2i, radius: int = FOG_REVEAL_RADIUS) -> int:
 	var uncovered := 0
 	for dy in range(-radius, radius + 1):
@@ -210,8 +224,26 @@ func _reveal_around(center: Vector2i, radius: int = FOG_REVEAL_RADIUS) -> int:
 				continue
 			if fog.get_cell_source_id(pos) != -1:
 				fog.erase_cell(pos)
+				GameState.reveal_cell(poi_id, pos)
 				uncovered += 1
 	return uncovered
+
+# This visit's explored ground (see _cleared): how many new cells the step
+# on `center` adds. Same geometry as the fog reveal, independent of what
+# earlier visits uncovered - monsters roam remembered corridors too.
+func _clear_around(center: Vector2i) -> int:
+	var added := 0
+	for dy in range(-FOG_REVEAL_RADIUS, FOG_REVEAL_RADIUS + 1):
+		for dx in range(-FOG_REVEAL_RADIUS, FOG_REVEAL_RADIUS + 1):
+			if dx * dx + dy * dy > FOG_REVEAL_RADIUS * FOG_REVEAL_RADIUS:
+				continue
+			var pos: Vector2i = center + Vector2i(dx, dy)
+			if pos.x < 0 or pos.y < 0 or pos.x >= WIDTH or pos.y >= HEIGHT:
+				continue
+			if not _cleared.has(pos):
+				_cleared[pos] = true
+				added += 1
+	return added
 
 # The dramatic reveal: fog sweeps off the boss room (plus one ring of wall,
 # so it reads as a bounded chamber) one column at a time starting nearest
@@ -229,6 +261,7 @@ func _reveal_boss_room(entry_x: int) -> void:
 	for x in columns:
 		for y in range(room.y - 1, room.y + room.h + 1):
 			fog.erase_cell(Vector2i(x, y))
+			GameState.reveal_cell(poi_id, Vector2i(x, y))
 		if not Combat.fast:
 			await get_tree().create_timer(ROOM_REVEAL_STEP).timeout
 			if not is_inside_tree():

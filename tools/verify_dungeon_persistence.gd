@@ -106,6 +106,31 @@ func _initialize() -> void:
 	var steps_before: int = d5.explore_steps
 	var fought_after: bool = await _explore(d5, combat)
 	print("Boss beaten: the whole maze explored (", d5.explore_steps - steps_before, " new-ground steps) without a single encounter: ", not d5.encounters_active() and not fought_after and d5.explore_steps - steps_before >= 20 and not combat.in_combat)
+	# --- the map stays revealed across visits and saves ---
+	var remembered: Vector2i = d5._gen.corridors[1][2]
+	var boss_seen: bool = not d5._boss_reveal_pending
+	var snap2: Variant = JSON.parse_string(JSON.stringify(save.snapshot()))
 	await _close(d5)
+	var d6: Node2D = _open("res://scenes/Dungeon.tscn")
+	for i in range(3):
+		await process_frame
+	print("Ground uncovered on an earlier visit is already clear on the next, and the boss room reveal does not replay: ", boss_seen and d6.fog.get_cell_source_id(remembered) == -1 and not d6._boss_reveal_pending)
+	combat._steps_since_encounter = -1000000
+	var steps6: int = d6.explore_steps
+	var p6: CharacterBody2D = d6.get_node("YSort/Player")
+	for t in d6._gen.corridors[0].slice(0, 6):
+		p6.position = d6._tile_center(t)
+		await process_frame
+		await process_frame
+	print("Remembered corridors still count as new ground for this visit (monsters roam them again): ", d6.explore_steps - steps6 >= 3)
+	await _close(d6)
+	game_state.reset()
+	print("A new game forgets the revealed ground: ", game_state.dungeon_revealed.is_empty())
+	save.apply(snap2)
+	var d7: Node2D = _open("res://scenes/Dungeon.tscn")
+	for i in range(3):
+		await process_frame
+	print("Loading the save brings the revealed ground back through JSON: ", d7.fog.get_cell_source_id(remembered) == -1 and not d7._boss_reveal_pending)
+	await _close(d7)
 	game_state.cutscene = false
 	quit()

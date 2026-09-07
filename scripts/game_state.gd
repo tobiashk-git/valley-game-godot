@@ -47,11 +47,26 @@ var cutscene := false
 # by a new game. (Chests are already once-per-save via Storage; once the
 # boss is beaten the maze stays empty - see maze_interior.encounters_active.)
 var dungeon_seeds: Dictionary = {}
+# The fog a maze has lost, per save: poi_id -> {"x,y": true}. Revealed
+# ground stays revealed on later visits (user: "a nice sense of
+# achievement"); exploring for encounters is tracked per visit instead.
+var dungeon_revealed: Dictionary = {}
 
 func dungeon_seed(poi_id: String) -> int:
 	if not dungeon_seeds.has(poi_id):
 		dungeon_seeds[poi_id] = int(randi() & 0x7FFFFFFF)
 	return int(dungeon_seeds[poi_id])
+
+func revealed_cells(poi_id: String) -> Dictionary:
+	if not dungeon_revealed.has(poi_id):
+		dungeon_revealed[poi_id] = {}
+	return dungeon_revealed[poi_id]
+
+func reveal_cell(poi_id: String, pos: Vector2i) -> void:
+	revealed_cells(poi_id)["%d,%d" % [pos.x, pos.y]] = true
+
+func is_revealed(poi_id: String, pos: Vector2i) -> bool:
+	return revealed_cells(poi_id).has("%d,%d" % [pos.x, pos.y])
 
 # World Map fast-travel unlocks. House/village start known (the player
 # spawns right there); the dungeon/castle unlock themselves in
@@ -118,6 +133,7 @@ func reset() -> void:
 	for key in biome_paths_open.keys():
 		biome_paths_open[key] = false
 	dungeon_seeds.clear()
+	dungeon_revealed.clear()
 
 # True on any scene with a player (overworld, houses, interiors); false on
 # the title screen. The always-on overlays (HUD, toolbar, quick bar,

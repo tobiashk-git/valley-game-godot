@@ -107,6 +107,7 @@ func snapshot() -> Dictionary:
 			"world_progress": GameState.world_progress.duplicate(),
 			"biome_paths_open": GameState.biome_paths_open.duplicate(),
 			"dungeon_seeds": GameState.dungeon_seeds.duplicate(),
+			"dungeon_revealed": GameState.dungeon_revealed.duplicate(true),
 		},
 		"inventory": {"backpack": _int_dict(Inventory.backpack), "gear": gear, "next_uid": Inventory._next_uid},
 		"character": {"stats": _int_dict(Character.stats), "equipment": equipment},
@@ -128,6 +129,10 @@ func apply(data: Dictionary) -> void:
 	GameState.village_gates_open = bool(gs.get("village_gates_open", false))
 	GameState.intro_pending = bool(gs.get("intro_pending", false)) # older saves: intro long done
 	GameState.dungeon_seeds = _int_dict(gs.get("dungeon_seeds", {})) # replace, not merge: a load must drop this session's seeds
+	var revealed: Dictionary = {}
+	for poi_id in gs.get("dungeon_revealed", {}).keys():
+		revealed[str(poi_id)] = Dictionary(gs.dungeon_revealed[poi_id]).duplicate()
+	GameState.dungeon_revealed = revealed
 
 	var inv: Dictionary = data.get("inventory", {})
 	Inventory.backpack = _int_dict(inv.get("backpack", {}))
