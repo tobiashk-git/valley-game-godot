@@ -47,7 +47,8 @@ func _initialize() -> void:
 	# Four villagers complete the tutorial now (the Trader, the Blacksmith, Luigi and Eden).
 	for npc in ["village_blacksmith", "luigi", "eden"]:
 		quests.mark_npc_met(npc)
-	quests.mark_npc_met("village_trader") # the last one completes the tutorial, opens the gates
+	quests.mark_npc_met("village_trader")
+	quests._complete_quest("meet_villagers") # turned in at the Elder: opens the gates
 	quests._accept_quest("gather_wood")
 	storage.add_item("house_chest", "stone", 4)
 	game_state.discovered_pois.dungeon = true

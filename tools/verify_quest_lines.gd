@@ -49,7 +49,10 @@ func _initialize() -> void:
 	print("Each biome chapter is its ford quest then its hunt; the finale is the Guardians then the Warden: ", chapter_ok and quests.chapter_quests("finale").size() == 2 and quests.chain_of("two_guardians") == ["two_guardians", "ancient_warden"])
 
 	# --- gating ---
-	print("At a fresh start the fords are open in any order (all four ford quests offerable) but no hunt is: ", quests.is_available("cross_frostpeak") and quests.is_available("cross_gloomfen") and not quests.is_available("hunt_frostpeak") and not quests.is_available("hunt_gloomfen") and not quests.is_available("two_guardians"))
+	print("Meet the Village is the gateway: before it is turned in no ford, barrow or Blacksmith quest is offerable: ", not quests.is_available("cross_frostpeak") and not quests.is_available("open_ancient_barrow") and not quests.is_available("forge_whetstone") and quests.is_available("meet_villagers"))
+	quests.quest_state.meet_villagers = "completed"
+	print("After the tutorial the fords are open in any order (all four ford quests offerable) but no hunt is: ", quests.is_available("cross_frostpeak") and quests.is_available("cross_gloomfen") and not quests.is_available("hunt_frostpeak") and not quests.is_available("hunt_gloomfen") and not quests.is_available("two_guardians"))
+	quests.quest_state.erase("meet_villagers")
 	quests.quest_state.cross_verdantwood = "completed"
 	print("Completing a ford unlocks that biome's hunt only: ", quests.is_available("hunt_verdantwood") and not quests.is_available("hunt_frostpeak"))
 

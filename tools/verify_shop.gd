@@ -29,6 +29,7 @@ func _initialize() -> void:
 	var shop: Node = root.get_node("Shop")
 	var shop_panel: Node = root.get_node("ShopPanel")
 	var quests: Node = root.get_node("Quests")
+	quests.quest_state["meet_villagers"] = "completed" # the gateway quest - the barrow quest waits for it
 	var crafting: Node = root.get_node("Crafting")
 	var tracker: Node = root.get_node("QuestTracker")
 	var player: CharacterBody2D = trader_house.get_node("YSort/Player")

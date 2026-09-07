@@ -28,6 +28,7 @@ func _initialize() -> void:
 	var world: Node = root.get_node("World")
 	var game_state: Node = root.get_node("GameState")
 	var quests: Node = root.get_node("Quests")
+	quests.quest_state["meet_villagers"] = "completed" # the gateway quest - every other quest waits for it
 	var inventory: Node = root.get_node("Inventory")
 	var dialogue_ui: Node = root.get_node("DialogueUI")
 	var combat: Node = root.get_node("Combat")

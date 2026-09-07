@@ -22,14 +22,12 @@ const QUEST_DEFS := {
 			"completed": "Thanks again for your help, traveler.",
 		},
 	},
-	# The fence/gates tutorial. Offered by the Village Elder, who stands
-	# OUTSIDE his house on the village square (user request: the player has
-	# to go to him to receive it) - accepting it counts as meeting him, so
-	# the objective is the one other villager. Completes silently the moment
-	# the Trader's intro plays (see mark_npc_met()), or on the spot if the
-	# player met the Trader first (see _accept_quest()). Its reward is a
-	# little XP - the gates opening is the real reward (npc.gd's "?" marker
-	# keys off a gold reward, so a silent completion never shows one).
+	# The fence/gates tutorial and the GATEWAY quest (2026-09-07): every
+	# other quest requires it, so no other "!" shows until it is turned in.
+	# Offered by the Village Elder, who stands OUTSIDE his house on the
+	# village square; meet the four villagers, then come BACK to the Elder -
+	# his "?" is how the player learns the turn-in marker - and the gates
+	# open on the turn-in (see _complete_quest()).
 	"meet_villagers": {
 		"giver_name": "Village Elder",
 		"name": "Meet the Village",
@@ -41,14 +39,14 @@ const QUEST_DEFS := {
 		"dialogue": {
 			"offer": "Welcome to the valley, traveler! Before you go wandering, meet the rest of us: the Trader in the south-west house, the Blacksmith in the south-east one, and Luigi and Eden here on the square. Say hello to all four and I'll have the gates opened for you.",
 			"in_progress": "The Trader's in the south-west house, the Blacksmith in the south-east, and Luigi and Eden are about the square - say hello to them all, and the gates are yours.",
-			"ready": "You've met everyone worth meeting. The gates are open - the valley's yours to explore.",
+			"ready": "You've met everyone worth meeting? Splendid. Then let me have those gates opened for you.",
 			"completed": "The gates are open - the valley's yours to explore. Mind the river fords, though.",
 		},
 	},
 	"cross_frostpeak": {
 		"giver_name": "Frostpeak Ranger",
 		"name": "Reinforcing the Ford",
-		"line": "story", "chapter": "frostpeak", "requires": [],
+		"line": "story", "chapter": "frostpeak", "requires": ["meet_villagers"],
 		"objective": {"type": "gather_multi", "items": [
 			{"item_id": "wood", "amount": 8},
 			{"item_id": "stone", "amount": 8},
@@ -64,7 +62,7 @@ const QUEST_DEFS := {
 	"cross_verdantwood": {
 		"giver_name": "Forest Druid",
 		"name": "Clearing the Crossing",
-		"line": "story", "chapter": "verdantwood", "requires": [],
+		"line": "story", "chapter": "verdantwood", "requires": ["meet_villagers"],
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
 		"reward": {"xp": 150, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -77,7 +75,7 @@ const QUEST_DEFS := {
 	"cross_badlands": {
 		"giver_name": "Badlands Prospector",
 		"name": "Shoring Up the Crossing",
-		"line": "story", "chapter": "badlands", "requires": [],
+		"line": "story", "chapter": "badlands", "requires": ["meet_villagers"],
 		"objective": {"type": "gather", "item_id": "stone", "amount": 12},
 		"reward": {"xp": 180, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -90,7 +88,7 @@ const QUEST_DEFS := {
 	"cross_gloomfen": {
 		"giver_name": "Marsh Guide",
 		"name": "Laying the Boardwalk",
-		"line": "story", "chapter": "gloomfen", "requires": [],
+		"line": "story", "chapter": "gloomfen", "requires": ["meet_villagers"],
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
 		"reward": {"xp": 210, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -108,7 +106,7 @@ const QUEST_DEFS := {
 	"open_ancient_barrow": {
 		"giver_name": "Village Trader",
 		"name": "What Lies Beneath",
-		"line": "side", "requires": [],
+		"line": "side", "requires": ["meet_villagers"],
 		"objective": {"type": "gather", "item_id": "stone", "amount": 6},
 		"reward": {"xp": 90, "gold": 25, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -207,7 +205,7 @@ const QUEST_DEFS := {
 	"forge_whetstone": {
 		"giver_name": "Village Blacksmith",
 		"name": "A Keen Edge",
-		"line": "side", "requires": [],
+		"line": "side", "requires": ["meet_villagers"],
 		"objective": {"type": "gather", "item_id": "stone", "amount": 6},
 		"reward": {"xp": 30, "gold": 15},
 		"dialogue": {
@@ -462,13 +460,6 @@ func _accept_quest(quest_id: String) -> void:
 	# same as a manual Track click at the cap.
 	if tracked_quests.size() < MAX_TRACKED:
 		tracked_quests.append(quest_id)
-	# The tutorial has no turn-in step: if the player already met the Trader
-	# before finding the Elder, it's done the moment it's accepted - and the
-	# Elder says so (the Accept button's own box has just closed).
-	if quest_id == "meet_villagers" and objective_met(quest_id):
-		_mark_completed(quest_id)
-		_open_village_gates()
-		get_node("/root/DialogueUI").show_dialogue(QUEST_DEFS[quest_id].giver_name, "You've already met everyone? Splendid. The village gates are open - the valley's yours to explore.")
 	changed.emit()
 
 func _mark_completed(quest_id: String) -> void:
@@ -506,6 +497,8 @@ func _complete_quest(quest_id: String) -> void:
 		GameState.biome_paths_open.gloomfen = true
 	elif quest_id == "open_ancient_barrow":
 		GameState.world_progress.golden_plains_revealed = true
+	elif quest_id == "meet_villagers":
+		_open_village_gates() # the tutorial's real reward, paid on the turn-in
 	changed.emit()
 
 # Called by npc.gd the first time (and only the first time) the player
@@ -516,16 +509,9 @@ func _complete_quest(quest_id: String) -> void:
 func mark_npc_met(npc_id: String) -> bool:
 	npcs_met[npc_id] = true
 	changed.emit()
-	# Only an ACCEPTED tutorial completes here - meeting the Trader before
-	# the Elder just counts towards it (see _accept_quest()).
-	if quest_state.get("meet_villagers", "") != "accepted":
-		return false
-	if not objective_met("meet_villagers"):
-		return false
-	_mark_completed("meet_villagers")
-	_open_village_gates()
-	changed.emit()
-	return true
+	# The tutorial is turned in at the Elder (his "?"), never completed here;
+	# kept returning false so npc.gd's intro fold-in stays inert.
+	return false
 
 # Flips the flag AND repaints the gates if the player is standing on the
 # overworld right now - the scene only reads the flag in its _ready(), so

@@ -114,7 +114,8 @@ func _initialize() -> void:
 	overworld.queue_free()
 	await process_frame
 
-	# --- Trader: first talk shows intro + gates-opened line, completes meet_villagers. ---
+	# --- Trader: no "!" while the gateway quest is open; the first talk is
+	# the intro, the second opens the shop (the barrow quest waits). ---
 	var trader_scene: PackedScene = load("res://scenes/TraderHouse.tscn")
 	var trader_house: Node2D = trader_scene.instantiate()
 	root.add_child(trader_house)
@@ -128,7 +129,7 @@ func _initialize() -> void:
 	for child in trader_ysort.get_children():
 		if child.name.begins_with("NPC"):
 			trader = child
-	print("Trader shows a '!' too (the barrow quest is on offer): ", trader.get_node("QuestMarker").visible and trader.marker_kind() == "!")
+	print("Trader shows no marker while the tutorial is open (the gateway hides the barrow quest): ", not trader.get_node("QuestMarker").visible and trader.marker_kind() == "" and not quests.is_available("open_ancient_barrow"))
 	trader_player.position = trader.position + Vector2(0, 20)
 	for i in range(3):
 		await process_frame
@@ -138,43 +139,66 @@ func _initialize() -> void:
 	Input.action_release("interact")
 	await process_frame
 	print("First Trader talk shows intro: ", dialogue_ui.text_label.text.begins_with("Welcome, welcome"))
-	print("Combined gates-opened line present: ", dialogue_ui.text_label.text.contains("gates have opened"))
-	print("meet_villagers completed: ", quests.quest_state.get("meet_villagers", "") == "completed")
-	print("GameState.village_gates_open: ", game_state.village_gates_open)
+	print("Meeting the last villager does not finish the tutorial by itself (no gates line, still accepted, ready to turn in): ", not dialogue_ui.text_label.text.contains("gates have opened") and quests.quest_state.get("meet_villagers", "") == "accepted" and quests.objective_met("meet_villagers") and not game_state.village_gates_open)
 	root.get_texture().get_image().save_png("res://verify_gates_intro_combined.png")
 	Input.action_press("interact")
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-
-	# --- Second Trader talk: the barrow quest offer (an active quest beats
-	# the shop, see npc.gd). ---
 	var shop_panel: Node = root.get_node("ShopPanel")
 	Input.action_press("interact")
 	await process_frame
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-	print("Second Trader talk shows the barrow quest offer (not the shop): ", dialogue_ui.text_label.text.begins_with("There's an old barrow") and not shop_panel.is_open())
-	(dialogue_ui.actions_row.get_child(0) as Button).pressed.emit() # Accept the barrow quest
+	print("Second Trader talk opens the shop, not a quest: ", shop_panel.is_open() and not dialogue_ui.is_open())
+	shop_panel.close()
 	await process_frame
-	root.get_node("Inventory").add_item("stone", 6)
-	await process_frame
-	print("Trader's marker turns to '?' once the barrow quest is ready to turn in: ", trader.get_node("QuestMarker").text == "?" and trader.get_node("QuestMarker").visible)
-	root.get_texture().get_image().save_png("res://verify_gates_trader_ready.png")
-
 	root.remove_child(trader_house)
 	trader_house.queue_free()
 	await process_frame
 
-	# --- Met-the-Trader-first path: accepting the tutorial completes it on
-	# the spot and opens the gates. ---
+	# --- Back to the Elder: his "?" teaches the turn-in; Turn In opens the gates. ---
+	var ow3: Node2D = load("res://scenes/Overworld.tscn").instantiate()
+	root.add_child(ow3)
+	current_scene = ow3
+	await process_frame
+	await process_frame
+	var elder3: Node = null
+	for child in ow3.get_node("YSort").get_children():
+		if child.get("npc_id") == "village_elder":
+			elder3 = child
+	var marker3: Label = elder3.get_node("QuestMarker")
+	print("With all four met the Elder shows a '?' (ready to turn in) and no one else shows a marker: ", marker3.visible and marker3.text == "?" and elder3.marker_kind() == "?")
+	root.get_texture().get_image().save_png("res://verify_gates_elder_ready.png")
+	var player3: CharacterBody2D = ow3.get_node("YSort/Player")
+	player3.position = elder3.position + Vector2(0, 20)
+	player3.get_node("Camera2D").reset_smoothing()
+	for i in range(3):
+		await process_frame
+	Input.action_press("interact")
+	await process_frame
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	var ready_ok: bool = dialogue_ui.text_label.text.begins_with("You've met everyone worth meeting") and dialogue_ui.actions_row.get_child_count() == 2 and (dialogue_ui.actions_row.get_child(0) as Button).text == "Turn In"
+	print("The Elder's ready line with a Turn In button: ", ready_ok)
+	(dialogue_ui.actions_row.get_child(0) as Button).pressed.emit()
+	await process_frame
+	print("Turned in: meet_villagers completed, gates open, the Elder's marker flips to '!' for the wood quest: ", quests.quest_state.get("meet_villagers", "") == "completed" and game_state.village_gates_open and marker3.visible and marker3.text == "!")
+	root.remove_child(ow3)
+	ow3.queue_free()
+	await process_frame
+
+	# --- Met-everyone-first path: accepting the tutorial makes it ready at
+	# once; it still needs the turn-in. ---
 	quests.quest_state.erase("meet_villagers")
 	game_state.village_gates_open = false
 	quests._accept_quest("meet_villagers")
 	await process_frame
-	print("Accepting after already meeting the Trader completes it at once and opens the gates: ", quests.quest_state.get("meet_villagers", "") == "completed" and game_state.village_gates_open and dialogue_ui.is_open() and dialogue_ui.text_label.text.begins_with("You've already met everyone"))
-	dialogue_ui.hide_dialogue()
+	print("Accepting after already meeting everyone leaves it ready to turn in, gates still shut: ", quests.quest_state.get("meet_villagers", "") == "accepted" and quests.objective_met("meet_villagers") and not game_state.village_gates_open)
+	quests._complete_quest("meet_villagers")
+	print("...and the turn-in opens the gates: ", quests.quest_state.get("meet_villagers", "") == "completed" and game_state.village_gates_open)
 
 	# --- The bug: completing the tutorial while STANDING on the overworld
 	# must open the gates right there, without a scene reload. ---
@@ -187,7 +211,8 @@ func _initialize() -> void:
 	await process_frame
 	var live_map: TileMapLayer = live.get_node("TileMapLayer")
 	print("Gate tile painted shut on this fresh overworld: ", live_map.get_cell_source_id(south_gate) == world.SRC_GATE)
-	quests._accept_quest("meet_villagers") # Trader already met -> completes on the spot
+	quests._accept_quest("meet_villagers") # everyone already met -> ready at once
+	quests._complete_quest("meet_villagers") # the turn-in, standing on the overworld
 	await process_frame
 	dialogue_ui.hide_dialogue()
 	print("Gates repaint open immediately, no reload: ", game_state.village_gates_open and live_map.get_cell_source_id(south_gate) == world.SRC_GRASS)

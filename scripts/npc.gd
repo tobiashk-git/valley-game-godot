@@ -109,7 +109,7 @@ func marker_kind() -> String:
 	var state: String = quests.quest_state.get(id, "")
 	if state == "":
 		return "!"
-	if state == "accepted" and quests.objective_met(id) and quests.QUEST_DEFS[id].reward.has("gold"):
+	if state == "accepted" and quests.objective_met(id):
 		return "?"
 	return ""
 
