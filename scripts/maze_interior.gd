@@ -80,7 +80,9 @@ func _tile_center(pos: Vector2i) -> Vector2:
 	return Vector2(pos.x * 32 + 16, pos.y * 32 + 16)
 
 func _ready() -> void:
-	_gen = DungeonGen.generate(WIDTH, HEIGHT)
+	# The layout is fixed per save (seed drawn on the first visit), so
+	# looted chests and the way to the boss stay where they were.
+	_gen = DungeonGen.generate(WIDTH, HEIGHT, GameState.dungeon_seed(poi_id))
 	var gen: Dictionary = _gen
 	var map: Array = gen.map
 
@@ -181,8 +183,13 @@ func _step(encounters: bool) -> void:
 		return
 	if uncovered > 0:
 		explore_steps += 1
-		if encounters:
+		if encounters and encounters_active():
 			Combat.check_random_encounter(encounter_zone)
+
+# Monsters respawn every visit until the boss is beaten; after that the
+# maze stays empty for the rest of the save.
+func encounters_active() -> bool:
+	return not GameState.boss_defeated.get(boss_id, false)
 
 func _in_room(room: DungeonGen.Room, tile: Vector2i) -> bool:
 	return tile.x >= room.x and tile.x < room.x + room.w and tile.y >= room.y and tile.y < room.y + room.h

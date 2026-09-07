@@ -42,6 +42,16 @@ var intro_pending := false
 var gathering := false
 # A short scripted moment (the boss room reveal): movement frozen, E still works.
 var cutscene := false
+# Dungeon persistence (2026-09-07): each maze keeps its layout for the whole
+# save - poi_id -> generator seed, drawn on the first visit, saved, cleared
+# by a new game. (Chests are already once-per-save via Storage; once the
+# boss is beaten the maze stays empty - see maze_interior.encounters_active.)
+var dungeon_seeds: Dictionary = {}
+
+func dungeon_seed(poi_id: String) -> int:
+	if not dungeon_seeds.has(poi_id):
+		dungeon_seeds[poi_id] = int(randi() & 0x7FFFFFFF)
+	return int(dungeon_seeds[poi_id])
 
 # World Map fast-travel unlocks. House/village start known (the player
 # spawns right there); the dungeon/castle unlock themselves in
@@ -107,6 +117,7 @@ func reset() -> void:
 		world_progress[key] = false
 	for key in biome_paths_open.keys():
 		biome_paths_open[key] = false
+	dungeon_seeds.clear()
 
 # True on any scene with a player (overworld, houses, interiors); false on
 # the title screen. The always-on overlays (HUD, toolbar, quick bar,

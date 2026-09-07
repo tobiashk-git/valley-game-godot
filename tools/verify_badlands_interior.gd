@@ -289,6 +289,14 @@ func _initialize() -> void:
 	await _clear_combat(combat)
 	# Encounters only roll on steps that uncover new fog (dungeon
 	# refinement), so explore: hop along the corridors into unrevealed ground.
+	game_state.boss_defeated.badlands_boss = false # monsters only roam while the boss is awake - wake it for the pool check
+	# Re-fog the maze so every corridor hop counts as new ground (the earlier
+	# steps explored most of it), and skip the encounter cooldown.
+	for fy in range(interior.HEIGHT):
+		for fx in range(interior.WIDTH):
+			interior.fog.set_cell(Vector2i(fx, fy), interior.SRC_FOG, Vector2i(0, 0))
+	interior._last_revealed_tile = Vector2i(-9999, -9999)
+	combat._steps_since_encounter = 1000
 	var got_encounter := false
 	for corridor in interior._gen.corridors:
 		if got_encounter:
@@ -301,6 +309,7 @@ func _initialize() -> void:
 				got_encounter = true
 				break
 	print("Interior random encounter fired while exploring new ground: ", got_encounter)
+	game_state.boss_defeated.badlands_boss = true
 	if got_encounter:
 		var names := {"Magma Slime": true, "Fire Drake": true, "Ash Golem": true}
 		var wrong_enemy := false
