@@ -41,6 +41,8 @@ const PORTRAITS := {
 	"Forest Druid": "res://assets/portraits/forest_druid.png",
 	"Badlands Prospector": "res://assets/portraits/badlands_prospector.png",
 	"Marsh Guide": "res://assets/portraits/marsh_guide.png",
+	"Luigi the Fearless": "res://assets/portraits/luigi.png",
+	"Eden": "res://assets/portraits/eden.png",
 }
 const PORTRAIT_SIZE_WIDE := 96.0
 const PORTRAIT_SIZE_NARROW := 72.0

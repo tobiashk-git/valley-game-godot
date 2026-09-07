@@ -97,6 +97,11 @@ const GOLDEN_PLAINS_INTERIOR_ENTRANCE := Vector2i(WORLD_CENTER_X - 13, WORLD_CEN
 # TileSet source ids — must match the order sources were added in
 # tools/setup_phase1.gd when the TileSet resource was built (0-8), plus 2
 # more added later by tools/setup_biome_revamp.gd (9-10, the river/ford).
+# Luigi the Fearless (a battle hound) south-east of the altar and Eden (a
+# fairy) north-west of it, both off the axis paths.
+const LUIGI_POS := Vector2i(WORLD_CENTER_X + 2, WORLD_CENTER_Y + 3)
+const EDEN_POS := Vector2i(WORLD_CENTER_X - 2, WORLD_CENTER_Y - 3)
+
 # --- Movable places (map design tool, 2026-09-07) ---
 # The entrance and camp constants above are DEFAULTS; the recipe's "places"
 # section (maps/overworld.json, see map_recipe.gd) moves any of them.
@@ -111,12 +116,16 @@ const PLACE_DEFAULTS := {
 	"badlands_interior": BADLANDS_INTERIOR_ENTRANCE, "gloomfen_interior": GLOOMFEN_INTERIOR_ENTRANCE,
 	"golden_plains_interior": GOLDEN_PLAINS_INTERIOR_ENTRANCE,
 	"ranger_camp": RANGER_CAMP_POS, "druid_glade": DRUID_GLADE_POS, "prospector_camp": PROSPECTOR_CAMP_POS, "marsh_guide": MARSH_GUIDE_POS,
+	# Village companions-to-be (2026-09-07): a battle hound and a fairy, on
+	# the square for now; the recipe moves them as the story does.
+	"luigi": LUIGI_POS, "eden": EDEN_POS,
 }
 const PLACE_LABELS := {
 	"dungeon": "Dungeon", "castle": "Castle", "final_boss": "Ancient Warden's lair",
 	"frostpeak_interior": "Ice Caves", "verdantwood_interior": "Verdantwood Grove", "badlands_interior": "Caldera",
 	"gloomfen_interior": "Sunken Temple", "golden_plains_interior": "Ancient Barrow",
 	"ranger_camp": "Frostpeak Ranger", "druid_glade": "Forest Druid", "prospector_camp": "Badlands Prospector", "marsh_guide": "Marsh Guide",
+	"luigi": "Luigi the Fearless", "eden": "Eden",
 }
 var _places: Dictionary = {}
 var _places_loaded := false

@@ -48,7 +48,7 @@ func _initialize() -> void:
 	# --- defaults ---
 	MapRecipe.active_path = "res://tools/no_such_recipe.json"
 	world.reload_places()
-	print("Twelve movable places, each defaulting to its constant (dungeon at ", world.place("dungeon"), "): ", world.PLACE_DEFAULTS.size() == 12 and world.place("dungeon") == world.PLACE_DEFAULTS.dungeon and world.place("ranger_camp") == world.PLACE_DEFAULTS.ranger_camp and world.place_at(world.PLACE_DEFAULTS.castle) == "castle" and world.place_at(Vector2i(3, 3)) == "")
+	print("Fourteen movable places, each defaulting to its constant (dungeon at ", world.place("dungeon"), "): ", world.PLACE_DEFAULTS.size() == 14 and world.place("dungeon") == world.PLACE_DEFAULTS.dungeon and world.place("ranger_camp") == world.PLACE_DEFAULTS.ranger_camp and world.place_at(world.PLACE_DEFAULTS.castle) == "castle" and world.place_at(Vector2i(3, 3)) == "")
 
 	# --- a recipe moves the dungeon door and the Ranger's camp ---
 	var new_door := Vector2i(cx - 15, cy + 8)

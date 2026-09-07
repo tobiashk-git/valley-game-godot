@@ -16,6 +16,13 @@ extends StaticBody2D
 @export var npc_id := "" # stable id for Quests.npcs_met; "" skips the one-time intro entirely
 @export var intro_text := "" # shown once, the very first interaction, before shop/quest/greeting
 @export var sprite_tint := Color(1, 1, 1, 1) # lets a new NPC reuse an existing sprite with a distinct tint (matches enemies.gd's convention)
+# Painted art (a keyed Leonardo illustration, hundreds of px tall) instead
+# of a 64px pixel sprite: drawn smooth at this on-screen height with the
+# feet FEET_DROP below the node, the interact area covering the figure -
+# the same grounding maths as wild_monster.gd. 0 = a plain pixel sprite.
+@export var art_height := 0.0
+const FEET_DROP := 10.0
+const INTERACT_MARGIN := 24.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var interact_area: Area2D = $InteractArea
@@ -39,6 +46,20 @@ func _ready() -> void:
 	if sprite_path != "":
 		sprite.texture = load(sprite_path)
 	sprite.modulate = sprite_tint
+	var visual_top: float = sprite.position.y + sprite.get_rect().position.y if sprite.texture else -32.0
+	if art_height > 0.0 and sprite.texture != null:
+		var tex_size: Vector2 = sprite.texture.get_size()
+		var scale_f: float = art_height / tex_size.y
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		sprite.scale = Vector2(scale_f, scale_f)
+		sprite.offset = Vector2(0.0, FEET_DROP / scale_f - tex_size.y / 2.0)
+		var visual_size: Vector2 = tex_size * scale_f
+		var visual_center: Vector2 = sprite.offset * scale_f
+		var shape := RectangleShape2D.new()
+		shape.size = visual_size + Vector2(INTERACT_MARGIN, INTERACT_MARGIN) * 2.0
+		interact_area.get_node("CollisionShape2D").shape = shape
+		interact_area.position = visual_center
+		visual_top = visual_center.y - visual_size.y / 2.0
 	interact_area.body_entered.connect(_on_body_entered)
 	interact_area.body_exited.connect(_on_body_exited)
 	_marker = Label.new()
@@ -54,8 +75,7 @@ func _ready() -> void:
 	_marker.visible = false
 	# Just above the drawn sprite's top edge (the sprite is offset upwards
 	# from the body's feet-level origin).
-	var top: float = sprite.position.y + sprite.get_rect().position.y if sprite.texture else -32.0
-	_marker_base_y = top - 36.0
+	_marker_base_y = visual_top - 36.0
 	_marker.position = Vector2(-16.0, _marker_base_y)
 	add_child(_marker)
 	quests.changed.connect(_refresh_marker)

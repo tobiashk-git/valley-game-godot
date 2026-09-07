@@ -300,6 +300,38 @@ func _ready() -> void:
 	elder.intro_text = "Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler."
 	ysort.add_child(elder)
 
+	# Luigi the Fearless, a battle hound, and Eden, a fairy - the village's
+	# two newest faces (2026-09-07), companions in the story to come. Both
+	# use painted art when it exists (npc.gd art_height) and a tinted
+	# placeholder sprite until then.
+	var luigi: StaticBody2D = NPC_SCENE.instantiate()
+	luigi.position = _tile_center(World.place("luigi"))
+	if ResourceLoader.exists("res://assets/npc_luigi.png"):
+		luigi.sprite_path = "res://assets/npc_luigi.png"
+		luigi.art_height = 52.0
+	else:
+		luigi.sprite_path = "res://assets/trader.png"
+		luigi.sprite_tint = Color(0.75, 0.55, 0.35, 1.0)
+	luigi.npc_name = "Luigi the Fearless"
+	luigi.npc_id = "luigi"
+	luigi.intro_text = "Woof! Ahem - hail, small human. Luigi the Fearless, at your service. Once I guarded the castle gate; now I guard this square, and nothing gets past me. Except cats. Cats are fast."
+	luigi.dialogue_text = "Stand tall, pup. The valley is full of things worth barking at, and I have barked at every one of them."
+	ysort.add_child(luigi)
+
+	var eden: StaticBody2D = NPC_SCENE.instantiate()
+	eden.position = _tile_center(World.place("eden"))
+	if ResourceLoader.exists("res://assets/npc_eden.png"):
+		eden.sprite_path = "res://assets/npc_eden.png"
+		eden.art_height = 40.0
+	else:
+		eden.sprite_path = "res://assets/elder.png"
+		eden.sprite_tint = Color(0.75, 0.95, 0.7, 1.0)
+	eden.npc_name = "Eden"
+	eden.npc_id = "eden"
+	eden.intro_text = "Oh! A new face - and such big feet. I'm Eden. I live in the light over the altar, mostly. Don't stare, it's rude. Well... stare a little."
+	eden.dialogue_text = "Psst. The valley remembers everything, you know. Where the monsters sleep, where the old doors are - even where you hid your gold."
+	ysort.add_child(eden)
+
 	# The Frostpeak ford-crossing quest giver, camped in the valley near the
 	# northern ford (moved out of the village's bottom-right house, which is
 	# the Blacksmith's now).
