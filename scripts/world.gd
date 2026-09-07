@@ -35,12 +35,14 @@ var VILLAGE_GATES := {
 # unbuilt river-crossing quest. Offset 19 (was 30/35) still uses noticeably
 # more of the village's breathing room than before, just stays on the safe
 # side of the ring - revisit once the river-crossing quests actually exist.
-const DUNGEON_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y - 19)
-const CASTLE_ENTRANCE := Vector2i(WORLD_CENTER_X + 19, WORLD_CENTER_Y)
+# Defaults keep the big painted gates (5-6 tiles wide) off the axis roads, the
+# fords and the river ring; the recipe can still move any of them.
+const DUNGEON_ENTRANCE := Vector2i(WORLD_CENTER_X + 7, WORLD_CENTER_Y - 17) # was (0, -19): the gate sat on the north road over the ford
+const CASTLE_ENTRANCE := Vector2i(WORLD_CENTER_X + 17, WORLD_CENTER_Y - 4) # was (+19, 0): the towers hung over the east river and blocked the road
 const HOUSE_ENTRANCE := Vector2i(WORLD_CENTER_X - 5, WORLD_CENTER_Y - 3)
 # Hidden until the altar reveals it (2 Magic Crystals) - an outer biome
 # zone, well away from the village and the other two entrances.
-const FINAL_BOSS_ENTRANCE := Vector2i(WORLD_CENTER_X, WORLD_CENTER_Y + 19)
+const FINAL_BOSS_ENTRANCE := Vector2i(WORLD_CENTER_X - 7, WORLD_CENTER_Y + 17) # was (0, +19): on the south road
 
 # Elder (NE), Trader (SW), and the still-empty 3rd house (SE) — same corners
 # as VILLAGE_HOUSE_POSITIONS in game.js.
