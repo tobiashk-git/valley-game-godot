@@ -10,15 +10,19 @@ extends Control
 # from the unsaved recipe (MapRecipe.override), which is also how Undo /
 # Redo / Erase restore generated content. Save writes the JSON.
 #
-# Mouse: left = use the tool, right / middle drag = pan, wheel = zoom.
-# Keys: WASD / arrows pan, 1-7 tools, [ ] brush, G grid, M marks, N notes,
-# Ctrl+Z / Ctrl+Y undo / redo, Ctrl+S save, R regenerate.
+# Mouse: left = use the tool (the Pan tool, open by default, drags the
+# map; Space + left drag pans in any tool), right / middle drag = pan,
+# wheel = zoom. Keys: WASD / arrows pan, H pan tool, 1-7 tools, [ ] brush,
+# G grid, M marks, N notes, Ctrl+Z / Ctrl+Y undo / redo, Ctrl+S save,
+# R regenerate.
 
 const OVERWORLD_SCENE := preload("res://scenes/Overworld.tscn")
 const WILD_MONSTER_SCENE := preload("res://scenes/props/WildMonster.tscn")
-const TOOLS := ["tile", "prop", "monster", "remove", "erase", "pick", "note"]
-const TOOL_LABELS := {"tile": "1  Paint tile", "prop": "2  Place prop", "monster": "3  Place monster", "remove": "4  Remove generated", "erase": "5  Erase recipe", "pick": "6  Pick", "note": "7  Note"}
+const TOOLS := ["pan", "tile", "prop", "monster", "remove", "erase", "pick", "note"]
+const EDIT_TOOLS := ["tile", "prop", "monster", "remove", "erase", "pick", "note"] # keys 1-7
+const TOOL_LABELS := {"pan": "H  Pan (drag the map)", "tile": "1  Paint tile", "prop": "2  Place prop", "monster": "3  Place monster", "remove": "4  Remove generated", "erase": "5  Erase recipe", "pick": "6  Pick", "note": "7  Note"}
 const TOOL_HELP := {
+	"pan": "Drag the map with the left mouse button. In any tool, hold Space to drag, or use the right / middle button.",
 	"tile": "Paints the chosen ground over the generated map (brush [ ]).",
 	"prop": "Puts the chosen prop on the tile; anything generated there is dropped.",
 	"monster": "Puts a wild monster of the chosen species on the tile.",
@@ -44,7 +48,7 @@ var overworld: Node2D
 var stage: Node2D
 var camera: Camera2D
 var overlay: Node2D
-var tool := "tile"
+var tool := "pan"
 var palette_choice := {"tile": "path", "prop": "MightyOak", "monster": "frost_wolf"}
 var brush := 1
 var zoom_index := 3
@@ -105,7 +109,7 @@ func _ready() -> void:
 	_build_ui()
 	recipe = _fresh(MapRecipe.load_from(MapRecipe.active_path))
 	regenerate()
-	_set_tool("tile")
+	_set_tool("pan")
 	set_status("Loaded %s" % MapRecipe.active_path)
 
 func _fresh(r: Dictionary) -> Dictionary:
@@ -229,6 +233,8 @@ func apply_at(pos: Vector2i) -> bool:
 	if not MapRecipe.in_world(pos):
 		return false
 	match tool:
+		"pan":
+			return false
 		"tile":
 			var name: String = palette_choice.tile
 			var source: int = MapRecipe.tile_source(name)
@@ -382,9 +388,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
 			set_zoom_index(zoom_index - 1, camera.get_global_mouse_position())
 		elif mb.button_index == MOUSE_BUTTON_LEFT:
-			_painting = mb.pressed and not _over_ui()
-			if _painting:
-				apply_at(mouse_tile())
+			if not mb.pressed:
+				_painting = false
+				_panning = false
+			elif not _over_ui():
+				if tool == "pan" or Input.is_key_pressed(KEY_SPACE):
+					_panning = true
+				else:
+					_painting = true
+					apply_at(mouse_tile())
 		elif mb.button_index == MOUSE_BUTTON_RIGHT or mb.button_index == MOUSE_BUTTON_MIDDLE:
 			_panning = mb.pressed
 	elif event is InputEventMouseMotion:
@@ -414,8 +426,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			set_brush(brush - 2)
 		elif k.keycode == KEY_BRACKETRIGHT:
 			set_brush(brush + 2)
+		elif k.keycode == KEY_H:
+			_set_tool("pan")
 		elif k.keycode >= KEY_1 and k.keycode <= KEY_7:
-			_set_tool(TOOLS[k.keycode - KEY_1])
+			_set_tool(EDIT_TOOLS[k.keycode - KEY_1])
 
 func _process(delta: float) -> void:
 	var dir := Vector2.ZERO
@@ -493,7 +507,7 @@ func _draw_overlay() -> void:
 				var w: float = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 8.0
 				overlay.draw_rect(Rect2(o.x + 10, o.y - 12, w, 20), Color(0.1, 0.08, 0.04, 0.85))
 				overlay.draw_string(font, Vector2(o.x + 14, o.y + 3), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, MARK_NOTE)
-	if MapRecipe.in_world(hover_tile) and not _over_ui():
+	if MapRecipe.in_world(hover_tile) and not _over_ui() and tool != "pan":
 		var half: int = (brush - 1) / 2 if tool in ["tile", "erase"] else 0
 		var r := Rect2((hover_tile.x - half) * 32, (hover_tile.y - half) * 32, (2 * half + 1) * 32, (2 * half + 1) * 32)
 		overlay.draw_rect(r, Color(1, 1, 1, 0.9), false, 2.0)
@@ -660,7 +674,7 @@ func set_brush(b: int) -> void:
 
 func _palette_entries() -> Array:
 	match tool:
-		"tile", "erase", "pick", "remove", "note":
+		"pan", "tile", "erase", "pick", "remove", "note":
 			return MapRecipe.tile_names().keys()
 		"prop":
 			return prop_scenes.keys()
