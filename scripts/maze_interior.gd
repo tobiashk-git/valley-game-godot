@@ -311,6 +311,7 @@ func _place_chests(gen: Dictionary) -> void:
 				Storage.add_item(storage_id, spec.item, int(spec.get("amount", 1)))
 		var chest: StaticBody2D = CHEST_SCENE.instantiate()
 		chest.storage_id = storage_id
+		chest.sprite_path = "res://assets/chest_dungeon.png" # the heavier treasure chest
 		chest.position = _tile_center(spot)
 		ysort.add_child(chest)
 		chests.append(chest)

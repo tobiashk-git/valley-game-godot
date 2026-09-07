@@ -15,7 +15,7 @@ func _build() -> void:
 	var sprite := Sprite2D.new()
 	sprite.name = "Sprite2D"
 	sprite.texture = load("res://assets/chest.png")
-	sprite.offset = Vector2(0, HALF - 32.0 / 2.0)
+	sprite.offset = Vector2.ZERO # chest.gd bottom-anchors whatever texture it ends up with
 	body.add_child(sprite)
 	sprite.owner = body
 
