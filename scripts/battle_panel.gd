@@ -52,6 +52,8 @@ func _ready() -> void:
 	_target_style.set_corner_radius_all(6)
 	Combat.changed.connect(_refresh)
 	Character.changed.connect(_refresh)
+	Combat.enemy_turn_started.connect(_on_enemy_turn_started)
+	Combat.enemy_struck.connect(_on_enemy_struck)
 	Layout.changed.connect(_apply_layout)
 	_apply_layout()
 	# A tap on the message (or E, see _process) hurries the current beat.
@@ -188,6 +190,66 @@ func _flash(sprite: TextureRect) -> void:
 	sprite.self_modulate = HIT_FLASH
 	var tween := create_tween()
 	tween.tween_property(sprite, "self_modulate", Color.WHITE, 0.35)
+
+# --- who is acting (Combat.enemy_turn_started / enemy_struck) ---
+# The figure sits in a container, which owns its position and size but not
+# its rotation or scale - so the cues use those, around a centred pivot.
+const WINDUP_SCALE := 1.1
+const STRIKE_FLASH := Color(2.2, 2.0, 1.6, 1.0)
+var acting_index := -1  # the slot winding up or striking, -1 between turns
+var last_struck := -1
+var _act_tween: Tween
+
+func _acting_sprite(index: int) -> TextureRect:
+	if index < 0 or index >= enemy_slots.size():
+		return null
+	return enemy_slots[index].get_node("Box/Sprite")
+
+func _settle_acting() -> void:
+	var prev: TextureRect = _acting_sprite(acting_index)
+	if prev != null:
+		prev.scale = Vector2.ONE
+		prev.rotation = 0.0
+		prev.self_modulate = Color.WHITE
+
+# The wind-up: the figure leans in (scales up a touch, warms) and holds.
+func _on_enemy_turn_started(index: int) -> void:
+	if _act_tween != null and _act_tween.is_valid():
+		_act_tween.kill()
+	_settle_acting()
+	acting_index = index
+	var sprite: TextureRect = _acting_sprite(index)
+	if sprite == null:
+		return
+	sprite.pivot_offset = sprite.size / 2.0
+	_act_tween = create_tween()
+	_act_tween.tween_property(sprite, "scale", Vector2.ONE * WINDUP_SCALE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_act_tween.parallel().tween_property(sprite, "self_modulate", Color(1.15, 1.05, 0.9, 1.0), 0.18)
+
+# The blow: a sharp shake and a bright flash, then back to rest.
+func _on_enemy_struck(index: int) -> void:
+	if _act_tween != null and _act_tween.is_valid():
+		_act_tween.kill()
+	if index != acting_index:
+		_settle_acting()
+		acting_index = index
+	last_struck = index
+	var sprite: TextureRect = _acting_sprite(index)
+	if sprite == null:
+		return
+	sprite.pivot_offset = sprite.size / 2.0
+	sprite.self_modulate = STRIKE_FLASH
+	_act_tween = create_tween()
+	_act_tween.tween_property(sprite, "rotation", -0.12, 0.05)
+	_act_tween.tween_property(sprite, "rotation", 0.12, 0.07)
+	_act_tween.tween_property(sprite, "rotation", -0.08, 0.06)
+	_act_tween.tween_property(sprite, "rotation", 0.06, 0.06)
+	_act_tween.tween_property(sprite, "rotation", 0.0, 0.06)
+	_act_tween.parallel().tween_property(sprite, "self_modulate", Color.WHITE, 0.45)
+	_act_tween.parallel().tween_property(sprite, "scale", Vector2.ONE, 0.45).set_delay(0.2)
+	_act_tween.tween_callback(func() -> void:
+		if acting_index == index:
+			acting_index = -1)
 
 func _clear_submenu() -> void:
 	for child in submenu.get_children():

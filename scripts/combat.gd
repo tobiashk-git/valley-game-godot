@@ -66,6 +66,11 @@ var _steps_since_encounter := ENCOUNTER_COOLDOWN_STEPS
 # ---------------------------------------------------------------------------
 
 signal beat(message: String)
+# Which enemy is acting (2026-09-07, user: with three on stage you could not
+# tell who was hitting you): the panel leans the winding-up figure forward
+# and shakes + flashes it on the blow; the others stay still.
+signal enemy_turn_started(index: int)
+signal enemy_struck(index: int)
 const BEAT_SECONDS := 1.1
 const BEAT_SECONDS_SHORT := 0.7
 var playing := false # a sequence of beats is on screen: commands hidden, actions ignored
@@ -571,9 +576,11 @@ func _enemy_turn() -> void:
 	for index in alive_enemies():
 		var enemy: Dictionary = current_enemies[index]
 		# The wind-up: a beat of nothing you can do about it.
+		enemy_turn_started.emit(index)
 		await _beat("%s prepares to strike..." % enemy.name, BEAT_SECONDS_SHORT)
 		# Agility above its starting value lets Oliver slip a blow entirely.
 		if randf() < Character.dodge_chance():
+			enemy_struck.emit(index)
 			await _beat("%s attacks - Oliver dodges!" % enemy.name)
 			if was_asleep and not woke_this_round:
 				player_status.erase("sleep")
@@ -585,6 +592,7 @@ func _enemy_turn() -> void:
 			dmg = max(1, dmg / 2)
 		Character.stats.hp = max(0, Character.stats.hp - dmg)
 		Character.changed.emit()
+		enemy_struck.emit(index)
 		await _beat("%s attacks Oliver for %d damage!" % [enemy.name, dmg])
 
 		if Character.stats.hp <= 0:
