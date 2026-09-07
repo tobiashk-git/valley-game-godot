@@ -88,15 +88,15 @@ func dodge_chance() -> float:
 # missing content.
 const SLOTS := {
 	"weapon": {"label": "Weapon", "doll": Vector2(250, 120), "line_to": Vector2(348, 150), "stat": "attack"},
-	"armor": {"label": "Armor", "doll": Vector2(504, 146), "line_to": Vector2(452, 142), "stat": "defense"},
+	"armor": {"label": "Armor", "doll": Vector2(504, 174), "line_to": Vector2(452, 142), "stat": "defense"},
 	"accessory": {"label": "Accessory", "doll": Vector2(504, 14), "line_to": Vector2(420, 84), "stat": "bonus"},
 	# Armour sets (2026-09-06): a helm, greaves and boots per biome tier,
 	# each with its own LPC layer on the walking sprite (player.gd).
 	"head": {"label": "Head", "doll": Vector2(250, 30), "line_to": Vector2(360, 66), "stat": "defense"},
 	"legs": {"label": "Legs", "doll": Vector2(250, 210), "line_to": Vector2(366, 205), "stat": "defense"},
-	"feet": {"label": "Feet", "doll": Vector2(504, 212), "line_to": Vector2(440, 236), "stat": "defense"},
+	"feet": {"label": "Feet", "doll": Vector2(504, 254), "line_to": Vector2(440, 236), "stat": "defense"},
 	# Gloves (2026-09-07): the last armour piece; the right column holds four.
-	"hands": {"label": "Hands", "doll": Vector2(504, 80), "line_to": Vector2(446, 176), "stat": "defense"},
+	"hands": {"label": "Hands", "doll": Vector2(504, 94), "line_to": Vector2(446, 176), "stat": "defense"},
 }
 
 # slot -> gear INSTANCE ({"uid", "base", "mods"}, see inventory.gd) or {}

@@ -133,7 +133,7 @@ var craft_columns := 6
 # Craft mode sections, in display order, by what the recipe makes.
 const CRAFT_GROUPS := ["Potions & Food", "Equipment", "Materials"]
 # Phone Hero tab: where the slot pane starts under the doll block.
-const PHONE_PANE_Y := 330.0 # below the doll block (the right column's fourth slot ends at 288, its label at 302)
+const PHONE_PANE_Y := 358.0 # below the doll block (the right column's fourth slot ends at 318, its label at 334)
 # Enhance mode sections: one per equipment slot (Character.SLOTS order).
 const SLOT_GROUP_NAMES := {"weapon": "Weapons", "armor": "Armour", "accessory": "Accessories", "head": "Helms", "legs": "Greaves", "feet": "Boots", "hands": "Gloves"}
 # Header equipment slots: 44px so seven fit beside the bars (wide: 7 x 52 =
@@ -365,7 +365,7 @@ func _layout_character(pos: Vector2, size: Vector2) -> void:
 		figure.position = Vector2(300, 22)
 		figure_shadow.position = Vector2(352, 248)
 		_place_doll(300.0)
-		_place(doll_hint, Vector2(250, 306), Vector2(300, 20))
+		_place(doll_hint, Vector2(250, 334), Vector2(300, 20))
 		_place(slot_pane, Vector2(594, 0), Vector2(106, 342))
 		_place(slot_pane_title, Vector2(0, 6), Vector2(106, 20))
 		_place(slot_scroll, Vector2(6, 30), Vector2(94, 306))
@@ -385,7 +385,7 @@ func _layout_character(pos: Vector2, size: Vector2) -> void:
 		figure.position = Vector2(fig_x, 22)
 		figure_shadow.position = Vector2(fig_x + 52.0, 248)
 		_place_doll(fig_x)
-		_place(doll_hint, Vector2(0, 306), Vector2(iw, 20))
+		_place(doll_hint, Vector2(0, 334), Vector2(iw, 20))
 		_place(slot_pane, Vector2(20, PHONE_PANE_Y), Vector2(iw - 40.0, 160))
 		_place(slot_pane_title, Vector2(0, 6), Vector2(iw - 40.0, 20))
 		_place(slot_scroll, Vector2(6, 30), Vector2(iw - 52.0, 124))
