@@ -99,7 +99,12 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-	print("Talking again while in progress reminds you of the Trader: ", dialogue_ui.text_label.text.begins_with("The Trader's in the south-west house"))
+	print("Talking again while in progress reminds you of the four to meet: ", dialogue_ui.text_label.text.begins_with("The Trader's in the south-west house, the Blacksmith"))
+	# Four villagers complete the tutorial now; this walk covers the Trader
+	# in person and counts the other three as met.
+	quests.npcs_met.village_blacksmith = true
+	quests.npcs_met.luigi = true
+	quests.npcs_met.eden = true
 	Input.action_press("interact")
 	await process_frame
 	Input.action_release("interact")
@@ -168,7 +173,7 @@ func _initialize() -> void:
 	game_state.village_gates_open = false
 	quests._accept_quest("meet_villagers")
 	await process_frame
-	print("Accepting after already meeting the Trader completes it at once and opens the gates: ", quests.quest_state.get("meet_villagers", "") == "completed" and game_state.village_gates_open and dialogue_ui.is_open() and dialogue_ui.text_label.text.begins_with("You've already met the Trader"))
+	print("Accepting after already meeting the Trader completes it at once and opens the gates: ", quests.quest_state.get("meet_villagers", "") == "completed" and game_state.village_gates_open and dialogue_ui.is_open() and dialogue_ui.text_label.text.begins_with("You've already met everyone"))
 	dialogue_ui.hide_dialogue()
 
 	# --- The bug: completing the tutorial while STANDING on the overworld

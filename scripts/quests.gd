@@ -34,11 +34,13 @@ const QUEST_DEFS := {
 		"giver_name": "Village Elder",
 		"name": "Meet the Village",
 		"line": "story", "chapter": "village", "requires": [],
-		"objective": {"type": "talk_to_npcs", "npc_ids": ["village_trader"], "goal": "Introduce yourself to the Village Trader in the south-west house."},
+		# Four villagers to meet (2026-09-07): the Trader and the Blacksmith in
+		# their houses, Luigi and Eden on the square.
+		"objective": {"type": "talk_to_npcs", "npc_ids": ["village_trader", "village_blacksmith", "luigi", "eden"], "goal": "Say hello to the Village Trader (south-west house), the Village Blacksmith (south-east house), Luigi the Fearless and Eden on the square."},
 		"reward": {"xp": 20},
 		"dialogue": {
-			"offer": "Welcome to the valley, traveler! Before you go wandering, meet the rest of us - the Trader keeps the house in the south-west corner. Once you've said hello, I'll have the gates opened for you.",
-			"in_progress": "The Trader's in the south-west house - go and say hello, and the gates are yours.",
+			"offer": "Welcome to the valley, traveler! Before you go wandering, meet the rest of us: the Trader in the south-west house, the Blacksmith in the south-east one, and Luigi and Eden here on the square. Say hello to all four and I'll have the gates opened for you.",
+			"in_progress": "The Trader's in the south-west house, the Blacksmith in the south-east, and Luigi and Eden are about the square - say hello to them all, and the gates are yours.",
 			"ready": "You've met everyone worth meeting. The gates are open - the valley's yours to explore.",
 			"completed": "The gates are open - the valley's yours to explore. Mind the river fords, though.",
 		},
@@ -466,7 +468,7 @@ func _accept_quest(quest_id: String) -> void:
 	if quest_id == "meet_villagers" and objective_met(quest_id):
 		_mark_completed(quest_id)
 		_open_village_gates()
-		get_node("/root/DialogueUI").show_dialogue(QUEST_DEFS[quest_id].giver_name, "You've already met the Trader? Splendid. The village gates are open - the valley's yours to explore.")
+		get_node("/root/DialogueUI").show_dialogue(QUEST_DEFS[quest_id].giver_name, "You've already met everyone? Splendid. The village gates are open - the valley's yours to explore.")
 	changed.emit()
 
 func _mark_completed(quest_id: String) -> void:
