@@ -29,8 +29,8 @@
       181.0
     ],
     "frostpeak_interior": [
-      142.0,
-      9.0
+      132.0,
+      24.0
     ],
     "verdantwood_interior": [
       186.0,
@@ -630,33 +630,8 @@
     },
     {
       "scene": "IceCrystalShard",
-      "x": 116.0,
-      "y": 41.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 117.0,
-      "y": 42.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 114.0,
-      "y": 41.0
-    },
-    {
-      "scene": "IceCrystalShard",
       "x": 114.0,
       "y": 40.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 115.0,
-      "y": 41.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 116.0,
-      "y": 42.0
     },
     {
       "scene": "IceCrystalShard",
@@ -760,83 +735,8 @@
     },
     {
       "scene": "IceCrystalShard",
-      "x": 118.0,
-      "y": 42.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 117.0,
-      "y": 41.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 117.0,
-      "y": 43.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 118.0,
-      "y": 44.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 114.0,
-      "y": 44.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 116.0,
-      "y": 44.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 119.0,
-      "y": 41.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 119.0,
-      "y": 42.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 120.0,
-      "y": 43.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 120.0,
-      "y": 42.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 121.0,
-      "y": 43.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 122.0,
-      "y": 43.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 121.0,
-      "y": 42.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 123.0,
-      "y": 42.0
-    },
-    {
-      "scene": "IceCrystalShard",
       "x": 127.0,
       "y": 44.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 123.0,
-      "y": 43.0
     },
     {
       "scene": "IceCrystalShard",
@@ -892,11 +792,6 @@
       "scene": "IceCrystalShard",
       "x": 119.0,
       "y": 46.0
-    },
-    {
-      "scene": "IceCrystalShard",
-      "x": 121.0,
-      "y": 44.0
     },
     {
       "scene": "IceCrystalShard",
@@ -1067,9 +962,182 @@
       "scene": "BadlandsFireGeyser",
       "x": 149.0,
       "y": 176.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 142.0,
+      "y": 17.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 143.0,
+      "y": 12.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 146.0,
+      "y": 11.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 152.0,
+      "y": 11.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 157.0,
+      "y": 9.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 150.0,
+      "y": 7.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 140.0,
+      "y": 7.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 134.0,
+      "y": 7.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 150.0,
+      "y": 16.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 158.0,
+      "y": 15.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 164.0,
+      "y": 11.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 164.0,
+      "y": 19.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 164.0,
+      "y": 25.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 129.0,
+      "y": 39.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 145.0,
+      "y": 41.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 160.0,
+      "y": 9.0
+    },
+    {
+      "scene": "IceCrystalShard",
+      "x": 160.0,
+      "y": 7.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 115.0,
+      "y": 40.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 115.0,
+      "y": 41.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 114.0,
+      "y": 41.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 115.0,
+      "y": 37.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 112.0,
+      "y": 40.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 109.0,
+      "y": 37.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 125.0,
+      "y": 47.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 126.0,
+      "y": 46.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 121.0,
+      "y": 47.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 130.0,
+      "y": 46.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 129.0,
+      "y": 44.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 133.0,
+      "y": 44.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 136.0,
+      "y": 44.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 139.0,
+      "y": 47.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 110.0,
+      "y": 32.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 109.0,
+      "y": 30.0
+    },
+    {
+      "scene": "IceBoulder",
+      "x": 108.0,
+      "y": 28.0
     }
   ],
-  "removed": [],
+  "removed": [
+    "119,46",
+    "120,46"
+  ],
   "tiles": {
     "10,0": "mountain",
     "10,1": "mountain",
