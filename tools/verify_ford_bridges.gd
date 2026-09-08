@@ -48,7 +48,10 @@ func _initialize() -> void:
 	# A look at the northern crossing.
 	var player: CharacterBody2D = overworld.get_node("YSort/Player")
 	player.position = Vector2(north_tile.x * 32 + 16, (north_tile.y + 2) * 32 + 16)
-	for i in range(4):
+	var cam: Camera2D = player.get_node_or_null("Camera2D")
+	if cam != null:
+		cam.reset_smoothing()
+	for i in range(12):
 		await process_frame
 	root.get_texture().get_image().save_png("res://verify_ford_bridge.png")
 	print("Saved verify_ford_bridge.png")
