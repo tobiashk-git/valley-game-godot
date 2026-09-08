@@ -141,6 +141,7 @@ func _initialize() -> void:
 	shop_panel.open()
 	await process_frame
 	var sp_rect: Rect2 = _rect(shop_panel.window)
+	print("Shop window on the phone: a full-width Close under the pane, inside the window: ", shop_panel.close_bottom.visible and shop_panel.close_bottom.position.y >= shop_panel.detail_pane.position.y + shop_panel.detail_pane.size.y and shop_panel.close_bottom.get_global_rect().end.y <= shop_panel.window.get_global_rect().end.y + 0.5)
 	print("Shop window (kit) fills the phone width, grid above its pane: ", shop_panel.narrow and sp_rect.position.x == 12.0 and sp_rect.size.x == 400.0 - 24.0 and shop_panel.detail_pane.position.y >= shop_panel.grid_scroll.position.y + shop_panel.grid_scroll.size.y and shop_panel.grid.columns == 4)
 	shop_panel.grid.get_node("HealingPotionSlot").pressed.emit()
 	await process_frame

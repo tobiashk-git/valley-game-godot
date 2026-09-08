@@ -41,6 +41,9 @@ const SLOT_SIZE := 64
 # 2026-09-08: "deposit all resources" / "take all loot" in one go). The
 # subclass names it via _bulk_label() ("" = none) and does it in _on_bulk().
 var bulk_action: Button
+# A full-width Close under the pane on a phone (the X is a long reach at the
+# top; the touch controls hide while the window is up, so E is gone too).
+var close_bottom: Button
 
 # 0 = TabA, 1 = TabB.
 var tab := 0
@@ -66,6 +69,13 @@ func _ready() -> void:
 	bulk_action.visible = false
 	bulk_action.pressed.connect(_on_bulk)
 	detail_actions.add_child(bulk_action)
+	close_bottom = Button.new()
+	close_bottom.name = "CloseBottom"
+	close_bottom.text = "Close"
+	close_bottom.theme_type_variation = &"SecondaryButton"
+	close_bottom.visible = false
+	close_bottom.pressed.connect(close)
+	window.add_child(close_bottom)
 	Layout.changed.connect(_on_layout_changed)
 	_apply_layout()
 
@@ -181,6 +191,7 @@ func _apply_layout() -> void:
 		_place(detail_pane, Vector2(452, 96), Vector2(pw, pane_h))
 		hint_label.position = Vector2(20, 500)
 		hint_label.visible = true
+		close_bottom.visible = false
 	else:
 		var iw: float = Layout.width - 24.0
 		var wh: float = Layout.size().y - 56.0 - 12.0
@@ -198,8 +209,10 @@ func _apply_layout() -> void:
 		var grid_h: float = 3 * SLOT_SIZE + 12.0
 		_place(grid_scroll, Vector2(20, 126), Vector2(iw - 40.0, grid_h))
 		pw = iw - 40.0
-		pane_h = minf(300.0, wh - 126.0 - grid_h - 8.0 - 12.0)
+		pane_h = minf(300.0, wh - 126.0 - grid_h - 8.0 - 12.0 - 48.0)
 		_place(detail_pane, Vector2(20, 126.0 + grid_h + 8.0), Vector2(pw, pane_h))
+		_place(close_bottom, Vector2(20, 126.0 + grid_h + 8.0 + pane_h + 8.0), Vector2(pw, 40))
+		close_bottom.visible = true
 		hint_label.visible = false
 	_place(detail_type, Vector2(68, 34), Vector2(pw - 80.0, 32))
 	_place(detail_desc, Vector2(12, 72), Vector2(pw - 24.0, 60 if narrow else 80))

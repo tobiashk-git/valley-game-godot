@@ -87,4 +87,15 @@ func _initialize() -> void:
 	await process_frame
 	print("Releasing the interact button clears it: ", not Input.is_action_pressed("interact"))
 
+
+	# A window with its own Close hides the controls (they sat under it on a phone).
+	var storage_panel: Node = root.get_node("StoragePanel")
+	storage_panel.open_storage("house_chest")
+	await process_frame
+	await process_frame
+	var hidden_under_window: bool = not touch_controls.visible
+	storage_panel.close()
+	await process_frame
+	await process_frame
+	print("The controls hide while a kit window is open and return when it closes: ", hidden_under_window and touch_controls.visible)
 	quit()

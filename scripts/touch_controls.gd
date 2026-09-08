@@ -60,11 +60,21 @@ func _on_layout_changed() -> void:
 func _process(_delta: float) -> void:
 	# Nothing to steer or interact with during a fight - and the joystick
 	# would draw over the battle panel's bottom on a phone.
-	visible = GameState.is_gameplay() and not Combat.in_combat
+	# ...nor under a window with its own Close (kit windows, the sheet,
+	# Settings): on a phone the window is as tall as the screen and sat over
+	# the joystick and E (user, 2026-09-08).
+	visible = GameState.is_gameplay() and not Combat.in_combat and not _window_open()
 	var cam := get_viewport().get_camera_2d()
 	if cam != null and cam != _zoomed_camera:
 		_zoomed_camera = cam
 		cam.zoom = _zoom()
+
+func _window_open() -> bool:
+	for path in ["/root/ShopPanel", "/root/StoragePanel", "/root/CharacterSheet", "/root/SettingsPanel"]:
+		var n: Node = get_node_or_null(path)
+		if n != null and n.has_method("is_open") and n.is_open():
+			return true
+	return false
 
 # TouchScreenButton is a Node2D, not a Control - it has no anchor preset to
 # lean on like the joystick's BOTTOM_LEFT-anchored base, so its bottom-right
