@@ -160,6 +160,7 @@ func _repaint_open_paths() -> void:
 # quarter turn on the eastern and western ones. Drawn right after the tile
 # map, so walkers and the companions waiting on the ford pass over it.
 const FORD_BRIDGE := "res://assets/ford_bridge.png"
+const EW_BRIDGE_DROP := 14.0
 
 func _refresh_ford_bridges() -> void:
 	if not ResourceLoader.exists(FORD_BRIDGE):
@@ -175,6 +176,10 @@ func _refresh_ford_bridges() -> void:
 		bridge.position = _tile_center(World.BIOME_FORDS[zone])
 		if zone == World.Zone.VERDANTWOOD or zone == World.Zone.GLOOMFEN:
 			bridge.rotation = PI / 2.0
+			# Oliver's sprite is centred on his position, so his feet draw
+			# ~29 px below it: a turned bridge (34 px band) sits under his
+			# feet, his body above (user, 2026-09-08), not under his belt.
+			bridge.position.y += EW_BRIDGE_DROP
 		add_child(bridge)
 		move_child(bridge, tilemap.get_index() + 1)
 

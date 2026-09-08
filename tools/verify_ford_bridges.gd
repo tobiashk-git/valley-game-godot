@@ -39,15 +39,16 @@ func _initialize() -> void:
 	var east: Node = bridge.call(world.Zone.VERDANTWOOD)
 	var north_tile: Vector2i = world.BIOME_FORDS[world.Zone.FROSTPEAK]
 	var east_tile: Vector2i = world.BIOME_FORDS[world.Zone.VERDANTWOOD]
-	print("Opening the northern and eastern fords draws a bridge on each crossing tile, none on the closed ones: ", north != null and east != null and north.position == Vector2(north_tile.x * 32 + 16, north_tile.y * 32 + 16) and east.position == Vector2(east_tile.x * 32 + 16, east_tile.y * 32 + 16) and bridge.call(world.Zone.BADLANDS) == null)
+	print("Opening the northern and eastern fords draws a bridge on each crossing tile, none on the closed ones: ", north != null and east != null and north.position == Vector2(north_tile.x * 32 + 16, north_tile.y * 32 + 16) and east.position == Vector2(east_tile.x * 32 + 16, east_tile.y * 32 + 16 + overworld.EW_BRIDGE_DROP) and bridge.call(world.Zone.BADLANDS) == null)
+	print("The turned bridge sits lower, under Oliver's feet (his sprite is centred, feet ~29 px down): ", overworld.EW_BRIDGE_DROP >= 10.0 and overworld.EW_BRIDGE_DROP + 17.0 >= 29.0 - 4.0)
 	print("The northern bridge stands upright (spanning the east-west river), the eastern one is turned a quarter: ", north != null and east != null and is_equal_approx(north.rotation, 0.0) and is_equal_approx(absf(east.rotation), PI / 2.0))
 	print("Bridges draw under the walkers: right after the tile map, before the YSort: ", north != null and north.get_index() > tilemap.get_index() and north.get_index() < ysort.get_index() and north.texture != null and north.texture.get_width() >= 32)
 	quests.changed.emit()
 	await process_frame
 	print("A second repaint reuses the bridges (no duplicates): ", overworld.get_children().filter(func(c): return String(c.name).begins_with("FordBridge")).size() == 2)
-	# A look at the northern crossing.
+	# A look at Oliver standing on the eastern crossing (Eden waits beside it in the story; here nobody is stationed).
 	var player: CharacterBody2D = overworld.get_node("YSort/Player")
-	player.position = Vector2(north_tile.x * 32 + 16, (north_tile.y + 2) * 32 + 16)
+	player.position = Vector2(east_tile.x * 32 + 16, east_tile.y * 32 + 16)
 	var cam: Camera2D = player.get_node_or_null("Camera2D")
 	if cam != null:
 		cam.reset_smoothing()
