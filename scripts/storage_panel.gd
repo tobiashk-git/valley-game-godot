@@ -36,7 +36,7 @@ func _subtitle() -> String:
 func _hint() -> String:
 	if tab == 0:
 		return "Tap something in the chest to take it out." + ("" if _is_bank() else " Or take all the loot at once.")
-	return "Tap something you carry to put it in the chest." + (" Or put every resource and your gold in at once." if _is_bank() else "")
+	return "Tap something you carry to put it in the chest." + (" Deposit all banks every resource and your gold in one tap." if _is_bank() else "")
 
 func _is_bank() -> bool:
 	return storage_id == Inventory.BANK_CHEST
@@ -60,7 +60,7 @@ func _bulk_label() -> String:
 		var n := 0
 		for item_id in _carried_resources():
 			n += Inventory.backpack[item_id]
-		return "Deposit all resources and gold (%d)" % n if n > 0 else ""
+		return "Deposit all (%d)" % n if n > 0 else "" # resources + gold; the hint line spells it out (a long label ran off the phone pane)
 	if tab == 0 and not _is_bank():
 		var n := 0
 		for item_id in _chest_items().keys():

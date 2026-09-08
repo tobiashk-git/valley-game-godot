@@ -66,6 +66,8 @@ func _ready() -> void:
 	bulk_action = Button.new()
 	bulk_action.name = "BulkAction"
 	bulk_action.theme_type_variation = &"PrimaryButton"
+	bulk_action.clip_text = true # never wider than the pane
+	bulk_action.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	bulk_action.visible = false
 	bulk_action.pressed.connect(_on_bulk)
 	detail_actions.add_child(bulk_action)

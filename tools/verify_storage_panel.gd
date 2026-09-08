@@ -128,7 +128,7 @@ func _initialize() -> void:
 	await process_frame
 	storage_panel.tab_b.pressed.emit()
 	await process_frame
-	print("Bank chest, backpack tab, nothing selected: a 'Deposit all resources and gold (37)' button in the pane: ", storage_panel.bulk_action.visible and storage_panel.bulk_action.text == "Deposit all resources and gold (37)" and storage_panel.detail_name.text == "Select an item")
+	print("Bank chest, backpack tab, nothing selected: a 'Deposit all resources and gold (37)' button in the pane: ", storage_panel.bulk_action.visible and storage_panel.bulk_action.text == "Deposit all (37)" and storage_panel.detail_name.text == "Select an item")
 	storage_panel.bulk_action.pressed.emit()
 	await process_frame
 	print("It banks the wood, stone and gold and leaves the potions and armour in the pack: ", storage.get_count("house_chest", "wood") == 4 and storage.get_count("house_chest", "stone") == 3 and storage.get_count("house_chest", "gold") == 30 and inventory.get_count("wood") == 0 and inventory.get_count("gold") == 0 and inventory.get_count("healing_potion") == 2 and inventory.get_count("leather_armor") == 1 and storage.get_count("house_chest", "healing_potion") == 0)
