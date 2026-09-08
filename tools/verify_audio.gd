@@ -175,6 +175,17 @@ func _initialize() -> void:
 	var slider: HSlider = settings.music_slider
 	var sfx_slider: HSlider = settings.sfx_slider
 	print("Settings window (system bar) has Music and Sounds sliders showing the current volumes; the Hero tab has none: ", settings.is_open() and slider.value == round(audio.music_volume * 100.0) and sfx_slider.value == round(audio.sfx_volume * 100.0) and sheet.stats_list.find_child("MusicSlider", true, false) == null)
+	# Mute all (2026-09-08): a switch above the sliders silences both buses,
+	# keeps the slider values, persists, and comes back off.
+	var mute_btn: CheckButton = settings.mute_btn
+	var music_before: float = audio.music_volume
+	print("Settings has a 'Mute all' switch above the sliders, off: ", mute_btn != null and mute_btn.get_index() == 0 and not mute_btn.button_pressed and not audio.muted)
+	mute_btn.button_pressed = true
+	await process_frame
+	print("Mute all silences the Music and Sounds buses while the sliders keep their values: ", audio.muted and AudioServer.get_bus_volume_db(music_bus) <= -79.0 and AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Sfx")) <= -79.0 and absf(audio.music_volume - music_before) < 0.001 and slider.value == round(music_before * 100.0) and settings.music_slider.get_parent().modulate.r < 0.6)
+	mute_btn.button_pressed = false
+	await process_frame
+	print("Off again: the buses follow the sliders once more: ", not audio.muted and absf(AudioServer.get_bus_volume_db(music_bus) - linear_to_db(music_before)) < 0.01)
 	slider.value = 40
 	await process_frame
 	print("Dragging Music to 40 sets the bus to ~-8 dB and the setting: ", absf(AudioServer.get_bus_volume_db(music_bus) - linear_to_db(0.4)) < 0.01 and absf(audio.music_volume - 0.4) < 0.001)

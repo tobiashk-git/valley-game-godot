@@ -28,6 +28,7 @@ const CONFIRM_SECONDS := 3.0
 @onready var quit_btn: Button = $Window/Rows/Game/QuitBtn
 
 var confirm_quit := false
+var mute_btn: CheckButton # "Mute all" above the sliders (built here, not in the scene)
 var _ignore_close_this_frame := false
 var _save_token := 0
 var _quit_token := 0
@@ -46,6 +47,17 @@ func _ready() -> void:
 	sfx_slider.value_changed.connect(func(v: float) -> void:
 		Audio.set_sfx_volume(v / 100.0)
 		sfx_value.text = str(int(v)))
+	# One switch silences the game (the phone keeps its own volume); the
+	# sliders keep their values for when it comes back.
+	mute_btn = CheckButton.new()
+	mute_btn.name = "MuteBtn"
+	mute_btn.text = "Mute all"
+	mute_btn.add_theme_font_size_override("font_size", 15)
+	mute_btn.toggled.connect(func(on: bool) -> void:
+		Audio.set_muted(on)
+		_style_mute())
+	rows.add_child(mute_btn)
+	rows.move_child(mute_btn, 0)
 	Layout.changed.connect(_apply_layout)
 	_apply_layout()
 
@@ -75,7 +87,14 @@ func toggle() -> void:
 func in_game() -> bool:
 	return GameState.is_gameplay()
 
+func _style_mute() -> void:
+	var dim: Color = Color(0.55, 0.55, 0.55, 1.0) if Audio.muted else Color.WHITE
+	for row in [music_slider.get_parent(), sfx_slider.get_parent()]:
+		row.modulate = dim
+
 func refresh() -> void:
+	mute_btn.set_pressed_no_signal(Audio.muted)
+	_style_mute()
 	music_slider.set_value_no_signal(round(Audio.music_volume * 100.0))
 	music_value.text = str(int(music_slider.value))
 	sfx_slider.set_value_no_signal(round(Audio.sfx_volume * 100.0))
@@ -126,7 +145,7 @@ func _reset_quit() -> void:
 
 func _apply_layout() -> void:
 	var w: float
-	var h: float = 400.0 if in_game() else 250.0
+	var h: float = 440.0 if in_game() else 290.0
 	if Layout.is_narrow():
 		w = Layout.width - 24.0
 		window.position = Vector2(12, 56)

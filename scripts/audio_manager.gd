@@ -107,6 +107,10 @@ var enabled := true
 var hard_switch := false # web: cut between tracks, no fades (see above)
 var music_volume := 0.8 # 0..1
 var sfx_volume := 0.9
+# Mute all (user, 2026-09-08): one switch that silences the game while the
+# phone itself keeps its volume (waiting for a call). The sliders keep
+# their values; the buses go silent while it is on. Persisted like them.
+var muted := false
 var _players: Array[AudioStreamPlayer] = []
 var _active := 0
 var _current := ""
@@ -329,12 +333,23 @@ func set_sfx_volume(v: float) -> void:
 	_apply_volumes()
 	_save_settings()
 
+func set_muted(on: bool) -> void:
+	muted = on
+	_apply_volumes()
+	_save_settings()
+	if hard_switch:
+		# The web reads bus volumes when a sample starts (see set_music_volume).
+		_restart_wanted = true
+		if not _restart_scheduled:
+			_restart_scheduled = true
+			get_tree().create_timer(RESTART_DEBOUNCE).timeout.connect(_restart_active)
+
 static func _to_db(v: float) -> float:
 	return linear_to_db(v) if v > 0.001 else -80.0
 
 func _apply_volumes() -> void:
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), _to_db(music_volume))
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Sfx"), _to_db(sfx_volume))
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), _to_db(0.0 if muted else music_volume))
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Sfx"), _to_db(0.0 if muted else sfx_volume))
 
 func _load_settings() -> void:
 	var cfg := ConfigFile.new()
@@ -342,6 +357,7 @@ func _load_settings() -> void:
 		return
 	music_volume = clampf(float(cfg.get_value("audio", "music", music_volume)), 0.0, 1.0)
 	sfx_volume = clampf(float(cfg.get_value("audio", "sfx", sfx_volume)), 0.0, 1.0)
+	muted = bool(cfg.get_value("audio", "muted", false))
 
 func _save_settings() -> void:
 	if not enabled:
@@ -350,4 +366,5 @@ func _save_settings() -> void:
 	cfg.load(SETTINGS_PATH)
 	cfg.set_value("audio", "music", music_volume)
 	cfg.set_value("audio", "sfx", sfx_volume)
+	cfg.set_value("audio", "muted", muted)
 	cfg.save(SETTINGS_PATH)
