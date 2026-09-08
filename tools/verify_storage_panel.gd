@@ -114,4 +114,43 @@ func _initialize() -> void:
 	await process_frame
 	print("X closes: ", not storage_panel.is_open())
 
+
+	# --- bulk buttons (2026-09-08): deposit every resource / take all loot ---
+	inventory.reset()
+	storage.reset()
+	inventory.add_item("wood", 4)
+	inventory.add_item("stone", 3)
+	inventory.add_item("healing_potion", 2)
+	inventory.add_item("gold", 30)
+	inventory.add_item("leather_armor", 1)
+	storage_panel.open_storage("house_chest")
+	await process_frame
+	await process_frame
+	storage_panel.tab_b.pressed.emit()
+	await process_frame
+	print("Bank chest, backpack tab, nothing selected: a 'Deposit all resources (7)' button in the pane: ", storage_panel.bulk_action.visible and storage_panel.bulk_action.text == "Deposit all resources (7)" and storage_panel.detail_name.text == "Select an item")
+	storage_panel.bulk_action.pressed.emit()
+	await process_frame
+	print("It banks the wood and stone and leaves the potions, gold and armour in the pack: ", storage.get_count("house_chest", "wood") == 4 and storage.get_count("house_chest", "stone") == 3 and inventory.get_count("wood") == 0 and inventory.get_count("healing_potion") == 2 and inventory.get_count("gold") == 30 and inventory.get_count("leather_armor") == 1 and storage.get_count("house_chest", "healing_potion") == 0)
+	print("With no resources left to bank the button is gone: ", not storage_panel.bulk_action.visible)
+	storage_panel.tab_a.pressed.emit()
+	await process_frame
+	print("The bank's own chest tab offers no take-all (it is a bank, not loot): ", not storage_panel.bulk_action.visible)
+	storage_panel.grid.get_node("WoodSlot").pressed.emit()
+	await process_frame
+	print("Selecting an item hides the bulk button behind the item's own actions: ", not storage_panel.bulk_action.visible and storage_panel.primary_action.visible)
+	storage_panel.close()
+	await process_frame
+	storage.add_item("dungeon_chest_1", "monster_fur", 3)
+	storage.add_item("dungeon_chest_1", "gold", 12)
+	storage_panel.open_storage("dungeon_chest_1")
+	await process_frame
+	await process_frame
+	print("A treasure chest opens on its loot with a 'Take all loot (15)' button: ", storage_panel.tab == 0 and storage_panel.bulk_action.visible and storage_panel.bulk_action.text == "Take all loot (15)")
+	print("Kit slots pass touches through to the scroll behind them (phone drag-scrolling): ", storage_panel.grid.get_node("MonsterFurSlot").mouse_filter == Control.MOUSE_FILTER_PASS)
+	storage_panel.bulk_action.pressed.emit()
+	await process_frame
+	print("One tap empties it into the pack: ", storage.get_storage("dungeon_chest_1").is_empty() and inventory.get_count("monster_fur") == 3 and inventory.get_count("gold") == 42 and not storage_panel.bulk_action.visible)
+	storage_panel.close()
+	await process_frame
 	quit()

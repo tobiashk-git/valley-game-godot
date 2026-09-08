@@ -14,6 +14,11 @@ func _ready() -> void:
 	super()
 	Inventory.changed.connect(_refresh)
 	Shop.changed.connect(_refresh)
+	# The gold line is what you shop by: bigger and in gold (user, 2026-09-08).
+	subtitle_label.add_theme_font_size_override("font_size", 17)
+	subtitle_label.add_theme_color_override("font_color", Color(1.0, 0.84, 0.3))
+	subtitle_label.add_theme_color_override("font_outline_color", Color(0.25, 0.15, 0.02))
+	subtitle_label.add_theme_constant_override("outline_size", 4)
 
 func open() -> void:
 	tab = 0

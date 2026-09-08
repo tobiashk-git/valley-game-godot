@@ -9,7 +9,7 @@ extends SceneTree
 # sprite carries one overlay per slot in the draw order legs, feet, body,
 # head; a save round-trips the new slots.
 
-const PIECES: Array[String] = ["leather_cap", "leather_boots", "leather_gloves", "frost_helm", "frost_greaves", "frost_boots", "frost_gloves", "ironwood_helm", "ironwood_greaves", "ironwood_boots", "ironwood_gloves", "ember_helm", "ember_greaves", "ember_boots", "ember_gloves", "bogiron_helm", "bogiron_greaves", "bogiron_boots", "bogiron_gloves"]
+const PIECES: Array[String] = ["leather_cap", "leather_greaves", "leather_boots", "leather_gloves", "frost_helm", "frost_greaves", "frost_boots", "frost_gloves", "ironwood_helm", "ironwood_greaves", "ironwood_boots", "ironwood_gloves", "ember_helm", "ember_greaves", "ember_boots", "ember_gloves", "bogiron_helm", "bogiron_greaves", "bogiron_boots", "bogiron_gloves"]
 const BOGIRON_LAYER := {"legs": "bogiron_greaves", "feet": "bogiron_boots", "armor": "bogiron_harness", "hands": "bogiron_gloves", "head": "bogiron_helm"}
 
 func _initialize() -> void:
@@ -47,7 +47,7 @@ func _initialize() -> void:
 			continue
 		if not crafting.RECIPES.has(id) or crafting.RECIPES[id].result != id:
 			recipes_ok = false
-	print("Every tier piece has a recipe; the Trader stocks the leather cap and boots: ", recipes_ok and shop.SHOP_STOCK.has("leather_cap") and shop.SHOP_STOCK.has("leather_boots"))
+	print("Every tier piece has a recipe; the Trader stocks the leather cap, greaves and boots: ", recipes_ok and shop.SHOP_STOCK.has("leather_cap") and shop.SHOP_STOCK.has("leather_greaves") and shop.SHOP_STOCK.has("leather_boots"))
 
 	# --- defence sums across slots ---
 	for id in ["bogiron_harness", "bogiron_helm", "bogiron_greaves", "bogiron_boots", "bogiron_gloves"]:
@@ -130,4 +130,6 @@ func _initialize() -> void:
 	root.size = Vector2i(800, 600)
 	for i in range(4):
 		await process_frame
+
+	print("Leather greaves complete the leather set: legs slot, DEF 1, 15 gold at the Trader, with a walking layer and an icon: ", items.ITEMS.leather_greaves.slot == "legs" and items.ITEMS.leather_greaves.defense == 1 and items.ITEMS.leather_greaves.value == 15 and ResourceLoader.exists(items.ITEMS.leather_greaves.layer) and ResourceLoader.exists("res://assets/icons/leather_greaves.png"))
 	quit()

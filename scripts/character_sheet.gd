@@ -812,6 +812,7 @@ func _pane_item(inst: Dictionary, action_text: String, action: Callable, variati
 	var icon_panel := Panel.new()
 	icon_panel.custom_minimum_size = Vector2(48, 48)
 	icon_panel.theme_type_variation = &"DetailPanel"
+	icon_panel.mouse_filter = Control.MOUSE_FILTER_PASS
 	var icon := TextureRect.new()
 	# Modes BEFORE the size: with the default "keep size" the 64px texture
 	# is the minimum, and a size set then stays clamped at 64 even after
@@ -837,6 +838,7 @@ func _pane_item(inst: Dictionary, action_text: String, action: Callable, variati
 	btn.custom_minimum_size = Vector2(90, 32)
 	btn.theme_type_variation = variation
 	btn.add_theme_font_size_override("font_size", 13)
+	btn.mouse_filter = Control.MOUSE_FILTER_PASS # touch drag scrolls the list
 	btn.set_meta("item_id", item_id)
 	btn.set_meta("uid", inst.uid)
 	btn.pressed.connect(action)
@@ -851,6 +853,7 @@ func _pane_row(inst: Dictionary, action_text: String, action: Callable, variatio
 	var icon_panel := Panel.new()
 	icon_panel.custom_minimum_size = Vector2(44, 44)
 	icon_panel.theme_type_variation = &"DetailPanel"
+	icon_panel.mouse_filter = Control.MOUSE_FILTER_PASS
 	var icon := TextureRect.new()
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE # before the size (see _pane_item)
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -883,6 +886,7 @@ func _pane_row(inst: Dictionary, action_text: String, action: Callable, variatio
 	btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	btn.theme_type_variation = variation
 	btn.add_theme_font_size_override("font_size", 13)
+	btn.mouse_filter = Control.MOUSE_FILTER_PASS # touch drag scrolls the list
 	btn.set_meta("item_id", item_id)
 	btn.set_meta("uid", inst.uid)
 	btn.pressed.connect(action)

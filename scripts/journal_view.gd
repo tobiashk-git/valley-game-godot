@@ -266,6 +266,7 @@ func _row(quest_id: String) -> void:
 	btn.name = quest_id.to_pascal_case() + "Row"
 	btn.custom_minimum_size = Vector2(_row_width, ROW_HEIGHT)
 	btn.theme_type_variation = &"TabButtonActive" if selected else &"TabButton"
+	btn.mouse_filter = Control.MOUSE_FILTER_PASS # a touch drag on a row scrolls the list (phone)
 	btn.pressed.connect(select_quest.bind(quest_id))
 	var name_label := Label.new()
 	name_label.name = "Name"

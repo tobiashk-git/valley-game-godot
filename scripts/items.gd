@@ -62,6 +62,8 @@ const ITEMS := {
 	# starter cap and boots at the Trader. Each carries an LPC walk layer.
 	"leather_cap": {"name": "Leather Cap", "icon": "🛡️", "slot": "head", "layer": "res://assets/armour_layers/leather_cap.png", "defense": 1, "value": 15, "desc": "A stiff hide cap. Better than hair."},
 	"leather_boots": {"name": "Leather Boots", "icon": "🛡️", "slot": "feet", "layer": "res://assets/armour_layers/leather_boots.png", "defense": 1, "value": 15, "desc": "Soft boots with a hard sole. Keeps the thorns out."},
+	# The legs piece the leather set was missing (user, 2026-09-08).
+	"leather_greaves": {"name": "Leather Greaves", "icon": "🛡️", "slot": "legs", "layer": "res://assets/armour_layers/leather_greaves.png", "defense": 1, "value": 15, "desc": "Stiff hide leggings, laced at the calf. Turns a briar, and a bite."},
 	"frost_helm": {"name": "Frost Helm", "icon": "🛡️", "slot": "head", "layer": "res://assets/armour_layers/frost_helm.png", "defense": 2, "tier": 1, "value": 30, "desc": "A kettle helm rimmed with frost shard. Cold on the brow, colder on a claw."},
 	"frost_greaves": {"name": "Frost Greaves", "icon": "🛡️", "slot": "legs", "layer": "res://assets/armour_layers/frost_greaves.png", "defense": 2, "tier": 1, "value": 30, "desc": "Fur leggings stiffened with frost shard plates."},
 	"frost_boots": {"name": "Frost Boots", "icon": "🛡️", "slot": "feet", "layer": "res://assets/armour_layers/frost_boots.png", "defense": 1, "tier": 1, "value": 20, "desc": "Fur boots with frost shard toes. Sure-footed on ice."},

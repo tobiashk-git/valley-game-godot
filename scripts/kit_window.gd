@@ -37,6 +37,10 @@ const SLOT_SIZE := 64
 @onready var primary_action: Button = $Window/DetailPane/Actions/PrimaryAction
 @onready var secondary_action: Button = $Window/DetailPane/Actions/SecondaryAction
 @onready var hint_label: Label = $Window/HintLabel
+# A window-level action shown in the pane while NOTHING is selected (user,
+# 2026-09-08: "deposit all resources" / "take all loot" in one go). The
+# subclass names it via _bulk_label() ("" = none) and does it in _on_bulk().
+var bulk_action: Button
 
 # 0 = TabA, 1 = TabB.
 var tab := 0
@@ -56,6 +60,12 @@ func _ready() -> void:
 	close_btn.pressed.connect(close)
 	primary_action.pressed.connect(_on_primary)
 	secondary_action.pressed.connect(_on_secondary)
+	bulk_action = Button.new()
+	bulk_action.name = "BulkAction"
+	bulk_action.theme_type_variation = &"PrimaryButton"
+	bulk_action.visible = false
+	bulk_action.pressed.connect(_on_bulk)
+	detail_actions.add_child(bulk_action)
 	Layout.changed.connect(_on_layout_changed)
 	_apply_layout()
 
@@ -75,6 +85,13 @@ func _on_primary() -> void:
 	pass
 
 func _on_secondary() -> void:
+	pass
+
+# The bulk action's label while nothing is selected ("" hides it).
+func _bulk_label() -> String:
+	return ""
+
+func _on_bulk() -> void:
 	pass
 
 # Title-row subtitle ("Gold on hand: 12" / "Chest: 3 items - Backpack: 5").
@@ -188,7 +205,7 @@ func _apply_layout() -> void:
 	_place(detail_desc, Vector2(12, 72), Vector2(pw - 24.0, 60 if narrow else 80))
 	_place(detail_value, Vector2(12, 136 if narrow else 158), Vector2(pw - 24.0, 40))
 	_place(detail_actions, Vector2(12, 184 if narrow else 206), Vector2(pw - 24.0, 88))
-	for b in [primary_action, secondary_action]:
+	for b in [primary_action, secondary_action, bulk_action]:
 		b.custom_minimum_size = Vector2(pw - 24.0, 40)
 
 # --- refresh ---
@@ -225,6 +242,7 @@ func _refresh() -> void:
 func _refresh_detail(entry: Dictionary) -> void:
 	primary_action.visible = false
 	secondary_action.visible = false
+	bulk_action.visible = false
 	primary_action.disabled = false
 	secondary_action.disabled = false
 	detail_name.position.x = 68.0 if not entry.is_empty() else 12.0
@@ -235,6 +253,9 @@ func _refresh_detail(entry: Dictionary) -> void:
 		detail_type.text = ""
 		detail_desc.text = ""
 		detail_value.text = ""
+		var bulk: String = _bulk_label()
+		bulk_action.text = bulk
+		bulk_action.visible = bulk != ""
 		return
 	var def: Dictionary = Items.ITEMS[entry.id]
 	detail_icon.texture = Items.get_item_icon(entry.id)
@@ -273,6 +294,10 @@ static func make_slot(item_id: String, count: int, selected: bool, inst: Diction
 	btn.icon = Items.get_item_icon(item_id)
 	btn.expand_icon = true
 	btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# PASS, not the default STOP: a touch that starts on a slot must reach
+	# the ScrollContainer behind it, or the grid cannot be drag-scrolled on
+	# the phone (user, 2026-09-08: the lists were only scrollable by the bar).
+	btn.mouse_filter = Control.MOUSE_FILTER_PASS
 	btn.tooltip_text = Items.instance_name(inst) if not inst.is_empty() else Items.get_item_name(item_id)
 	if connect_select and on_select.is_valid():
 		btn.pressed.connect(on_select)

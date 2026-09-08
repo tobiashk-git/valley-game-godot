@@ -112,4 +112,6 @@ func _initialize() -> void:
 	root.size = Vector2i(800, 600)
 	for i in range(3):
 		await process_frame
+
+	print("Journal rows pass touches through, so a drag on a row scrolls the list on the phone: ", view.quest_list.get_children().filter(func(c): return c is Button).all(func(b): return b.mouse_filter == Control.MOUSE_FILTER_PASS))
 	quit()

@@ -65,7 +65,7 @@ const TIERS := [
 	{"name": "Bog-iron", "level": 12, "weapon": "bogiron_cleaver", "body": "bogiron_harness", "set": ["bogiron_helm", "bogiron_greaves", "bogiron_boots", "bogiron_gloves"], "boss": "gloomfen_boss", "next_zone": "", "next_boss": "final_boss"},
 ]
 # The leather "set" (Trader cap + boots) is the previous set for the Frost row.
-const LEATHER_FULL := ["wooden_pickaxe", "leather_armor", "leather_cap", "leather_boots", "leather_gloves"]
+const LEATHER_FULL := ["wooden_pickaxe", "leather_armor", "leather_cap", "leather_greaves", "leather_boots", "leather_gloves"]
 const BAND_BODY_MAX := 35      # body piece only vs own boss: should lose
 const BAND_OVERLEVEL_MAX := 50 # body only, two levels higher - INFORMATIONAL: two levels add more
                                # power and HP than a set adds mitigation, so no boss stat can gate this
