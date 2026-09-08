@@ -15,8 +15,8 @@ const WHERE := {
 	"Village Blacksmith": "village, south-east house (workbench)",
 	"Frostpeak Ranger": "camp by the northern ford; just past the crossing once it opens (hunt turned in at the Elder)",
 	"Forest Druid": "glade by the eastern ford; just past the crossing once it opens (hunt turned in at the Elder)",
-	"Badlands Prospector": "camp by the southern ford",
-	"Marsh Guide": "camp by the western ford",
+	"Badlands Prospector": "camp by the southern ford; just past the crossing once it opens (hunt turned in at the Elder)",
+	"Marsh Guide": "camp by the western ford; just past the crossing once it opens (hunt turned in at the Elder)",
 	"Luigi the Fearless": "village square; on a ford for his events",
 	"Eden": "village square; on the eastern ford for her event",
 }

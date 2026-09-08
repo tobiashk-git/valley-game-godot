@@ -55,6 +55,7 @@ func _initialize() -> void:
 	print("The bank lesson is met by 20 gold in the house chest (0/20 then 20/20 Gold banked): ", not bank_before and quests.objective_met("bank_gold") and quests.objective_progress_text("bank_gold") == "20/20 Gold banked")
 	storage.reset()
 	quests.quest_state.erase("bank_gold")
+	print("All four biome hunts are given in the field and turned in at the Elder: ", ["frostpeak_ranger", "forest_druid", "badlands_prospector", "marsh_guide"] == [quests.giver_id_of("hunt_frostpeak"), quests.giver_id_of("hunt_verdantwood"), quests.giver_id_of("hunt_badlands"), quests.giver_id_of("hunt_gloomfen")] and quests.turn_in_id_of("hunt_badlands") == "village_elder" and quests.turn_in_id_of("hunt_gloomfen") == "village_elder")
 	print("Each ford needs the previous hunt: ", quests.requires_of("cross_frostpeak") == ["hunt_dungeon"] and quests.requires_of("cross_verdantwood") == ["hunt_frostpeak"] and quests.requires_of("cross_badlands") == ["hunt_verdantwood"] and quests.requires_of("cross_gloomfen") == ["hunt_badlands"])
 	print("The finale: the castle (needs the Bogmaw), then the altar (a flag objective), then the Warden: ", quests.requires_of("hunt_castle") == ["hunt_gloomfen"] and quests.QUEST_DEFS.two_guardians.objective.type == "flag" and quests.requires_of("two_guardians") == ["hunt_castle"] and quests.requires_of("ancient_warden") == ["two_guardians"])
 	quests.reset()

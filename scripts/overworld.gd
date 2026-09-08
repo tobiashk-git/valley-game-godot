@@ -197,6 +197,8 @@ func _on_quests_changed() -> void:
 # in the village; they go home to their camps once the hunt is turned in.
 var _ranger: StaticBody2D
 var _druid: StaticBody2D
+var _prospector: StaticBody2D
+var _guide: StaticBody2D
 const GUIDE_STEPS_IN := 3
 
 func _guide_spot(zone: int) -> Vector2i:
@@ -213,6 +215,12 @@ func _place_guides() -> void:
 	if _druid != null:
 		var out: bool = done.call("cross_verdantwood") and not done.call("hunt_verdantwood")
 		_druid.position = _tile_center(_guide_spot(World.Zone.VERDANTWOOD) if out else World.place("druid_glade"))
+	if _prospector != null:
+		var out: bool = done.call("cross_badlands") and not done.call("hunt_badlands")
+		_prospector.position = _tile_center(_guide_spot(World.Zone.BADLANDS) if out else World.place("prospector_camp"))
+	if _guide != null:
+		var out: bool = done.call("cross_gloomfen") and not done.call("hunt_gloomfen")
+		_guide.position = _tile_center(_guide_spot(World.Zone.GLOOMFEN) if out else World.place("marsh_guide"))
 
 # --- Companions on the map (2026-09-07). Where Luigi and Eden stand follows
 # the story (quests.gd: the joining events). "With Oliver" = off the map.
@@ -502,7 +510,6 @@ func _ready() -> void:
 	druid.intro_text = "You've wandered far from the village. Verdantwood lies beyond that ford - if you can call it a ford anymore. The old crossing's overgrown; I could use a hand clearing it."
 	ysort.add_child(druid)
 	_druid = druid
-	_place_guides()
 
 	# The Badlands ford-crossing quest giver - same standalone pattern as the Druid.
 	var prospector: StaticBody2D = NPC_SCENE.instantiate()
@@ -510,10 +517,12 @@ func _ready() -> void:
 	prospector.sprite_path = "res://assets/trader.png"
 	prospector.sprite_tint = Color(0.75, 0.45, 0.25, 1.0)
 	prospector.npc_name = "Badlands Prospector"
-	prospector.quest_id = "cross_badlands"
+	var prospector_chain: Array[String] = ["cross_badlands", "hunt_badlands"] # the ford, then the hunt (turned in at the Elder)
+	prospector.quest_ids = prospector_chain
 	prospector.npc_id = "badlands_prospector"
 	prospector.intro_text = "Emberfall's past that ford - if the heat don't get you, the ground giving way underfoot will. I've been meaning to shore up the crossing, just need the stone for it."
 	ysort.add_child(prospector)
+	_prospector = prospector
 
 	# The Gloomfen ford-crossing quest giver - same standalone pattern as the Druid/Prospector.
 	var guide: StaticBody2D = NPC_SCENE.instantiate()
@@ -521,10 +530,13 @@ func _ready() -> void:
 	guide.sprite_path = "res://assets/elder.png"
 	guide.sprite_tint = Color(0.35, 0.42, 0.32, 1.0)
 	guide.npc_name = "Marsh Guide"
-	guide.quest_id = "cross_gloomfen"
+	var guide_chain: Array[String] = ["cross_gloomfen", "hunt_gloomfen"] # the ford, then the hunt (turned in at the Elder)
+	guide.quest_ids = guide_chain
 	guide.npc_id = "marsh_guide"
 	guide.intro_text = "Gloomfen's past that ford, if you can call it that anymore - the old boards rotted through years back. Bring me wood and I'll lay a new crossing."
 	ysort.add_child(guide)
+	_guide = guide
+	_place_guides()
 
 	# Painted village ground (see house.gd's room shell for the idea): one
 	# picture of the plaza, paths and grass over the interior tiles, under

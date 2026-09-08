@@ -45,9 +45,9 @@ _Fires in the south._  -  companions: Luigi and Eden (after The Fearless Pair)
 
 | # | Quest | Giver (where) | Gate (needs turned in) | Goal | Reward | Completing it unlocks |
 |---|---|---|---|---|---|---|
-| 1 | Shoring Up the Crossing (`cross_badlands`) | Badlands Prospector (camp by the southern ford) | Elder Bramblewood | Gather 12 Stone | 180 XP, 35 gold, 1 Healing Potion | the southern ford opens: Emberfall Badlands and the caldera; both companions move onto the ford |
+| 1 | Shoring Up the Crossing (`cross_badlands`) | Badlands Prospector (camp by the southern ford; just past the crossing once it opens (hunt turned in at the Elder)) | Elder Bramblewood | Gather 12 Stone | 180 XP, 35 gold, 1 Healing Potion | the southern ford opens: Emberfall Badlands and the caldera; both companions move onto the ford |
 | 2 | The Fearless Pair (`join_pair`) | Luigi the Fearless (village square; on a ford for his events) | Shoring Up the Crossing | Luigi and Eden wait on the southern ford. Ask them both along. | 40 XP | both walk with Oliver from here on (Badlands, Gloomfen, the castle, the finale); settles the single events too |
-| 3 | Cinderjaw (`hunt_badlands`) | Village Elder (village square, outside his house) | The Fearless Pair | Brave the Emberfall interior and put Cinderjaw to sleep. | 260 XP, 70 gold, 1 Healing Potion | chapter 4 done; the finale needs it |
+| 3 | Cinderjaw (`hunt_badlands`) | Badlands Prospector (camp by the southern ford; just past the crossing once it opens (hunt turned in at the Elder)) | The Fearless Pair | Brave the Emberfall caldera and put Cinderjaw to sleep, then tell the Village Elder. | 260 XP, 70 gold, 1 Healing Potion | chapter 4 done; the finale needs it |
 
 ### Chapter 5: Gloomfen Marsh
 
@@ -55,8 +55,8 @@ _The mouth at the end of the boardwalk._  -  companions: Luigi and Eden (the pai
 
 | # | Quest | Giver (where) | Gate (needs turned in) | Goal | Reward | Completing it unlocks |
 |---|---|---|---|---|---|---|
-| 1 | Laying the Boardwalk (`cross_gloomfen`) | Marsh Guide (camp by the western ford) | Cinderjaw | Gather 12 Wood | 210 XP, 35 gold, 1 Healing Potion | the western ford opens: Gloomfen Marsh and the sunken temple |
-| 2 | The Bogmaw (`hunt_gloomfen`) | Village Elder (village square, outside his house) | Laying the Boardwalk | Cross the new boardwalk into Gloomfen's depths and put the Bogmaw to sleep. | 300 XP, 80 gold, 1 Healing Potion | chapter 5 done; the finale needs it |
+| 1 | Laying the Boardwalk (`cross_gloomfen`) | Marsh Guide (camp by the western ford; just past the crossing once it opens (hunt turned in at the Elder)) | Cinderjaw | Gather 12 Wood | 210 XP, 35 gold, 1 Healing Potion | the western ford opens: Gloomfen Marsh and the sunken temple |
+| 2 | The Bogmaw (`hunt_gloomfen`) | Marsh Guide (camp by the western ford; just past the crossing once it opens (hunt turned in at the Elder)) | Laying the Boardwalk | Follow the boardwalk into Gloomfen's depths and put the Bogmaw to sleep, then tell the Village Elder. | 300 XP, 80 gold, 1 Healing Potion | chapter 5 done; the finale needs it |
 
 ### Chapter 6: The Ancient Warden
 
