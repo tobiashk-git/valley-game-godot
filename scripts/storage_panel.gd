@@ -36,28 +36,31 @@ func _subtitle() -> String:
 func _hint() -> String:
 	if tab == 0:
 		return "Tap something in the chest to take it out." + ("" if _is_bank() else " Or take all the loot at once.")
-	return "Tap something you carry to put it in the chest." + (" Or put every resource in at once." if _is_bank() else "")
+	return "Tap something you carry to put it in the chest." + (" Or put every resource and your gold in at once." if _is_bank() else "")
 
 func _is_bank() -> bool:
 	return storage_id == Inventory.BANK_CHEST
 
 # Carried RESOURCES: stackables that are neither gear, nor consumables, nor
-# gold, nor a quest item - what a dungeon run brings home for the bank.
+# a quest item - what a dungeon run brings home for the bank. Gold counts
+# (user, 2026-09-08): the bank's gold is spendable everywhere, and carried
+# gold is what a nap costs.
 func _carried_resources() -> Array:
 	var out: Array = []
 	for item_id in Inventory.backpack.keys():
-		if Inventory.backpack[item_id] > 0 and not Items.is_equippable(item_id) and not Items.is_usable(item_id) and item_id != "gold" and item_id != "magic_crystal":
+		if Inventory.backpack[item_id] > 0 and not Items.is_equippable(item_id) and not Items.is_usable(item_id) and item_id != "magic_crystal":
 			out.append(item_id)
 	return out
 
-# The bank's backpack tab: put every resource in at once (consumables, gold
-# and gear stay carried). A treasure chest's chest tab: take all the loot.
+# The bank's backpack tab: put every resource and the gold in at once
+# (consumables and gear stay carried). A treasure chest's chest tab: take
+# all the loot.
 func _bulk_label() -> String:
 	if tab == 1 and _is_bank():
 		var n := 0
 		for item_id in _carried_resources():
 			n += Inventory.backpack[item_id]
-		return "Deposit all resources (%d)" % n if n > 0 else ""
+		return "Deposit all resources and gold (%d)" % n if n > 0 else ""
 	if tab == 0 and not _is_bank():
 		var n := 0
 		for item_id in _chest_items().keys():
