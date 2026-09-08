@@ -142,7 +142,7 @@ func _initialize() -> void:
 	quests._complete_quest("hunt_verdantwood")
 	var xp_gained: bool = character.stats.level > level_before or character.stats.xp > xp_before
 	print("Turned in: completed, 60 gold and 220 XP paid, a potion granted, chapter 3 complete: ", quests.quest_state.hunt_verdantwood == "completed" and inventory.get_count("gold") == gold_before + 60 and xp_gained and inventory.get_count("healing_potion") == 1 and quests.chapter_state("verdantwood") == "complete" and quests.chapter_state("frostpeak") == "not_started" and quests.chapter_state("village") == "complete")
-	print("Turned in, the Druid goes back to her glade: ", druid.position == Vector2(world.place("druid_glade").x * 32 + 16, world.place("druid_glade").y * 32 + 16))
+	print("Turned in, the Druid stays past the crossing - the zone's side-quest giver from here on: ", druid.position != Vector2(world.place("druid_glade").x * 32 + 16, world.place("druid_glade").y * 32 + 16) and druid.position.x > east_ford.x * 32 + 16)
 
 	# --- chains and steps ---
 	print("Chains derive from the requirements: ford -> join -> hunt is a three-step chain, the hunt step 3 of 3, the ford step 1 of 3: ", quests.chain_of("hunt_frostpeak") == ["cross_frostpeak", "join_luigi", "hunt_frostpeak"] and quests.step_of("hunt_frostpeak") == [3, 3] and quests.step_of("cross_frostpeak") == [1, 3] and quests.prev_of("hunt_frostpeak") == "join_luigi" and quests.next_of("cross_frostpeak") == ["join_luigi"])

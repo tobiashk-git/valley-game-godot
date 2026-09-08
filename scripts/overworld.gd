@@ -191,10 +191,11 @@ func _on_quests_changed() -> void:
 	_place_companions()
 	_place_guides()
 
-# The Ranger and the Druid step across once their ford opens (user,
-# 2026-09-08): they stand a few tiles past the crossing on the biome side,
-# off the path, so the hunt is found on the way in rather than missed back
-# in the village; they go home to their camps once the hunt is turned in.
+# The four guides step across once their ford opens (user, 2026-09-08):
+# they stand a few tiles past the crossing on the biome side, off the path,
+# so the hunt is found on the way in rather than missed back in the
+# village - and they STAY there: from that spot they are each zone's main
+# side-quest giver (the Druid's Thornback hunt today, more lines to come).
 var _ranger: StaticBody2D
 var _druid: StaticBody2D
 var _prospector: StaticBody2D
@@ -210,17 +211,13 @@ func _guide_spot(zone: int) -> Vector2i:
 func _place_guides() -> void:
 	var done := func(id: String) -> bool: return Quests.quest_state.get(id, "") == "completed"
 	if _ranger != null:
-		var out: bool = done.call("cross_frostpeak") and not done.call("hunt_frostpeak")
-		_ranger.position = _tile_center(_guide_spot(World.Zone.FROSTPEAK) if out else World.place("ranger_camp"))
+		_ranger.position = _tile_center(_guide_spot(World.Zone.FROSTPEAK) if done.call("cross_frostpeak") else World.place("ranger_camp"))
 	if _druid != null:
-		var out: bool = done.call("cross_verdantwood") and not done.call("hunt_verdantwood")
-		_druid.position = _tile_center(_guide_spot(World.Zone.VERDANTWOOD) if out else World.place("druid_glade"))
+		_druid.position = _tile_center(_guide_spot(World.Zone.VERDANTWOOD) if done.call("cross_verdantwood") else World.place("druid_glade"))
 	if _prospector != null:
-		var out: bool = done.call("cross_badlands") and not done.call("hunt_badlands")
-		_prospector.position = _tile_center(_guide_spot(World.Zone.BADLANDS) if out else World.place("prospector_camp"))
+		_prospector.position = _tile_center(_guide_spot(World.Zone.BADLANDS) if done.call("cross_badlands") else World.place("prospector_camp"))
 	if _guide != null:
-		var out: bool = done.call("cross_gloomfen") and not done.call("hunt_gloomfen")
-		_guide.position = _tile_center(_guide_spot(World.Zone.GLOOMFEN) if out else World.place("marsh_guide"))
+		_guide.position = _tile_center(_guide_spot(World.Zone.GLOOMFEN) if done.call("cross_gloomfen") else World.place("marsh_guide"))
 
 # --- Companions on the map (2026-09-07). Where Luigi and Eden stand follows
 # the story (quests.gd: the joining events). "With Oliver" = off the map.
