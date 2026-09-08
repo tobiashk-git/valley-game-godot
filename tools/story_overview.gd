@@ -23,7 +23,8 @@ const WHERE := {
 # What completing a quest changes in the world (quests.gd _complete_quest and friends).
 const UNLOCKS := {
 	"meet_villagers": "the village gates open - the valley (Golden Plains); the dungeon and castle gates stay barred",
-	"gather_wood": "nothing in the world - the Elder's first errand (potion reward); leads to the barrow",
+	"gather_wood": "nothing in the world - the Elder's first errand (potion reward); leads to the bank lesson",
+	"bank_gold": "nothing in the world - the bank lesson (the house chest is safe and spendable everywhere); leads to the barrow",
 	"hunt_barrow": "chapter 1's dungeon lesson done; the Elder unbars the old dungeon next",
 	"hunt_dungeon": "Magic Crystal 1 in the pack; the northern ford quest becomes available",
 	"hunt_castle": "Magic Crystal 2 in the pack; the altar step becomes available",

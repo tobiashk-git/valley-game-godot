@@ -105,10 +105,26 @@ const QUEST_DEFS := {
 	# Elder's reason to open the fords. The Elder gives all of it; the Trader
 	# is a shop again. The dungeon gate stays barred until The Bone Lord is
 	# handed out (portal.gd lock_quest), the castle's until The Royal Wraith.
+	# The bank lesson (user, 2026-09-08): before the barrow the Elder has
+	# Oliver put the wood errand's gold in the house chest - what is banked
+	# is safe from a nap and spendable everywhere. Objective type "bank".
+	"bank_gold": {
+		"giver_name": "Village Elder",
+		"name": "A Safe Place",
+		"line": "story", "chapter": "village", "requires": ["gather_wood"],
+		"objective": {"type": "bank", "item_id": "gold", "amount": 20, "goal": "Put at least 20 gold in the chest in your house, then come back to the Elder."},
+		"reward": {"xp": 30},
+		"dialogue": {
+			"offer": "Before you go anywhere dangerous, a word about your gold. There's a chest in your house, by the bed - put your coin and your spare goods in it. Whatever's in that chest is safe: a nap can't lose it, and the Trader, the Blacksmith and I can all draw on it wherever you are. Go and bank the 20 gold I gave you, then come back.",
+			"in_progress": "The chest is in your house, by the bed. Put at least 20 gold in it - 'Deposit all' does it in one tap - and come back to me.",
+			"ready": "Banked? Good. That's a habit that will save you more than once. Now - about the barrow.",
+			"completed": "Keep banking what you bring home.",
+		},
+	},
 	"open_ancient_barrow": {
 		"giver_name": "Village Elder",
 		"name": "What Lies Beneath",
-		"line": "story", "chapter": "village", "requires": ["gather_wood"],
+		"line": "story", "chapter": "village", "requires": ["bank_gold"],
 		"objective": {"type": "gather", "item_id": "stone", "amount": 6, "goal": "Bring the Elder 6 Stone to shore up the barrow's collapsed entrance. Buy the leather set from the Trader while you gather."},
 		"reward": {"xp": 90, "gold": 40, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -494,6 +510,8 @@ func objective_met(quest_id: String) -> bool:
 		return true # settled the moment it is accepted
 	if objective.type == "flag":
 		return bool(GameState.world_progress.get(objective.flag, false))
+	if objective.type == "bank":
+		return Storage.get_count(Inventory.BANK_CHEST, objective.item_id) >= objective.amount
 	return false
 
 # e.g. "3/5 [icon] Wood" or "1/2 Villagers" - used by the offer-in-progress
@@ -528,6 +546,8 @@ func objective_progress_text(quest_id: String) -> String:
 		return "Ready to join"
 	if objective.type == "flag":
 		return "%d/1 %s" % [1 if bool(GameState.world_progress.get(objective.flag, false)) else 0, objective.get("label", "done")]
+	if objective.type == "bank":
+		return "%d/%d %s banked" % [min(Storage.get_count(Inventory.BANK_CHEST, objective.item_id), objective.amount), objective.amount, Items.get_item_name(objective.item_id)]
 	return ""
 
 # Called by npc.gd when the player interacts with a quest-giving NPC. Picks

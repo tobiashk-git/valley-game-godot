@@ -149,7 +149,7 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-	print("With the wood turned in the Elder moves straight on to the barrow (chapter 1 continues): ", dialogue_ui.text_label.text.begins_with("There's an old barrow"))
+	print("With the wood turned in the Elder moves straight on to the bank lesson (chapter 1 continues): ", dialogue_ui.text_label.text.begins_with("Before you go anywhere dangerous"))
 	print("...offered with Accept / Not now: ", dialogue_ui.actions_row.get_child_count() == 2)
 	Input.action_press("interact")
 	await process_frame

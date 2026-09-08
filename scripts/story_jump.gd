@@ -20,7 +20,7 @@ const CHAPTER_ORDER := ["village", "frostpeak", "verdantwood", "badlands", "gloo
 # Story quests completed on ENTERING each chapter (cumulative).
 const DONE_BY := {
 	"village": [],
-	"frostpeak": ["meet_villagers", "gather_wood", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon"],
+	"frostpeak": ["meet_villagers", "gather_wood", "bank_gold", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon"],
 	"verdantwood": ["cross_frostpeak", "join_luigi", "hunt_frostpeak"],
 	"badlands": ["cross_verdantwood", "join_eden", "hunt_verdantwood"],
 	"gloomfen": ["cross_badlands", "join_pair", "hunt_badlands"],

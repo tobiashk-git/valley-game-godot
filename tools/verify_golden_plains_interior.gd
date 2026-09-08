@@ -64,6 +64,7 @@ func _initialize() -> void:
 	# --- 2. Quest flow via the Village Elder on the square (2026-09-08: the
 	# barrow is chapter 1's teaching dungeon, given after the wood errand). ---
 	quests.quest_state["gather_wood"] = "completed"
+	quests.quest_state["bank_gold"] = "completed"
 	quests.npcs_met["village_elder"] = true
 	var trader_house: Node2D = load("res://scenes/Overworld.tscn").instantiate()
 	root.add_child(trader_house)

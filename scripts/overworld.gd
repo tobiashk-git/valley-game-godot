@@ -408,7 +408,7 @@ func _ready() -> void:
 	elder.npc_name = "Village Elder"
 	# The story line in chapter order; locked chapters are skipped by
 	# npc.active_quest(), so the biome hunts come in whatever order the fords open.
-	var elder_chain: Array[String] = ["meet_villagers", "gather_wood", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon", "hunt_frostpeak", "hunt_verdantwood", "hunt_badlands", "hunt_gloomfen", "hunt_castle", "two_guardians", "ancient_warden"]
+	var elder_chain: Array[String] = ["meet_villagers", "gather_wood", "bank_gold", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon", "hunt_frostpeak", "hunt_verdantwood", "hunt_badlands", "hunt_gloomfen", "hunt_castle", "two_guardians", "ancient_warden"]
 	elder.quest_ids = elder_chain
 	elder.npc_id = "village_elder"
 	elder.intro_text = "Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler."

@@ -31,7 +31,7 @@ func _initialize() -> void:
 	character.reset()
 
 	# --- the order of things ---
-	var chain: Array = ["meet_villagers", "gather_wood", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon", "cross_frostpeak", "join_luigi", "hunt_frostpeak", "cross_verdantwood", "join_eden", "hunt_verdantwood", "cross_badlands", "join_pair", "hunt_badlands", "cross_gloomfen", "hunt_gloomfen", "hunt_castle", "two_guardians", "ancient_warden"]
+	var chain: Array = ["meet_villagers", "gather_wood", "bank_gold", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon", "cross_frostpeak", "join_luigi", "hunt_frostpeak", "cross_verdantwood", "join_eden", "hunt_verdantwood", "cross_badlands", "join_pair", "hunt_badlands", "cross_gloomfen", "hunt_gloomfen", "hunt_castle", "two_guardians", "ancient_warden"]
 	var in_order := true
 	for i in range(chain.size()):
 		var id: String = chain[i]
@@ -44,9 +44,17 @@ func _initialize() -> void:
 				in_order = false
 				print("  offered too early: ", later, " while ", id, " is open")
 		quests.quest_state[id] = "completed"
-	print("The nineteen story steps are offered one at a time, each only once the one before is turned in: ", in_order)
-	print("The barrow quest is the Elder's now, in chapter 1, after the wood errand; the Trader is a shop: ", quests.QUEST_DEFS.open_ancient_barrow.giver_name == "Village Elder" and quests.chapter_of("open_ancient_barrow") == "village" and quests.requires_of("open_ancient_barrow") == ["gather_wood"] and quests.line_of("open_ancient_barrow") == "story")
-	print("Chapter 1 chain: meet, wood, barrow, Barrow Warden, Bone Lord - five steps: ", quests.chain_of("hunt_dungeon") == ["meet_villagers", "gather_wood", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon"])
+	print("The twenty story steps are offered one at a time, each only once the one before is turned in: ", in_order)
+	print("The barrow quest is the Elder's now, in chapter 1, after the bank lesson; the Trader is a shop: ", quests.QUEST_DEFS.open_ancient_barrow.giver_name == "Village Elder" and quests.chapter_of("open_ancient_barrow") == "village" and quests.requires_of("open_ancient_barrow") == ["bank_gold"] and quests.line_of("open_ancient_barrow") == "story")
+	print("Chapter 1 chain: meet, wood, bank, barrow, Barrow Warden, Bone Lord - six steps: ", quests.chain_of("hunt_dungeon") == ["meet_villagers", "gather_wood", "bank_gold", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon"])
+	quests.quest_state.bank_gold = "accepted"
+	var storage: Node = root.get_node("Storage")
+	storage.reset()
+	var bank_before: bool = quests.objective_met("bank_gold")
+	storage.add_item(inventory.BANK_CHEST, "gold", 20)
+	print("The bank lesson is met by 20 gold in the house chest (0/20 then 20/20 Gold banked): ", not bank_before and quests.objective_met("bank_gold") and quests.objective_progress_text("bank_gold") == "20/20 Gold banked")
+	storage.reset()
+	quests.quest_state.erase("bank_gold")
 	print("Each ford needs the previous hunt: ", quests.requires_of("cross_frostpeak") == ["hunt_dungeon"] and quests.requires_of("cross_verdantwood") == ["hunt_frostpeak"] and quests.requires_of("cross_badlands") == ["hunt_verdantwood"] and quests.requires_of("cross_gloomfen") == ["hunt_badlands"])
 	print("The finale: the castle (needs the Bogmaw), then the altar (a flag objective), then the Warden: ", quests.requires_of("hunt_castle") == ["hunt_gloomfen"] and quests.QUEST_DEFS.two_guardians.objective.type == "flag" and quests.requires_of("two_guardians") == ["hunt_castle"] and quests.requires_of("ancient_warden") == ["two_guardians"])
 	quests.reset()
