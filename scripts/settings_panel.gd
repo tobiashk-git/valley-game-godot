@@ -28,7 +28,7 @@ const CONFIRM_SECONDS := 3.0
 @onready var quit_btn: Button = $Window/Rows/Game/QuitBtn
 
 var confirm_quit := false
-var mute_btn: CheckButton # "Mute all" above the sliders (built here, not in the scene)
+var mute_btn: Button # "Mute all" toggle above the sliders (built here, not in the scene)
 var _ignore_close_this_frame := false
 var _save_token := 0
 var _quit_token := 0
@@ -49,9 +49,10 @@ func _ready() -> void:
 		sfx_value.text = str(int(v)))
 	# One switch silences the game (the phone keeps its own volume); the
 	# sliders keep their values for when it comes back.
-	mute_btn = CheckButton.new()
+	mute_btn = Button.new()
 	mute_btn.name = "MuteBtn"
-	mute_btn.text = "Mute all"
+	mute_btn.toggle_mode = true
+	mute_btn.custom_minimum_size = Vector2(0, 40)
 	mute_btn.add_theme_font_size_override("font_size", 15)
 	mute_btn.toggled.connect(func(on: bool) -> void:
 		Audio.set_muted(on)
@@ -91,6 +92,8 @@ func _style_mute() -> void:
 	var dim: Color = Color(0.55, 0.55, 0.55, 1.0) if Audio.muted else Color.WHITE
 	for row in [music_slider.get_parent(), sfx_slider.get_parent()]:
 		row.modulate = dim
+	mute_btn.text = "Muted  -  tap to unmute" if Audio.muted else "Mute all"
+	mute_btn.theme_type_variation = &"PrimaryButton" if Audio.muted else &"SecondaryButton"
 
 func refresh() -> void:
 	mute_btn.set_pressed_no_signal(Audio.muted)
