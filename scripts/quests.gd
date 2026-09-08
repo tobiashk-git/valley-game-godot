@@ -156,7 +156,7 @@ const QUEST_DEFS := {
 		"dialogue": {
 			"offer": "There's an old dungeon under the north road, and I've had its gate unbarred for you. A Bone Lord walks its halls, and it guards a Magic Crystal - the first of two the altar needs. Put it to sleep and bring the crystal home.",
 			"in_progress": "The Bone Lord still walks the dungeon. There's more bone in it than the Warden had - keep potions on you.",
-			"ready": "The crystal! Keep it safe. With that in hand I'll ask the Ranger to open the northern ford.",
+			"ready": "The crystal! Keep it safe. And that pick it was hoarding - frost shard on the head, that is; you'll see more of that up the ridge. With the crystal in hand I'll ask the Ranger to open the northern ford.",
 			"completed": "The Bone Lord sleeps. The fords are next.",
 		},
 	},

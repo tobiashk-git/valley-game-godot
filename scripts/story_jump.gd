@@ -37,7 +37,7 @@ const FORDS_BY := {"verdantwood": "frostpeak", "badlands": "verdantwood", "gloom
 # Level and full set on entering the chapter (weapon first).
 const KIT := {
 	"village": {"level": 1, "gear": []},
-	"frostpeak": {"level": 3, "gear": ["wooden_pickaxe", "leather_armor", "leather_cap", "leather_greaves", "leather_boots", "leather_gloves"]},
+	"frostpeak": {"level": 3, "gear": ["frost_pick", "leather_armor", "leather_cap", "leather_greaves", "leather_boots", "leather_gloves"]}, # the Bone Lord drops the Frost Pick
 	"verdantwood": {"level": 5, "gear": ["frost_pick", "frostweave_coat", "frost_helm", "frost_greaves", "frost_boots", "frost_gloves"]},
 	"badlands": {"level": 8, "gear": ["ironwood_blade", "ironwood_mail", "ironwood_helm", "ironwood_greaves", "ironwood_boots", "ironwood_gloves"]},
 	"gloomfen": {"level": 10, "gear": ["ember_blade", "ember_plate", "ember_helm", "ember_greaves", "ember_boots", "ember_gloves"]},

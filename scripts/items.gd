@@ -30,7 +30,7 @@ const ITEMS := {
 	# Boss-exclusive - no recipe in crafting.gd, only obtainable as a drop.
 	# Sellable for a nice payout (like the plan's boss-drop pricing), but
 	# never appears in Shop.SHOP_STOCK to buy.
-	"bone_greatsword": {"name": "Bone Greatsword", "icon": "🗡️", "slot": "weapon", "attack": 6, "value": 100, "desc": "Hewn from the Bone Lord's own femur. Unnervingly light for its size."},
+	"bone_greatsword": {"name": "Bone Greatsword", "icon": "🗡️", "slot": "weapon", "attack": 6, "value": 100, "desc": "Hewn from the Bone Lord's own femur. Unnervingly light for its size."}, # no longer dropped (the Bone Lord gives the Frost Pick); kept for old saves
 	"royal_plate": {"name": "Royal Plate", "icon": "🛡️", "slot": "armor", "layer": "res://assets/armour_layers/royal_plate.png", "defense": 8, "value": 130, "desc": "The Royal Wraith's ceremonial plate, still faintly cold to the touch."},
 	# Quest item for the altar/world-advance loop - deliberately no "value"
 	# (not sellable), no "slot"/"effect" (not equippable or usable).

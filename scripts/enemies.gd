@@ -170,7 +170,9 @@ const BOSSES := {
 		# leather armour alone 0%, the full set 100%.
 		"max_hp": 105, "attack": 8, "defense": 3, "gold_min": 40, "gold_max": 60,
 		"status_attack": {"status": "paralysis", "chance": 0.2},
-		"drop_item_ids": ["bone_greatsword", "magic_crystal"],
+		# The Frost Pick, not the old greatsword (2026-09-08, user: +6 made the
+		# next two weapon tiers redundant); it also introduces the frost gear.
+		"drop_item_ids": ["frost_pick", "magic_crystal"],
 	},
 	"castle_boss": {
 		"name": "Royal Wraith", "sprite": "res://assets/enemies/art/castle_boss.png", "art_height": 96,

@@ -95,7 +95,7 @@ _The castle's crystal, the altar, and what sleeps beneath the valley._  -  compa
 
 | Boss | Where | HP / attack / defence | Drops | Companions | Quest that wants it |
 |---|---|---|---|---|---|
-| Bone Lord (`dungeon_boss`) | old dungeon | 105 / 8 / 3 | bone_greatsword, magic_crystal | nobody | The Bone Lord |
+| Bone Lord (`dungeon_boss`) | old dungeon | 105 / 8 / 3 | frost_pick, magic_crystal | nobody | The Bone Lord |
 | Royal Wraith (`castle_boss`) | castle | 156 / 18 / 4 | royal_plate, magic_crystal | luigi, eden | The Royal Wraith |
 | Glacial Revenant (`frostpeak_boss`) | ice caves | 88 / 14 / 4 | healing_potion | luigi | The Glacial Revenant |
 | Elder Bramblewood (`verdantwood_boss`) | Verdantwood grove | 117 / 16 / 4 | healing_potion | eden | Elder Bramblewood |
