@@ -190,15 +190,23 @@ const QUEST_DEFS := {
 			"completed": "Frostpeak, pup. Stay behind me and mind the ice.",
 		},
 	},
+	# The biome hunts of chapters 2 and 3 are handed out IN THE FIELD (user,
+	# 2026-09-08: the player is already past the ford and would miss an offer
+	# back in the village): the Ranger / the Druid give them, standing just
+	# past the crossing once it opens (overworld._place_guides), and the
+	# Elder takes the turn-in - giver_id / turn_in_id tell npc.gd who offers
+	# and who shows the "?"; "send_on" is the giver's line once the boss sleeps.
 	"hunt_frostpeak": {
-		"giver_name": "Village Elder",
+		"giver_name": "Frostpeak Ranger", "giver_id": "frostpeak_ranger",
+		"turn_in_name": "Village Elder", "turn_in_id": "village_elder",
 		"name": "The Glacial Revenant",
 		"line": "story", "chapter": "frostpeak", "requires": ["join_luigi"],
-		"objective": {"type": "defeat_bosses", "boss_ids": ["frostpeak_boss"], "label": "Glacial Revenant asleep", "goal": "Find the ice caves beyond the northern ford and put the Glacial Revenant to sleep."},
+		"objective": {"type": "defeat_bosses", "boss_ids": ["frostpeak_boss"], "label": "Glacial Revenant asleep", "goal": "Find the ice caves up the ridge and put the Glacial Revenant to sleep, then tell the Village Elder."},
 		"reward": {"xp": 180, "gold": 50, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
-			"offer": "The ford's open, but Frostpeak isn't safe yet - something haunts the ice caves up there. The Ranger calls it the Glacial Revenant. Put it to sleep and the ridge is ours again.",
+			"offer": "The ford holds and you've a hound at your side - good. Something haunts the ice caves up the ridge; the old hands call it the Glacial Revenant. Put it to sleep, then tell the Elder in the village - he'll want to hear it from you.",
 			"in_progress": "The Revenant still walks the ice caves. Take a Frost set if you can forge one - the cold up there bites.",
+			"send_on": "It sleeps? Then go and tell the Elder - he keeps the count of these things.",
 			"ready": "The Revenant sleeps? Then Frostpeak breathes easy tonight. Well done, traveler.",
 			"completed": "Frostpeak's quiet now, thanks to you.",
 		},
@@ -217,14 +225,16 @@ const QUEST_DEFS := {
 		},
 	},
 	"hunt_verdantwood": {
-		"giver_name": "Village Elder",
+		"giver_name": "Forest Druid", "giver_id": "forest_druid",
+		"turn_in_name": "Village Elder", "turn_in_id": "village_elder",
 		"name": "Elder Bramblewood",
 		"line": "story", "chapter": "verdantwood", "requires": ["join_eden"],
-		"objective": {"type": "defeat_bosses", "boss_ids": ["verdantwood_boss"], "label": "Elder Bramblewood asleep", "goal": "Go deep into Verdantwood's tangled interior and put Elder Bramblewood to sleep."},
+		"objective": {"type": "defeat_bosses", "boss_ids": ["verdantwood_boss"], "label": "Elder Bramblewood asleep", "goal": "Go deep into Verdantwood's tangled interior and put Elder Bramblewood to sleep, then tell the Village Elder."},
 		"reward": {"xp": 220, "gold": 60, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
-			"offer": "With the eastern crossing clear, the forest's rot can be reached at last. Something old and thorned sits at its heart - the Druid calls it Elder Bramblewood. Put it to sleep and the wood will heal.",
+			"offer": "The crossing's clear and Eden's with you. Something old and thorned sits at the heart of the wood - Elder Bramblewood. Put it to sleep, then tell the Elder in the village; he'll want to know the forest breathes again.",
 			"in_progress": "Bramblewood still chokes the forest's heart. Ironwood armour turns thorns, if the Blacksmith can make you some.",
+			"send_on": "The bramble sleeps? Go and tell the Elder - it's his village that's been holding its breath.",
 			"ready": "The old bramble sleeps? Then Verdantwood can grow green again. You have my thanks.",
 			"completed": "The forest's healing, thanks to you.",
 		},
@@ -554,21 +564,27 @@ func objective_progress_text(quest_id: String) -> String:
 # the right dialogue line + Accept/Turn In choices for the quest's current
 # state and shows it via DialogueUI - same one-frame-guard box every other
 # NPC already uses, just sometimes with buttons attached.
-func talk_to_giver(quest_id: String) -> void:
+# `npc_id` = who is talking: a quest with a separate turn-in NPC offers at
+# its giver, sends the player on ("send_on") once the objective is met, and
+# only the turn-in NPC shows the Turn In choice.
+func talk_to_giver(quest_id: String, npc_id: String = "") -> void:
 	var def: Dictionary = QUEST_DEFS[quest_id]
 	var state: String = quest_state.get(quest_id, "")
 	var dialogue_ui: Node = get_node("/root/DialogueUI")
+	var speaker: String = def.turn_in_name if (def.has("turn_in_name") and npc_id != "" and npc_id == def.get("turn_in_id", "")) else def.giver_name
 
 	if state == "completed":
-		dialogue_ui.show_dialogue(def.giver_name, def.dialogue.completed)
+		dialogue_ui.show_dialogue(speaker, def.dialogue.completed)
 	elif state == "accepted":
-		if objective_met(quest_id):
-			dialogue_ui.show_dialogue(def.giver_name, def.dialogue.ready, [
+		if objective_met(quest_id) and takes_turn_in(quest_id, npc_id):
+			dialogue_ui.show_dialogue(speaker, def.dialogue.ready, [
 				{"label": "Turn In", "callback": _complete_quest.bind(quest_id)},
 				{"label": "Not yet", "callback": Callable()},
 			])
+		elif objective_met(quest_id):
+			dialogue_ui.show_dialogue(speaker, def.dialogue.get("send_on", def.dialogue.in_progress))
 		else:
-			dialogue_ui.show_dialogue(def.giver_name, "%s (%s)" % [def.dialogue.in_progress, objective_progress_text(quest_id)])
+			dialogue_ui.show_dialogue(speaker, "%s (%s)" % [def.dialogue.in_progress, objective_progress_text(quest_id)])
 	else:
 		dialogue_ui.show_dialogue(def.giver_name, def.dialogue.offer, [
 			{"label": "Accept", "callback": _accept_quest.bind(quest_id)},
@@ -597,6 +613,29 @@ func giver_label(quest_id: String) -> String:
 	var def: Dictionary = QUEST_DEFS[quest_id]
 	var giver: String = def.get("giver_name", "villagers")
 	return giver if def.get("giver_is_name", false) else "the " + giver
+
+# Where a quest is turned in - the giver unless it names someone else.
+func turn_in_label(quest_id: String) -> String:
+	var def: Dictionary = QUEST_DEFS[quest_id]
+	if def.has("turn_in_name"):
+		return def.turn_in_name if def.get("turn_in_is_name", false) else "the " + def.turn_in_name
+	return giver_label(quest_id)
+
+# The NPC that offers a quest ("" = whoever carries it in their chain) and
+# the one that takes its turn-in (the giver unless turn_in_id says otherwise).
+func giver_id_of(quest_id: String) -> String:
+	return QUEST_DEFS[quest_id].get("giver_id", "")
+
+func turn_in_id_of(quest_id: String) -> String:
+	return QUEST_DEFS[quest_id].get("turn_in_id", giver_id_of(quest_id))
+
+func offers(quest_id: String, npc_id: String) -> bool:
+	var g: String = giver_id_of(quest_id)
+	return g == "" or npc_id == "" or g == npc_id
+
+func takes_turn_in(quest_id: String, npc_id: String) -> bool:
+	var t: String = turn_in_id_of(quest_id)
+	return t == "" or npc_id == "" or t == npc_id
 
 # The joining event a companion (or the pair) needs before it comes along.
 func companion_joined(event_id: String) -> bool:

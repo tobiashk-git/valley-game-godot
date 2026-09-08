@@ -437,7 +437,7 @@ func refresh() -> void:
 	elif done:
 		quest_progress.text = "[color=#8ee07f]Completed[/color]"
 	elif Quests.objective_met(selected_quest):
-		quest_progress.text = "[color=#8ee07f]Ready to turn in!%s[/color]" % (" Go back to %s." % Quests.giver_label(selected_quest) if def.has("giver_name") else "")
+		quest_progress.text = "[color=#8ee07f]Ready to turn in!%s[/color]" % (" Go to %s." % Quests.turn_in_label(selected_quest) if def.has("giver_name") else "")
 	else:
 		quest_progress.text = "Progress: " + Quests.objective_progress_text(selected_quest)
 	quest_reward.text = reward_text(selected_quest)

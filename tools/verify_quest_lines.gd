@@ -11,6 +11,7 @@ extends SceneTree
 
 func _initialize() -> void:
 	var quests: Node = root.get_node("Quests")
+	var world: Node = root.get_node("World")
 	var game_state: Node = root.get_node("GameState")
 	var inventory: Node = root.get_node("Inventory")
 	var character: Node = root.get_node("Character")
@@ -96,12 +97,20 @@ func _initialize() -> void:
 	quests.quest_state.erase("join_eden")
 	print("With the Verdantwood event not done the Elder has nothing to offer and repeats his last closing line (no marker): ", elder.active_quest() == "hunt_dungeon" and elder.marker_kind() == "")
 	quests.quest_state.join_eden = "completed"
-	print("Eden's event done: he offers Elder Bramblewood: ", elder.active_quest() == "hunt_verdantwood" and elder.marker_kind() == "!")
+	print("Eden's event done: the DRUID offers Elder Bramblewood in the field; the Elder does not (he takes the turn-in): ", druid != null and druid.active_quest() == "hunt_verdantwood" and druid.marker_kind() == "!" and elder.active_quest() == "hunt_dungeon" and elder.marker_kind() == "")
+	print("The hunt's giver is the Druid, its turn-in the Elder: ", quests.giver_id_of("hunt_verdantwood") == "forest_druid" and quests.turn_in_id_of("hunt_verdantwood") == "village_elder" and quests.turn_in_label("hunt_verdantwood") == "the Village Elder" and quests.giver_label("hunt_verdantwood") == "the Forest Druid")
 
-	# --- accept a hunt through the Elder's dialogue, then beat the boss ---
+	# --- accept the hunt from the Druid past the ford, beat the boss, turn it in at the Elder ---
 	var player: CharacterBody2D = overworld.get_node("YSort/Player")
-	quests.npcs_met.village_elder = true # past the one-time intro
-	player.position = elder.position + Vector2(0, 20)
+	quests.npcs_met.village_elder = true # past the one-time intros
+	quests.npcs_met.forest_druid = true
+	game_state.biome_paths_open.verdantwood = true
+	quests.changed.emit()
+	await process_frame
+	var east_ford: Vector2i = world.BIOME_FORDS[world.Zone.VERDANTWOOD]
+	print("With the eastern ford open the Druid stands just past the crossing, on the forest side: ", druid.position.x > east_ford.x * 32 + 16 and absf(druid.position.y - (east_ford.y * 32 + 16)) <= 64.0)
+	player.position = druid.position + Vector2(0, 20)
+	player.get_node("Camera2D").reset_smoothing()
 	for i in range(3):
 		await physics_frame
 	await process_frame
@@ -110,21 +119,30 @@ func _initialize() -> void:
 	Input.action_release("interact")
 	await process_frame
 	await process_frame
-	var offer_ok: bool = dialogue_ui.is_open() and dialogue_ui.text_label.text.begins_with("With the eastern crossing clear")
+	var offer_ok: bool = dialogue_ui.is_open() and dialogue_ui.text_label.text.begins_with("The crossing's clear and Eden's with you")
 	var actions: Array = dialogue_ui.actions_row.get_children()
-	print("The Elder offers the hunt in his own words with Accept / Not now: ", offer_ok and actions.size() == 2 and actions[0].text == "Accept")
+	print("The Druid offers the hunt in her own words with Accept / Not now: ", offer_ok and actions.size() == 2 and actions[0].text == "Accept")
 	actions[0].pressed.emit()
 	await process_frame
 	print("Accepted: tracked, objective 0/1 Elder Bramblewood asleep, not met: ", quests.quest_state.get("hunt_verdantwood", "") == "accepted" and quests.tracked_quests.has("hunt_verdantwood") and quests.objective_progress_text("hunt_verdantwood") == "0/1 Elder Bramblewood asleep" and not quests.objective_met("hunt_verdantwood"))
-	print("Marker shows nothing while the boss is awake: ", elder.marker_kind() == "")
+	print("Markers show nothing while the boss is awake: ", elder.marker_kind() == "" and druid.marker_kind() == "")
 	game_state.boss_defeated.verdantwood_boss = true
-	print("Boss asleep: objective met, Elder shows '?': ", quests.objective_met("hunt_verdantwood") and elder.marker_kind() == "?")
+	print("Boss asleep: objective met, the Elder shows '?' and the Druid does not: ", quests.objective_met("hunt_verdantwood") and elder.marker_kind() == "?" and druid.marker_kind() == "")
+	Input.action_press("interact")
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	await process_frame
+	print("The Druid sends Oliver on to the Elder (no Turn In here): ", dialogue_ui.is_open() and dialogue_ui.text_label.text.begins_with("The bramble sleeps? Go and tell the Elder") and dialogue_ui.actions_row.get_child_count() == 0)
+	dialogue_ui.hide_dialogue()
+	await process_frame
 	var xp_before: int = character.stats.xp + 0
 	var gold_before: int = inventory.get_count("gold")
 	var level_before: int = character.stats.level
 	quests._complete_quest("hunt_verdantwood")
 	var xp_gained: bool = character.stats.level > level_before or character.stats.xp > xp_before
 	print("Turned in: completed, 60 gold and 220 XP paid, a potion granted, chapter 3 complete: ", quests.quest_state.hunt_verdantwood == "completed" and inventory.get_count("gold") == gold_before + 60 and xp_gained and inventory.get_count("healing_potion") == 1 and quests.chapter_state("verdantwood") == "complete" and quests.chapter_state("frostpeak") == "not_started" and quests.chapter_state("village") == "complete")
+	print("Turned in, the Druid goes back to her glade: ", druid.position == Vector2(world.place("druid_glade").x * 32 + 16, world.place("druid_glade").y * 32 + 16))
 
 	# --- chains and steps ---
 	print("Chains derive from the requirements: ford -> join -> hunt is a three-step chain, the hunt step 3 of 3, the ford step 1 of 3: ", quests.chain_of("hunt_frostpeak") == ["cross_frostpeak", "join_luigi", "hunt_frostpeak"] and quests.step_of("hunt_frostpeak") == [3, 3] and quests.step_of("cross_frostpeak") == [1, 3] and quests.prev_of("hunt_frostpeak") == "join_luigi" and quests.next_of("cross_frostpeak") == ["join_luigi"])
@@ -148,7 +166,7 @@ func _initialize() -> void:
 	print("Altar turned in: the Ancient Warden is offered next, finale in progress: ", quests.is_available("ancient_warden") and elder.active_quest() == "ancient_warden" and quests.chapter_state("finale") == "in_progress")
 
 	# --- side chains: the Druid's hunt and the Blacksmith's two steps ---
-	print("The Druid follows the ford with the Thornback hunt (side, needs the ford): ", druid != null and druid.quest_ids == ["cross_verdantwood", "thornback_warden"] and quests.line_of("thornback_warden") == "side" and quests.is_available("thornback_warden") and druid.active_quest() == "thornback_warden")
+	print("The Druid follows the ford with the Thornback hunt (side, needs the ford): ", druid != null and druid.quest_ids == ["cross_verdantwood", "hunt_verdantwood", "thornback_warden"] and quests.line_of("thornback_warden") == "side" and quests.is_available("thornback_warden") and druid.active_quest() == "thornback_warden")
 	overworld.queue_free()
 	await process_frame
 	var smithy: Node2D = load("res://scenes/BlacksmithHouse.tscn").instantiate()

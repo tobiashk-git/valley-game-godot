@@ -189,6 +189,30 @@ func _refresh_ford_bridges() -> void:
 func _on_quests_changed() -> void:
 	_repaint_open_paths()
 	_place_companions()
+	_place_guides()
+
+# The Ranger and the Druid step across once their ford opens (user,
+# 2026-09-08): they stand a few tiles past the crossing on the biome side,
+# off the path, so the hunt is found on the way in rather than missed back
+# in the village; they go home to their camps once the hunt is turned in.
+var _ranger: StaticBody2D
+var _druid: StaticBody2D
+const GUIDE_STEPS_IN := 3
+
+func _guide_spot(zone: int) -> Vector2i:
+	var ford: Vector2i = World.BIOME_FORDS[zone]
+	var inward := Vector2i(signi(World.WORLD_CENTER_X - ford.x), signi(World.WORLD_CENTER_Y - ford.y))
+	var perp := Vector2i(1, 0) if inward.y != 0 else Vector2i(0, 1)
+	return ford - inward * GUIDE_STEPS_IN + perp
+
+func _place_guides() -> void:
+	var done := func(id: String) -> bool: return Quests.quest_state.get(id, "") == "completed"
+	if _ranger != null:
+		var out: bool = done.call("cross_frostpeak") and not done.call("hunt_frostpeak")
+		_ranger.position = _tile_center(_guide_spot(World.Zone.FROSTPEAK) if out else World.place("ranger_camp"))
+	if _druid != null:
+		var out: bool = done.call("cross_verdantwood") and not done.call("hunt_verdantwood")
+		_druid.position = _tile_center(_guide_spot(World.Zone.VERDANTWOOD) if out else World.place("druid_glade"))
 
 # --- Companions on the map (2026-09-07). Where Luigi and Eden stand follows
 # the story (quests.gd: the joining events). "With Oliver" = off the map.
@@ -457,10 +481,12 @@ func _ready() -> void:
 	ranger.sprite_path = "res://assets/trader.png"
 	ranger.sprite_tint = Color(0.75, 0.88, 1.0, 1.0)
 	ranger.npc_name = "Frostpeak Ranger"
-	ranger.quest_id = "cross_frostpeak"
+	var ranger_chain: Array[String] = ["cross_frostpeak", "hunt_frostpeak"] # the ford, then the hunt (turned in at the Elder)
+	ranger.quest_ids = ranger_chain
 	ranger.npc_id = "frostpeak_ranger"
 	ranger.intro_text = "You made it this far? Frostpeak Ridge lies past that river to the north - the old ford's been washed out for ages, or I'd be up there myself."
 	ysort.add_child(ranger)
+	_ranger = ranger
 
 	# The Verdantwood ford-crossing quest giver stands in the valley near
 	# the ford itself, a few tiles off the direct crossing line so it
@@ -470,11 +496,13 @@ func _ready() -> void:
 	druid.sprite_path = "res://assets/elder.png"
 	druid.sprite_tint = Color(0.55, 0.75, 0.4, 1.0)
 	druid.npc_name = "Forest Druid"
-	var druid_chain: Array[String] = ["cross_verdantwood", "thornback_warden"] # the ford, then a side hunt
+	var druid_chain: Array[String] = ["cross_verdantwood", "hunt_verdantwood", "thornback_warden"] # the ford, the hunt (turned in at the Elder), then a side hunt
 	druid.quest_ids = druid_chain
 	druid.npc_id = "forest_druid"
 	druid.intro_text = "You've wandered far from the village. Verdantwood lies beyond that ford - if you can call it a ford anymore. The old crossing's overgrown; I could use a hand clearing it."
 	ysort.add_child(druid)
+	_druid = druid
+	_place_guides()
 
 	# The Badlands ford-crossing quest giver - same standalone pattern as the Druid.
 	var prospector: StaticBody2D = NPC_SCENE.instantiate()

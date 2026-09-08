@@ -25,9 +25,9 @@ _The ice caves beyond the northern ford._  -  companions: Luigi (after A Fearles
 
 | # | Quest | Giver (where) | Gate (needs turned in) | Goal | Reward | Completing it unlocks |
 |---|---|---|---|---|---|---|
-| 1 | Reinforcing the Ford (`cross_frostpeak`) | Frostpeak Ranger (camp by the northern ford) | The Bone Lord | Gather 8 Wood and 8 Stone | 120 XP, 35 gold, 1 Healing Potion | the northern ford opens (a bridge appears): Frostpeak Ridge and its ice caves; Luigi moves onto the ford |
+| 1 | Reinforcing the Ford (`cross_frostpeak`) | Frostpeak Ranger (camp by the northern ford; just past the crossing once it opens (hunt turned in at the Elder)) | The Bone Lord | Gather 8 Wood and 8 Stone | 120 XP, 35 gold, 1 Healing Potion | the northern ford opens (a bridge appears): Frostpeak Ridge and its ice caves; Luigi moves onto the ford |
 | 2 | A Fearless Friend (`join_luigi`) | Luigi the Fearless (village square; on a ford for his events) | Reinforcing the Ford | Luigi waits on the northern ford. Ask him along into Frostpeak. | 30 XP | Luigi walks with Oliver - Bite / Guard in Frostpeak fights |
-| 3 | The Glacial Revenant (`hunt_frostpeak`) | Village Elder (village square, outside his house) | A Fearless Friend | Find the ice caves beyond the northern ford and put the Glacial Revenant to sleep. | 180 XP, 50 gold, 1 Healing Potion | chapter 2 done; the finale needs it |
+| 3 | The Glacial Revenant (`hunt_frostpeak`) | Frostpeak Ranger (camp by the northern ford; just past the crossing once it opens (hunt turned in at the Elder)) | A Fearless Friend | Find the ice caves up the ridge and put the Glacial Revenant to sleep, then tell the Village Elder. | 180 XP, 50 gold, 1 Healing Potion | chapter 2 done; the finale needs it |
 
 ### Chapter 3: Verdantwood Forest
 
@@ -35,9 +35,9 @@ _The rot at the heart of the eastern wood._  -  companions: Eden (after A Small 
 
 | # | Quest | Giver (where) | Gate (needs turned in) | Goal | Reward | Completing it unlocks |
 |---|---|---|---|---|---|---|
-| 1 | Clearing the Crossing (`cross_verdantwood`) | Forest Druid (glade by the eastern ford) | The Glacial Revenant | Gather 12 Wood | 150 XP, 35 gold, 1 Healing Potion | the eastern ford opens: Verdantwood Forest, its maze and grove; Eden moves onto the ford (Luigi beside her) |
+| 1 | Clearing the Crossing (`cross_verdantwood`) | Forest Druid (glade by the eastern ford; just past the crossing once it opens (hunt turned in at the Elder)) | The Glacial Revenant | Gather 12 Wood | 150 XP, 35 gold, 1 Healing Potion | the eastern ford opens: Verdantwood Forest, its maze and grove; Eden moves onto the ford (Luigi beside her) |
 | 2 | A Small Loud Guide (`join_eden`) | Eden (village square; on the eastern ford for her event) | Clearing the Crossing | Eden waits on the eastern ford. Ask her along into Verdantwood. | 30 XP | Eden walks with Oliver - Scream / Shimmer in Verdantwood; Luigi goes home |
-| 3 | Elder Bramblewood (`hunt_verdantwood`) | Village Elder (village square, outside his house) | A Small Loud Guide | Go deep into Verdantwood's tangled interior and put Elder Bramblewood to sleep. | 220 XP, 60 gold, 1 Healing Potion | chapter 3 done; the finale needs it |
+| 3 | Elder Bramblewood (`hunt_verdantwood`) | Forest Druid (glade by the eastern ford; just past the crossing once it opens (hunt turned in at the Elder)) | A Small Loud Guide | Go deep into Verdantwood's tangled interior and put Elder Bramblewood to sleep, then tell the Village Elder. | 220 XP, 60 gold, 1 Healing Potion | chapter 3 done; the finale needs it |
 
 ### Chapter 4: Emberfall Badlands
 
@@ -74,7 +74,7 @@ _The castle's crystal, the altar, and what sleeps beneath the valley._  -  compa
 |---|---|---|---|---|---|
 | A Keen Edge (`forge_whetstone`) | Village Blacksmith (village, south-east house (workbench)) | The Bone Lord | Gather 6 Stone | 30 XP, 15 gold | nothing in the world (gold + XP); leads to Cold Iron |
 | Cold Iron (`forge_frost`) | Village Blacksmith (village, south-east house (workbench)) | A Keen Edge | Gather 2 Frost Shard | 80 XP, 40 gold, 1 Healing Potion | nothing in the world (potion + gold) |
-| The Thornback (`thornback_warden`) | Forest Druid (glade by the eastern ford) | Clearing the Crossing | Find the walled glade in Verdantwood's maze and put the Thornback Warden to sleep. | 120 XP, 30 gold | the Thornback's glade in the Verdantwood maze is cleared |
+| The Thornback (`thornback_warden`) | Forest Druid (glade by the eastern ford; just past the crossing once it opens (hunt turned in at the Elder)) | Clearing the Crossing | Find the walled glade in Verdantwood's maze and put the Thornback Warden to sleep. | 120 XP, 30 gold | the Thornback's glade in the Verdantwood maze is cleared |
 
 ## Places and how they open
 

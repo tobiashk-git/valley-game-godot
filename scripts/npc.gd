@@ -99,8 +99,8 @@ func active_quest() -> String:
 			return id
 		if state == "completed":
 			last_completed = id
-		elif quests.is_available(id):
-			return id
+		elif quests.is_available(id) and quests.offers(id, npc_id):
+			return id # (a quest given elsewhere - the Ranger's hunt - is not offered here)
 	return last_completed
 
 # "!" = a quest to offer, "?" = an accepted quest ready to turn in, else none.
@@ -111,8 +111,8 @@ func marker_kind() -> String:
 	var state: String = quests.quest_state.get(id, "")
 	if state == "":
 		return "!"
-	if state == "accepted" and quests.objective_met(id):
-		return "?"
+	if state == "accepted" and quests.objective_met(id) and quests.takes_turn_in(id, npc_id):
+		return "?" # only the turn-in NPC shows it
 	return ""
 
 func _refresh_marker() -> void:
@@ -163,10 +163,10 @@ func _process(_delta: float) -> void:
 	var live_quest: String = active_quest()
 	var quest_active: bool = live_quest != "" and quests.quest_state.get(live_quest, "") != "completed"
 	if quest_active:
-		quests.talk_to_giver(live_quest)
+		quests.talk_to_giver(live_quest, npc_id)
 	elif shop:
 		shop_panel.open()
 	elif live_quest != "":
-		quests.talk_to_giver(live_quest)
+		quests.talk_to_giver(live_quest, npc_id)
 	else:
 		dialogue_ui.show_dialogue(npc_name, dialogue_text)
