@@ -151,6 +151,32 @@ func _repaint_open_paths() -> void:
 	for zone in ZONE_KEYS:
 		if GameState.biome_paths_open[ZONE_KEYS[zone]]:
 			World.open_biome_path(tilemap, zone)
+	_refresh_ford_bridges()
+
+# River crossing art (2026-09-08, the user's Leonardo render): an open ford
+# draws a painted plank footbridge over its crossing tile - the ford tile
+# itself now looks like river, so the bridge is what marks the way. Upright
+# on the northern and southern fords (the river runs east-west there), a
+# quarter turn on the eastern and western ones. Drawn right after the tile
+# map, so walkers and the companions waiting on the ford pass over it.
+const FORD_BRIDGE := "res://assets/ford_bridge.png"
+
+func _refresh_ford_bridges() -> void:
+	if not ResourceLoader.exists(FORD_BRIDGE):
+		return
+	for zone in ZONE_KEYS:
+		var node_name := "FordBridge%d" % zone
+		if not GameState.biome_paths_open[ZONE_KEYS[zone]] or has_node(node_name):
+			continue
+		var bridge := Sprite2D.new()
+		bridge.name = node_name
+		bridge.texture = load(FORD_BRIDGE)
+		bridge.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		bridge.position = _tile_center(World.BIOME_FORDS[zone])
+		if zone == World.Zone.VERDANTWOOD or zone == World.Zone.GLOOMFEN:
+			bridge.rotation = PI / 2.0
+		add_child(bridge)
+		move_child(bridge, tilemap.get_index() + 1)
 
 func _on_quests_changed() -> void:
 	_repaint_open_paths()
