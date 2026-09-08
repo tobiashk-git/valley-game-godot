@@ -297,7 +297,9 @@ const QUEST_DEFS := {
 	"forge_whetstone": {
 		"giver_name": "Village Blacksmith",
 		"name": "A Keen Edge",
-		"line": "side", "requires": ["meet_villagers"],
+		# Waits for the Frostpeak chapter to open (the Bone Lord turned in):
+		# its follow-up wants frost shards (user, 2026-09-08).
+		"line": "side", "requires": ["hunt_dungeon"],
 		"objective": {"type": "gather", "item_id": "stone", "amount": 6},
 		"reward": {"xp": 30, "gold": 15},
 		"dialogue": {

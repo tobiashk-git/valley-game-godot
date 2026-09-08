@@ -54,12 +54,12 @@ func _initialize() -> void:
 	# --- gating ---
 	print("Meet the Village is the gateway: before it is turned in no ford, barrow or Blacksmith quest is offerable: ", not quests.is_available("cross_frostpeak") and not quests.is_available("open_ancient_barrow") and not quests.is_available("forge_whetstone") and quests.is_available("meet_villagers"))
 	quests.quest_state.meet_villagers = "completed"
-	print("After the tutorial only the wood errand and the Blacksmith open; no ford, no hunt (the story runs in order): ", quests.is_available("gather_wood") and quests.is_available("forge_whetstone") and not quests.is_available("cross_frostpeak") and not quests.is_available("cross_gloomfen") and not quests.is_available("open_ancient_barrow") and not quests.is_available("hunt_frostpeak"))
+	print("After the tutorial only the wood errand opens; no ford, no hunt, and not the Blacksmith yet (the story runs in order): ", quests.is_available("gather_wood") and not quests.is_available("forge_whetstone") and not quests.is_available("cross_frostpeak") and not quests.is_available("cross_gloomfen") and not quests.is_available("open_ancient_barrow") and not quests.is_available("hunt_frostpeak"))
 	for id in ["gather_wood", "open_ancient_barrow", "hunt_barrow"]:
 		quests.quest_state[id] = "completed"
 	print("The barrow arc: the Warden done, the Bone Lord is offered and the northern ford still is not: ", quests.is_available("hunt_dungeon") and not quests.is_available("cross_frostpeak"))
 	quests.quest_state.hunt_dungeon = "completed"
-	print("The Bone Lord done: the northern ford opens up, the other three fords wait for their chapters: ", quests.is_available("cross_frostpeak") and not quests.is_available("cross_verdantwood") and not quests.is_available("cross_badlands") and not quests.is_available("cross_gloomfen"))
+	print("The Bone Lord done: the northern ford opens up (and the Blacksmith's whetstone errand, whose follow-up wants frost shards), the other three fords wait for their chapters: ", quests.is_available("cross_frostpeak") and quests.is_available("forge_whetstone") and not quests.is_available("cross_verdantwood") and not quests.is_available("cross_badlands") and not quests.is_available("cross_gloomfen"))
 	for id in ["gather_wood", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon"]:
 		quests.quest_state.erase(id)
 	quests.quest_state.erase("meet_villagers")

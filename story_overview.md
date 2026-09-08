@@ -71,7 +71,7 @@ _The castle's crystal, the altar, and what sleeps beneath the valley._  -  compa
 
 | Quest | Giver (where) | Gate | Goal | Reward | Unlocks |
 |---|---|---|---|---|---|
-| A Keen Edge (`forge_whetstone`) | Village Blacksmith (village, south-east house (workbench)) | Meet the Village | Gather 6 Stone | 30 XP, 15 gold | nothing in the world (gold + XP); leads to Cold Iron |
+| A Keen Edge (`forge_whetstone`) | Village Blacksmith (village, south-east house (workbench)) | The Bone Lord | Gather 6 Stone | 30 XP, 15 gold | nothing in the world (gold + XP); leads to Cold Iron |
 | Cold Iron (`forge_frost`) | Village Blacksmith (village, south-east house (workbench)) | A Keen Edge | Gather 2 Frost Shard | 80 XP, 40 gold, 1 Healing Potion | nothing in the world (potion + gold) |
 | The Thornback (`thornback_warden`) | Forest Druid (glade by the eastern ford) | Clearing the Crossing | Find the walled glade in Verdantwood's maze and put the Thornback Warden to sleep. | 120 XP, 30 gold | the Thornback's glade in the Verdantwood maze is cleared |
 
