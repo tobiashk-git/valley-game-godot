@@ -45,25 +45,13 @@ func _initialize() -> void:
 	for i in range(3):
 		await process_frame
 
-	# --- Dismiss the one-time intro, then take and turn in the barrow quest
-	# (npc.gd gives an active quest priority over the shop). ---
+	# --- Dismiss the one-time intro; the Trader is a plain shop since the
+	# barrow quest moved to the Elder (2026-09-08). ---
 	var dialogue_ui: Node = root.get_node("DialogueUI")
 	await _press_e()
 	print("Intro shown first: ", dialogue_ui.text_label.text.begins_with("Welcome, welcome"))
 	await _press_e()
-	await _press_e()
-	var offer_actions: Array = dialogue_ui.actions_row.get_children()
-	offer_actions[0].pressed.emit() # Accept
-	await process_frame
-	inventory.add_item("stone", 6)
-	await _press_e()
-	var ready_actions: Array = dialogue_ui.actions_row.get_children()
-	ready_actions[0].pressed.emit() # Turn In
-	await process_frame
-	print("Barrow quest completed so the shop becomes reachable: ", quests.quest_state.get("open_ancient_barrow", "") == "completed")
-	# Reset to a clean slate (the reward gave 25 gold + a potion).
-	inventory.remove_item("gold", inventory.get_count("gold"))
-	inventory.remove_item("healing_potion", inventory.get_count("healing_potion"))
+	print("The Trader carries no quest (a shop from the first E after the intro): ", trader.quest_ids.is_empty() and trader.quest_id == "" and quests.quest_state.get("open_ancient_barrow", "") == "")
 
 	# --- Walk up + E opens the shop window. ---
 	await _press_e()

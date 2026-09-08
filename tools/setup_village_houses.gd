@@ -102,7 +102,7 @@ func _initialize() -> void:
 		],
 		[Vector2i(8, 1), Vector2i(8, 2)],
 		World.TRADER_HOUSE_ENTRANCE,
-		"open_ancient_barrow", true, "village_trader", # quest first, shop once it's done (npc.gd)
+		"", true, "village_trader", # a shop (the barrow quest moved to the Elder, 2026-09-08)
 		"Welcome, welcome! I'm the Village Trader - come back anytime you want to buy or sell.",
 		Color(1, 1, 1, 1), "res://assets/interiors/trader_shell.png", 3
 	)

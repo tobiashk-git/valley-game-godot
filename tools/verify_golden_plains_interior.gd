@@ -61,8 +61,11 @@ func _initialize() -> void:
 	overworld0.queue_free()
 	await process_frame
 
-	# --- 2. Quest flow via the Village Trader (TraderHouse) - also still a shop. ---
-	var trader_house: Node2D = load("res://scenes/TraderHouse.tscn").instantiate()
+	# --- 2. Quest flow via the Village Elder on the square (2026-09-08: the
+	# barrow is chapter 1's teaching dungeon, given after the wood errand). ---
+	quests.quest_state["gather_wood"] = "completed"
+	quests.npcs_met["village_elder"] = true
+	var trader_house: Node2D = load("res://scenes/Overworld.tscn").instantiate()
 	root.add_child(trader_house)
 	current_scene = trader_house
 	await process_frame
@@ -72,27 +75,18 @@ func _initialize() -> void:
 	var house_ysort: Node2D = trader_house.get_node("YSort")
 	var trader: Node = null
 	for child in house_ysort.get_children():
-		if child.get("npc_id") == "village_trader":
+		if child.get("npc_id") == "village_elder":
 			trader = child
-	print("Village Trader NPC found: ", trader != null)
+	print("Village Elder NPC found: ", trader != null)
 
 	house_player.position = trader.position + Vector2(0, 20)
+	house_player.get_node("Camera2D").reset_smoothing()
 	for i in range(3):
-		await process_frame
+		await physics_frame
+	await process_frame
+	print("The Elder holds the barrow quest after the wood errand: ", trader.active_quest() == "open_ancient_barrow")
 
-	# One-time intro first.
-	Input.action_press("interact")
-	await process_frame
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
-	print("Intro shown first: ", dialogue_ui.text_label.text.begins_with("Welcome, welcome"))
-	Input.action_press("interact")
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
-
-	# Quest offer takes priority over the shop while the quest is active.
+	# The offer.
 	Input.action_press("interact")
 	await process_frame
 	await process_frame
@@ -129,21 +123,23 @@ func _initialize() -> void:
 	ready_actions[0].pressed.emit()
 	await process_frame
 	print("Stone deducted: ", inventory.get_count("stone") == 0)
-	print("Gold granted: ", inventory.get_count("gold") == gold_before + 25)
+	print("Gold granted: ", inventory.get_count("gold") == gold_before + 40)
 	print("Potions granted: ", inventory.get_count("healing_potion") == potions_before + 1)
 	print("Quest marked completed: ", quests.quest_state.get("open_ancient_barrow", "") == "completed")
 	print("Golden Plains revealed flag set: ", game_state.world_progress.golden_plains_revealed == true)
 
-	# Now that the quest is completed, interacting should open the shop -
-	# confirms npc.gd's quest-active-before-shop priority correctly falls
-	# through once there's no active quest left to show.
+	# The Elder moves straight on to the Warden hunt.
 	Input.action_press("interact")
 	await process_frame
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-	print("Shop still opens once the quest is completed: ", shop_panel.is_open())
-	shop_panel.close()
+	print("With the barrow open the Elder offers The Barrow Warden (full leather, mind): ", trader.active_quest() == "hunt_barrow" and dialogue_ui.text_label.text.contains("Full leather"))
+	Input.action_press("interact")
+	await process_frame
+	Input.action_release("interact")
+	await process_frame
+	dialogue_ui.hide_dialogue()
 	await process_frame
 
 	root.remove_child(trader_house)
@@ -186,9 +182,10 @@ func _initialize() -> void:
 	print("Interior has TerrainLayer + FogLayer: ", terrain != null and fog != null)
 	player = interior.get_node("YSort/Player") # the scene change freed the Overworld's Player
 
-	# --- 5. Zero random encounters - a real regression check, not luck. ---
+	# --- 5. A few random encounters on new ground - the lesson of the place (2026-09-08). ---
 	player.position = interior._tile_center(interior._gen.spawn_tile)
 	await process_frame
+	combat._steps_since_encounter = 0 # count the new-ground steps the barrow feeds the encounter roll
 	var got_encounter := false
 	var directions := ["move_left", "move_right", "move_up", "move_down"]
 	for burst in range(30):
@@ -203,7 +200,8 @@ func _initialize() -> void:
 				break
 		Input.action_release(action)
 		await physics_frame
-	print("Zero random encounters exploring the interior: ", not got_encounter)
+	print("Exploring the barrow feeds the encounter roll on new ground (steps counted, or a fight broke out): ", got_encounter or (interior.explore_steps > 0 and combat._steps_since_encounter > 0))
+	await _clear_combat(combat)
 
 	# --- 6. Boss fight. ---
 	var boss: Node = null

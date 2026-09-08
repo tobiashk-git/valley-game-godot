@@ -45,10 +45,13 @@ func _initialize() -> void:
 	# picked up), Verdantwood ford accepted, the Blacksmith's first step done.
 	quests.quest_state.meet_villagers = "completed"
 	quests.quest_state.gather_wood = "completed"
+	quests.quest_state.open_ancient_barrow = "completed"
+	quests.quest_state.hunt_barrow = "completed"
+	quests.quest_state.hunt_dungeon = "completed"
 	quests.quest_state.cross_frostpeak = "completed"
 	quests.quest_state.cross_verdantwood = "accepted"
 	quests.quest_state.forge_whetstone = "completed"
-	quests.quest_state.open_ancient_barrow = "accepted"
+	quests.quest_state.thornback_warden = "accepted"
 	sheet.open("journal")
 	await process_frame
 	await process_frame
@@ -62,7 +65,7 @@ func _initialize() -> void:
 	var sections: Array = _sections(view)
 	print("Six chapter sections in order with their states (1 complete, 2 and 3 in progress, the rest untouched): ", sections.size() == 6 and sections[0] == "Chapter 1: The Valley  -  complete" and sections[1] == "Chapter 2: Frostpeak Ridge  -  in progress" and sections[2] == "Chapter 3: Verdantwood Forest  -  in progress" and sections[3] == "Chapter 4: Emberfall Badlands" and sections[5] == "Chapter 6: The Ancient Warden")
 	var rows: Array = _rows(view)
-	print("Rows in chapter and chain order, Luigi's joining event announced as the next step, no side quests here: ", rows == ["MeetVillagersRow", "GatherWoodRow", "CrossFrostpeakRow", "JoinLuigiRow", "CrossVerdantwoodRow"])
+	print("Rows in chapter and chain order, Luigi's joining event announced as the next step, no side quests here: ", rows == ["MeetVillagersRow", "GatherWoodRow", "OpenAncientBarrowRow", "HuntBarrowRow", "HuntDungeonRow", "CrossFrostpeakRow", "JoinLuigiRow", "CrossVerdantwoodRow"])
 	var join_row: Button = view.quest_list.get_node("JoinLuigiRow")
 	print("The announced step says where to get it and carries its step tag: ", join_row.get_node("Status").text == "See Luigi the Fearless" and join_row.get_node("Step").text == "Step 2 of 3" and view.quest_list.get_node("CrossFrostpeakRow").get_node("Step").text == "Step 1 of 3")
 	print("Untouched chapters show their blurb line: ", view.quest_list.get_children().any(func(c): return c is Label and String(c.text).strip_edges() == "Fires in the south."))
@@ -85,8 +88,8 @@ func _initialize() -> void:
 	await process_frame
 	sections = _sections(view)
 	rows = _rows(view)
-	print("Side tab: Active (the barrow), Available (Cold Iron, its first step done), Completed (A Keen Edge); nothing from the story: ", view.line_tab == "side" and sections == ["Active (1)", "Available (1)", "Completed (1)"] and rows == ["OpenAncientBarrowRow", "ForgeFrostRow", "ForgeWhetstoneRow"])
-	print("Single-action side quest has no step tag; the chain's steps do: ", not view.quest_list.get_node("OpenAncientBarrowRow").has_node("Step") and view.quest_list.get_node("ForgeFrostRow").get_node("Step").text == "Step 2 of 2")
+	print("Side tab: Active (the Thornback), Available (Cold Iron, its first step done), Completed (A Keen Edge); nothing from the story: ", view.line_tab == "side" and sections == ["Active (1)", "Available (1)", "Completed (1)"] and rows == ["ThornbackWardenRow", "ForgeFrostRow", "ForgeWhetstoneRow"])
+	print("Single-action side quest has no step tag; the chain's steps do: ", not view.quest_list.get_node("ThornbackWardenRow").has_node("Step") and view.quest_list.get_node("ForgeFrostRow").get_node("Step").text == "Step 2 of 2")
 	view.select_quest("forge_frost")
 	await process_frame
 	print("Cold Iron's pane: follows A Keen Edge, see the Blacksmith: ", view.quest_giver.text == "From the Village Blacksmith\nStep 2 of 2  -  follows A Keen Edge" and view.quest_list.get_node("ForgeFrostRow").get_node("Status").text == "See the Village Blacksmith")

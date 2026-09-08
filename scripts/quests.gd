@@ -46,7 +46,7 @@ const QUEST_DEFS := {
 	"cross_frostpeak": {
 		"giver_name": "Frostpeak Ranger",
 		"name": "Reinforcing the Ford",
-		"line": "story", "chapter": "frostpeak", "requires": ["meet_villagers"],
+		"line": "story", "chapter": "frostpeak", "requires": ["hunt_dungeon"],
 		"objective": {"type": "gather_multi", "items": [
 			{"item_id": "wood", "amount": 8},
 			{"item_id": "stone", "amount": 8},
@@ -62,7 +62,7 @@ const QUEST_DEFS := {
 	"cross_verdantwood": {
 		"giver_name": "Forest Druid",
 		"name": "Clearing the Crossing",
-		"line": "story", "chapter": "verdantwood", "requires": ["meet_villagers"],
+		"line": "story", "chapter": "verdantwood", "requires": ["hunt_frostpeak"],
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
 		"reward": {"xp": 150, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -75,7 +75,7 @@ const QUEST_DEFS := {
 	"cross_badlands": {
 		"giver_name": "Badlands Prospector",
 		"name": "Shoring Up the Crossing",
-		"line": "story", "chapter": "badlands", "requires": ["meet_villagers"],
+		"line": "story", "chapter": "badlands", "requires": ["hunt_verdantwood"],
 		"objective": {"type": "gather", "item_id": "stone", "amount": 12},
 		"reward": {"xp": 180, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -88,7 +88,7 @@ const QUEST_DEFS := {
 	"cross_gloomfen": {
 		"giver_name": "Marsh Guide",
 		"name": "Laying the Boardwalk",
-		"line": "story", "chapter": "gloomfen", "requires": ["meet_villagers"],
+		"line": "story", "chapter": "gloomfen", "requires": ["hunt_badlands"],
 		"objective": {"type": "gather", "item_id": "wood", "amount": 12},
 		"reward": {"xp": 210, "gold": 35, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
@@ -98,29 +98,57 @@ const QUEST_DEFS := {
 			"completed": "The boardwalk's holding, thanks to you.",
 		},
 	},
-	# The Golden Plains gating quest - unlike the 4 ford quests above, this
-	# doesn't open a river crossing (Golden Plains IS the valley, no river to
-	# cross). Reuses the Village Trader (previously shop-only) rather than a
-	# new standalone NPC - a lighter ask (6 items vs 8-12) and lighter reward
-	# than the ford quests, matching its "light gate" framing.
+	# --- Chapter 1's teaching arc (2026-09-08, the user's storyline pass):
+	# the Ancient Barrow is the FIRST dungeon - a few encounters, the fog, the
+	# chests and a boss the full leather set is needed for (the upgrade
+	# lesson) - then the old dungeon and its Bone Lord, whose crystal is the
+	# Elder's reason to open the fords. The Elder gives all of it; the Trader
+	# is a shop again. The dungeon gate stays barred until The Bone Lord is
+	# handed out (portal.gd lock_quest), the castle's until The Royal Wraith.
 	"open_ancient_barrow": {
-		"giver_name": "Village Trader",
+		"giver_name": "Village Elder",
 		"name": "What Lies Beneath",
-		"line": "side", "requires": ["meet_villagers"],
-		"objective": {"type": "gather", "item_id": "stone", "amount": 6},
-		"reward": {"xp": 90, "gold": 25, "item_id": "healing_potion", "item_amount": 1},
+		"line": "story", "chapter": "village", "requires": ["gather_wood"],
+		"objective": {"type": "gather", "item_id": "stone", "amount": 6, "goal": "Bring the Elder 6 Stone to shore up the barrow's collapsed entrance. Buy the leather set from the Trader while you gather."},
+		"reward": {"xp": 90, "gold": 40, "item_id": "healing_potion", "item_amount": 1},
 		"dialogue": {
-			"offer": "There's an old barrow at the edge of the valley - sealed for as long as anyone can remember. Bring me 6 Stone to clear the collapsed entrance and I'll show you where it lies.",
-			"in_progress": "Still need more stone to clear the barrow's entrance - what have you got?",
-			"ready": "That's enough. Let me show you where it opens up.",
-			"completed": "The old barrow's open now, thanks to you.",
+			"offer": "There's an old barrow at the edge of the valley - sealed for as long as anyone remembers. Bring me 6 Stone to shore up its collapsed entrance and I'll show you where it lies. And traveler: the Trader sells leather gear. Buy the whole set before you go down. Every piece.",
+			"in_progress": "Still need 6 Stone for the barrow's entrance. And get that leather from the Trader - armour, cap, greaves, boots, gloves. All of it.",
+			"ready": "That's enough stone. Let me show you where it opens up.",
+			"completed": "The old barrow's open. Mind yourself down there.",
+		},
+	},
+	"hunt_barrow": {
+		"giver_name": "Village Elder",
+		"name": "The Barrow Warden",
+		"line": "story", "chapter": "village", "requires": ["open_ancient_barrow"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["golden_plains_boss"], "label": "Barrow Warden asleep", "goal": "Go down into the Ancient Barrow, learn its ways, and put the Barrow Warden to sleep. Wear the whole leather set."},
+		"reward": {"xp": 100, "gold": 40, "item_id": "healing_potion", "item_amount": 1},
+		"dialogue": {
+			"offer": "The barrow's open. Something stirs at the bottom of it - the Barrow Warden, the old stories call it. Go down, find your feet, and put it to sleep. Full leather, mind: armour, cap, greaves, boots and gloves. The Trader has them all.",
+			"in_progress": "The Barrow Warden still stirs. If it keeps throwing you out, you're missing a piece of leather - the Trader stocks the lot.",
+			"ready": "The Warden sleeps? Then you've the makings of an adventurer. Rest up - I've something bigger for you.",
+			"completed": "The barrow's quiet now.",
+		},
+	},
+	"hunt_dungeon": {
+		"giver_name": "Village Elder",
+		"name": "The Bone Lord",
+		"line": "story", "chapter": "village", "requires": ["hunt_barrow"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["dungeon_boss"], "label": "Bone Lord asleep", "goal": "The old dungeon's gate is open. Put the Bone Lord to sleep and bring back the Magic Crystal it guards."},
+		"reward": {"xp": 150, "gold": 50, "item_id": "healing_potion", "item_amount": 1},
+		"dialogue": {
+			"offer": "There's an old dungeon under the north road, and I've had its gate unbarred for you. A Bone Lord walks its halls, and it guards a Magic Crystal - the first of two the altar needs. Put it to sleep and bring the crystal home.",
+			"in_progress": "The Bone Lord still walks the dungeon. There's more bone in it than the Warden had - keep potions on you.",
+			"ready": "The crystal! Keep it safe. With that in hand I'll ask the Ranger to open the northern ford.",
+			"completed": "The Bone Lord sleeps. The fords are next.",
 		},
 	},
 	# --- Story chapters (quest lines revamp, 2026-09-07). The Village Elder
 	# is the story voice: after each ford opens he sends Oliver after that
 	# biome's boss, and once all four sleep, after the two Guardians and the
-	# Ancient Warden. Fords stay open in any order (the hunts only require
-	# their own ford), so chapters 2-5 can be played in any order.
+	# Ancient Warden. Since the storyline pass (2026-09-08) the chapters run
+	# in order: each ford quest requires the previous chapter's hunt.
 	# --- Joining events (2026-09-07, user: "we would need a joining event").
 	# The companions follow the story: once a ford opens, the one who comes
 	# along for that biome waits ON the crossing (blocking it) with a "!";
@@ -224,17 +252,30 @@ const QUEST_DEFS := {
 			"completed": "Gloomfen's still now, thanks to you.",
 		},
 	},
-	"two_guardians": {
+	"hunt_castle": {
 		"giver_name": "Village Elder",
-		"name": "The Two Guardians",
-		"line": "story", "chapter": "finale", "requires": ["hunt_frostpeak", "hunt_verdantwood", "hunt_badlands", "hunt_gloomfen"],
-		"objective": {"type": "defeat_bosses", "boss_ids": ["dungeon_boss", "castle_boss"], "label": "Guardians asleep", "goal": "Put the Bone Lord in the old dungeon and the Royal Wraith in the castle to sleep, and bring their two crystals to the altar."},
+		"name": "The Royal Wraith",
+		"line": "story", "chapter": "finale", "requires": ["hunt_gloomfen"],
+		"objective": {"type": "defeat_bosses", "boss_ids": ["castle_boss"], "label": "Royal Wraith asleep", "goal": "The castle gate is unchained. Put the Royal Wraith to sleep and take the second Magic Crystal."},
 		"reward": {"xp": 300, "gold": 100},
 		"dialogue": {
-			"offer": "All four biomes sleep, but the valley's oldest trouble is still below us. Two Guardians keep the way to it - the Bone Lord in the dungeon and the Royal Wraith in the castle. Each holds a crystal. Bring both to the altar on the square.",
-			"in_progress": "The Guardians hold the crystals - the Bone Lord below the dungeon, the Royal Wraith in the castle. The altar needs both.",
-			"ready": "Both crystals? Then the altar will show you where the Ancient Warden hides. Steel yourself, traveler.",
-			"completed": "The Guardians sleep and the way is open.",
+			"offer": "All four biomes sleep, but the valley's oldest trouble is still below us. One crystal is in your pack; the other is in the castle, with the Royal Wraith. I've had the castle gate unchained. Take both your companions.",
+			"in_progress": "The Royal Wraith holds the castle - and the second crystal.",
+			"ready": "Both crystals! To the altar on the square, traveler - it will show us where the Warden hides.",
+			"completed": "The Wraith sleeps.",
+		},
+	},
+	"two_guardians": {
+		"giver_name": "Village Elder",
+		"name": "The Altar",
+		"line": "story", "chapter": "finale", "requires": ["hunt_castle"],
+		"objective": {"type": "flag", "flag": "final_boss_revealed", "label": "lair revealed", "goal": "Set both Magic Crystals on the altar on the village square."},
+		"reward": {"xp": 200, "gold": 100},
+		"dialogue": {
+			"offer": "The altar on the square has waited an age for those two crystals. Set them on it and watch.",
+			"in_progress": "The altar waits for the two crystals. Press E at it with both in your pack.",
+			"ready": "The altar has shown you the lair. Steel yourself, traveler.",
+			"completed": "The lair is known.",
 		},
 	},
 	"ancient_warden": {
@@ -298,12 +339,12 @@ const QUEST_DEFS := {
 # per biome (playable in any order - the fords are independent), then the
 # finale. The Journal groups story quests under these.
 const CHAPTERS := [
-	{"id": "village", "title": "Chapter 1: The Valley", "blurb": "A new face in a small settlement."},
+	{"id": "village", "title": "Chapter 1: The Valley", "blurb": "A new face, a barrow to learn in, and a crystal under the north road."},
 	{"id": "frostpeak", "title": "Chapter 2: Frostpeak Ridge", "blurb": "The ice caves beyond the northern ford."},
 	{"id": "verdantwood", "title": "Chapter 3: Verdantwood Forest", "blurb": "The rot at the heart of the eastern wood."},
 	{"id": "badlands", "title": "Chapter 4: Emberfall Badlands", "blurb": "Fires in the south."},
 	{"id": "gloomfen", "title": "Chapter 5: Gloomfen Marsh", "blurb": "The mouth at the end of the boardwalk."},
-	{"id": "finale", "title": "Chapter 6: The Ancient Warden", "blurb": "Two Guardians, two crystals, and what sleeps beneath the valley."},
+	{"id": "finale", "title": "Chapter 6: The Ancient Warden", "blurb": "The castle's crystal, the altar, and what sleeps beneath the valley."},
 ]
 
 # --- lines, chapters and chains ---
@@ -449,6 +490,8 @@ func objective_met(quest_id: String) -> bool:
 		return true
 	if objective.type == "join":
 		return true # settled the moment it is accepted
+	if objective.type == "flag":
+		return bool(GameState.world_progress.get(objective.flag, false))
 	return false
 
 # e.g. "3/5 [icon] Wood" or "1/2 Villagers" - used by the offer-in-progress
@@ -481,6 +524,8 @@ func objective_progress_text(quest_id: String) -> String:
 		return "%d/%d %s" % [asleep, objective.boss_ids.size(), objective.get("label", "bosses asleep")]
 	if objective.type == "join":
 		return "Ready to join"
+	if objective.type == "flag":
+		return "%d/1 %s" % [1 if bool(GameState.world_progress.get(objective.flag, false)) else 0, objective.get("label", "done")]
 	return ""
 
 # Called by npc.gd when the player interacts with a quest-giving NPC. Picks

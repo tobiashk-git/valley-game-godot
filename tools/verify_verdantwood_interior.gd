@@ -63,6 +63,7 @@ func _initialize() -> void:
 	var game_state: Node = root.get_node("GameState")
 	var quests: Node = root.get_node("Quests")
 	quests.quest_state["meet_villagers"] = "completed" # the gateway quest - every other quest waits for it
+	quests.quest_state["hunt_frostpeak"] = "completed" # the story runs in order (2026-09-08): this ford needs the previous chapter's hunt
 	var inventory: Node = root.get_node("Inventory")
 	var dialogue_ui: Node = root.get_node("DialogueUI")
 	var combat: Node = root.get_node("Combat")

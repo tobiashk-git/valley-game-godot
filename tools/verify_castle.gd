@@ -17,6 +17,7 @@ func _initialize() -> void:
 	var world_map_panel: Node = root.get_node("WorldMapPanel")
 
 	print("Castle undiscovered at boot: ", not game_state.discovered_pois.castle)
+	root.get_node("Quests").quest_state["hunt_castle"] = "accepted" # the gate is barred until the Elder hands this out (2026-09-08)
 
 	# --- Real portal path: walk to the castle entrance and press E. ---
 	var overworld_scene: PackedScene = load("res://scenes/Overworld.tscn")

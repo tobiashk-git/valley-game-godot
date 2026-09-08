@@ -100,7 +100,7 @@ func _spawn_prop(scene: PackedScene, tile_pos: Vector2i) -> Node2D:
 # assets/house.png) but the Elder's/Ranger's get their own roof-recoloured
 # variant. Every house PNG is exactly 123px tall, so the scene's baked
 # scale/offset keep working unchanged.
-func _add_entrance(prop_scene: PackedScene, entrance_tile: Vector2i, target_scene: String, target_spawn: Vector2, texture_path: String = "") -> void:
+func _add_entrance(prop_scene: PackedScene, entrance_tile: Vector2i, target_scene: String, target_spawn: Vector2, texture_path: String = "", lock_quest: String = "", locked_text: String = "") -> Area2D:
 	var prop: Node2D = _spawn_prop(prop_scene, entrance_tile)
 	if texture_path != "":
 		prop.get_node("Sprite2D").texture = load(texture_path)
@@ -109,7 +109,10 @@ func _add_entrance(prop_scene: PackedScene, entrance_tile: Vector2i, target_scen
 	portal.get_node("CollisionShape2D").shape.size = Vector2(56, 56)
 	portal.target_scene = target_scene
 	portal.target_spawn = target_spawn
+	portal.lock_quest = lock_quest
+	portal.locked_text = locked_text
 	add_child(portal)
+	return portal
 
 # Called once by Altar.gd the moment 2 Magic Crystals reveal it, and again
 # from _ready() on every later visit once GameState.world_progress already
@@ -379,8 +382,11 @@ func _ready() -> void:
 	# Dungeon.tscn/Castle.tscn/FinalBoss.tscn all regenerate their maze fresh
 	# every visit and always spawn the player at their own entrance, so the
 	# target_spawn passed here is unused.
-	_add_entrance(DUNGEON_ENTRANCE_SCENE, World.place("dungeon"), "res://scenes/Dungeon.tscn", Vector2.ZERO)
-	_add_entrance(CASTLE_ENTRANCE_SCENE, World.place("castle"), "res://scenes/Castle.tscn", Vector2.ZERO)
+	# Barred until the Elder hands out their hunts (chapter 1 / the finale).
+	var dungeon_portal: Area2D = _add_entrance(DUNGEON_ENTRANCE_SCENE, World.place("dungeon"), "res://scenes/Dungeon.tscn", Vector2.ZERO, "", "hunt_dungeon", "The old gate is barred with iron and rune. The Village Elder might know how to get it open.")
+	dungeon_portal.name = "DungeonPortal"
+	var castle_portal: Area2D = _add_entrance(CASTLE_ENTRANCE_SCENE, World.place("castle"), "res://scenes/Castle.tscn", Vector2.ZERO, "", "hunt_castle", "The castle gate is chained shut. The Village Elder might know how to get it open.")
+	castle_portal.name = "CastlePortal"
 	# No conditional gating needed here - the closed ford (see biome_paths_open
 	# above) already physically blocks reaching this entrance until the
 	# cross_frostpeak quest opens it.
@@ -402,7 +408,7 @@ func _ready() -> void:
 	elder.npc_name = "Village Elder"
 	# The story line in chapter order; locked chapters are skipped by
 	# npc.active_quest(), so the biome hunts come in whatever order the fords open.
-	var elder_chain: Array[String] = ["meet_villagers", "gather_wood", "hunt_frostpeak", "hunt_verdantwood", "hunt_badlands", "hunt_gloomfen", "two_guardians", "ancient_warden"]
+	var elder_chain: Array[String] = ["meet_villagers", "gather_wood", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon", "hunt_frostpeak", "hunt_verdantwood", "hunt_badlands", "hunt_gloomfen", "hunt_castle", "two_guardians", "ancient_warden"]
 	elder.quest_ids = elder_chain
 	elder.npc_id = "village_elder"
 	elder.intro_text = "Ah, a new face! I'm the Village Elder - I look after this little settlement. Good to meet you, traveler."

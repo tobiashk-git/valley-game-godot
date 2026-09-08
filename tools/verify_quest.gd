@@ -149,8 +149,8 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("interact")
 	await process_frame
-	print("Completed text shown: ", dialogue_ui.text_label.text.begins_with("Thanks again"))
-	print("No buttons on completed dialogue: ", dialogue_ui.actions_row.get_children().is_empty())
+	print("With the wood turned in the Elder moves straight on to the barrow (chapter 1 continues): ", dialogue_ui.text_label.text.begins_with("There's an old barrow"))
+	print("...offered with Accept / Not now: ", dialogue_ui.actions_row.get_child_count() == 2)
 	Input.action_press("interact")
 	await process_frame
 	Input.action_release("interact")
@@ -164,14 +164,17 @@ func _initialize() -> void:
 	await process_frame
 	Input.action_release("toggle_quests")
 	await process_frame
+	journal.show_completed = true # completed quests hide behind "Show done" (2026-09-08)
+	journal.refresh()
+	await process_frame
 	var done_row: Button = journal.quest_list.get_node("GatherWoodRow")
 	# The Story sub-tab groups by chapter (quest lines revamp): the row stays
-	# under Chapter 1, whose header now reads complete.
+	# under Chapter 1, which now runs on to the barrow (in progress).
 	var chapter_header_index := -1
 	for child in journal.quest_list.get_children():
-		if child is Label and child.text.begins_with("Chapter 1") and child.text.ends_with("complete"):
+		if child is Label and child.text.begins_with("Chapter 1") and child.text.ends_with("in progress"):
 			chapter_header_index = child.get_index()
-	print("Journal shows it Completed under a complete Chapter 1 (not tracked): ", done_row.get_node("Status").text == "Completed" and chapter_header_index >= 0 and done_row.get_index() > chapter_header_index and not done_row.get_node("Name").text.ends_with("(tracked)"))
+	print("Journal shows it Completed under Chapter 1, still in progress (not tracked): ", done_row.get_node("Status").text == "Completed" and chapter_header_index >= 0 and done_row.get_index() > chapter_header_index and not done_row.get_node("Name").text.ends_with("(tracked)"))
 	done_row.pressed.emit()
 	await process_frame
 	print("Completed quest has no Track button in the pane: ", journal.selected_quest == "gather_wood" and not journal.track_btn.visible and journal.quest_progress.text.contains("Completed"))

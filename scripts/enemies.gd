@@ -166,7 +166,9 @@ func pick_random_id_for_zone(zone: int) -> String:
 const BOSSES := {
 	"dungeon_boss": {
 		"name": "Bone Lord", "sprite": "res://assets/enemies/art/dungeon_boss.png", "art_height": 92,
-		"max_hp": 60, "attack": 8, "defense": 3, "gold_min": 40, "gold_max": 60,
+		# Chapter 1's last step at ~L3 in leather (2026-09-08, sim --barrow):
+		# leather armour alone 0%, the full set 100%.
+		"max_hp": 105, "attack": 8, "defense": 3, "gold_min": 40, "gold_max": 60,
 		"status_attack": {"status": "paralysis", "chance": 0.2},
 		"drop_item_ids": ["bone_greatsword", "magic_crystal"],
 	},
@@ -238,7 +240,9 @@ const BOSSES := {
 	# No magic_crystal drop, same rule as every non-Guardian boss.
 	"golden_plains_boss": {
 		"name": "The Barrow Warden", "sprite": "res://assets/enemies/art/golden_plains_boss.png", "art_height": 92,
-		"max_hp": 40, "attack": 5, "defense": 2, "gold_min": 25, "gold_max": 40,
+		# Chapter 1's lesson (2026-09-08, sim --barrow): no armour 0%, leather
+		# armour alone 8%, the full leather set 100% at level 2.
+		"max_hp": 80, "attack": 9, "defense": 2, "gold_min": 25, "gold_max": 40,
 		"drop_item_ids": ["healing_potion"],
 	},
 	# The two Guardians' crystals reveal this one's hiding place (see

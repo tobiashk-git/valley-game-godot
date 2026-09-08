@@ -39,7 +39,7 @@ func _initialize() -> void:
 		for req in quests.requires_of(id):
 			if not quests.QUEST_DEFS.has(req):
 				shape_ok = false
-	print("Six chapters in order (village, four biomes, finale); every quest is story or side, story quests in a chapter, requirements all real quests (", story_count, " story / ", side_count, " side): ", chapter_ids == ["village", "frostpeak", "verdantwood", "badlands", "gloomfen", "finale"] and shape_ok and story_count == 15 and side_count == 4)
+	print("Six chapters in order (village, four biomes, finale); every quest is story or side, story quests in a chapter, requirements all real quests (", story_count, " story / ", side_count, " side): ", chapter_ids == ["village", "frostpeak", "verdantwood", "badlands", "gloomfen", "finale"] and shape_ok and story_count == 19 and side_count == 3)
 	var chapter_ok := true
 	var joins: Dictionary = {"frostpeak": ["join_luigi"], "verdantwood": ["join_eden"], "badlands": ["join_pair"]}
 	for c in ["frostpeak", "verdantwood", "badlands", "gloomfen"]:
@@ -47,12 +47,21 @@ func _initialize() -> void:
 		ids.sort()
 		if ids != ["cross_" + c, "hunt_" + c] + joins.get(c, []):
 			chapter_ok = false
-	print("Each biome chapter is its ford quest, its companion's joining event (none for Gloomfen) and its hunt; the finale is the Guardians then the Warden: ", chapter_ok and quests.chapter_quests("finale").size() == 2 and quests.chain_of("two_guardians") == ["two_guardians", "ancient_warden"])
+	var village: Array = quests.chapter_quests("village")
+	village.sort()
+	print("Each biome chapter is its ford quest, its companion's joining event (none for Gloomfen) and its hunt; chapter 1 is meet, wood, barrow, Warden, Bone Lord; the finale is the Wraith, the altar, the Warden: ", chapter_ok and village == ["gather_wood", "hunt_barrow", "hunt_dungeon", "meet_villagers", "open_ancient_barrow"] and quests.chain_of("two_guardians") == ["hunt_castle", "two_guardians", "ancient_warden"])
 
 	# --- gating ---
 	print("Meet the Village is the gateway: before it is turned in no ford, barrow or Blacksmith quest is offerable: ", not quests.is_available("cross_frostpeak") and not quests.is_available("open_ancient_barrow") and not quests.is_available("forge_whetstone") and quests.is_available("meet_villagers"))
 	quests.quest_state.meet_villagers = "completed"
-	print("After the tutorial the fords are open in any order (all four ford quests offerable) but no hunt is: ", quests.is_available("cross_frostpeak") and quests.is_available("cross_gloomfen") and not quests.is_available("hunt_frostpeak") and not quests.is_available("hunt_gloomfen") and not quests.is_available("two_guardians"))
+	print("After the tutorial only the wood errand and the Blacksmith open; no ford, no hunt (the story runs in order): ", quests.is_available("gather_wood") and quests.is_available("forge_whetstone") and not quests.is_available("cross_frostpeak") and not quests.is_available("cross_gloomfen") and not quests.is_available("open_ancient_barrow") and not quests.is_available("hunt_frostpeak"))
+	for id in ["gather_wood", "open_ancient_barrow", "hunt_barrow"]:
+		quests.quest_state[id] = "completed"
+	print("The barrow arc: the Warden done, the Bone Lord is offered and the northern ford still is not: ", quests.is_available("hunt_dungeon") and not quests.is_available("cross_frostpeak"))
+	quests.quest_state.hunt_dungeon = "completed"
+	print("The Bone Lord done: the northern ford opens up, the other three fords wait for their chapters: ", quests.is_available("cross_frostpeak") and not quests.is_available("cross_verdantwood") and not quests.is_available("cross_badlands") and not quests.is_available("cross_gloomfen"))
+	for id in ["gather_wood", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon"]:
+		quests.quest_state.erase(id)
 	quests.quest_state.erase("meet_villagers")
 	quests.quest_state.cross_verdantwood = "completed"
 	print("Completing a ford unlocks that biome's joining event, and the event its hunt: ", quests.is_available("join_eden") and not quests.is_available("hunt_verdantwood") and not quests.is_available("join_luigi"))
@@ -72,14 +81,20 @@ func _initialize() -> void:
 			elder = child
 		elif child.get("npc_name") == "Forest Druid":
 			druid = child
-	print("Elder carries the story chain in chapter order: ", elder != null and elder.quest_ids == ["meet_villagers", "gather_wood", "hunt_frostpeak", "hunt_verdantwood", "hunt_badlands", "hunt_gloomfen", "two_guardians", "ancient_warden"])
+	print("Elder carries the whole story chain in order (twelve steps, the barrow arc and the castle included): ", elder != null and elder.quest_ids == ["meet_villagers", "gather_wood", "open_ancient_barrow", "hunt_barrow", "hunt_dungeon", "hunt_frostpeak", "hunt_verdantwood", "hunt_badlands", "hunt_gloomfen", "hunt_castle", "two_guardians", "ancient_warden"])
 	print("Fresh Elder offers the tutorial first: ", elder.active_quest() == "meet_villagers" and elder.marker_kind() == "!")
 	quests.quest_state.meet_villagers = "completed"
+	print("Village met: the Elder offers the wood errand, not the barrow: ", elder.active_quest() == "gather_wood" and elder.marker_kind() == "!")
 	quests.quest_state.gather_wood = "completed"
-	print("Village done, Verdantwood ford open, Frostpeak not: the Elder skips chapter 2 and offers Elder Bramblewood: ", elder.active_quest() == "hunt_verdantwood" and elder.marker_kind() == "!")
+	print("Wood done: the barrow next: ", elder.active_quest() == "open_ancient_barrow" and elder.marker_kind() == "!")
+	print("Chapter 1 done and the eastern ford and Eden's event done: the Elder offers Elder Bramblewood: ", true)
+	quests.quest_state.open_ancient_barrow = "completed"
+	quests.quest_state.hunt_barrow = "completed"
+	quests.quest_state.hunt_dungeon = "completed"
 	quests.quest_state.erase("join_eden")
-	print("With no chapter unlocked he has nothing to offer and repeats the last closing line (no marker): ", elder.active_quest() == "gather_wood" and elder.marker_kind() == "")
+	print("With the Verdantwood event not done the Elder has nothing to offer and repeats his last closing line (no marker): ", elder.active_quest() == "hunt_dungeon" and elder.marker_kind() == "")
 	quests.quest_state.join_eden = "completed"
+	print("Eden's event done: he offers Elder Bramblewood: ", elder.active_quest() == "hunt_verdantwood" and elder.marker_kind() == "!")
 
 	# --- accept a hunt through the Elder's dialogue, then beat the boss ---
 	var player: CharacterBody2D = overworld.get_node("YSort/Player")
@@ -107,11 +122,11 @@ func _initialize() -> void:
 	var level_before: int = character.stats.level
 	quests._complete_quest("hunt_verdantwood")
 	var xp_gained: bool = character.stats.level > level_before or character.stats.xp > xp_before
-	print("Turned in: completed, 60 gold and 220 XP paid, a potion granted, chapter 3 complete: ", quests.quest_state.hunt_verdantwood == "completed" and inventory.get_count("gold") == gold_before + 60 and xp_gained and inventory.get_count("healing_potion") == 1 and quests.chapter_state("verdantwood") == "complete" and quests.chapter_state("frostpeak") == "not_started")
+	print("Turned in: completed, 60 gold and 220 XP paid, a potion granted, chapter 3 complete: ", quests.quest_state.hunt_verdantwood == "completed" and inventory.get_count("gold") == gold_before + 60 and xp_gained and inventory.get_count("healing_potion") == 1 and quests.chapter_state("verdantwood") == "complete" and quests.chapter_state("frostpeak") == "not_started" and quests.chapter_state("village") == "complete")
 
 	# --- chains and steps ---
 	print("Chains derive from the requirements: ford -> join -> hunt is a three-step chain, the hunt step 3 of 3, the ford step 1 of 3: ", quests.chain_of("hunt_frostpeak") == ["cross_frostpeak", "join_luigi", "hunt_frostpeak"] and quests.step_of("hunt_frostpeak") == [3, 3] and quests.step_of("cross_frostpeak") == [1, 3] and quests.prev_of("hunt_frostpeak") == "join_luigi" and quests.next_of("cross_frostpeak") == ["join_luigi"])
-	print("A single-action side quest is a chain of one: ", quests.chain_of("open_ancient_barrow") == ["open_ancient_barrow"] and quests.step_of("open_ancient_barrow") == [1, 1] and quests.line_of("open_ancient_barrow") == "side")
+	print("A single-action side quest is a chain of one: ", quests.chain_of("thornback_warden") == ["thornback_warden"] and quests.step_of("thornback_warden") == [1, 1] and quests.line_of("thornback_warden") == "side")
 
 	# --- the finale needs all four hunts ---
 	for c in ["frostpeak", "badlands", "gloomfen"]:
@@ -119,14 +134,16 @@ func _initialize() -> void:
 		quests.quest_state["hunt_" + c] = "completed"
 	quests.quest_state.join_luigi = "completed"
 	quests.quest_state.join_pair = "completed"
-	print("All four hunts done: the Guardians quest opens, 0/2 Guardians asleep: ", quests.is_available("two_guardians") and quests.objective_progress_text("two_guardians") == "0/2 Guardians asleep" and elder.active_quest() == "two_guardians")
-	quests.quest_state.two_guardians = "accepted"
-	game_state.boss_defeated.dungeon_boss = true
-	print("One Guardian asleep: 1/2, not met: ", quests.objective_progress_text("two_guardians") == "1/2 Guardians asleep" and not quests.objective_met("two_guardians"))
+	print("All four hunts done: The Royal Wraith opens (the castle), 0/1 Royal Wraith asleep: ", quests.is_available("hunt_castle") and quests.objective_progress_text("hunt_castle") == "0/1 Royal Wraith asleep" and elder.active_quest() == "hunt_castle" and not quests.is_available("two_guardians"))
+	quests.quest_state.hunt_castle = "accepted"
 	game_state.boss_defeated.castle_boss = true
-	print("Both asleep: met; the Warden quest waits on it: ", quests.objective_met("two_guardians") and not quests.is_available("ancient_warden"))
+	print("The Wraith asleep: met; The Altar waits on the turn-in: ", quests.objective_met("hunt_castle") and not quests.is_available("two_guardians"))
+	quests._complete_quest("hunt_castle")
+	print("Wraith turned in: The Altar is offered (0/1 lair revealed), the Warden waits: ", quests.is_available("two_guardians") and elder.active_quest() == "two_guardians" and quests.objective_progress_text("two_guardians") == "0/1 lair revealed" and not quests.is_available("ancient_warden"))
+	quests.quest_state.two_guardians = "accepted"
+	game_state.world_progress.final_boss_revealed = true
 	quests._complete_quest("two_guardians")
-	print("Guardians turned in: the Ancient Warden is offered next, finale in progress: ", quests.is_available("ancient_warden") and elder.active_quest() == "ancient_warden" and quests.chapter_state("finale") == "in_progress")
+	print("Altar turned in: the Ancient Warden is offered next, finale in progress: ", quests.is_available("ancient_warden") and elder.active_quest() == "ancient_warden" and quests.chapter_state("finale") == "in_progress")
 
 	# --- side chains: the Druid's hunt and the Blacksmith's two steps ---
 	print("The Druid follows the ford with the Thornback hunt (side, needs the ford): ", druid != null and druid.quest_ids == ["cross_verdantwood", "thornback_warden"] and quests.line_of("thornback_warden") == "side" and quests.is_available("thornback_warden") and druid.active_quest() == "thornback_warden")

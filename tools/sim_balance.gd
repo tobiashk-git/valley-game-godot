@@ -105,6 +105,10 @@ func _initialize() -> void:
 		_companions_sweep()
 		quit()
 		return
+	if "--barrow" in OS.get_cmdline_user_args():
+		_barrow_sweep()
+		quit()
+		return
 	var world: Node = root.get_node("World")
 	var arenas: Array = [
 		{"name": "Dungeon", "zone": -1},
@@ -181,6 +185,69 @@ func _companions_sweep() -> void:
 		for line in _rule_table(m, {}):
 			print(line)
 		print("")
+
+# --barrow: chapter 1's teaching dungeon (user, 2026-09-08: the barrow must
+# force the full leather set). Oliver alone (no companions yet). Bands: no
+# armour loses almost always, leather armour alone still loses, the full
+# leather set wins; then the same full set at level 3 must still beat the
+# Bone Lord (the chapter's last step) most of the time.
+const BARROW_HP := [1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
+const BARROW_ATK := [1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.4]
+func _barrow_sweep() -> void:
+	var model: Dictionary = MODELS.live
+	var naked: Dictionary = _profile("L1 naked", 1, ["wooden_pickaxe"])
+	var naked2: Dictionary = _profile("L2 naked", 2, ["wooden_pickaxe"])
+	var body: Dictionary = _profile("L2 leather body", 2, ["wooden_pickaxe", "leather_armor"])
+	var full: Dictionary = _profile("L2 leather full", 2, LEATHER_FULL)
+	var full3: Dictionary = _profile("L3 leather full", 3, LEATHER_FULL)
+	print("Barrow wilds (dungeon pool) - win % / fights per trip:")
+	for p in [naked, body, full]:
+		print("  %s: %s" % [p.name, _cell(model, p, _pool(-1))])
+	print("")
+	print("| hp x | atk x | L1 naked | L2 naked | L2 body | L2 full | L3 full | margin |")
+	print("|---|---|---|---|---|---|---|---|")
+	var best: Dictionary = {}
+	for hp in BARROW_HP:
+		for atk in BARROW_ATK:
+			var o: Dictionary = {"golden_plains_boss": {"hp": hp, "atk": atk}}
+			var n1: int = _boss_win(model, naked, "golden_plains_boss", o)
+			var n2: int = _boss_win(model, naked2, "golden_plains_boss", o)
+			var b: int = _boss_win(model, body, "golden_plains_boss", o)
+			var f: int = _boss_win(model, full, "golden_plains_boss", o)
+			var f3: int = _boss_win(model, full3, "golden_plains_boss", o)
+			var margin: int = mini(mini(15 - n2, 35 - b), f - 90)
+			print("| %.2f | %.1f | %d | %d | %d | %d | %d | %d |" % [hp, atk, n1, n2, b, f, f3, margin])
+			if margin >= 0 and (best.is_empty() or margin > best.margin):
+				best = {"hp": hp, "atk": atk, "margin": margin}
+	if best.is_empty():
+		print("no passing pair for the Barrow Warden")
+	else:
+		var d: Dictionary = _boss_def("golden_plains_boss", {"golden_plains_boss": best})
+		print("-> Barrow Warden hp x%.2f atk x%.1f (margin %d): %d HP / %d attack" % [best.hp, best.atk, best.margin, d.max_hp, int(round(d.attack))])
+	print("")
+	# The Bone Lord: chapter 1's last step, fought at ~L3 in the leather set.
+	# Same shape: body only loses, the full set wins, and the set still wins a level up.
+	var body3: Dictionary = _profile("L3 leather body", 3, ["wooden_pickaxe", "leather_armor"])
+	var full4: Dictionary = _profile("L4 leather full", 4, LEATHER_FULL)
+	print("Bone Lord sweep (L3 body <= 35, L3 full >= 90):")
+	print("| hp x | atk x | L3 body | L3 full | L4 full | margin |")
+	print("|---|---|---|---|---|---|")
+	var best_bl: Dictionary = {}
+	for hp in BARROW_HP:
+		for atk in BARROW_ATK:
+			var o: Dictionary = {"dungeon_boss": {"hp": hp, "atk": atk}}
+			var b3: int = _boss_win(model, body3, "dungeon_boss", o)
+			var f3: int = _boss_win(model, full3, "dungeon_boss", o)
+			var f4: int = _boss_win(model, full4, "dungeon_boss", o)
+			var margin: int = mini(35 - b3, f3 - 90)
+			print("| %.2f | %.1f | %d | %d | %d | %d |" % [hp, atk, b3, f3, f4, margin])
+			if margin >= 0 and (best_bl.is_empty() or margin > best_bl.margin or (margin == best_bl.margin and atk < best_bl.atk)):
+				best_bl = {"hp": hp, "atk": atk, "margin": margin}
+	if best_bl.is_empty():
+		print("no passing pair for the Bone Lord")
+	else:
+		var d: Dictionary = _boss_def("dungeon_boss", {"dungeon_boss": best_bl})
+		print("-> Bone Lord hp x%.2f atk x%.1f (margin %d): %d HP / %d attack" % [best_bl.hp, best_bl.atk, best_bl.margin, d.max_hp, int(round(d.attack))])
 
 func _with_companions(model: Dictionary) -> Dictionary:
 	var m: Dictionary = model.duplicate()

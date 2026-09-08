@@ -100,6 +100,7 @@ func _initialize() -> void:
 
 	# --- Walk to the dungeon entrance and enter through the real portal. ---
 	combat._steps_since_encounter = -100000 # no random encounter mid-walk
+	root.get_node("Quests").quest_state["hunt_dungeon"] = "accepted" # the dungeon gate is barred until the Elder hands this out (2026-09-08)
 	var approach: Vector2i = world.place("dungeon") + Vector2i(0, 2)
 	player.position = Vector2(approach.x * 32 + 16, approach.y * 32 + 16)
 	var cam: Camera2D = player.get_node("Camera2D")

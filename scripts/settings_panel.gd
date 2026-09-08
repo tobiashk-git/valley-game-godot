@@ -26,6 +26,10 @@ const CONFIRM_SECONDS := 3.0
 @onready var save_btn: Button = $Window/Rows/Game/SaveRow/SaveBtn
 @onready var load_btn: Button = $Window/Rows/Game/SaveRow/LoadBtn
 @onready var quit_btn: Button = $Window/Rows/Game/QuitBtn
+# Story jump (testing, 2026-09-08): six buttons that set the game to the
+# start of a chapter (scripts/story_jump.gd) - to feel the gating flow.
+var jump_row: HBoxContainer
+var jump_buttons: Array = []
 
 var confirm_quit := false
 var mute_btn: Button # "Mute all" toggle above the sliders (built here, not in the scene)
@@ -41,6 +45,27 @@ func _ready() -> void:
 	save_btn.pressed.connect(_on_save)
 	load_btn.pressed.connect(_on_load)
 	quit_btn.pressed.connect(_on_quit)
+	var jump_title := Label.new()
+	jump_title.name = "JumpTitle"
+	jump_title.text = "Story jump (testing) - start at chapter:"
+	jump_title.theme_type_variation = &"DimLabel"
+	jump_title.add_theme_font_size_override("font_size", 12)
+	game_section.add_child(jump_title)
+	jump_row = HBoxContainer.new()
+	jump_row.name = "JumpRow"
+	jump_row.add_theme_constant_override("separation", 6)
+	game_section.add_child(jump_row)
+	for i in range(StoryJump.CHAPTER_ORDER.size()):
+		var b := Button.new()
+		b.name = "Jump%d" % (i + 1)
+		b.text = str(i + 1)
+		b.theme_type_variation = &"SecondaryButton"
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size = Vector2(0, 36)
+		b.tooltip_text = "Start at " + StoryJump.CHAPTER_ORDER[i]
+		b.pressed.connect(_on_jump.bind(StoryJump.CHAPTER_ORDER[i]))
+		jump_row.add_child(b)
+		jump_buttons.append(b)
 	music_slider.value_changed.connect(func(v: float) -> void:
 		Audio.set_music_volume(v / 100.0)
 		music_value.text = str(int(v)))
@@ -140,6 +165,10 @@ func _on_quit() -> void:
 	close()
 	SaveSystem.quit_to_title()
 
+func _on_jump(chapter_id: String) -> void:
+	close()
+	StoryJump.jump(get_tree(), chapter_id)
+
 func _reset_quit() -> void:
 	confirm_quit = false
 	_quit_token += 1
@@ -148,7 +177,7 @@ func _reset_quit() -> void:
 
 func _apply_layout() -> void:
 	var w: float
-	var h: float = 440.0 if in_game() else 290.0
+	var h: float = 510.0 if in_game() else 290.0
 	if Layout.is_narrow():
 		w = Layout.width - 24.0
 		window.position = Vector2(12, 56)
