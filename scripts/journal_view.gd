@@ -38,6 +38,16 @@ var line_tab := "story"
 var _row_width := 424.0
 var line_tabs: HBoxContainer
 var _line_buttons: Dictionary = {}
+# Phone usability (user, 2026-09-08): completed quests hide behind a "Show
+# done" toggle (and sit in grey boxes when shown), and on a phone the detail
+# pane opens on a tap and closes on a second tap of the same row (or its X),
+# so the list can take the whole height while you scroll.
+var show_completed := false
+var done_toggle: Button
+var pane_open := false
+var pane_close_btn: Button
+var _narrow := false
+var _view_size := Vector2(720, 452)
 
 func _ready() -> void:
 	track_btn.pressed.connect(_on_track_pressed)
@@ -54,16 +64,47 @@ func _ready() -> void:
 		b.pressed.connect(show_line.bind(line))
 		line_tabs.add_child(b)
 		_line_buttons[line] = b
+	done_toggle = Button.new()
+	done_toggle.name = "DoneToggle"
+	done_toggle.text = "Show done"
+	done_toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	done_toggle.size_flags_stretch_ratio = 0.75
+	done_toggle.custom_minimum_size = Vector2(0, LINE_TAB_HEIGHT)
+	done_toggle.add_theme_font_size_override("font_size", 13)
+	done_toggle.pressed.connect(toggle_completed)
+	line_tabs.add_child(done_toggle)
+	pane_close_btn = Button.new()
+	pane_close_btn.name = "PaneClose"
+	pane_close_btn.text = "X"
+	pane_close_btn.theme_type_variation = &"SecondaryButton"
+	pane_close_btn.custom_minimum_size = Vector2(36, 32)
+	pane_close_btn.visible = false
+	pane_close_btn.pressed.connect(close_pane)
+	detail_pane.add_child(pane_close_btn)
 	_style_line_tabs()
+
+func toggle_completed() -> void:
+	show_completed = not show_completed
+	_style_line_tabs()
+	refresh()
+
+func close_pane() -> void:
+	pane_open = false
+	apply_layout(_narrow, _view_size)
+	refresh()
 
 func _style_line_tabs() -> void:
 	for line in _line_buttons.keys():
 		_line_buttons[line].theme_type_variation = &"TabButtonActive" if line == line_tab else &"TabButton"
+	if done_toggle != null:
+		done_toggle.theme_type_variation = &"TabButtonActive" if show_completed else &"TabButton"
 
 func show_line(line: String) -> void:
 	line_tab = line
 	_style_line_tabs()
 	selected_quest = ""
+	pane_open = false
+	apply_layout(_narrow, _view_size)
 	refresh()
 
 # --- layout (the sheet hides its header on this tab) ---
@@ -73,6 +114,8 @@ func _place(c: Control, pos: Vector2, size: Vector2) -> void:
 	c.size = size
 
 func apply_layout(narrow: bool, view_size: Vector2) -> void:
+	_narrow = narrow
+	_view_size = view_size
 	var pane_h: float
 	var list_top: float = LINE_TAB_HEIGHT + 6.0
 	if not narrow:
@@ -81,16 +124,28 @@ func apply_layout(narrow: bool, view_size: Vector2) -> void:
 		_place(list_scroll, Vector2(20, list_top), Vector2(424, 430 - list_top))
 		pane_h = 430.0
 		_place(detail_pane, Vector2(452, 0), Vector2(248, pane_h))
+		detail_pane.visible = true
+		pane_close_btn.visible = false
 		hint_label.position = Vector2(20, 436)
 		hint_label.visible = true
 	else:
 		var iw: float = view_size.x
 		_row_width = iw - 40.0
 		_place(line_tabs, Vector2(20, 0), Vector2(iw - 40.0, LINE_TAB_HEIGHT))
-		var list_h := 4 * ROW_HEIGHT + 3 * 4.0 + 24.0
-		_place(list_scroll, Vector2(20, list_top), Vector2(iw - 40.0, list_h))
-		pane_h = maxf(200.0, view_size.y - list_top - list_h - 8.0 - 4.0)
-		_place(detail_pane, Vector2(20, list_top + list_h + 8.0), Vector2(iw - 40.0, pane_h))
+		if pane_open:
+			# The pane below a four-row list.
+			var list_h := 4 * ROW_HEIGHT + 3 * 4.0 + 24.0
+			_place(list_scroll, Vector2(20, list_top), Vector2(iw - 40.0, list_h))
+			pane_h = maxf(200.0, view_size.y - list_top - list_h - 8.0 - 4.0)
+			_place(detail_pane, Vector2(20, list_top + list_h + 8.0), Vector2(iw - 40.0, pane_h))
+		else:
+			# Pane closed: the list takes the whole height.
+			_place(list_scroll, Vector2(20, list_top), Vector2(iw - 40.0, view_size.y - list_top - 4.0))
+			pane_h = 200.0
+			_place(detail_pane, Vector2(20, list_top), Vector2(iw - 40.0, pane_h))
+		detail_pane.visible = pane_open
+		pane_close_btn.visible = true
+		pane_close_btn.position = Vector2(iw - 40.0 - 44.0, 8)
 		hint_label.visible = false
 	var pw: float = detail_pane.size.x
 	_place(quest_name, Vector2(12, 10), Vector2(pw - 24.0, 44))
@@ -114,10 +169,14 @@ func _shows(quest_id: String) -> bool:
 	var prev: String = Quests.prev_of(quest_id)
 	return prev != "" and _state(prev) == "completed" and Quests.is_available(quest_id)
 
+# Completed quests list only while "Show done" is on.
+func _listed(quest_id: String) -> bool:
+	return _shows(quest_id) and (show_completed or _state(quest_id) != "completed")
+
 func _line_ids(line: String) -> Array:
 	var out: Array = []
 	for quest_id in Quests.QUEST_DEFS.keys():
-		if Quests.line_of(quest_id) == line and _shows(quest_id):
+		if Quests.line_of(quest_id) == line and _listed(quest_id):
 			out.append(quest_id)
 	return out
 
@@ -228,7 +287,13 @@ func select_default() -> void:
 		selected_quest = ids[0] if not ids.is_empty() else ""
 
 func select_quest(quest_id: String) -> void:
-	selected_quest = quest_id
+	if _narrow:
+		# A tap opens the pane; a second tap on the same row closes it.
+		pane_open = not (pane_open and quest_id == selected_quest)
+		selected_quest = quest_id
+		apply_layout(_narrow, _view_size)
+	else:
+		selected_quest = quest_id
 	refresh()
 
 # --- building the list ---
@@ -239,6 +304,9 @@ func _clear(container: Node) -> void:
 		child.visible = false
 		child.queue_free()
 
+# Labels never widen the list: a long line would grow the scroll container
+# (horizontal scrolling is off, so it takes its content's width) past the
+# window - the rows spilled off the right edge of a phone (user, 2026-09-08).
 func _section(text: String, name_hint: String = "") -> void:
 	var l := Label.new()
 	if name_hint != "":
@@ -246,6 +314,9 @@ func _section(text: String, name_hint: String = "") -> void:
 	l.text = text
 	l.theme_type_variation = &"PanelTitle"
 	l.add_theme_font_size_override("font_size", 14)
+	l.custom_minimum_size = Vector2(_row_width, 0)
+	l.clip_text = true
+	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	quest_list.add_child(l)
 
 func _dim_line(text: String) -> void:
@@ -253,6 +324,8 @@ func _dim_line(text: String) -> void:
 	l.text = text
 	l.theme_type_variation = &"DimLabel"
 	l.add_theme_font_size_override("font_size", 12)
+	l.custom_minimum_size = Vector2(_row_width, 0)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD
 	quest_list.add_child(l)
 
 # A row is a tab-styled button with the name, a step tag and the status
@@ -261,11 +334,14 @@ func _row(quest_id: String) -> void:
 	var def: Dictionary = Quests.QUEST_DEFS[quest_id]
 	var selected: bool = quest_id == selected_quest
 	var pending: bool = _state(quest_id) == ""
-	var ink := Color(0.1, 0.08, 0.04) if selected else (Color(0.62, 0.6, 0.55) if pending else Color(1, 1, 1))
+	var done: bool = _state(quest_id) == "completed"
+	var ink := Color(0.1, 0.08, 0.04) if selected else (Color(0.62, 0.6, 0.55) if pending or done else Color(1, 1, 1))
 	var btn := Button.new()
 	btn.name = quest_id.to_pascal_case() + "Row"
 	btn.custom_minimum_size = Vector2(_row_width, ROW_HEIGHT)
 	btn.theme_type_variation = &"TabButtonActive" if selected else &"TabButton"
+	if done and not selected:
+		btn.self_modulate = Color(0.55, 0.55, 0.55, 1.0) # a grey box: done, out of the way
 	btn.mouse_filter = Control.MOUSE_FILTER_PASS # a touch drag on a row scrolls the list (phone)
 	btn.pressed.connect(select_quest.bind(quest_id))
 	var name_label := Label.new()

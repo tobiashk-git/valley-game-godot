@@ -52,6 +52,10 @@ func _initialize() -> void:
 	sheet.open("journal")
 	await process_frame
 	await process_frame
+	print("Completed quests are hidden until 'Show done' is on: ", not view.show_completed and view.quest_list.get_node_or_null("MeetVillagersRow") == null and view.quest_list.get_node_or_null("CrossFrostpeakRow") == null and view.quest_list.get_node_or_null("JoinLuigiRow") != null and view.line_tabs.get_node("DoneToggle").theme_type_variation == &"TabButton")
+	view.done_toggle.pressed.emit()
+	await process_frame
+	print("Show done lists them again, in grey boxes: ", view.show_completed and view.quest_list.get_node_or_null("MeetVillagersRow") != null and view.quest_list.get_node("MeetVillagersRow").self_modulate.r < 0.6 and view.quest_list.get_node("JoinLuigiRow").self_modulate == Color.WHITE)
 
 	# --- Story tab ---
 	print("Journal opens on the Story sub-tab with two line tabs: ", view.line_tab == "story" and view.has_node("LineTabs/StoryTab") and view.has_node("LineTabs/SideTab") and view.line_tabs.get_node("StoryTab").theme_type_variation == &"TabButtonActive")
@@ -104,10 +108,30 @@ func _initialize() -> void:
 	await process_frame
 	win = sheet.window.get_global_rect()
 	var pane: Rect2 = view.detail_pane.get_global_rect()
+	view.select_quest("cross_verdantwood") # open the pane to measure it
+	await process_frame
+	pane = view.detail_pane.get_global_rect()
 	var inside_phone: bool = win.encloses(pane) and win.encloses(view.line_tabs.get_global_rect()) and view.list_scroll.get_global_rect().position.y >= view.line_tabs.get_global_rect().end.y and view.track_btn.get_global_rect().end.y <= pane.end.y
 	print("Wide and phone: sub-tabs, list and pane inside the window, Track inside the pane: ", inside_wide and inside_phone)
+	view.close_pane()
+	await process_frame
 	root.get_texture().get_image().save_png("res://verify_quest_journal_phone.png")
 	print("Saved verify_quest_journal_phone.png")
+	print("Phone: the list never grows past its width (the finale blurb wraps), rows end inside the window: ", view.list_scroll.size.x <= view._row_width + 12.0 and view.quest_list.size.x <= view._row_width and view.quest_list.get_node("JoinLuigiRow").get_global_rect().end.x <= win.end.x)
+	print("Phone: the pane starts closed and the list takes the whole height: ", not view.pane_open and not view.detail_pane.visible and view.list_scroll.size.y > 400.0)
+	view.select_quest("cross_verdantwood")
+	await process_frame
+	var pane_open_rect: Rect2 = view.detail_pane.get_global_rect()
+	print("A tap on a row opens its pane below a shorter list, with an X, inside the window: ", view.pane_open and view.detail_pane.visible and view.quest_name.text == "Clearing the Crossing" and view.pane_close_btn.visible and pane_open_rect.position.y >= view.list_scroll.get_global_rect().end.y and win.encloses(pane_open_rect))
+	root.get_texture().get_image().save_png("res://verify_quest_journal_phone_pane.png")
+	view.select_quest("cross_verdantwood")
+	await process_frame
+	print("A second tap on the same row closes the pane again: ", not view.pane_open and not view.detail_pane.visible)
+	view.select_quest("cross_verdantwood")
+	await process_frame
+	view.pane_close_btn.pressed.emit()
+	await process_frame
+	print("...and so does the pane's X: ", not view.pane_open and not view.detail_pane.visible)
 	sheet.close()
 	root.size = Vector2i(800, 600)
 	for i in range(3):

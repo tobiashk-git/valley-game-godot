@@ -134,7 +134,7 @@ func _initialize() -> void:
 	quest_panel.open()
 	await process_frame
 	var jv: Control = sheet.journal_view
-	print("Journal tab on the phone: header hidden, list above its pane, inside the window: ", quest_panel.is_open() and sheet.narrow and not sheet.header.visible and jv.visible and jv.detail_pane.position.y >= jv.list_scroll.position.y + jv.list_scroll.size.y and jv.detail_pane.get_global_rect().end.y <= sheet.window.get_global_rect().end.y)
+	print("Journal tab on the phone: header hidden, the pane closed so the list takes the height, inside the window: ", quest_panel.is_open() and sheet.narrow and not sheet.header.visible and jv.visible and not jv.detail_pane.visible and jv.list_scroll.get_global_rect().end.y <= sheet.window.get_global_rect().end.y and jv.list_scroll.size.y > 300.0)
 	root.get_texture().get_image().save_png("res://verify_phone_journal.png")
 	print("Saved verify_phone_journal.png")
 	quest_panel.close()
