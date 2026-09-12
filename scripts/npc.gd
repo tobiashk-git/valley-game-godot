@@ -162,10 +162,18 @@ func _process(_delta: float) -> void:
 	# existing NPC that only ever has one of the two set.
 	var live_quest: String = active_quest()
 	var quest_active: bool = live_quest != "" and quests.quest_state.get(live_quest, "") != "completed"
-	if quest_active:
+	if quest_active and shop and quests.quest_state.get(live_quest, "") == "accepted" and not quests.objective_met(live_quest):
+		# A shopkeeper mid-errand: the reminder, with the shop a tap away
+		# (the Blacksmith's two-step chain must never lock his counter).
+		var def: Dictionary = quests.QUEST_DEFS[live_quest]
+		dialogue_ui.show_dialogue(npc_name, "%s (%s)" % [def.dialogue.in_progress, quests.objective_progress_text(live_quest)], [
+			{"label": "Shop", "callback": shop_panel.open.bind(npc_id)},
+			{"label": "Later", "callback": Callable()},
+		])
+	elif quest_active:
 		quests.talk_to_giver(live_quest, npc_id)
 	elif shop:
-		shop_panel.open()
+		shop_panel.open(npc_id)
 	elif live_quest != "":
 		quests.talk_to_giver(live_quest, npc_id)
 	else:

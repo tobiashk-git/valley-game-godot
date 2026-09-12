@@ -20,24 +20,44 @@ func _ready() -> void:
 	subtitle_label.add_theme_color_override("font_outline_color", Color(0.25, 0.15, 0.02))
 	subtitle_label.add_theme_constant_override("outline_size", 4)
 
-func open() -> void:
+# `keeper`: whose shop - the Trader (potions, accessories, resources) or
+# the Blacksmith (armour and weapons). See Shop.STOCKS.
+func open(keeper: String = "village_trader") -> void:
+	Shop.keeper = keeper
+	title_label.text = "Blacksmith's Forge" if keeper == "village_blacksmith" else "Trader's Shop"
 	tab = 0
 	_open_window()
+
+# Resources not on sale yet show as blueprint-tinted teasers.
+const TEASER_TINT := Color(0.55, 0.7, 1.0, 1.0)
+
+func _locked(item_id: String) -> bool:
+	return tab == 0 and Shop.is_resource(item_id) and not Shop.resource_available(item_id)
+
+func _decorate_slot(btn: Button, entry: Dictionary) -> void:
+	if _locked(entry.id):
+		for key in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
+			btn.add_theme_color_override(key, TEASER_TINT)
+		btn.modulate.a = 0.6
 
 func _subtitle() -> String:
 	var banked: int = Storage.get_count(Inventory.BANK_CHEST, "gold")
 	return "Gold on hand: %d" % Inventory.get_count("gold") + ("  -  banked: %d" % banked if banked > 0 else "")
 
 func _hint() -> String:
-	return "Tap an item to see it. Prices on the Buy tab are per item." if tab == 0 else "Tap what you want to sell. Enhanced gear sells for its base price."
+	if tab == 0:
+		return "Tap an item to see it. Prices are per item; resources cost far more than gathering them. Faded ones come later." if Shop.keeper == "village_trader" else "Tap a piece to see it. Prices are per item; the biome tiers are forged at the bench."
+	return "Tap what you want to sell. Enhanced gear sells for its base price."
 
 func _badge(entry: Dictionary) -> String:
-	return "%dg" % Shop.buy_price(entry.id) if tab == 0 else ""
+	if tab != 0:
+		return ""
+	return "?" if _locked(entry.id) else "%dg" % Shop.buy_price(entry.id)
 
 func _entries() -> Array:
 	if tab == 0:
 		var out: Array = []
-		for item_id in Shop.SHOP_STOCK:
+		for item_id in Shop.stock_for(Shop.keeper):
 			out.append({"id": item_id, "count": 1, "inst": {}})
 		return out
 	var unsellable: Array = ["gold"]
@@ -49,6 +69,9 @@ func _entries() -> Array:
 func _detail_actions(entry: Dictionary) -> void:
 	var owned: int = Inventory.get_count(entry.id)
 	if tab == 0:
+		if _locked(entry.id):
+			detail_value.text = Shop.locked_text(entry.id)
+			return
 		var price: int = Shop.buy_price(entry.id)
 		var full: bool = not Inventory.can_add(entry.id)
 		detail_value.text = "Costs %d gold  -  you have %d%s" % [price, owned, "  (can't carry more)" if full else ""]

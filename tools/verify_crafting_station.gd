@@ -37,7 +37,7 @@ func _initialize() -> void:
 	for child in overworld.get_node("YSort").get_children():
 		if child.get("npc_id") == "frostpeak_ranger":
 			ranger = child
-	print("Frostpeak Ranger stands in the valley by the north ford with his quest: ", ranger != null and ranger.position == Vector2(world.place("ranger_camp").x * 32 + 16, world.place("ranger_camp").y * 32 + 16) and ranger.quest_id == "cross_frostpeak" and world.place("ranger_camp").y < world.VILLAGE_BOUNDS.y0)
+	print("Frostpeak Ranger stands in the valley by the north ford with his quest: ", ranger != null and ranger.position == Vector2(world.place("ranger_camp").x * 32 + 16, world.place("ranger_camp").y * 32 + 16) and ranger.quest_ids[0] == "cross_frostpeak" and world.place("ranger_camp").y < world.VILLAGE_BOUNDS.y0)
 
 	# --- Away from the bench. ---
 	sheet.open("crafting")

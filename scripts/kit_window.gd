@@ -103,6 +103,10 @@ func _on_secondary() -> void:
 func _bulk_label() -> String:
 	return ""
 
+# A subclass may restyle a slot after it is built (the shop's locked teasers).
+func _decorate_slot(_btn: Button, _entry: Dictionary) -> void:
+	pass
+
 func _on_bulk() -> void:
 	pass
 
@@ -246,6 +250,7 @@ func _refresh() -> void:
 	for entry in entries:
 		var uid: int = entry.inst.uid if not entry.inst.is_empty() else 0
 		var btn: Button = make_slot(entry.id, entry.count, entry == selected_entry, entry.inst, false, _badge(entry))
+		_decorate_slot(btn, entry)
 		seen[entry.id] = seen.get(entry.id, 0) + 1
 		if seen[entry.id] > 1:
 			btn.name = "%sSlot%d" % [entry.id.to_pascal_case(), seen[entry.id]]

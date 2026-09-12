@@ -47,7 +47,7 @@ func _initialize() -> void:
 			continue
 		if not crafting.RECIPES.has(id) or crafting.RECIPES[id].result != id:
 			recipes_ok = false
-	print("Every tier piece has a recipe; the Trader stocks the leather cap, greaves and boots: ", recipes_ok and shop.SHOP_STOCK.has("leather_cap") and shop.SHOP_STOCK.has("leather_greaves") and shop.SHOP_STOCK.has("leather_boots"))
+	print("Every tier piece has a recipe; the Blacksmith stocks the leather cap, greaves and boots: ", recipes_ok and shop.stock_for("village_blacksmith").has("leather_cap") and shop.stock_for("village_blacksmith").has("leather_greaves") and shop.stock_for("village_blacksmith").has("leather_boots"))
 
 	# --- defence sums across slots ---
 	for id in ["bogiron_harness", "bogiron_helm", "bogiron_greaves", "bogiron_boots", "bogiron_gloves"]:
@@ -131,5 +131,5 @@ func _initialize() -> void:
 	for i in range(4):
 		await process_frame
 
-	print("Leather greaves complete the leather set: legs slot, DEF 1, 15 gold at the Trader, with a walking layer and an icon: ", items.ITEMS.leather_greaves.slot == "legs" and items.ITEMS.leather_greaves.defense == 1 and items.ITEMS.leather_greaves.value == 15 and ResourceLoader.exists(items.ITEMS.leather_greaves.layer) and ResourceLoader.exists("res://assets/icons/leather_greaves.png"))
+	print("Leather greaves complete the leather set: legs slot, DEF 1, 15 gold at the Blacksmith, with a walking layer and an icon: ", items.ITEMS.leather_greaves.slot == "legs" and items.ITEMS.leather_greaves.defense == 1 and items.ITEMS.leather_greaves.value == 15 and ResourceLoader.exists(items.ITEMS.leather_greaves.layer) and ResourceLoader.exists("res://assets/icons/leather_greaves.png"))
 	quit()

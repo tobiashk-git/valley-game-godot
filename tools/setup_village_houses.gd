@@ -120,7 +120,7 @@ func _initialize() -> void:
 		],
 		[Vector2i(8, 1), Vector2i(8, 2)],
 		World.BLACKSMITH_HOUSE_ENTRANCE,
-		"", false, "village_blacksmith",
+		"", true, "village_blacksmith", # a shop too: the leather set (2026-09-12)
 		"Hah, the new arrival. I'm the Blacksmith - anything that needs hammering, forging or breaking down, that's my bench in the corner. Walk up to it and press E.",
 		Color(0.62, 0.6, 0.68, 1.0), "res://assets/interiors/smithy_shell.png", 3,
 		["forge_whetstone", "forge_frost"] # a two-step side chain (quest lines revamp)
