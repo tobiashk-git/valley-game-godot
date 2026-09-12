@@ -83,6 +83,40 @@ const LAIR_REVEAL_RADIUS := 4
 const FOG_COLOUR := Color(0.2, 0.17, 0.13)
 const FOG_EDGE_BLEND := 0.6
 
+# The painted chart (2026-09-12, phase 3 of the map plan): the Map tab now
+# shows the valley drawn with the real tileset plus its static scenery -
+# village ground and houses, the altar, every entrance gate that exists,
+# the open fords' bridges - rendered off-screen once per map open through
+# a SubViewport at the closest zoom's pixels per tile, then fogged on the
+# CPU tile by tile. No scene is instantiated: the cells come from the same
+# builder calls the Overworld makes, the props are plain Sprite2Ds matching
+# scenes/props/*.tscn (texture, offset, scale). Guides/NPCs/monsters and
+# the random tree scatter are deliberately absent - a chart, not a photo.
+# render_map() (one pixel per tile) stays for the title backdrop.
+const CHART_ENTRANCES := {
+	"dungeon": ["res://assets/dungeon_entrance.png", -51.0],
+	"castle": ["res://assets/castle_entrance.png", -72.5],
+	"final_boss": ["res://assets/dungeon_entrance.png", -51.0],
+	"frostpeak_interior": ["res://assets/entrance_ice_caves.png", -56.5],
+	"verdantwood_interior": ["res://assets/entrance_grove.png", -95.5],
+	"badlands_interior": ["res://assets/entrance_caldera.png", -57.5],
+	"gloomfen_interior": ["res://assets/entrance_temple.png", -68.5],
+	"golden_plains_interior": ["res://assets/entrance_barrow.png", -39.5],
+}
+const CHART_HOUSES := {
+	"house": [World.HOUSE_ENTRANCE, "res://assets/house.png"],
+	"elder_house": [World.ELDER_HOUSE_ENTRANCE, "res://assets/house_elder.png"],
+	"trader_house": [World.TRADER_HOUSE_ENTRANCE, "res://assets/house.png"],
+	"blacksmith_house": [World.BLACKSMITH_HOUSE_ENTRANCE, "res://assets/house_smithy.png"],
+}
+const HOUSE_SCALE := 0.75
+const HOUSE_OFFSET_Y := -30.125
+const VILLAGE_GROUND := "res://assets/interiors/village_ground.png"
+const FORD_BRIDGE := "res://assets/ford_bridge.png"
+const EW_BRIDGE_DROP := 14.0
+var last_chart_props: Array = [] # ids drawn by the last render_chart (verifies)
+var _chart_tileset: TileSet
+
 const LOCATION_NAMES := {
 	"Overworld": "the Valley",
 	"Dungeon": "the Dungeon",
@@ -163,13 +197,7 @@ func discovered_count() -> int:
 # and the designer, which want the whole chart.
 func render_map(region: Rect2i, fog: bool = false) -> ImageTexture:
 	var tilemap := TileMapLayer.new()
-	World.build_overworld_map(tilemap)
-	MapRecipe.apply_tiles(tilemap, MapRecipe.load_active()) # the chart shows designed tiles too
-	for zone in GameState.biome_paths_open.keys():
-		if GameState.biome_paths_open[zone]:
-			World.open_biome_path(tilemap, World.Zone[zone.to_upper()])
-	if GameState.village_gates_open:
-		World.open_gates(tilemap)
+	_build_chart_cells(tilemap)
 	var w: int = region.size.x
 	var h: int = region.size.y
 	var revealed := PackedByteArray()
@@ -201,6 +229,139 @@ func render_map(region: Rect2i, fog: bool = false) -> ImageTexture:
 			img.set_pixel(x, y, colour)
 	tilemap.free()
 	return ImageTexture.create_from_image(img)
+
+# The overworld's cells as the current save has them: the builder, the
+# designer's recipe, the open fords, the village gates.
+func _build_chart_cells(tilemap: TileMapLayer) -> void:
+	World.build_overworld_map(tilemap)
+	MapRecipe.apply_tiles(tilemap, MapRecipe.load_active()) # the chart shows designed tiles too
+	for zone in GameState.biome_paths_open.keys():
+		if GameState.biome_paths_open[zone]:
+			World.open_biome_path(tilemap, World.Zone[zone.to_upper()])
+	if GameState.village_gates_open:
+		World.open_gates(tilemap)
+
+# The Overworld's TileSet is embedded in its scene: read it off the packed
+# scene's state rather than instantiating the scene (its _ready spawns
+# monsters, moves NPCs and consumes the pending spawn).
+func chart_tileset() -> TileSet:
+	if _chart_tileset == null:
+		var state: SceneState = (load("res://scenes/Overworld.tscn") as PackedScene).get_state()
+		for i in range(state.get_node_count()):
+			if state.get_node_name(i) != "TileMapLayer":
+				continue
+			for j in range(state.get_node_property_count(i)):
+				if state.get_node_property_name(i, j) == "tile_set":
+					_chart_tileset = state.get_node_property_value(i, j)
+	return _chart_tileset
+
+func _tile_centre(tile: Vector2i) -> Vector2:
+	return Vector2(tile.x * 32 + 16, tile.y * 32 + 16)
+
+func _chart_sprite(parent: Node, texture_path: String, pos: Vector2, offset_y: float = 0.0, scale: float = 1.0) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.texture = load(texture_path)
+	s.position = pos
+	s.offset = Vector2(0, offset_y)
+	s.scale = Vector2(scale, scale)
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	parent.add_child(s)
+	return s
+
+# Renders `region` at `px` pixels per tile (a coroutine: one frame for the
+# off-screen draw). `fog` hides unrevealed tiles as render_map does.
+func render_chart(region: Rect2i, px: float, fog: bool = true) -> ImageTexture:
+	var ipx: int = int(px)
+	var vp := SubViewport.new()
+	vp.size = Vector2i(region.size.x * ipx, region.size.y * ipx)
+	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	vp.disable_3d = true
+	vp.transparent_bg = false
+	var stage := Node2D.new()
+	vp.add_child(stage)
+	var tilemap := TileMapLayer.new()
+	tilemap.tile_set = chart_tileset()
+	tilemap.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_build_chart_cells(tilemap)
+	World.carve_verdantwood_maze(tilemap) # the forest walls are painted terrain too
+	stage.add_child(tilemap)
+	last_chart_props = []
+	# Village ground plate (drawn just over the tiles, like the Overworld).
+	var plate := _chart_sprite(stage, VILLAGE_GROUND, Vector2((World.VILLAGE_BOUNDS.x0 + 1) * 32, (World.VILLAGE_BOUNDS.y0 + 1) * 32))
+	plate.centered = false
+	last_chart_props.append("village_ground")
+	# Bridges over the open fords.
+	for zone_key in GameState.biome_paths_open.keys():
+		if not GameState.biome_paths_open[zone_key]:
+			continue
+		var zone: int = World.Zone[zone_key.to_upper()]
+		var bridge := _chart_sprite(stage, FORD_BRIDGE, _tile_centre(World.BIOME_FORDS[zone]))
+		if zone == World.Zone.VERDANTWOOD or zone == World.Zone.GLOOMFEN:
+			bridge.rotation = PI / 2.0
+			bridge.position.y += EW_BRIDGE_DROP
+		last_chart_props.append("bridge_" + zone_key)
+	# Props, y-sorted like the Overworld's YSort.
+	var props := Node2D.new()
+	props.y_sort_enabled = true
+	stage.add_child(props)
+	for id in CHART_HOUSES:
+		_chart_sprite(props, CHART_HOUSES[id][1], _tile_centre(CHART_HOUSES[id][0]), HOUSE_OFFSET_Y, HOUSE_SCALE)
+		last_chart_props.append(id)
+	var altar := _chart_sprite(props, "res://assets/altar.png", _tile_centre(World.ALTAR_POS) + Vector2(0, 16.0))
+	altar.offset = Vector2(0, -altar.texture.get_height() / 2.0)
+	last_chart_props.append("altar")
+	for id in CHART_ENTRANCES:
+		if id == "golden_plains_interior" and not GameState.world_progress.get("golden_plains_revealed", false):
+			continue
+		if id == "final_boss" and not GameState.world_progress.get("final_boss_revealed", false):
+			continue
+		var gate := _chart_sprite(props, CHART_ENTRANCES[id][0], _tile_centre(World.place(id)), CHART_ENTRANCES[id][1])
+		gate.z_index = 1
+		last_chart_props.append(id)
+	var cam := Camera2D.new()
+	cam.position = (Vector2(region.position) + Vector2(region.size) / 2.0) * 32.0
+	cam.zoom = Vector2(px / 32.0, px / 32.0)
+	stage.add_child(cam)
+	add_child(vp)
+	cam.make_current()
+	await RenderingServer.frame_post_draw
+	await RenderingServer.frame_post_draw
+	var img: Image = vp.get_texture().get_image()
+	vp.queue_free()
+	img.convert(Image.FORMAT_RGBA8)
+	if fog:
+		_fog_chart(img, region, ipx)
+	img.generate_mipmaps() # the zoomed-out steps downscale it
+	return ImageTexture.create_from_image(img)
+
+# Fog per tile: unrevealed tiles filled solid, the rim one tile out blended.
+func _fog_chart(img: Image, region: Rect2i, px: int) -> void:
+	var named: Dictionary = named_places()
+	var w: int = region.size.x
+	var h: int = region.size.y
+	var revealed := PackedByteArray()
+	revealed.resize(w * h)
+	for y in range(h):
+		for x in range(w):
+			revealed[y * w + x] = 1 if is_tile_revealed(region.position + Vector2i(x, y), named) else 0
+	var edge := Image.create(px, px, false, Image.FORMAT_RGBA8)
+	edge.fill(Color(FOG_COLOUR.r, FOG_COLOUR.g, FOG_COLOUR.b, FOG_EDGE_BLEND))
+	var src := Rect2i(0, 0, px, px)
+	for y in range(h):
+		for x in range(w):
+			if revealed[y * w + x] == 1:
+				continue
+			var on_edge := false
+			for ny in range(maxi(0, y - 1), mini(h, y + 2)):
+				for nx in range(maxi(0, x - 1), mini(w, x + 2)):
+					if revealed[ny * w + nx] == 1:
+						on_edge = true
+			if on_edge:
+				img.blend_rect(edge, src, Vector2i(x * px, y * px))
+			else:
+				var tile: Vector2i = region.position + Vector2i(x, y)
+				var fleck: bool = (tile.x * 17 + tile.y * 11) % 3 == 0
+				img.fill_rect(Rect2i(x * px, y * px, px, px), FOG_COLOUR.darkened(0.06) if fleck else FOG_COLOUR)
 
 func is_discovered(poi_id: String) -> bool:
 	return GameState.discovered_pois.get(poi_id, false)

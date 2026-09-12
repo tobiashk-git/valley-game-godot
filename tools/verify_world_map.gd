@@ -91,6 +91,20 @@ func _initialize() -> void:
 	print("Header hidden on the Map tab so the map gets the height; tab strip still there: ", not sheet.header.visible and sheet.tabs.visible and sheet.tabs.get_node("InventoryTab").visible)
 	var inner_centre: Vector2 = Vector2(panel.FRAME_PAD, panel.FRAME_PAD) + panel._inner() / 2.0
 	print("Opens at the closest zoom (16px per tile on PC, base 4) centred on Oliver, the chart clipped to the frame: ", panel.map_rect.texture != null and panel.base_scale == 4.0 and panel.zoom_index == 2 and panel.map_scale == 16.0 and panel.map_rect.size == Vector2(1600, 1600) and panel.map_frame.clip_contents and (panel.markers.position + panel._map_pos(here)).distance_to(inner_centre) < 1.0)
+	for i in range(6):
+		await process_frame
+	var chart: Texture2D = panel.map_rect.texture
+	print("The chart is painted off-screen from the real tiles at the closest zoom (1600px for 100 tiles at 16px), mipmapped for the zoomed-out steps: ", panel.chart_ready and chart != null and chart.get_width() == 1600 and chart.get_height() == 1600 and chart.get_image().has_mipmaps() and panel.map_rect.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS)
+	var cimg: Image = chart.get_image()
+	var hp16: Vector2i = (here - panel.MAP_REGION.position) * 16 + Vector2i(8, 8)
+	var fp16: Vector2i = (far - panel.MAP_REGION.position) * 16 + Vector2i(8, 8)
+	var far16: Color = cimg.get_pixel(fp16.x, fp16.y)
+	print("Fog on the painted chart: Oliver's tile shows the ground, 30 tiles east is fog: ", not _close(cimg.get_pixel(hp16.x, hp16.y), world_map.FOG_COLOUR) and not _close(cimg.get_pixel(hp16.x, hp16.y), world_map.FOG_COLOUR.darkened(0.06)) and (_close(far16, world_map.FOG_COLOUR) or _close(far16, world_map.FOG_COLOUR.darkened(0.06))))
+	var drawn: Array = world_map.last_chart_props
+	print("Village ground, four houses, the altar, both gates and the four biome entrances are drawn; the barrow and the lair not yet, no bridges before a ford opens: ", drawn.has("village_ground") and drawn.has("house") and drawn.has("elder_house") and drawn.has("altar") and drawn.has("dungeon") and drawn.has("castle") and drawn.has("frostpeak_interior") and drawn.has("gloomfen_interior") and not drawn.has("golden_plains_interior") and not drawn.has("final_boss") and not drawn.has("bridge_frostpeak"))
+	var key_before: String = panel._chart_key
+	panel.refresh()
+	print("A refresh with nothing changed reuses the chart (no re-render): ", panel._chart_key == key_before and panel.chart_ready)
 	print("Zoom buttons in the frame's corner, + disabled at the closest step: ", panel.zoom_in_btn.disabled and not panel.zoom_out_btn.disabled and panel.zoom_in_btn.get_global_rect().intersects(panel.map_frame.get_global_rect()))
 	panel.zoom_out_btn.pressed.emit()
 	panel.zoom_out_btn.pressed.emit()

@@ -24,6 +24,13 @@ extends Control
 # and picking a place from the list centres on it. Markers live in a layer
 # that moves with the chart, so _map_pos() stays "tile -> layer pixels".
 #
+# Painted chart (2026-09-12, phase 3): the texture is WorldMap.render_chart
+# - the real tiles and scenery at the closest zoom's pixels per tile,
+# fogged, mipmapped for the zoomed-out steps. It is re-rendered only when
+# its signature (what is revealed, named, open, built) changes, so marker
+# taps and zooms reuse it; a render takes a frame, so refresh() shows the
+# previous chart until the new one lands (chart_ready).
+#
 # Skeleton from tools/setup_character_sheet.gd; character_sheet.gd calls
 # apply_layout() and refresh() and owns open/close/tab switching.
 
@@ -79,6 +86,9 @@ var _here_tex: Texture2D
 var _rumour_tex: Texture2D
 var _dragging := false
 var _centre_on_open := true
+var chart_ready := false
+var _chart_key := ""
+var _chart_gen := 0
 
 func _ready() -> void:
 	travel_btn.pressed.connect(_on_travel_pressed)
@@ -88,6 +98,7 @@ func _ready() -> void:
 	_rumour_tex = _circle_texture(10, Color(0.95, 0.78, 0.35, 0.22), Color(0.95, 0.78, 0.35))
 	map_frame.clip_contents = true
 	map_frame.gui_input.connect(_on_frame_input)
+	map_rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS # painted chart, downscaled when zoomed out
 	zoom_in_btn = _zoom_button("ZoomIn", "+")
 	zoom_out_btn = _zoom_button("ZoomOut", "-")
 	zoom_in_btn.pressed.connect(func() -> void: zoom_to(zoom_index + 1))
@@ -299,10 +310,28 @@ func _clear(container: Node) -> void:
 		child.visible = false
 		child.queue_free()
 
+# Everything the painted chart depends on; a change means a re-render.
+func _chart_signature() -> String:
+	return "%d|%s|%s|%s|%s|%s|%s" % [GameState.overworld_revealed_count(MAP_REGION), str(WorldMap.named_places().keys()), str(GameState.biome_paths_open), str(GameState.village_gates_open), str(GameState.world_progress), str(WorldMap.discovered_count()), str(base_scale)]
+
+func _refresh_chart() -> void:
+	var key: String = _chart_signature()
+	if key == _chart_key and map_rect.texture != null:
+		return
+	_chart_key = key
+	_chart_gen += 1
+	var gen: int = _chart_gen
+	chart_ready = false
+	var tex: ImageTexture = await WorldMap.render_chart(MAP_REGION, base_scale * ZOOM_STEPS[ZOOM_STEPS.size() - 1], true)
+	if gen != _chart_gen:
+		return # a newer render is on its way
+	map_rect.texture = tex
+	chart_ready = true
+
 func refresh() -> void:
 	if not visible:
 		return
-	map_rect.texture = WorldMap.render_map(MAP_REGION, true)
+	_refresh_chart()
 	var known: int = WorldMap.discovered_count()
 	var here: Vector2i = WorldMap.here_tile()
 	var location: String = WorldMap.current_location_name()
