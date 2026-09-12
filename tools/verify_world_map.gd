@@ -152,6 +152,13 @@ func _initialize() -> void:
 	print("...selected, the pane names it but offers no Fast Travel: ", panel.selected_poi == "dungeon" and panel.poi_name.text == "Dungeon" and panel.poi_status.text == "Rumoured - find it on foot." and not panel.travel_btn.visible)
 	root.get_texture().get_image().save_png("res://verify_map_rumoured.png")
 	print("Saved verify_map_rumoured.png")
+	# --- Walking past a door marks the place found (the user met the barred dungeon and expected it on the map). ---
+	game_state.reveal_overworld(world.place("dungeon"))
+	game_state.reveal_overworld(world.place("golden_plains_interior"))
+	panel.refresh()
+	await process_frame
+	print("Walking past the dungeon's door marks it found: gold marker, no '(rumoured)', still no Fast Travel until entered: ", world_map.is_seen("dungeon") and not world_map.is_discovered("dungeon") and panel.markers.get_node("DungeonMarker").icon != panel._rumour_tex and not panel.places_list.get_node("DungeonRow").text.contains("rumoured") and panel.poi_status.text == "Found - step inside to unlock Fast Travel." and not panel.travel_btn.visible)
+	print("...but the barrow's spot, walked over before the barrow exists, is not: ", not world_map.is_seen("golden_plains_interior") and not world_map.is_shown("golden_plains_interior"))
 	await _press("toggle_map")
 	player.position = Vector2(approach.x * 32 + 16, approach.y * 32 + 16)
 	var cam: Camera2D = player.get_node("Camera2D")

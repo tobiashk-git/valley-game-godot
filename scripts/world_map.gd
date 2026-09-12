@@ -225,9 +225,20 @@ func named_places() -> Dictionary:
 func is_named(poi_id: String) -> bool:
 	return named_places().has(poi_id)
 
-# On the map at all: walked through (discovered) or named by a hunt (rumoured).
+# Walked past its door (the entrance tile is inside the walked-near fog
+# record) - the user found the barred dungeon and expected it on the map
+# (2026-09-12). Found places get a marker and their description; Fast
+# Travel still needs a real visit (discovered). The barrow only counts
+# once it has actually appeared.
+func is_seen(poi_id: String) -> bool:
+	if poi_id == "golden_plains_interior" and not GameState.world_progress.get("golden_plains_revealed", false):
+		return false
+	return GameState.is_overworld_revealed(poi_tile(poi_id))
+
+# On the map at all: walked through (discovered), walked past (seen) or
+# named by a hunt (rumoured).
 func is_shown(poi_id: String) -> bool:
-	return is_discovered(poi_id) or is_named(poi_id)
+	return is_discovered(poi_id) or is_seen(poi_id) or is_named(poi_id)
 
 # The tile a named place stands on (movable places from the recipe, the
 # house / village from their fixed spots).

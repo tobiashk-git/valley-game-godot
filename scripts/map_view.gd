@@ -296,7 +296,9 @@ func refresh() -> void:
 		if not WorldMap.is_shown(poi_id):
 			continue
 		var selected: bool = poi_id == selected_poi
-		var rumoured: bool = not WorldMap.is_discovered(poi_id)
+		# Hollow marker only for a place known by hearsay; one Oliver has
+		# walked past (seen) or into (discovered) gets the gold disc.
+		var rumoured: bool = not WorldMap.is_discovered(poi_id) and not WorldMap.is_seen(poi_id)
 		var btn := Button.new()
 		btn.name = poi_id.to_pascal_case() + "Marker"
 		btn.flat = true
@@ -341,8 +343,8 @@ func refresh() -> void:
 	poi_where.text = WorldMap.poi_where(selected_poi)
 	poi_desc.text = WorldMap.POI_DESCRIPTIONS.get(selected_poi, "")
 	if not WorldMap.is_discovered(selected_poi):
-		# Named by a hunt, not yet walked into: the chart shows roughly where.
-		poi_status.text = "Rumoured - find it on foot."
+		# Walked past but never in, or only named by a hunt: no Fast Travel yet.
+		poi_status.text = "Found - step inside to unlock Fast Travel." if WorldMap.is_seen(selected_poi) else "Rumoured - find it on foot."
 		travel_btn.visible = false
 		return
 	var at_it: bool = here == WorldMap.poi_tile(selected_poi)
