@@ -117,6 +117,24 @@ func _initialize() -> void:
 	print("Command row fits inside the panel (five buttons): ", cmd_rect.end.x <= battle_rect.end.x + 0.5 and battle.run_btn.get_global_rect().end.x <= battle_rect.end.x + 0.5)
 	root.get_texture().get_image().save_png("res://verify_phone_battle.png")
 	print("Saved verify_phone_battle.png")
+	# The companion move menu (2026-09-12: its rows spilled off the right).
+	root.get_node("Quests").quest_state["meet_villagers"] = "completed"
+	root.get_node("Quests").quest_state["join_pair"] = "completed"
+	combat.player_run()
+	await process_frame
+	combat.start_combat(["dungeon_rat"], root.get_node("World").Zone.BADLANDS)
+	await process_frame
+	combat.open_companion_menu("luigi")
+	await process_frame
+	await process_frame
+	var rows_fit := true
+	for child in battle.submenu.get_children():
+		if child is Button and child.get_global_rect().end.x > battle_rect.end.x + 0.5:
+			rows_fit = false
+	print("Companion move menu rows fit inside the phone panel (labels clipped, never overflowing): ", battle.submenu.visible and battle.submenu.get_child_count() == 3 and rows_fit and battle.submenu.get_global_rect().end.x <= battle_rect.end.x + 0.5)
+	root.get_texture().get_image().save_png("res://verify_phone_companion_menu.png")
+	combat.close_submenu()
+	await process_frame
 	while combat.in_combat:
 		combat.player_run()
 		await physics_frame

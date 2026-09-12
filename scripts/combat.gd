@@ -112,12 +112,12 @@ const BOSS_EVENT := {
 const EVENT_ROSTER := {"join_luigi": ["luigi"], "join_eden": ["eden"], "join_pair": ["luigi", "eden"]}
 const COMPANION_MOVES := {
 	"luigi": [
-		{"id": "bite", "name": "Bite", "hint": "one hard bite, then he takes the blows"},
-		{"id": "guard", "name": "Guard", "hint": "braces - blows halved, pool topped up"},
+		{"id": "bite", "name": "Bite", "hint": "one hard bite"},
+		{"id": "guard", "name": "Guard", "hint": "braces, blows halved"},
 	],
 	"eden": [
-		{"id": "scream", "name": "Scream", "hint": "hits everyone, may leave them reeling"},
-		{"id": "shimmer", "name": "Shimmer", "hint": "nothing lands on anyone this round"},
+		{"id": "scream", "name": "Scream", "hint": "hits everyone, may stun"},
+		{"id": "shimmer", "name": "Shimmer", "hint": "nothing lands this round"},
 	],
 }
 const CHARGE_LEVELS := [5, 10] # one more charge per fight at each

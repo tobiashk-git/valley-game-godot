@@ -429,7 +429,13 @@ func _add_submenu_row(text: String, disabled: bool, on_pick: Callable, icon: Tex
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.custom_minimum_size = Vector2(0, 44)
 	btn.theme_type_variation = &"SecondaryButton"
-	btn.add_theme_font_size_override("font_size", 15)
+	btn.add_theme_font_size_override("font_size", 13 if narrow else 15)
+	# A row never widens the submenu past the panel: a long label (the
+	# companion moves' hints) is clipped instead (user, 2026-09-12: the
+	# options spilled off the right of the phone).
+	btn.clip_text = true
+	btn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btn.disabled = disabled
 	btn.pressed.connect(on_pick)
 	submenu.add_child(btn)
