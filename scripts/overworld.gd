@@ -190,6 +190,14 @@ func _on_quests_changed() -> void:
 	_repaint_open_paths()
 	_place_companions()
 	_place_guides()
+	_refresh_altar_marker()
+
+var _altar_marker: Label
+var _altar_marker_base_y := 0.0
+
+func _refresh_altar_marker() -> void:
+	if _altar_marker != null:
+		_altar_marker.visible = Altar.has_offering()
 
 # The four guides step across once their ford opens (user, 2026-09-08):
 # they stand a few tiles past the crossing on the biome side, off the path,
@@ -557,6 +565,26 @@ func _ready() -> void:
 		altar_sprite.position = _tile_center(World.ALTAR_POS) + Vector2(0, 16.0)
 		altar_sprite.offset = Vector2(0, -altar_sprite.texture.get_height() / 2.0)
 		ysort.add_child(altar_sprite)
+		# The altar's turn-in marker: the same gold "!" the NPCs wear, shown
+		# while the crystals in hand would do something at the altar.
+		_altar_marker = Label.new()
+		_altar_marker.name = "AltarMarker"
+		_altar_marker.text = "!"
+		_altar_marker.size = Vector2(32, 34)
+		_altar_marker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_altar_marker.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_altar_marker.add_theme_font_size_override("font_size", 28)
+		_altar_marker.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+		_altar_marker.add_theme_color_override("font_outline_color", Color(0.2, 0.12, 0.02))
+		_altar_marker.add_theme_constant_override("outline_size", 6)
+		_altar_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_altar_marker.position = Vector2(-16.0, -altar_sprite.texture.get_height() - 36.0)
+		_altar_marker.visible = false
+		altar_sprite.add_child(_altar_marker)
+		_altar_marker_base_y = _altar_marker.position.y
+		Inventory.changed.connect(_refresh_altar_marker)
+		Altar.changed.connect(_refresh_altar_marker)
+		_refresh_altar_marker()
 
 	# The altar tile (painted solid by build_overworld_map()) just needs an
 	# interact trigger on top of it - it isn't a separate prop/scene like
@@ -613,6 +641,8 @@ const OVERWORLD_ENCOUNTERS_ENABLED := false
 # needed beyond the guard below, and it's what keeps the existing "walk many
 # steps across the village, confirm zero encounters" test passing unchanged.
 func _process(_delta: float) -> void:
+	if _altar_marker != null and _altar_marker.visible:
+		_altar_marker.position.y = _altar_marker_base_y + sin(Time.get_ticks_msec() / 1000.0 * 4.0) * 3.0
 	var current_tile := Vector2i(int(player.position.x / 32), int(player.position.y / 32))
 	if current_tile != _last_tile:
 		_last_tile = current_tile

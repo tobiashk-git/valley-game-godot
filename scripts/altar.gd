@@ -16,6 +16,18 @@ signal changed
 func _dialogue_ui() -> Node:
 	return get_node("/root/DialogueUI")
 
+# Whether the crystals in hand would do something here right now - the
+# overworld hangs a "!" over the altar while they would (user, 2026-09-12:
+# the final crystal turn-in was easy to miss).
+func has_offering() -> bool:
+	var progress: Dictionary = GameState.world_progress
+	if progress.get("game_completed", false) or progress.world2_unlocked:
+		return false
+	var crystals: int = Inventory.get_count("magic_crystal")
+	if progress.final_boss_revealed:
+		return GameState.boss_defeated.final_boss and crystals >= 1
+	return crystals >= CRYSTALS_TO_REVEAL
+
 func interact() -> void:
 	var progress: Dictionary = GameState.world_progress
 

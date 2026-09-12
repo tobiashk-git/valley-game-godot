@@ -36,6 +36,8 @@ func _initialize() -> void:
 	current_scene = overworld
 	for i in range(3):
 		await process_frame
+	var marker: Label = overworld.get_node("YSort/AltarSprite/AltarMarker")
+	print("With the Warden asleep and its crystal in hand the altar wears a '!' (the final turn-in): ", marker.visible and altar.has_offering())
 	altar.interact()
 	await process_frame
 	await process_frame
@@ -66,6 +68,7 @@ func _initialize() -> void:
 	current_scene = over2
 	for i in range(3):
 		await process_frame
+	print("Completed, the altar's '!' is gone: ", not over2.get_node("YSort/AltarSprite/AltarMarker").visible and not altar.has_offering())
 	altar.interact()
 	await process_frame
 	print("With the game completed the altar only says the valley is at peace: ", dialogue_ui.is_open() and dialogue_ui.text_label.text.contains("at peace") and not swirl.playing)
