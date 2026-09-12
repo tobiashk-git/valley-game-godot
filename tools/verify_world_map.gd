@@ -219,7 +219,18 @@ func _initialize() -> void:
 	await process_frame
 	var frame_rect: Rect2 = panel.map_frame.get_global_rect()
 	var pane_rect: Rect2 = panel.detail_pane.get_global_rect()
-	print("Phone: base 3px per tile (opens at 12), full-width square frame, pane below inside the window with its list: ", layout.width == 400 and sheet.narrow and panel.base_scale == 3.0 and panel.map_scale == 12.0 and panel.map_frame.size == Vector2(sheet.window.size.x - 40.0, sheet.window.size.x - 40.0) and absf(frame_rect.get_center().x - 200.0) < 2.0 and pane_rect.position.y >= frame_rect.end.y and pane_rect.end.y <= sheet.window.get_global_rect().end.y and panel.places_scroll.get_global_rect().end.y <= pane_rect.end.y)
+	print("Phone: base 3px per tile (opens at 12), full-width square frame, pane below inside the window with its list: ", layout.width == 400 and sheet.narrow and panel.base_scale == 3.0 and panel.map_scale == 12.0 and panel.map_frame.size == Vector2(sheet.window.size.x - 40.0, sheet.window.size.x - 40.0) and absf(frame_rect.get_center().x - 200.0) < 2.0 and pane_rect.position.y >= frame_rect.end.y and pane_rect.end.y <= sheet.window.get_global_rect().end.y and panel.places_grid.visible and not panel.places_scroll.visible and not panel.places_title.visible and panel.places_grid.get_global_rect().end.y <= pane_rect.end.y)
+	for poi_id in world_map.POI_NAMES:
+		game_state.discovered_pois[poi_id] = true
+	panel.refresh()
+	await process_frame
+	var grid_rows: Array = panel.places_grid.get_children().filter(func(c): return c.visible)
+	var last_row: Control = grid_rows[-1]
+	print("Phone: all nine places sit in a two-column grid inside the pane, no scrolling: ", grid_rows.size() == 9 and panel.places_grid.columns == 2 and last_row.get_global_rect().end.y <= pane_rect.end.y and last_row.get_global_rect().end.x <= pane_rect.end.x and panel.places_grid.get_node("DungeonRow").text.begins_with(" Dungeon"))
+	for poi_id in world_map.POI_NAMES:
+		game_state.discovered_pois[poi_id] = poi_id in ["house", "village", "dungeon"]
+	panel.refresh()
+	await process_frame
 	panel.zoom_to(0)
 	print("Phone, whole valley: the 300px chart sits centred in the wider frame: ", panel.pan == ((panel._inner() - Vector2(300, 300)) / 2.0).round() and panel.pan.x > 0.0 and panel.map_rect.size == Vector2(300, 300))
 	panel.zoom_to(2)

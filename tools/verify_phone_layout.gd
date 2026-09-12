@@ -191,7 +191,7 @@ func _initialize() -> void:
 	sheet.open("map")
 	await process_frame
 	var mv2: Control = sheet.map_view
-	print("Short phone, Map: the frame gives up height so the pane (with two place rows) fits inside the window: ", mv2.base_scale == 3.0 and mv2.map_frame.size.y < mv2.map_frame.size.x and mv2.map_frame.size.y >= mv2.FRAME_MIN_NARROW and mv2.detail_pane.get_global_rect().end.y <= win_bottom and mv2.places_scroll.get_global_rect().end.y <= win_bottom and mv2.places_scroll.size.y >= 56.0 and mv2.travel_btn.get_global_rect().end.y <= win_bottom, " frame_h=", mv2.map_frame.size.y, " pane_end=", mv2.detail_pane.get_global_rect().end.y, " win_end=", win_bottom)
+	print("Short phone, Map: the frame gives up height so the pane (with two place rows) fits inside the window: ", mv2.base_scale == 3.0 and mv2.map_frame.size.y < mv2.map_frame.size.x and mv2.map_frame.size.y >= mv2.FRAME_MIN_NARROW and mv2.detail_pane.get_global_rect().end.y <= win_bottom and mv2.places_grid.visible and mv2.places_grid.get_global_rect().end.y <= win_bottom and mv2.places_grid.size.y >= 136.0 and mv2.travel_btn.get_global_rect().end.y <= win_bottom, " frame_h=", mv2.map_frame.size.y, " pane_end=", mv2.detail_pane.get_global_rect().end.y, " win_end=", win_bottom)
 	sheet.open("character")
 	await process_frame
 	await process_frame

@@ -40,11 +40,14 @@ const DEFAULT_ZOOM := 2
 const ZOOM_BTN := 34.0
 const FRAME_PAD := 4.0
 # Phone (2026-09-12, user: "the locations panel doesn't fit on the bottom
-# of the screen"): the pane keeps at least PANE_MIN_NARROW (its compact
-# rows plus two place rows); the map frame, a clipped window now, takes
-# whatever height is left, full width, never taller than it is wide.
-const PANE_MIN_NARROW := 262.0
+# of the screen", then "the scroll between locations is not good - a
+# little grey bar"): the pane keeps at least PANE_MIN_NARROW - its compact
+# rows plus a two-column GRID of all nine places (no scrolling at all); the
+# map frame, a clipped window now, takes whatever height is left, full
+# width, never taller than it is wide.
+const PANE_MIN_NARROW := 316.0
 const FRAME_MIN_NARROW := 150.0
+const GRID_ROW_H := 24.0
 
 @onready var subtitle_label: Label = $SubtitleLabel
 @onready var map_frame: Panel = $MapFrame
@@ -68,6 +71,8 @@ var map_scale := 16.0 # base_scale * ZOOM_STEPS[zoom_index]
 var pan := Vector2.ZERO # the chart's top-left inside the frame's inner area (<= 0)
 var zoom_in_btn: Button
 var zoom_out_btn: Button
+var places_grid: GridContainer # the phone's place buttons (two columns, no scroll)
+var _narrow := false
 var _marker_tex: Texture2D
 var _marker_selected_tex: Texture2D
 var _here_tex: Texture2D
@@ -87,6 +92,13 @@ func _ready() -> void:
 	zoom_out_btn = _zoom_button("ZoomOut", "-")
 	zoom_in_btn.pressed.connect(func() -> void: zoom_to(zoom_index + 1))
 	zoom_out_btn.pressed.connect(func() -> void: zoom_to(zoom_index - 1))
+	places_grid = GridContainer.new()
+	places_grid.name = "PlacesGrid"
+	places_grid.columns = 2
+	places_grid.add_theme_constant_override("h_separation", 4)
+	places_grid.add_theme_constant_override("v_separation", 4)
+	places_grid.visible = false
+	detail_pane.add_child(places_grid)
 	hint_label.text = "Drag to look around, + / - to zoom. Tap a marker or a name to see the place. Fast Travel lands you at its entrance."
 
 func _zoom_button(node_name: String, label: String) -> Button:
@@ -152,6 +164,10 @@ func apply_layout(narrow: bool, view_size: Vector2) -> void:
 	_centre_on_open = true
 	_apply_view()
 	var pw: float = detail_pane.size.x
+	_narrow = narrow
+	places_title.visible = not narrow
+	places_scroll.visible = not narrow
+	places_grid.visible = narrow
 	if not narrow:
 		_place(poi_name, Vector2(12, 10), Vector2(pw - 24.0, 44))
 		poi_where.position = Vector2(12, 56)
@@ -162,14 +178,14 @@ func apply_layout(narrow: bool, view_size: Vector2) -> void:
 		_place(places_scroll, Vector2(12, 238), Vector2(pw - 24.0, maxf(40.0, pane_h - 238.0 - 12.0)))
 	else:
 		# Compact rows: one-line name, three lines of description, a 36px
-		# button, the list from y=196 (two rows fit inside PANE_MIN_NARROW).
+		# button, then the two-column grid of places from y=174 (five grid
+		# rows of 24px hold all nine places inside PANE_MIN_NARROW).
 		_place(poi_name, Vector2(12, 8), Vector2(pw - 24.0, 24))
 		poi_where.position = Vector2(12, 34)
 		_place(poi_desc, Vector2(12, 54), Vector2(pw - 24.0, 52))
 		poi_status.position = Vector2(12, 108)
 		_place(travel_btn, Vector2(12, 130), Vector2(pw - 24.0, 36))
-		places_title.position = Vector2(12, 174)
-		_place(places_scroll, Vector2(12, 196), Vector2(pw - 24.0, maxf(56.0, pane_h - 196.0 - 10.0)))
+		_place(places_grid, Vector2(12, 174), Vector2(pw - 24.0, pane_h - 174.0 - 6.0))
 
 # --- zoom + pan ---
 
@@ -308,6 +324,9 @@ func refresh() -> void:
 	# top (it's not a button; the place under it is still tappable).
 	_clear(markers)
 	_clear(places_list)
+	_clear(places_grid)
+	var rows_parent: Container = places_grid if _narrow else places_list
+	var grid_w: float = (detail_pane.size.x - 24.0 - 4.0) / 2.0
 	for poi_id in WorldMap.POI_NAMES:
 		if not WorldMap.is_shown(poi_id):
 			continue
@@ -329,14 +348,23 @@ func refresh() -> void:
 		markers.add_child(btn)
 		var row := Button.new()
 		row.name = poi_id.to_pascal_case() + "Row"
-		row.text = "  " + WorldMap.POI_NAMES[poi_id] + (" (rumoured)" if rumoured else "")
 		row.theme_type_variation = &"TabButtonActive" if selected else &"TabButton"
-		row.add_theme_font_size_override("font_size", 12)
-		row.custom_minimum_size = Vector2(places_scroll.size.x, 28)
 		row.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		row.mouse_filter = Control.MOUSE_FILTER_PASS # touch drag-scroll through the list
 		row.pressed.connect(select_poi.bind(poi_id, true))
-		places_list.add_child(row)
+		if _narrow:
+			# Half-width cells: a "?" stands in for "(rumoured)", long names trim.
+			row.text = ("? " if rumoured else " ") + WorldMap.POI_NAMES[poi_id]
+			row.add_theme_font_size_override("font_size", 11)
+			row.custom_minimum_size = Vector2(grid_w, GRID_ROW_H)
+			row.clip_text = true
+			row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			row.tooltip_text = WorldMap.POI_NAMES[poi_id]
+		else:
+			row.text = "  " + WorldMap.POI_NAMES[poi_id] + (" (rumoured)" if rumoured else "")
+			row.add_theme_font_size_override("font_size", 12)
+			row.custom_minimum_size = Vector2(places_scroll.size.x, 28)
+		rows_parent.add_child(row)
 	if here != Vector2i(-1, -1):
 		var dot := TextureRect.new()
 		dot.name = "HereMarker"
