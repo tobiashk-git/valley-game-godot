@@ -58,6 +58,7 @@ static func _load_music(id: String):
 # ZONE_MUSIC below).
 const SCENE_MUSIC := {
 	"Title": "title",
+	"Ending": "title",
 	"Overworld": "village",
 	"House": "village",
 	"ElderHouse": "village",

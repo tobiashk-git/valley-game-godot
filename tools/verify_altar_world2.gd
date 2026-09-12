@@ -64,6 +64,7 @@ func _initialize() -> void:
 	Input.action_release("interact")
 	await process_frame
 	print("Crystals consumed on reveal: ", inventory.get_count("magic_crystal") == 0)
+	print("(The Warden's crystal now ends the game - see verify_ending.gd - so this verify stops at the lair.)", "")
 	print("Final boss now revealed: ", game_state.world_progress.final_boss_revealed)
 	print("Reveal message shown: ", dialogue_ui.text_label.text.contains("hidden path"))
 	root.get_texture().get_image().save_png("res://verify_altar_revealed.png")
@@ -134,66 +135,8 @@ func _initialize() -> void:
 		exit_tries += 1
 	print("Left the final boss maze via the real portal: ", current_scene.name == "Overworld")
 
-	# --- Altar again: boss dead, crystal in hand - opens the portal. ---
-	player = current_scene.get_node("YSort/Player")
-	player.position = Vector2(altar_tile.x * 32 + 16, (altar_tile.y + 4) * 32 + 16)
-	cam = player.get_node("Camera2D")
-	cam.reset_smoothing()
-	for i in range(3):
-		await process_frame
-	await _walk(player, "move_up", 60)
-	Input.action_press("interact")
-	await process_frame
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
-	print("Third crystal consumed: ", inventory.get_count("magic_crystal") == 0)
-	print("World2 unlocked flag set: ", game_state.world_progress.world2_unlocked)
-	print("Portal-opens message shown: ", dialogue_ui.text_label.text.contains("portal to a new world"))
-	print("Still on Overworld (didn't auto-travel): ", current_scene.name == "Overworld")
-	Input.action_press("interact")
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
-
-	# --- Interact again: this time it actually travels to World 2. ---
-	Input.action_press("interact")
-	await process_frame
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
-	print("Traveled to World 2: ", current_scene.name == "Overworld2")
-	await process_frame
-	print("HUD shows a biome on World 2: ", hud.location_label.text in world.ZONE_NAMES.values(), " -> '", hud.location_label.text, "'")
-	root.get_texture().get_image().save_png("res://verify_world2.png")
-
-	# --- World 2 boundary works too. ---
-	var w2player: CharacterBody2D = current_scene.get_node("YSort/Player")
-	var w2cam: Camera2D = w2player.get_node("Camera2D")
-	w2player.position = Vector2(5 * 32 + 16, world.WORLD_CENTER_Y * 32 + 16)
-	w2cam.reset_smoothing()
-	for i in range(3):
-		await process_frame
-	await _walk(w2player, "move_left", 60)
-	print("World 2 west boundary holds: ", w2player.position.x >= -32.0)
-
-	# --- Return portal takes us back to World 1, at the altar plaza. ---
-	# Unlike the altar/entrance props, the return portal has no separate
-	# solid StaticBody2D blocking it (Area2D alone doesn't block
-	# CharacterBody2D movement), so a small close offset works directly -
-	# same convention as approaching an NPC/chest.
-	w2player.position = Vector2(world.WORLD_CENTER_X * 32 + 16, world.WORLD_CENTER_Y * 32 + 16 + 15)
-	w2cam.reset_smoothing()
-	for i in range(3):
-		await process_frame
-	Input.action_press("interact")
-	await process_frame
-	await process_frame
-	Input.action_release("interact")
-	await process_frame
-	print("Returned to Overworld (World 1): ", current_scene.name == "Overworld")
-	var back_player: CharacterBody2D = current_scene.get_node("YSort/Player")
-	var back_tile := Vector2i(int(back_player.position.x / 32), int(back_player.position.y / 32))
-	print("Landed at the village altar plaza: ", back_tile == world.ALTAR_POS + Vector2i(0, 2))
-
+	# --- The Warden's crystal at the altar now ENDS THE GAME (2026-09-12):
+	# the swirl and the completion screen are verify_ending.gd's; world 2 (the
+	# portal, Overworld2) is a future version and is not walked here.
+	print("World 2 stays a future version: nothing sets world2_unlocked any more: ", not game_state.world_progress.world2_unlocked)
 	quit()

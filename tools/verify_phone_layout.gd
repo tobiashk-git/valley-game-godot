@@ -227,5 +227,25 @@ func _initialize() -> void:
 	print("Tracker back beside the HUD (y=64): ", tracker.vbox.offset_top == 64.0 and tracker.vbox.offset_left == -268.0)
 	bar_rect = _rect(quick_bar.hbox)
 	print("Quick bar back at the bottom edge: ", 600.0 - bar_rect.end.y <= 24.0)
+	# The completion screen on a phone: everything inside the screen, Oliver
+	# between the two busts, buttons at the bottom.
+	root.size = Vector2i(400, 860)
+	for i in range(4):
+		await process_frame
+	for boss_id in root.get_node("GameState").boss_defeated.keys():
+		root.get_node("GameState").boss_defeated[boss_id] = true
+	var ending: Control = load("res://scenes/Ending.tscn").instantiate()
+	root.add_child(ending)
+	current_scene = ending
+	for i in range(4):
+		await process_frame
+	print("Ending screen on the phone: Oliver between the busts, strip and buttons inside 400x860: ", ending.luigi.get_global_rect().end.x <= ending.oliver.get_global_rect().position.x and ending.eden.get_global_rect().position.x >= ending.oliver.get_global_rect().end.x and ending.quit_btn.get_global_rect().end.y <= 860.0 and ending.strip_clip.size.x == 400.0 and ending.headline.get_global_rect().end.x <= 400.0)
+	root.get_texture().get_image().save_png("res://verify_phone_ending.png")
+	print("Saved verify_phone_ending.png")
+	ending.queue_free()
+	await process_frame
+	root.size = Vector2i(800, 600)
+	for i in range(4):
+		await process_frame
 	print("Battle panel back to 560 wide: ", battle.panel.offset_left == -280.0 and battle.panel.offset_right == 280.0)
 	quit()

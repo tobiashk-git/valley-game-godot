@@ -40,7 +40,7 @@ const UNLOCKS := {
 	"cross_gloomfen": "the western ford opens: Gloomfen Marsh and the sunken temple",
 	"hunt_gloomfen": "chapter 5 done; the finale needs it",
 	"two_guardians": "both crystals set on the altar: the Ancient Warden's lair is revealed at the valley's edge",
-	"ancient_warden": "the Warden's crystal at the altar opens the portal to a second world (world 2, not built out)",
+	"ancient_warden": "the Warden's crystal at the altar ENDS THE GAME: a swirl from the altar, then the completion screen (Oliver with Luigi and Eden, the bosses put to sleep, Play again / Quit). World 2 is a future version.",
 	"open_ancient_barrow": "the Ancient Barrow entrance appears in the Golden Plains - chapter 1's teaching dungeon",
 	"forge_whetstone": "nothing in the world (gold + XP); leads to Cold Iron",
 	"forge_frost": "nothing in the world (potion + gold)",
@@ -178,7 +178,7 @@ func _initialize() -> void:
 			_out(lines, "- %s (`%s`) is not the target of any quest." % [enemies.BOSSES[boss_id].name, boss_id])
 	_out(lines, "- The old dungeon is chapter 1's last step and the castle the finale's first; both gates are barred until their hunt is handed out.")
 	_out(lines, "- The chapters are chained (each ford needs the previous hunt); the Story jump in Settings is the way to test a later chapter.")
-	_out(lines, "- world 2 (the portal after the Warden) exists in the state but has no content.")
+	_out(lines, "- world 2 (the portal after the Warden) is a future version; this version ends at the altar.")
 
 	var f := FileAccess.open("res://story_overview.md", FileAccess.WRITE)
 	f.store_string("\n".join(lines) + "\n")

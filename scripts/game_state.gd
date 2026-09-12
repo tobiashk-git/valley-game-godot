@@ -82,7 +82,7 @@ var discovered_pois: Dictionary = {"house": true, "village": true, "dungeon": fa
 # there's no river to cross) flipped by the "open_ancient_barrow" quest; see
 # world.gd's GOLDEN_PLAINS_INTERIOR_ENTRANCE and overworld.gd's
 # reveal_golden_plains_entrance().
-var world_progress: Dictionary = {"final_boss_revealed": false, "world2_unlocked": false, "golden_plains_revealed": false}
+var world_progress: Dictionary = {"final_boss_revealed": false, "world2_unlocked": false, "golden_plains_revealed": false, "game_completed": false}
 
 # The biome revamp's river dividers - each outer biome starts blocked by a
 # river with one ford (see world.gd's _paint_river_ring()/open_biome_path()).
@@ -147,7 +147,7 @@ func is_gameplay() -> bool:
 # press that closes a chat also opens the chest / walks through the door /
 # starts a fight the player is standing next to.
 func interact_blocked() -> bool:
-	return gathering or get_node("/root/DialogueUI").is_open() or get_node("/root/Intro").is_playing()
+	return gathering or get_node("/root/DialogueUI").is_open() or get_node("/root/Intro").is_playing() or get_node("/root/EndingSwirl").playing
 
 func put_wild_monster_to_sleep(key: String) -> void:
 	wild_monsters_defeated[key] = int(Time.get_unix_time_from_system()) + WILD_MONSTER_SLEEP_SECONDS

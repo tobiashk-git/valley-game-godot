@@ -66,7 +66,7 @@ _The castle's crystal, the altar, and what sleeps beneath the valley._  -  compa
 |---|---|---|---|---|---|---|
 | 1 | The Royal Wraith (`hunt_castle`) | Village Elder (village square, outside his house) | The Bogmaw | The castle gate is unchained. Put the Royal Wraith to sleep and take the second Magic Crystal. | 300 XP, 100 gold | Magic Crystal 2 in the pack; the altar step becomes available |
 | 2 | The Altar (`two_guardians`) | Village Elder (village square, outside his house) | The Royal Wraith | Set both Magic Crystals on the altar on the village square. | 200 XP, 100 gold | both crystals set on the altar: the Ancient Warden's lair is revealed at the valley's edge |
-| 3 | The Ancient Warden (`ancient_warden`) | Village Elder (village square, outside his house) | The Altar | Enter the hidden lair the altar revealed and put the Ancient Warden to sleep. | 500 XP, 200 gold | the Warden's crystal at the altar opens the portal to a second world (world 2, not built out) |
+| 3 | The Ancient Warden (`ancient_warden`) | Village Elder (village square, outside his house) | The Altar | Enter the hidden lair the altar revealed and put the Ancient Warden to sleep. | 500 XP, 200 gold | the Warden's crystal at the altar ENDS THE GAME: a swirl from the altar, then the completion screen (Oliver with Luigi and Eden, the bosses put to sleep, Play again / Quit). World 2 is a future version. |
 
 ## Side quests
 
@@ -109,4 +109,4 @@ _The castle's crystal, the altar, and what sleeps beneath the valley._  -  compa
 
 - The old dungeon is chapter 1's last step and the castle the finale's first; both gates are barred until their hunt is handed out.
 - The chapters are chained (each ford needs the previous hunt); the Story jump in Settings is the way to test a later chapter.
-- world 2 (the portal after the Warden) exists in the state but has no content.
+- world 2 (the portal after the Warden) is a future version; this version ends at the altar.

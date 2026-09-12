@@ -19,6 +19,12 @@ func _dialogue_ui() -> Node:
 func interact() -> void:
 	var progress: Dictionary = GameState.world_progress
 
+	# The game's end (2026-09-12): the Warden's crystal at the altar plays
+	# the ending (EndingSwirl -> Ending.tscn). The world-2 portal is a future
+	# version - its code path stays for then, but nothing sets the flag now.
+	if progress.get("game_completed", false):
+		_dialogue_ui().show_dialogue("Altar", "The valley is at peace. Oliver's adventure is done - for now. (Play again from the title to start over.)")
+		return
 	if progress.world2_unlocked:
 		GameState.set_next_spawn(Vector2(World.OVERWORLD_WIDTH * 16, World.OVERWORLD_HEIGHT * 16))
 		get_tree().change_scene_to_file("res://scenes/Overworld2.tscn")
@@ -30,9 +36,9 @@ func interact() -> void:
 			return
 		if Inventory.get_count("magic_crystal") >= 1:
 			Inventory.remove_item("magic_crystal", 1)
-			progress.world2_unlocked = true
 			changed.emit()
-			_dialogue_ui().show_dialogue("Altar", "The crystal dissolves into light... A portal to a new world opens! Return here and step through when you're ready.")
+			var altar_pos: Vector2 = Vector2((World.WORLD_CENTER_X) * 32 + 16, (World.WORLD_CENTER_Y) * 32 + 16)
+			get_node("/root/EndingSwirl").play(altar_pos)
 		else:
 			_dialogue_ui().show_dialogue("Altar", "The altar awaits the Ancient Warden's crystal.")
 		return
