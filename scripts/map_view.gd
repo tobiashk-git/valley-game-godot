@@ -16,6 +16,14 @@ extends Control
 # named shows as a small clearing with a hollow "rumoured" marker (no fast
 # travel) until its portal is walked through. The subtitle adds "% explored".
 #
+# Zoom + pan (2026-09-12, phase 2 - user: "the initial zoom could be much
+# more zoomed in to the village"): the frame is a clipped window onto the
+# chart at base_scale x ZOOM_STEPS[zoom_index] px per tile. It opens at the
+# closest step centred on Oliver; drag (touch or mouse) pans, the +/-
+# buttons and the mouse wheel zoom about the frame's centre / the cursor,
+# and picking a place from the list centres on it. Markers live in a layer
+# that moves with the chart, so _map_pos() stays "tile -> layer pixels".
+#
 # Skeleton from tools/setup_character_sheet.gd; character_sheet.gd calls
 # apply_layout() and refresh() and owns open/close/tab switching.
 
@@ -25,6 +33,12 @@ extends Control
 # the mountain ranges between them.
 const MAP_REGION := Rect2i(World.WORLD_CENTER_X - 50, World.WORLD_CENTER_Y - 50, 100, 100)
 const MARKER_SIZE := 28.0
+# Whole valley / a biome / the local ground, as multiples of the base scale
+# (4 px per tile on PC, 3 on a phone) - so 4/8/16 or 3/6/12 px per tile.
+const ZOOM_STEPS := [1.0, 2.0, 4.0]
+const DEFAULT_ZOOM := 2
+const ZOOM_BTN := 34.0
+const FRAME_PAD := 4.0
 
 @onready var subtitle_label: Label = $SubtitleLabel
 @onready var map_frame: Panel = $MapFrame
@@ -42,11 +56,18 @@ const MARKER_SIZE := 28.0
 @onready var hint_label: Label = $HintLabel
 
 var selected_poi := ""
-var map_scale := 4.0
+var base_scale := 4.0
+var zoom_index := DEFAULT_ZOOM
+var map_scale := 16.0 # base_scale * ZOOM_STEPS[zoom_index]
+var pan := Vector2.ZERO # the chart's top-left inside the frame's inner area (<= 0)
+var zoom_in_btn: Button
+var zoom_out_btn: Button
 var _marker_tex: Texture2D
 var _marker_selected_tex: Texture2D
 var _here_tex: Texture2D
 var _rumour_tex: Texture2D
+var _dragging := false
+var _centre_on_open := true
 
 func _ready() -> void:
 	travel_btn.pressed.connect(_on_travel_pressed)
@@ -54,6 +75,23 @@ func _ready() -> void:
 	_marker_selected_tex = _circle_texture(13, Color(1.0, 0.9, 0.55), Color(1, 1, 1))
 	_here_tex = _circle_texture(8, Color(0.9, 0.2, 0.2), Color(1, 1, 1))
 	_rumour_tex = _circle_texture(10, Color(0.95, 0.78, 0.35, 0.22), Color(0.95, 0.78, 0.35))
+	map_frame.clip_contents = true
+	map_frame.gui_input.connect(_on_frame_input)
+	zoom_in_btn = _zoom_button("ZoomIn", "+")
+	zoom_out_btn = _zoom_button("ZoomOut", "-")
+	zoom_in_btn.pressed.connect(func() -> void: zoom_to(zoom_index + 1))
+	zoom_out_btn.pressed.connect(func() -> void: zoom_to(zoom_index - 1))
+	hint_label.text = "Drag to look around, + / - to zoom. Tap a marker or a name to see the place. Fast Travel lands you at its entrance."
+
+func _zoom_button(node_name: String, label: String) -> Button:
+	var btn := Button.new()
+	btn.name = node_name
+	btn.text = label
+	btn.size = Vector2(ZOOM_BTN, ZOOM_BTN)
+	btn.add_theme_font_size_override("font_size", 20)
+	btn.tooltip_text = "Zoom in" if label == "+" else "Zoom out"
+	map_frame.add_child(btn)
+	return btn
 
 # A filled disc with a 2px outline, generated once (no art file needed).
 func _circle_texture(radius: int, fill: Color, outline: Color) -> ImageTexture:
@@ -80,7 +118,7 @@ func _place(c: Control, pos: Vector2, size: Vector2) -> void:
 func apply_layout(narrow: bool, view_size: Vector2) -> void:
 	var pane_h: float
 	if not narrow:
-		map_scale = 4.0
+		base_scale = 4.0
 		_place(subtitle_label, Vector2(20, 0), Vector2(680, 18))
 		subtitle_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		_place(map_frame, Vector2(20, 22), Vector2(408, 408))
@@ -95,19 +133,21 @@ func apply_layout(narrow: bool, view_size: Vector2) -> void:
 		# Integer scale keeps the one-pixel-per-tile map crisp under NEAREST;
 		# on a short viewport (a phone browser's toolbars) drop a step so the
 		# pane below still has its 200px.
-		map_scale = maxf(1.0, floorf((iw - 48.0) / MAP_REGION.size.x))
+		base_scale = maxf(1.0, floorf((iw - 48.0) / MAP_REGION.size.x))
 		var room: float = view_size.y - 40.0 - 24.0 - 200.0
-		while map_scale > 1.0 and map_scale * MAP_REGION.size.x > room:
-			map_scale -= 1.0
-		var map_px: float = map_scale * MAP_REGION.size.x
+		while base_scale > 1.0 and base_scale * MAP_REGION.size.x > room:
+			base_scale -= 1.0
+		var map_px: float = base_scale * MAP_REGION.size.x
 		_place(map_frame, Vector2(floorf((iw - map_px - 8.0) / 2.0), 40), Vector2(map_px + 8.0, map_px + 8.0))
 		var pane_y: float = 40.0 + map_px + 8.0 + 8.0
 		pane_h = maxf(200.0, view_size.y - pane_y - 4.0)
 		_place(detail_pane, Vector2(20, pane_y), Vector2(iw - 40.0, pane_h))
 		hint_label.visible = false
-	var map_px2: float = map_scale * MAP_REGION.size.x
-	_place(map_rect, Vector2(4, 4), Vector2(map_px2, map_px2))
-	_place(markers, Vector2(4, 4), Vector2(map_px2, map_px2))
+	var inner: float = map_frame.size.x - 2.0 * FRAME_PAD
+	zoom_in_btn.position = Vector2(FRAME_PAD + inner - ZOOM_BTN - 4.0, FRAME_PAD + 4.0)
+	zoom_out_btn.position = Vector2(FRAME_PAD + inner - ZOOM_BTN - 4.0, FRAME_PAD + 4.0 + ZOOM_BTN + 4.0)
+	_centre_on_open = true
+	_apply_view()
 	var pw: float = detail_pane.size.x
 	_place(poi_name, Vector2(12, 10), Vector2(pw - 24.0, 44))
 	poi_where.position = Vector2(12, 56)
@@ -117,9 +157,82 @@ func apply_layout(narrow: bool, view_size: Vector2) -> void:
 	places_title.position = Vector2(12, 216)
 	_place(places_scroll, Vector2(12, 238), Vector2(pw - 24.0, maxf(40.0, pane_h - 238.0 - 12.0)))
 
+# --- zoom + pan ---
+
+# The frame's inner (chart-showing) size in pixels.
+func _inner() -> Vector2:
+	return map_frame.size - Vector2(2.0 * FRAME_PAD, 2.0 * FRAME_PAD)
+
+func _map_px() -> Vector2:
+	return Vector2(MAP_REGION.size) * map_scale
+
+# Keep the chart covering the frame: pan is never positive, never so
+# negative that the chart's far edge comes inside the frame.
+func _clamp_pan() -> void:
+	var lo: Vector2 = _inner() - _map_px()
+	pan.x = clampf(pan.x, minf(lo.x, 0.0), 0.0)
+	pan.y = clampf(pan.y, minf(lo.y, 0.0), 0.0)
+	pan = pan.round()
+
+func _apply_view() -> void:
+	map_scale = base_scale * ZOOM_STEPS[zoom_index]
+	_clamp_pan()
+	_place(map_rect, Vector2(FRAME_PAD, FRAME_PAD) + pan, _map_px())
+	_place(markers, Vector2(FRAME_PAD, FRAME_PAD) + pan, _map_px())
+	zoom_in_btn.disabled = zoom_index >= ZOOM_STEPS.size() - 1
+	zoom_out_btn.disabled = zoom_index <= 0
+
+# Put a tile at the middle of the frame (used on open and from the list).
+func centre_on(tile: Vector2i) -> void:
+	map_scale = base_scale * ZOOM_STEPS[zoom_index]
+	pan = _inner() / 2.0 - (Vector2(tile - MAP_REGION.position) + Vector2(0.5, 0.5)) * map_scale
+	_apply_view()
+
+# Change the zoom step keeping the chart point under `anchor` (inner-frame
+# pixels; the centre when omitted) where it is.
+func zoom_to(index: int, anchor: Vector2 = Vector2(-1, -1)) -> void:
+	index = clampi(index, 0, ZOOM_STEPS.size() - 1)
+	if index == zoom_index:
+		return
+	if anchor.x < 0.0:
+		anchor = _inner() / 2.0
+	var old_scale: float = map_scale
+	var chart_point: Vector2 = (anchor - pan) / old_scale # in tiles
+	zoom_index = index
+	map_scale = base_scale * ZOOM_STEPS[zoom_index]
+	pan = anchor - chart_point * map_scale
+	_apply_view()
+
+func pan_by(delta: Vector2) -> void:
+	pan += delta
+	_apply_view()
+
+# Drag anywhere on the chart to pan (the marker buttons and the zoom
+# buttons keep their own clicks); wheel zooms about the cursor.
+func _on_frame_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.button_index == MOUSE_BUTTON_LEFT:
+			_dragging = mb.pressed
+			map_frame.accept_event()
+		elif mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+			zoom_to(zoom_index + 1, mb.position - Vector2(FRAME_PAD, FRAME_PAD))
+			map_frame.accept_event()
+		elif mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			zoom_to(zoom_index - 1, mb.position - Vector2(FRAME_PAD, FRAME_PAD))
+			map_frame.accept_event()
+	elif event is InputEventMouseMotion and _dragging:
+		var mm: InputEventMouseMotion = event
+		if mm.button_mask & MOUSE_BUTTON_MASK_LEFT == 0:
+			_dragging = false
+			return
+		pan_by(mm.relative)
+		map_frame.accept_event()
+
 # --- selection ---
 
-# Start on the place the player is at (if known), else the village.
+# Start on the place the player is at (if known), else the village; the
+# view opens at the closest zoom, centred on Oliver.
 func select_default() -> void:
 	var here: Vector2i = WorldMap.here_tile()
 	selected_poi = ""
@@ -131,13 +244,20 @@ func select_default() -> void:
 		selected_poi = WorldMap.SCENE_POIS[current.name]
 	if selected_poi == "":
 		selected_poi = "village"
+	zoom_index = DEFAULT_ZOOM
+	_centre_on_open = true
 
-func select_poi(poi_id: String) -> void:
+# `recentre`: the list rows pass true (find the place); a marker tap leaves
+# the view where it is (the marker is already in sight).
+func select_poi(poi_id: String, recentre: bool = false) -> void:
 	selected_poi = poi_id
+	if recentre and WorldMap.is_shown(poi_id):
+		centre_on(WorldMap.poi_tile(poi_id))
 	refresh()
 
 # --- refresh ---
 
+# Tile -> pixels inside the markers layer (which pans with the chart).
 func _map_pos(tile: Vector2i) -> Vector2:
 	return (Vector2(tile - MAP_REGION.position) + Vector2(0.5, 0.5)) * map_scale
 
@@ -159,8 +279,16 @@ func refresh() -> void:
 		subtitle_label.text = "You are in %s - this map shows the Valley  -  %d of %d places known  -  %d%% explored" % [location, known, WorldMap.POI_NAMES.size(), explored]
 	else:
 		subtitle_label.text = "You are in %s  -  %d of %d places known  -  %d%% explored" % [location, known, WorldMap.POI_NAMES.size(), explored]
+	if _centre_on_open:
+		_centre_on_open = false
+		var focus: Vector2i = here
+		if focus == Vector2i(-1, -1):
+			focus = WorldMap.poi_tile(selected_poi) if selected_poi != "" and WorldMap.is_shown(selected_poi) else WorldMap.poi_tile("village")
+		centre_on(focus)
+	else:
+		_apply_view()
 
-	# Markers: one button per discovered place, then the you-are-here dot on
+	# Markers: one button per shown place, then the you-are-here dot on
 	# top (it's not a button; the place under it is still tappable).
 	_clear(markers)
 	_clear(places_list)
@@ -179,7 +307,7 @@ func refresh() -> void:
 			btn.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 		btn.size = Vector2(MARKER_SIZE, MARKER_SIZE)
 		btn.position = _map_pos(WorldMap.poi_tile(poi_id)) - Vector2(MARKER_SIZE, MARKER_SIZE) / 2.0
-		btn.pressed.connect(select_poi.bind(poi_id))
+		btn.pressed.connect(select_poi.bind(poi_id, false))
 		markers.add_child(btn)
 		var row := Button.new()
 		row.name = poi_id.to_pascal_case() + "Row"
@@ -188,7 +316,8 @@ func refresh() -> void:
 		row.add_theme_font_size_override("font_size", 12)
 		row.custom_minimum_size = Vector2(places_scroll.size.x, 28)
 		row.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		row.pressed.connect(select_poi.bind(poi_id))
+		row.mouse_filter = Control.MOUSE_FILTER_PASS # touch drag-scroll through the list
+		row.pressed.connect(select_poi.bind(poi_id, true))
 		places_list.add_child(row)
 	if here != Vector2i(-1, -1):
 		var dot := TextureRect.new()

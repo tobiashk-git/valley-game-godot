@@ -12,6 +12,9 @@ extends SceneTree
 # the Map tab (the title backdrop stays whole); a hunt quest names its lair
 # as a rumoured marker with a small clearing; walking reveals; the bitmap
 # survives a save round-trip and a new game clears it.
+# Zoom + pan (2026-09-12, phase 2): the map opens at the closest of three
+# zoom steps centred on Oliver; +/- step out and in about the centre, a
+# drag pans and is clamped to the chart, a list row centres on its place.
 
 func _walk(direction: String, frames: int) -> void:
 	Input.action_press(direction)
@@ -86,7 +89,31 @@ func _initialize() -> void:
 	await _press("toggle_map")
 	print("M opens the sheet on its Map tab (the alias autoload agrees): ", sheet.is_open() and sheet.current_tab == "map" and panel.visible and alias.is_open())
 	print("Header hidden on the Map tab so the map gets the height; tab strip still there: ", not sheet.header.visible and sheet.tabs.visible and sheet.tabs.get_node("InventoryTab").visible)
-	print("Map texture drawn at 4px per tile: ", panel.map_rect.texture != null and panel.map_rect.size == Vector2(400, 400) and panel.map_scale == 4.0)
+	var inner_centre: Vector2 = Vector2(panel.FRAME_PAD, panel.FRAME_PAD) + panel._inner() / 2.0
+	print("Opens at the closest zoom (16px per tile on PC, base 4) centred on Oliver, the chart clipped to the frame: ", panel.map_rect.texture != null and panel.base_scale == 4.0 and panel.zoom_index == 2 and panel.map_scale == 16.0 and panel.map_rect.size == Vector2(1600, 1600) and panel.map_frame.clip_contents and (panel.markers.position + panel._map_pos(here)).distance_to(inner_centre) < 1.0)
+	print("Zoom buttons in the frame's corner, + disabled at the closest step: ", panel.zoom_in_btn.disabled and not panel.zoom_out_btn.disabled and panel.zoom_in_btn.get_global_rect().intersects(panel.map_frame.get_global_rect()))
+	panel.zoom_out_btn.pressed.emit()
+	panel.zoom_out_btn.pressed.emit()
+	print("Two zoom-outs show the whole valley at 4px per tile, no pan: ", panel.zoom_index == 0 and panel.map_scale == 4.0 and panel.map_rect.size == Vector2(400, 400) and panel.pan == Vector2.ZERO and panel.zoom_out_btn.disabled)
+	panel.zoom_in_btn.pressed.emit()
+	print("Zooming in keeps the frame's centre tile (the chart's middle at 8px): ", panel.zoom_index == 1 and panel.map_scale == 8.0 and (panel.markers.position + panel._map_pos(panel.MAP_REGION.position + Vector2i(50, 50))).distance_to(inner_centre) < 8.0)
+	var pan_before: Vector2 = panel.pan
+	var drag := InputEventMouseMotion.new()
+	drag.button_mask = MOUSE_BUTTON_MASK_LEFT
+	drag.relative = Vector2(-60, -30)
+	panel._dragging = true
+	panel._on_frame_input(drag)
+	print("A drag pans the chart and the markers with it: ", panel.pan == pan_before + Vector2(-60, -30) and panel.markers.position == panel.map_rect.position)
+	drag.relative = Vector2(-5000, -5000)
+	panel._on_frame_input(drag)
+	print("...clamped so the chart's far edge never leaves the frame: ", panel.pan == panel._inner() - panel._map_px() and panel.map_rect.position + panel.map_rect.size == Vector2(panel.FRAME_PAD, panel.FRAME_PAD) + panel._inner())
+	panel._dragging = false
+	panel.places_list.get_node("HouseRow").pressed.emit()
+	await process_frame
+	print("Picking a place from the list centres the chart on it: ", (panel.markers.position + panel._map_pos(world_map.poi_tile("house"))).distance_to(inner_centre) < 1.0 and panel.selected_poi == "house")
+	panel.zoom_to(2)
+	panel.select_poi("village", true) # back to the opening state for the checks below (markers rebuilt at 16px)
+	await process_frame
 	var names: Array = _marker_names(panel)
 	print("Markers for the known places only (house, village): ", names.has("HouseMarker") and names.has("VillageMarker") and not names.has("DungeonMarker") and names.size() == 2)
 	print("Subtitle counts known places and the explored share: ", panel.subtitle_label.text.begins_with("You are in the Valley  -  2 of 9 places known  -  ") and panel.subtitle_label.text.ends_with("% explored") and world_map.explored_percent(panel.MAP_REGION) > 0 and world_map.explored_percent(panel.MAP_REGION) < 10)
@@ -185,7 +212,7 @@ func _initialize() -> void:
 	await process_frame
 	var frame_rect: Rect2 = panel.map_frame.get_global_rect()
 	var pane_rect: Rect2 = panel.detail_pane.get_global_rect()
-	print("Phone: map at 3px per tile, centred, pane below inside the window: ", layout.width == 400 and sheet.narrow and panel.map_scale == 3.0 and panel.map_rect.size == Vector2(300, 300) and absf(frame_rect.get_center().x - 200.0) < 2.0 and pane_rect.position.y >= frame_rect.end.y and pane_rect.end.y <= sheet.window.get_global_rect().end.y)
+	print("Phone: base 3px per tile (opens at 12), frame centred, pane below inside the window: ", layout.width == 400 and sheet.narrow and panel.base_scale == 3.0 and panel.map_scale == 12.0 and panel.map_frame.size == Vector2(308, 308) and absf(frame_rect.get_center().x - 200.0) < 2.0 and pane_rect.position.y >= frame_rect.end.y and pane_rect.end.y <= sheet.window.get_global_rect().end.y)
 	root.get_texture().get_image().save_png("res://verify_map_phone.png")
 	print("Saved verify_map_phone.png")
 	sheet.close()
