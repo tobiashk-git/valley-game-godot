@@ -646,6 +646,7 @@ func _process(_delta: float) -> void:
 	var current_tile := Vector2i(int(player.position.x / 32), int(player.position.y / 32))
 	if current_tile != _last_tile:
 		_last_tile = current_tile
+		GameState.reveal_overworld(current_tile) # the Map tab's fog of war (2026-09-12)
 		var zone: int = World.biome_at(current_tile.x, current_tile.y).zone
 		if zone != World.Zone.VALLEY and OVERWORLD_ENCOUNTERS_ENABLED:
 			Combat.check_random_encounter(zone)

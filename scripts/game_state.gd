@@ -68,6 +68,67 @@ func reveal_cell(poi_id: String, pos: Vector2i) -> void:
 func is_revealed(poi_id: String, pos: Vector2i) -> bool:
 	return revealed_cells(poi_id).has("%d,%d" % [pos.x, pos.y])
 
+# The valley's own fog of war (2026-09-12, the Map tab): one byte per
+# overworld tile, 1 once Oliver has walked within OVERWORLD_REVEAL_RADIUS
+# of it (overworld.gd calls reveal_overworld on every tile change). Saved
+# per save as compressed base64, cleared by a new game. Lairs a hunt quest
+# names are shown too, but that is derived from quest_state in WorldMap,
+# not stored here - so a Story jump agrees without extra bookkeeping.
+const OVERWORLD_REVEAL_RADIUS := 7
+var overworld_revealed: PackedByteArray = PackedByteArray()
+
+func _revealed_index(tile: Vector2i) -> int:
+	if tile.x < 0 or tile.y < 0 or tile.x >= World.OVERWORLD_WIDTH or tile.y >= World.OVERWORLD_HEIGHT:
+		return -1
+	return tile.y * World.OVERWORLD_WIDTH + tile.x
+
+func _ensure_revealed() -> void:
+	var n: int = World.OVERWORLD_WIDTH * World.OVERWORLD_HEIGHT
+	if overworld_revealed.size() != n:
+		overworld_revealed = PackedByteArray()
+		overworld_revealed.resize(n) # zero-filled: all fog
+
+func reveal_overworld(centre: Vector2i, radius: int = OVERWORLD_REVEAL_RADIUS) -> void:
+	_ensure_revealed()
+	for dy in range(-radius, radius + 1):
+		for dx in range(-radius, radius + 1):
+			if dx * dx + dy * dy > radius * radius:
+				continue
+			var i: int = _revealed_index(centre + Vector2i(dx, dy))
+			if i >= 0:
+				overworld_revealed[i] = 1
+
+func is_overworld_revealed(tile: Vector2i) -> bool:
+	_ensure_revealed()
+	var i: int = _revealed_index(tile)
+	return i >= 0 and overworld_revealed[i] == 1
+
+# How many tiles of a region Oliver has walked near (the Map tab's "explored").
+func overworld_revealed_count(region: Rect2i) -> int:
+	_ensure_revealed()
+	var n := 0
+	for y in range(region.position.y, region.end.y):
+		for x in range(region.position.x, region.end.x):
+			var i: int = _revealed_index(Vector2i(x, y))
+			if i >= 0 and overworld_revealed[i] == 1:
+				n += 1
+	return n
+
+# Save form: the 40 KB bitmap deflated and base64'd (a few hundred bytes early on).
+func overworld_revealed_encoded() -> String:
+	_ensure_revealed()
+	return Marshalls.raw_to_base64(overworld_revealed.compress(FileAccess.COMPRESSION_DEFLATE))
+
+func set_overworld_revealed_encoded(text: String) -> void:
+	overworld_revealed = PackedByteArray()
+	var n: int = World.OVERWORLD_WIDTH * World.OVERWORLD_HEIGHT
+	if text != "":
+		var raw: PackedByteArray = Marshalls.base64_to_raw(text)
+		var out: PackedByteArray = raw.decompress(n, FileAccess.COMPRESSION_DEFLATE)
+		if out.size() == n:
+			overworld_revealed = out
+	_ensure_revealed()
+
 # World Map fast-travel unlocks. House/village start known (the player
 # spawns right there); the dungeon/castle unlock themselves in
 # maze_interior.gd's own _ready() - in real play that only ever runs after
@@ -134,6 +195,7 @@ func reset() -> void:
 		biome_paths_open[key] = false
 	dungeon_seeds.clear()
 	dungeon_revealed.clear()
+	overworld_revealed = PackedByteArray()
 
 # True on any scene with a player (overworld, houses, interiors); false on
 # the title screen. The always-on overlays (HUD, toolbar, quick bar,

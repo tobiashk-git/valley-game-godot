@@ -68,6 +68,21 @@ const MAP_COLOURS := {
 	World.SRC_FOREST_WALL: Color(0.12, 0.3, 0.13),
 }
 
+# Fog of war (2026-09-12): the Map tab shows only the ground Oliver has
+# walked near (GameState.overworld_revealed) plus a small circle around any
+# lair a hunt quest has named - so the hunt text's directions and the chart
+# agree. A named-but-unvisited place is "rumoured": a hollow marker, no
+# fast travel, until its portal is walked through (discovered_pois).
+const LAIR_OF_BOSS := {
+	"golden_plains_boss": "golden_plains_interior", "dungeon_boss": "dungeon",
+	"frostpeak_boss": "frostpeak_interior", "verdantwood_boss": "verdantwood_interior",
+	"badlands_boss": "badlands_interior", "gloomfen_boss": "gloomfen_interior",
+	"castle_boss": "castle", "final_boss": "final_boss",
+}
+const LAIR_REVEAL_RADIUS := 4
+const FOG_COLOUR := Color(0.2, 0.17, 0.13)
+const FOG_EDGE_BLEND := 0.6
+
 const LOCATION_NAMES := {
 	"Overworld": "the Valley",
 	"Dungeon": "the Dungeon",
@@ -143,7 +158,10 @@ func discovered_count() -> int:
 # Verdantwood maze) is deliberately absent: the map is a chart, not a
 # screenshot. Ground tiles get the same deterministic fleck the terrain
 # uses so the biomes read as textured rather than flat.
-func render_map(region: Rect2i) -> ImageTexture:
+# `fog`: true for the Map tab (unrevealed tiles in FOG_COLOUR, the rim one
+# tile out blended so the edge reads soft); false for the title backdrop
+# and the designer, which want the whole chart.
+func render_map(region: Rect2i, fog: bool = false) -> ImageTexture:
 	var tilemap := TileMapLayer.new()
 	World.build_overworld_map(tilemap)
 	MapRecipe.apply_tiles(tilemap, MapRecipe.load_active()) # the chart shows designed tiles too
@@ -152,20 +170,89 @@ func render_map(region: Rect2i) -> ImageTexture:
 			World.open_biome_path(tilemap, World.Zone[zone.to_upper()])
 	if GameState.village_gates_open:
 		World.open_gates(tilemap)
-	var img := Image.create(region.size.x, region.size.y, false, Image.FORMAT_RGBA8)
-	for y in range(region.size.y):
-		for x in range(region.size.x):
+	var w: int = region.size.x
+	var h: int = region.size.y
+	var revealed := PackedByteArray()
+	if fog:
+		var named: Dictionary = named_places()
+		revealed.resize(w * h)
+		for y in range(h):
+			for x in range(w):
+				revealed[y * w + x] = 1 if is_tile_revealed(region.position + Vector2i(x, y), named) else 0
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in range(h):
+		for x in range(w):
 			var tile := Vector2i(region.position.x + x, region.position.y + y)
 			var source: int = tilemap.get_cell_source_id(tile)
 			var colour: Color = MAP_COLOURS.get(source, Color(0.1, 0.1, 0.1))
-			if (source in World.OUTER_BIOME_SOURCES or source == World.SRC_GRASS or source == World.SRC_MOUNTAIN) and (tile.x * 17 + tile.y * 11) % 3 == 0:
+			var fleck: bool = (tile.x * 17 + tile.y * 11) % 3 == 0
+			if (source in World.OUTER_BIOME_SOURCES or source == World.SRC_GRASS or source == World.SRC_MOUNTAIN) and fleck:
 				colour = colour.darkened(0.07)
+			if fog and revealed[y * w + x] == 0:
+				var edge := false
+				for ny in range(maxi(0, y - 1), mini(h, y + 2)):
+					for nx in range(maxi(0, x - 1), mini(w, x + 2)):
+						if revealed[ny * w + nx] == 1:
+							edge = true
+				if edge:
+					colour = colour.lerp(FOG_COLOUR, FOG_EDGE_BLEND)
+				else:
+					colour = FOG_COLOUR.darkened(0.06) if fleck else FOG_COLOUR
 			img.set_pixel(x, y, colour)
 	tilemap.free()
 	return ImageTexture.create_from_image(img)
 
 func is_discovered(poi_id: String) -> bool:
 	return GameState.discovered_pois.get(poi_id, false)
+
+# Places a hunt quest has named (accepted or done) -> true. Derived from the
+# quest state each time, so a Story jump or a load needs no extra step.
+func named_places() -> Dictionary:
+	var out: Dictionary = {}
+	var quests: Node = get_node("/root/Quests")
+	for quest_id in quests.QUEST_DEFS:
+		var state: String = str(quests.quest_state.get(quest_id, ""))
+		if state != "accepted" and state != "completed":
+			continue
+		var objective: Dictionary = quests.QUEST_DEFS[quest_id].get("objective", {})
+		if objective.get("type", "") != "defeat_bosses":
+			continue
+		for boss_id in objective.get("boss_ids", []):
+			if LAIR_OF_BOSS.has(boss_id):
+				out[LAIR_OF_BOSS[boss_id]] = true
+	return out
+
+func is_named(poi_id: String) -> bool:
+	return named_places().has(poi_id)
+
+# On the map at all: walked through (discovered) or named by a hunt (rumoured).
+func is_shown(poi_id: String) -> bool:
+	return is_discovered(poi_id) or is_named(poi_id)
+
+# The tile a named place stands on (movable places from the recipe, the
+# house / village from their fixed spots).
+func place_tile(place_id: String) -> Vector2i:
+	if World.PLACE_DEFAULTS.has(place_id):
+		return World.place(place_id)
+	return poi_tile(place_id)
+
+# Walked near, or inside a named lair's circle. `named` = named_places().
+func is_tile_revealed(tile: Vector2i, named: Dictionary) -> bool:
+	if GameState.is_overworld_revealed(tile):
+		return true
+	var r2: int = LAIR_REVEAL_RADIUS * LAIR_REVEAL_RADIUS
+	for place_id in named:
+		var d: Vector2i = tile - place_tile(place_id)
+		if d.x * d.x + d.y * d.y <= r2:
+			return true
+	return false
+
+# Whole percent of a region Oliver has walked near (the subtitle's nudge).
+func explored_percent(region: Rect2i) -> int:
+	var area: int = region.size.x * region.size.y
+	if area <= 0:
+		return 0
+	return int(round(100.0 * GameState.overworld_revealed_count(region) / area))
 
 func current_location_name() -> String:
 	var current: Node = get_tree().current_scene

@@ -108,6 +108,7 @@ func snapshot() -> Dictionary:
 			"biome_paths_open": GameState.biome_paths_open.duplicate(),
 			"dungeon_seeds": GameState.dungeon_seeds.duplicate(),
 			"dungeon_revealed": GameState.dungeon_revealed.duplicate(true),
+			"overworld_revealed": GameState.overworld_revealed_encoded(),
 		},
 		"inventory": {"backpack": _int_dict(Inventory.backpack), "gear": gear, "next_uid": Inventory._next_uid},
 		"character": {"stats": _int_dict(Character.stats), "equipment": equipment},
@@ -133,6 +134,7 @@ func apply(data: Dictionary) -> void:
 	for poi_id in gs.get("dungeon_revealed", {}).keys():
 		revealed[str(poi_id)] = Dictionary(gs.dungeon_revealed[poi_id]).duplicate()
 	GameState.dungeon_revealed = revealed
+	GameState.set_overworld_revealed_encoded(str(gs.get("overworld_revealed", ""))) # older saves: all fog again
 
 	var inv: Dictionary = data.get("inventory", {})
 	Inventory.backpack = _int_dict(inv.get("backpack", {}))

@@ -8,6 +8,10 @@ extends SceneTree
 # stands on the entrance while inside a place, entering the Dungeon through
 # its real portal discovers it, Fast Travel works from the Overworld and
 # from inside a house, and the phone layout stacks the pane under the map.
+# Fog of war (2026-09-12): only the ground Oliver has walked near shows on
+# the Map tab (the title backdrop stays whole); a hunt quest names its lair
+# as a rumoured marker with a small clearing; walking reveals; the bitmap
+# survives a save round-trip and a new game clears it.
 
 func _walk(direction: String, frames: int) -> void:
 	Input.action_press(direction)
@@ -51,7 +55,18 @@ func _initialize() -> void:
 	# The Map tab's view (the old WorldMapPanel window is now an alias). Read
 	# after the first frames: autoload @onready fields aren't set before.
 	var panel: Node = sheet.map_view
+	var save: Node = root.get_node("SaveSystem")
 	print("Dungeon undiscovered at boot: ", not game_state.discovered_pois.dungeon)
+	var player: CharacterBody2D = overworld.get_node("YSort/Player")
+	var here: Vector2i = Vector2i(floori(player.position.x / 32.0), floori(player.position.y / 32.0))
+	var far: Vector2i = here + Vector2i(30, 0)
+	print("Fog of war: the ground around Oliver's start is revealed, 30 tiles east is not: ", game_state.is_overworld_revealed(here) and game_state.is_overworld_revealed(here + Vector2i(5, 0)) and not game_state.is_overworld_revealed(here + Vector2i(9, 0)) and not game_state.is_overworld_revealed(far))
+	var fogged: Image = world_map.render_map(panel.MAP_REGION, true).get_image()
+	var fp: Vector2i = far - panel.MAP_REGION.position
+	var hp: Vector2i = here - panel.MAP_REGION.position
+	var far_px: Color = fogged.get_pixel(fp.x, fp.y)
+	print("A fogged render paints unrevealed tiles in the fog colour and revealed ones in their palette colour: ", (_close(far_px, world_map.FOG_COLOUR) or _close(far_px, world_map.FOG_COLOUR.darkened(0.06))) and not _close(fogged.get_pixel(hp.x, hp.y), world_map.FOG_COLOUR) and not _close(fogged.get_pixel(hp.x, hp.y), world_map.FOG_COLOUR.darkened(0.06)))
+	print("Nothing is rumoured before a hunt is handed out: ", world_map.named_places().is_empty() and not world_map.is_shown("dungeon"))
 
 	# --- The rendered map itself. ---
 	var tex: Texture2D = world_map.render_map(panel.MAP_REGION)
@@ -74,7 +89,7 @@ func _initialize() -> void:
 	print("Map texture drawn at 4px per tile: ", panel.map_rect.texture != null and panel.map_rect.size == Vector2(400, 400) and panel.map_scale == 4.0)
 	var names: Array = _marker_names(panel)
 	print("Markers for the known places only (house, village): ", names.has("HouseMarker") and names.has("VillageMarker") and not names.has("DungeonMarker") and names.size() == 2)
-	print("Subtitle counts known places: ", panel.subtitle_label.text == "You are in the Valley  -  2 of 9 places known")
+	print("Subtitle counts known places and the explored share: ", panel.subtitle_label.text.begins_with("You are in the Valley  -  2 of 9 places known  -  ") and panel.subtitle_label.text.ends_with("% explored") and world_map.explored_percent(panel.MAP_REGION) > 0 and world_map.explored_percent(panel.MAP_REGION) < 10)
 	# The bug that moved the map in here: from the Map tab you can switch
 	# straight to Inventory (and back) without losing the tab strip.
 	sheet.tabs.get_node("InventoryTab").pressed.emit()
@@ -83,8 +98,6 @@ func _initialize() -> void:
 	sheet.tabs.get_node("MapTab").pressed.emit()
 	await process_frame
 	print("...and Map tab returns to the map: ", sheet.current_tab == "map" and panel.visible and not sheet.header.visible)
-	var player: CharacterBody2D = overworld.get_node("YSort/Player")
-	var here: Vector2i = Vector2i(floori(player.position.x / 32.0), floori(player.position.y / 32.0))
 	var dot: Control = panel.markers.get_node("HereMarker")
 	print("You-are-here dot sits on the player's tile: ", dot != null and (dot.position + Vector2(8, 8)).is_equal_approx(panel._map_pos(here)))
 	var village_marker: Button = panel.markers.get_node("VillageMarker")
@@ -102,6 +115,17 @@ func _initialize() -> void:
 	combat._steps_since_encounter = -100000 # no random encounter mid-walk
 	root.get_node("Quests").quest_state["hunt_dungeon"] = "accepted" # the dungeon gate is barred until the Elder hands this out (2026-09-08)
 	var approach: Vector2i = world.place("dungeon") + Vector2i(0, 2)
+	# --- The hunt names the dungeon: rumoured on the map, a clearing around it. ---
+	print("The hunt names the Dungeon: rumoured (shown, not discovered), its ground revealed in a small circle only: ", world_map.is_named("dungeon") and world_map.is_shown("dungeon") and not world_map.is_discovered("dungeon") and world_map.is_tile_revealed(approach, world_map.named_places()) and not world_map.is_tile_revealed(world.place("dungeon") + Vector2i(0, 8), world_map.named_places()) and not game_state.is_overworld_revealed(approach))
+	await _press("toggle_map")
+	var rumour: Button = panel.markers.get_node_or_null("DungeonMarker")
+	print("...a hollow marker and a '(rumoured)' row: ", rumour != null and rumour.icon == panel._rumour_tex and panel.places_list.get_node("DungeonRow").text.contains("(rumoured)"))
+	rumour.pressed.emit()
+	await process_frame
+	print("...selected, the pane names it but offers no Fast Travel: ", panel.selected_poi == "dungeon" and panel.poi_name.text == "Dungeon" and panel.poi_status.text == "Rumoured - find it on foot." and not panel.travel_btn.visible)
+	root.get_texture().get_image().save_png("res://verify_map_rumoured.png")
+	print("Saved verify_map_rumoured.png")
+	await _press("toggle_map")
 	player.position = Vector2(approach.x * 32 + 16, approach.y * 32 + 16)
 	var cam: Camera2D = player.get_node("Camera2D")
 	cam.reset_smoothing()
@@ -111,13 +135,18 @@ func _initialize() -> void:
 	await _press("interact")
 	print("Entered the Dungeon via the real portal: ", current_scene.name == "Dungeon")
 	print("Dungeon marked discovered after entering: ", game_state.discovered_pois.dungeon)
+	print("Walking up to it revealed the ground on the way: ", game_state.is_overworld_revealed(approach) and game_state.is_overworld_revealed(approach + Vector2i(0, -1)))
+	var snap: Dictionary = save.snapshot()
+	game_state.overworld_revealed = PackedByteArray()
+	save.apply(snap)
+	print("The revealed bitmap survives a save round-trip (compressed base64 in the save): ", str(snap.game_state.overworld_revealed).length() > 0 and game_state.is_overworld_revealed(approach) and game_state.is_overworld_revealed(here) and not game_state.is_overworld_revealed(far))
 
 	# --- Inside the Dungeon the dot stands on its entrance, and the map
 	# starts on the Dungeon. ---
 	combat._steps_since_encounter = -100000
 	await _press("toggle_map")
 	print("Inside the Dungeon: dot on the dungeon entrance, Dungeon selected: ", alias.is_open() and world_map.here_tile() == world_map.poi_tile("dungeon") and panel.selected_poi == "dungeon" and _marker_names(panel).has("DungeonMarker"))
-	print("Subtitle now 3 of 9: ", panel.subtitle_label.text == "You are in the Dungeon  -  3 of 9 places known")
+	print("Subtitle now 3 of 9, the Dungeon marker gold now: ", panel.subtitle_label.text.begins_with("You are in the Dungeon  -  3 of 9 places known") and panel.markers.get_node("DungeonMarker").icon != panel._rumour_tex and not panel.places_list.get_node("DungeonRow").text.contains("rumoured"))
 	root.get_texture().get_image().save_png("res://verify_map_after_dungeon.png")
 	print("Saved verify_map_after_dungeon.png")
 
@@ -163,4 +192,6 @@ func _initialize() -> void:
 	root.size = Vector2i(800, 600)
 	for i in range(4):
 		await process_frame
+	game_state.reset()
+	print("A new game clears the fog record: ", not game_state.is_overworld_revealed(here) and game_state.overworld_revealed_count(panel.MAP_REGION) == 0)
 	quit()

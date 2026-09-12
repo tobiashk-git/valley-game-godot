@@ -11,6 +11,11 @@ extends Control
 # known place as a button too. Undiscovered places are simply absent - the
 # subtitle's "N of 9 places known" is the nudge to go and look.
 #
+# Fog of war (2026-09-12): the chart shows only the ground Oliver has
+# walked near (WorldMap.render_map(..., true)); a lair a hunt quest has
+# named shows as a small clearing with a hollow "rumoured" marker (no fast
+# travel) until its portal is walked through. The subtitle adds "% explored".
+#
 # Skeleton from tools/setup_character_sheet.gd; character_sheet.gd calls
 # apply_layout() and refresh() and owns open/close/tab switching.
 
@@ -41,12 +46,14 @@ var map_scale := 4.0
 var _marker_tex: Texture2D
 var _marker_selected_tex: Texture2D
 var _here_tex: Texture2D
+var _rumour_tex: Texture2D
 
 func _ready() -> void:
 	travel_btn.pressed.connect(_on_travel_pressed)
 	_marker_tex = _circle_texture(10, Color(0.95, 0.78, 0.35), Color(0.25, 0.15, 0.05))
 	_marker_selected_tex = _circle_texture(13, Color(1.0, 0.9, 0.55), Color(1, 1, 1))
 	_here_tex = _circle_texture(8, Color(0.9, 0.2, 0.2), Color(1, 1, 1))
+	_rumour_tex = _circle_texture(10, Color(0.95, 0.78, 0.35, 0.22), Color(0.95, 0.78, 0.35))
 
 # A filled disc with a 2px outline, generated once (no art file needed).
 func _circle_texture(radius: int, fill: Color, outline: Color) -> ImageTexture:
@@ -143,29 +150,31 @@ func _clear(container: Node) -> void:
 func refresh() -> void:
 	if not visible:
 		return
-	map_rect.texture = WorldMap.render_map(MAP_REGION)
+	map_rect.texture = WorldMap.render_map(MAP_REGION, true)
 	var known: int = WorldMap.discovered_count()
 	var here: Vector2i = WorldMap.here_tile()
 	var location: String = WorldMap.current_location_name()
+	var explored: int = WorldMap.explored_percent(MAP_REGION)
 	if here == Vector2i(-1, -1):
-		subtitle_label.text = "You are in %s - this map shows the Valley  -  %d of %d places known" % [location, known, WorldMap.POI_NAMES.size()]
+		subtitle_label.text = "You are in %s - this map shows the Valley  -  %d of %d places known  -  %d%% explored" % [location, known, WorldMap.POI_NAMES.size(), explored]
 	else:
-		subtitle_label.text = "You are in %s  -  %d of %d places known" % [location, known, WorldMap.POI_NAMES.size()]
+		subtitle_label.text = "You are in %s  -  %d of %d places known  -  %d%% explored" % [location, known, WorldMap.POI_NAMES.size(), explored]
 
 	# Markers: one button per discovered place, then the you-are-here dot on
 	# top (it's not a button; the place under it is still tappable).
 	_clear(markers)
 	_clear(places_list)
 	for poi_id in WorldMap.POI_NAMES:
-		if not WorldMap.is_discovered(poi_id):
+		if not WorldMap.is_shown(poi_id):
 			continue
 		var selected: bool = poi_id == selected_poi
+		var rumoured: bool = not WorldMap.is_discovered(poi_id)
 		var btn := Button.new()
 		btn.name = poi_id.to_pascal_case() + "Marker"
 		btn.flat = true
-		btn.icon = _marker_selected_tex if selected else _marker_tex
+		btn.icon = _rumour_tex if rumoured else (_marker_selected_tex if selected else _marker_tex)
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		btn.tooltip_text = WorldMap.POI_NAMES[poi_id]
+		btn.tooltip_text = WorldMap.POI_NAMES[poi_id] + (" (rumoured)" if rumoured else "")
 		for state in ["normal", "hover", "pressed", "focus"]:
 			btn.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 		btn.size = Vector2(MARKER_SIZE, MARKER_SIZE)
@@ -174,7 +183,7 @@ func refresh() -> void:
 		markers.add_child(btn)
 		var row := Button.new()
 		row.name = poi_id.to_pascal_case() + "Row"
-		row.text = "  " + WorldMap.POI_NAMES[poi_id]
+		row.text = "  " + WorldMap.POI_NAMES[poi_id] + (" (rumoured)" if rumoured else "")
 		row.theme_type_variation = &"TabButtonActive" if selected else &"TabButton"
 		row.add_theme_font_size_override("font_size", 12)
 		row.custom_minimum_size = Vector2(places_scroll.size.x, 28)
@@ -192,7 +201,7 @@ func refresh() -> void:
 		markers.add_child(dot)
 
 	# Detail pane.
-	if selected_poi == "" or not WorldMap.is_discovered(selected_poi):
+	if selected_poi == "" or not WorldMap.is_shown(selected_poi):
 		poi_name.text = "Nowhere selected"
 		poi_where.text = ""
 		poi_desc.text = ""
@@ -202,6 +211,11 @@ func refresh() -> void:
 	poi_name.text = WorldMap.POI_NAMES[selected_poi]
 	poi_where.text = WorldMap.poi_where(selected_poi)
 	poi_desc.text = WorldMap.POI_DESCRIPTIONS.get(selected_poi, "")
+	if not WorldMap.is_discovered(selected_poi):
+		# Named by a hunt, not yet walked into: the chart shows roughly where.
+		poi_status.text = "Rumoured - find it on foot."
+		travel_btn.visible = false
+		return
 	var at_it: bool = here == WorldMap.poi_tile(selected_poi)
 	# Fast travel only LEAVES from home (Oliver's house): the way back from a
 	# run is on foot, by Angel Feather, or a nap that costs the pack.
