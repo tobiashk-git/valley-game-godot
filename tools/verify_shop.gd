@@ -67,7 +67,7 @@ func _initialize() -> void:
 	print("The Trader sells potions, the charm and resources - no armour or weapons: ", shop.stock_for("village_trader").has("wood") and shop.stock_for("village_trader").has("charm_of_warding") and not shop.stock_for("village_trader").any(func(id: String) -> bool: return armour_slots.has(items.ITEMS[id].get("slot", ""))) and shop.stock_for("village_blacksmith").all(func(id: String) -> bool: return armour_slots.has(items.ITEMS[id].get("slot", ""))))
 	print("Resources cost five times their value (wood %d, monster fur %d, ember core %d; potion %d) - gathering is the better deal - and sell for half their value (fur %d): " % [shop.buy_price("wood"), shop.buy_price("monster_fur"), shop.buy_price("ember_core"), shop.buy_price("healing_potion"), shop.sell_price("monster_fur")], shop.buy_price("wood") == 5 and shop.buy_price("monster_fur") == 20 and shop.buy_price("ember_core") == 75 and shop.sell_price("monster_fur") == 2 and shop.buy_price("healing_potion") == 20)
 	var shard_slot: Button = shop_panel.grid.get_node("FrostShardSlot")
-	print("A biome's resource is a locked teaser until its ford opens: blueprint-tinted, badged '?', not buyable: ", not shop.resource_available("frost_shard") and shard_slot.get_node("Count").text == "?" and shard_slot.modulate.a < 0.7 and shop_panel.grid.get_node("WoodSlot").get_node("Count").text == "5g" and not shop.buy_item("frost_shard"))
+	print("A biome's resource is a locked teaser until its ford opens: blueprint-tinted, badged '?', not buyable (monster fur waits for the first biome too): ", not shop.resource_available("frost_shard") and not shop.resource_available("monster_fur") and shop.resource_available("wood") and shard_slot.get_node("Count").text == "?" and shard_slot.modulate.a < 0.7 and shop_panel.grid.get_node("WoodSlot").get_node("Count").text == "5g" and not shop.buy_item("frost_shard"))
 	shard_slot.pressed.emit()
 	await process_frame
 	print("Its pane says where it comes from and offers no Buy: ", shop_panel.detail_value.text.contains("northern ford") and not shop_panel.primary_action.visible)
@@ -77,7 +77,7 @@ func _initialize() -> void:
 	shop_panel.grid.get_node("FrostShardSlot").pressed.emit()
 	await process_frame
 	shard_slot = shop_panel.grid.get_node("FrostShardSlot") # (a press rebuilds the grid)
-	print("With the northern ford open the frost shard is on the shelf at 30 gold: ", shop.resource_available("frost_shard") and shard_slot.get_node("Count").text == "30g" and shop_panel.primary_action.visible and shop_panel.detail_value.text.begins_with("Costs 30 gold"))
+	print("With the northern ford open the frost shard is on the shelf at 30 gold (and the fur): ", shop.resource_available("frost_shard") and shop.resource_available("monster_fur") and shard_slot.get_node("Count").text == "30g" and shop_panel.primary_action.visible and shop_panel.detail_value.text.begins_with("Costs 30 gold"))
 	game_state.biome_paths_open.frostpeak = false
 	shop_panel.selected_item = ""
 	shop_panel.selected_uid = 0

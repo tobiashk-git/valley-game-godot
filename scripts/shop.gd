@@ -18,7 +18,7 @@ const STOCKS := {
 const SHOP_STOCK := STOCKS.village_trader # (older callers)
 const RESOURCE_MARKUP := 5
 # The ford a resource waits for ("" = always on the shelf).
-const RESOURCE_BIOME := {"frost_shard": "frostpeak", "ironwood": "verdantwood", "ember_core": "badlands", "bog_iron": "gloomfen"}
+const RESOURCE_BIOME := {"monster_fur": "frostpeak", "frost_shard": "frostpeak", "ironwood": "verdantwood", "ember_core": "badlands", "bog_iron": "gloomfen"} # fur waits for the first biome too (user, 2026-09-12)
 const BIOME_LABEL := {"frostpeak": "the northern ford, on Frostpeak Ridge", "verdantwood": "the eastern ford, in Verdantwood Forest", "badlands": "the southern ford, in the Emberfall Badlands", "gloomfen": "the western ford, in the Gloomfen Marsh"}
 var keeper := "village_trader" # whose shop is open
 
