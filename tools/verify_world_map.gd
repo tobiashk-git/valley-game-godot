@@ -219,7 +219,10 @@ func _initialize() -> void:
 	await process_frame
 	var frame_rect: Rect2 = panel.map_frame.get_global_rect()
 	var pane_rect: Rect2 = panel.detail_pane.get_global_rect()
-	print("Phone: base 3px per tile (opens at 12), frame centred, pane below inside the window: ", layout.width == 400 and sheet.narrow and panel.base_scale == 3.0 and panel.map_scale == 12.0 and panel.map_frame.size == Vector2(308, 308) and absf(frame_rect.get_center().x - 200.0) < 2.0 and pane_rect.position.y >= frame_rect.end.y and pane_rect.end.y <= sheet.window.get_global_rect().end.y)
+	print("Phone: base 3px per tile (opens at 12), full-width square frame, pane below inside the window with its list: ", layout.width == 400 and sheet.narrow and panel.base_scale == 3.0 and panel.map_scale == 12.0 and panel.map_frame.size == Vector2(sheet.window.size.x - 40.0, sheet.window.size.x - 40.0) and absf(frame_rect.get_center().x - 200.0) < 2.0 and pane_rect.position.y >= frame_rect.end.y and pane_rect.end.y <= sheet.window.get_global_rect().end.y and panel.places_scroll.get_global_rect().end.y <= pane_rect.end.y)
+	panel.zoom_to(0)
+	print("Phone, whole valley: the 300px chart sits centred in the wider frame: ", panel.pan == ((panel._inner() - Vector2(300, 300)) / 2.0).round() and panel.pan.x > 0.0 and panel.map_rect.size == Vector2(300, 300))
+	panel.zoom_to(2)
 	root.get_texture().get_image().save_png("res://verify_map_phone.png")
 	print("Saved verify_map_phone.png")
 	sheet.close()

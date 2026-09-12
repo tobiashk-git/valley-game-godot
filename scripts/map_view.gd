@@ -39,6 +39,12 @@ const ZOOM_STEPS := [1.0, 2.0, 4.0]
 const DEFAULT_ZOOM := 2
 const ZOOM_BTN := 34.0
 const FRAME_PAD := 4.0
+# Phone (2026-09-12, user: "the locations panel doesn't fit on the bottom
+# of the screen"): the pane keeps at least PANE_MIN_NARROW (its compact
+# rows plus two place rows); the map frame, a clipped window now, takes
+# whatever height is left, full width, never taller than it is wide.
+const PANE_MIN_NARROW := 262.0
+const FRAME_MIN_NARROW := 150.0
 
 @onready var subtitle_label: Label = $SubtitleLabel
 @onready var map_frame: Panel = $MapFrame
@@ -130,17 +136,14 @@ func apply_layout(narrow: bool, view_size: Vector2) -> void:
 		var iw: float = view_size.x
 		_place(subtitle_label, Vector2(20, 0), Vector2(iw - 40.0, 36))
 		subtitle_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-		# Integer scale keeps the one-pixel-per-tile map crisp under NEAREST;
-		# on a short viewport (a phone browser's toolbars) drop a step so the
-		# pane below still has its 200px.
+		# Integer scale keeps the one-pixel-per-tile chart crisp under NEAREST
+		# (3px on a 400-wide phone: 3/6/12 through the zoom steps).
 		base_scale = maxf(1.0, floorf((iw - 48.0) / MAP_REGION.size.x))
-		var room: float = view_size.y - 40.0 - 24.0 - 200.0
-		while base_scale > 1.0 and base_scale * MAP_REGION.size.x > room:
-			base_scale -= 1.0
-		var map_px: float = base_scale * MAP_REGION.size.x
-		_place(map_frame, Vector2(floorf((iw - map_px - 8.0) / 2.0), 40), Vector2(map_px + 8.0, map_px + 8.0))
-		var pane_y: float = 40.0 + map_px + 8.0 + 8.0
-		pane_h = maxf(200.0, view_size.y - pane_y - 4.0)
+		var frame_w: float = iw - 40.0
+		var frame_h: float = clampf(view_size.y - 40.0 - 16.0 - PANE_MIN_NARROW - 4.0, FRAME_MIN_NARROW, frame_w)
+		_place(map_frame, Vector2(20, 40), Vector2(frame_w, frame_h))
+		var pane_y: float = 40.0 + frame_h + 8.0 + 8.0
+		pane_h = maxf(PANE_MIN_NARROW, view_size.y - pane_y - 4.0)
 		_place(detail_pane, Vector2(20, pane_y), Vector2(iw - 40.0, pane_h))
 		hint_label.visible = false
 	var inner: float = map_frame.size.x - 2.0 * FRAME_PAD
@@ -149,13 +152,24 @@ func apply_layout(narrow: bool, view_size: Vector2) -> void:
 	_centre_on_open = true
 	_apply_view()
 	var pw: float = detail_pane.size.x
-	_place(poi_name, Vector2(12, 10), Vector2(pw - 24.0, 44))
-	poi_where.position = Vector2(12, 56)
-	_place(poi_desc, Vector2(12, 76), Vector2(pw - 24.0, 62))
-	poi_status.position = Vector2(12, 140)
-	_place(travel_btn, Vector2(12, 164), Vector2(pw - 24.0, 40))
-	places_title.position = Vector2(12, 216)
-	_place(places_scroll, Vector2(12, 238), Vector2(pw - 24.0, maxf(40.0, pane_h - 238.0 - 12.0)))
+	if not narrow:
+		_place(poi_name, Vector2(12, 10), Vector2(pw - 24.0, 44))
+		poi_where.position = Vector2(12, 56)
+		_place(poi_desc, Vector2(12, 76), Vector2(pw - 24.0, 62))
+		poi_status.position = Vector2(12, 140)
+		_place(travel_btn, Vector2(12, 164), Vector2(pw - 24.0, 40))
+		places_title.position = Vector2(12, 216)
+		_place(places_scroll, Vector2(12, 238), Vector2(pw - 24.0, maxf(40.0, pane_h - 238.0 - 12.0)))
+	else:
+		# Compact rows: one-line name, three lines of description, a 36px
+		# button, the list from y=196 (two rows fit inside PANE_MIN_NARROW).
+		_place(poi_name, Vector2(12, 8), Vector2(pw - 24.0, 24))
+		poi_where.position = Vector2(12, 34)
+		_place(poi_desc, Vector2(12, 54), Vector2(pw - 24.0, 52))
+		poi_status.position = Vector2(12, 108)
+		_place(travel_btn, Vector2(12, 130), Vector2(pw - 24.0, 36))
+		places_title.position = Vector2(12, 174)
+		_place(places_scroll, Vector2(12, 196), Vector2(pw - 24.0, maxf(56.0, pane_h - 196.0 - 10.0)))
 
 # --- zoom + pan ---
 
@@ -167,11 +181,13 @@ func _map_px() -> Vector2:
 	return Vector2(MAP_REGION.size) * map_scale
 
 # Keep the chart covering the frame: pan is never positive, never so
-# negative that the chart's far edge comes inside the frame.
+# negative that the chart's far edge comes inside the frame - and when the
+# chart is smaller than the frame in an axis (whole valley in a wide phone
+# frame) it sits centred there instead.
 func _clamp_pan() -> void:
 	var lo: Vector2 = _inner() - _map_px()
-	pan.x = clampf(pan.x, minf(lo.x, 0.0), 0.0)
-	pan.y = clampf(pan.y, minf(lo.y, 0.0), 0.0)
+	pan.x = lo.x / 2.0 if lo.x > 0.0 else clampf(pan.x, lo.x, 0.0)
+	pan.y = lo.y / 2.0 if lo.y > 0.0 else clampf(pan.y, lo.y, 0.0)
 	pan = pan.round()
 
 func _apply_view() -> void:
