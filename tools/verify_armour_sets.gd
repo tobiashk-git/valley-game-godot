@@ -43,11 +43,9 @@ func _initialize() -> void:
 	print("Set bonuses per tier with gloves: frost +6, ironwood +9, ember +10, bog-iron +14 (the simulator's profiles): ", totals.frost == 6 and totals.ironwood == 9 and totals.ember == 10 and totals.bogiron == 14)
 	var recipes_ok := true
 	for id in PIECES:
-		if id.begins_with("leather_"):
-			continue
 		if not crafting.RECIPES.has(id) or crafting.RECIPES[id].result != id:
 			recipes_ok = false
-	print("Every tier piece has a recipe; the Blacksmith stocks the leather cap, greaves and boots: ", recipes_ok and shop.stock_for("village_blacksmith").has("leather_cap") and shop.stock_for("village_blacksmith").has("leather_greaves") and shop.stock_for("village_blacksmith").has("leather_boots"))
+	print("Every piece - the leather set included - has a recipe; nothing wearable is for sale anywhere: ", recipes_ok and shop.stock_for("village_blacksmith").is_empty() and not shop.stock_for("village_trader").any(func(id: String) -> bool: return items.is_equippable(id) and items.ITEMS[id].get("slot", "") != "accessory"))
 
 	# --- defence sums across slots ---
 	for id in ["bogiron_harness", "bogiron_helm", "bogiron_greaves", "bogiron_boots", "bogiron_gloves"]:
@@ -131,5 +129,5 @@ func _initialize() -> void:
 	for i in range(4):
 		await process_frame
 
-	print("Leather greaves complete the leather set: legs slot, DEF 1, 15 gold at the Blacksmith, with a walking layer and an icon: ", items.ITEMS.leather_greaves.slot == "legs" and items.ITEMS.leather_greaves.defense == 1 and items.ITEMS.leather_greaves.value == 15 and ResourceLoader.exists(items.ITEMS.leather_greaves.layer) and ResourceLoader.exists("res://assets/icons/leather_greaves.png"))
+	print("Leather greaves complete the leather set: legs slot, DEF 1, forged from 3 wood and 2 stone, with a walking layer and an icon: ", items.ITEMS.leather_greaves.slot == "legs" and items.ITEMS.leather_greaves.defense == 1 and crafting.RECIPES.leather_greaves.cost == {"wood": 3, "stone": 2} and ResourceLoader.exists(items.ITEMS.leather_greaves.layer) and ResourceLoader.exists("res://assets/icons/leather_greaves.png"))
 	quit()

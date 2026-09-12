@@ -20,11 +20,10 @@ func _ready() -> void:
 	subtitle_label.add_theme_color_override("font_outline_color", Color(0.25, 0.15, 0.02))
 	subtitle_label.add_theme_constant_override("outline_size", 4)
 
-# `keeper`: whose shop - the Trader (potions, accessories, resources) or
-# the Blacksmith (armour and weapons). See Shop.STOCKS.
+# `keeper`: whose shop (only the Trader today - see Shop.STOCKS).
 func open(keeper: String = "village_trader") -> void:
 	Shop.keeper = keeper
-	title_label.text = "Blacksmith's Forge" if keeper == "village_blacksmith" else "Trader's Shop"
+	title_label.text = "Trader's Shop"
 	tab = 0
 	_open_window()
 
@@ -46,7 +45,7 @@ func _subtitle() -> String:
 
 func _hint() -> String:
 	if tab == 0:
-		return "Tap an item to see it. Prices are per item; resources cost far more than gathering them. Faded ones come later." if Shop.keeper == "village_trader" else "Tap a piece to see it. Prices are per item; the biome tiers are forged at the bench."
+		return "Tap an item to see it. Prices are per item; resources cost far more than gathering them. Faded ones come later."
 	return "Tap what you want to sell. Enhanced gear sells for its base price."
 
 func _badge(entry: Dictionary) -> String:

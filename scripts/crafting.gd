@@ -31,6 +31,12 @@ const RECIPES := {
 		"amount": 1,
 		"cost": {"wood": 4, "stone": 4},
 	},
+	# The rest of the leather set (2026-09-12): the Blacksmith forges it, the
+	# Trader no longer sells it. Valley wood and stone only.
+	"leather_cap": {"result": "leather_cap", "amount": 1, "cost": {"wood": 2, "stone": 2}},
+	"leather_greaves": {"result": "leather_greaves", "amount": 1, "cost": {"wood": 3, "stone": 2}},
+	"leather_boots": {"result": "leather_boots", "amount": 1, "cost": {"wood": 2, "stone": 3}},
+	"leather_gloves": {"result": "leather_gloves", "amount": 1, "cost": {"wood": 2, "stone": 1}},
 	"charm_of_warding": {
 		"result": "charm_of_warding",
 		"amount": 1,

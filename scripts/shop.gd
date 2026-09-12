@@ -4,16 +4,16 @@ extends Node
 # carried goods, and equipped gear already lives outside the backpack in
 # Character.equipment so it naturally never appears to sell.
 
-# Two shopkeepers (2026-09-12, the user's tidy-up): the TRADER sells potions,
-# accessories and resources; the BLACKSMITH sells every piece of armour and
-# every weapon on sale (the leather set - the tiers are crafted at his
-# bench). Resources cost RESOURCE_MARKUP x their value so gathering is
+# One shopkeeper (2026-09-12, the user's tidy-up): the TRADER sells potions,
+# accessories and resources. No armour or weapon is for sale anywhere - the
+# leather set and every tier are forged at the Blacksmith's bench (he is a
+# quest giver and a workbench, not a shop). Resources cost RESOURCE_MARKUP x
+# their value so gathering is
 # always the better deal - the shop is a one-off plug for a crafting gap -
 # and a biome's resource is only sold once that biome's ford is open;
 # before that it shows as a locked teaser (see shop_panel.gd).
 const STOCKS := {
 	"village_trader": ["healing_potion", "mana_potion", "antidote", "angel_feather", "charm_of_warding", "wood", "stone", "monster_fur", "frost_shard", "ironwood", "ember_core", "bog_iron"],
-	"village_blacksmith": ["leather_armor", "leather_cap", "leather_greaves", "leather_boots", "leather_gloves"],
 }
 const SHOP_STOCK := STOCKS.village_trader # (older callers)
 const RESOURCE_MARKUP := 5
